@@ -1,0 +1,883 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Guitar Companion</title>
+    <script>
+      (() => {
+        try {
+          const savedTheme = localStorage.getItem("guitarCourseTheme");
+          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+            document.documentElement.dataset.theme = "dark";
+          }
+        } catch {
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="styles.css?v=v2.9.4-ui-polish" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-landscape-row1">
+        <div class="topbar-main">
+          <a class="brand" href="#dashboard" aria-label="กลับไปหน้าวันนี้">
+            <span class="brand-mark" aria-hidden="true">GC</span>
+            <span>
+              <strong>Guitar Companion</strong>
+              <small id="brandSub">พื้นฐาน Rhythm 4 สัปดาห์</small>
+            </span>
+          </a>
+        </div>
+
+        <div class="top-controls">
+          <button class="icon-button theme-toggle" id="themeToggle" type="button" aria-label="สลับโหมดสี" title="สลับโหมดสี">☀️</button>
+          <button class="icon-button reset-button" id="resetProgress" type="button" aria-label="ล้างความคืบหน้า" title="ล้างความคืบหน้า">
+            <span aria-hidden="true">&#8634;</span>
+          </button>
+
+          <div class="top-metronome" aria-label="Metronome">
+            <span id="beatLight" aria-hidden="true"></span>
+            <div id="metronomeAnnouncer" aria-live="polite" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0);"></div>
+            <button class="icon-button" id="tempoDown" type="button" aria-label="ลด BPM" title="ลด BPM">-</button>
+            <div class="top-tempo-readout">
+              <input id="bpmValue" type="number" min="50" max="180" step="1" value="82" aria-label="BPM" />
+              <span>BPM</span>
+            </div>
+            <button class="icon-button" id="tempoUp" type="button" aria-label="เพิ่ม BPM" title="เพิ่ม BPM">+</button>
+            <button class="quick-tempo-toggle" id="quickTempoToggle" type="button" aria-label="เลือก BPM เร็ว" aria-expanded="false" aria-controls="quickTempoDrawer">เร็ว</button>
+            <div class="beat-count" id="beatCounter" aria-label="นับจังหวะ 1 2 3 4">
+              <span data-beat="1" class="accent">1</span>
+              <span data-beat="2">2</span>
+              <span data-beat="3">3</span>
+              <span data-beat="4">4</span>
+            </div>
+            <input class="top-bpm-slider" id="bpmSlider" type="range" min="50" max="180" value="82" aria-label="ปรับ BPM" />
+            <button class="primary-action metronome-toggle" id="metronomeToggle" type="button">เริ่ม</button>
+            <div class="quick-tempo-drawer" id="quickTempoDrawer" hidden>
+              <button type="button" data-bpm="50">50</button>
+              <button type="button" data-bpm="60">60</button>
+              <button type="button" data-bpm="70">70</button>
+              <button type="button" data-bpm="80">80</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <nav class="topnav" aria-label="เมนูหลัก">
+        <a href="#dashboard">วันนี้</a>
+        <a href="#lessons">บทเรียน</a>
+        <a href="#practice">ห้องซ้อม</a>
+      </nav>
+    </header>
+
+    <section class="hero" id="hero" aria-labelledby="heroTitle">
+      <h1 id="heroTitle">From Skipped Basics to Bluesman</h1>
+      <p class="sub">เส้นทางฝึกกีตาร์สำหรับคนที่อยากวางพื้นฐานใหม่ แล้วต่อยอดไปสู่ Blues / Rock / Fingerstyle อย่างเป็นระบบ</p>
+      <button class="cta-primary" data-scroll="#todayChecklist" type="button">เริ่มซ้อมวันนี้</button>
+    </section>
+
+    <main id="top">
+      <div class="month-switcher readonly-progression-tracker" id="monthSwitcher" aria-hidden="true">
+      </div>
+
+      <section class="dashboard" id="dashboard" aria-labelledby="currentWeekTitle">
+        <div class="focus-grid">
+          <article class="panel current-panel">
+            <p class="panel-label">สัปดาห์ปัจจุบัน</p>
+            <h1 id="currentWeekTitle">สัปดาห์ที่ 1</h1>
+            <p id="currentWeekSummary"></p>
+          </article>
+
+          <article class="panel progress-panel">
+            <p class="panel-label">ความคืบหน้า</p>
+            <div class="progress-number" id="monthProgressText">0 / 4 สัปดาห์สำเร็จแล้ว</div>
+            <div class="progress-line" aria-hidden="true">
+              <span id="monthProgressBar"></span>
+            </div>
+          </article>
+
+          <article class="panel today-panel" id="todayMission">
+            <div class="panel-title-row">
+              <div>
+                <p class="panel-label">Today's Mission</p>
+                <h2 id="todayPracticeTitle">วันที่ 1</h2>
+                <div class="mission-meta" id="todayMissionMeta"></div>
+              </div>
+              <button class="small-button" id="nextDayButton" type="button">วันถัดไป</button>
+            </div>
+            <div class="checklist" id="todayChecklist"></div>
+          </article>
+
+          <article class="panel journey-panel">
+            <p class="panel-label">Journey Timeline</p>
+            <h2>เส้นทาง Rhythm เดือนที่ 1</h2>
+            <ol class="journey" id="journeyList" aria-label="สถานะการฝึก 4 สัปดาห์"></ol>
+          </article>
+        </div>
+      </section>
+
+      <section id="preludeSection" class="prelude-card">
+        <div class="prelude-content">
+          <div class="prelude-copy">
+            <p class="prelude-eyebrow">
+              CORE CALIBRATION
+              <span>CORE ONLINE</span>
+            </p>
+            <h3>Foundation Reset</h3>
+            <p class="prelude-main">รีเซ็ตระบบทักษะ: จังหวะและแผนที่คอกีตาร์</p>
+            <p class="prelude-support">ล้างความเข้าใจผิด ปรับท่าทาง และจูนสัมผัสของคุณให้ตรงกับ Metronome ก่อนลุย Month 1–4 แบบมั่นใจ</p>
+
+            <div class="prelude-skill-chain" aria-label="Skill chain: Body, Time, TAB, C-F-G, Groove">
+              <span>Body</span>
+              <span>Time</span>
+              <span>TAB</span>
+              <span>C-F-G</span>
+              <span>Groove</span>
+            </div>
+
+            <button id="openPreludeBtn" class="btn-primary prelude-cta" type="button">เปิด Core Calibration</button>
+          </div>
+
+          <div class="prelude-amp-panel" aria-label="Core Calibration system status">
+            <div class="prelude-system-labels" aria-hidden="true">
+              <span>SIGNAL READY</span>
+              <span>PULSE LOCK</span>
+            </div>
+            <div class="prelude-amp-core" aria-hidden="true">
+              <span class="prelude-core-ring"></span>
+              <span class="prelude-core-dot"></span>
+            </div>
+            <div class="prelude-waveform" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="prelude-anchor-display" aria-label="C F G root anchors">
+              <span><strong>C</strong> = สาย 5 เฟรต 3</span>
+              <span><strong>F</strong> = สาย 6 เฟรต 1</span>
+              <span><strong>G</strong> = สาย 6 เฟรต 3</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-shell lessons-section" id="lessons" aria-labelledby="lessonsTitle">
+        <div class="section-heading">
+          <p class="eyebrow">บทเรียน</p>
+          <h2 id="lessonsTitle">พื้นฐานเดือนที่ 1</h2>
+          <p>เรียนทีละเรื่อง ซ้อมทีละจุด ให้ Rhythm แน่นขึ้นแบบไม่รีบเกินไป</p>
+          <nav class="lesson-month-switcher" id="lessonMonthSwitcher" aria-label="เลือกเดือนของบทเรียน"></nav>
+        </div>
+        <div class="data-status-row">
+          <p class="data-status" id="dataStatus" role="status" aria-live="polite">Loading companion data...</p>
+        </div>
+        <div class="week-tabs" id="weekTabs" role="tablist" aria-label="บทเรียนพื้นฐาน 4 สัปดาห์"></div>
+        <article class="lesson-panel" id="lessonPanel" role="tabpanel"></article>
+      </section>
+
+      <section class="section-shell practice-section" id="practice" aria-labelledby="practiceTitle">
+        <div class="section-heading">
+          <p class="eyebrow">ห้องซ้อม</p>
+          <h2 id="practiceTitle">ซ้อมให้เรียบง่ายและทำได้จริง</h2>
+          <p>ใช้หน้านี้จดสิ่งที่ได้ยินจากการซ้อม และเช็กความคืบหน้าของสัปดาห์แบบไม่ต้องคิดเยอะครับ</p>
+        </div>
+
+        <div class="practice-grid">
+          <article class="panel notes-panel">
+            <p class="panel-label">บันทึกการซ้อม</p>
+            <h3>วันนี้สังเกตอะไรจากการเล่นของตัวเอง?</h3>
+            <textarea id="practiceNotes" rows="9" placeholder="ตัวอย่าง: ผมเร่งตรง & หลัง beat 2 พรุ่งนี้จะลดลงมา 70 BPM แล้วนับให้ชัดก่อน"></textarea>
+            <p class="saved-note" id="notesSaved">บันทึกไว้ในเครื่องแล้ว</p>
+          </article>
+
+          <article class="panel tracking-panel">
+            <p class="panel-label">ติดตามความคืบหน้า</p>
+            <h3>ติ๊กสัปดาห์เมื่อทำการบ้านครบแล้ว</h3>
+            <div class="week-progress-list" id="weekProgressList"></div>
+          </article>
+
+          <article class="panel reference-panel">
+            <p class="panel-label">Reference Shelf</p>
+            <h3>คู่มือและคลังอ้างอิง</h3>
+            <p>ทบทวนเครื่องหมายแปลก ๆ บน TAB และค่าจังหวะตัวโน้ต เพื่อช่วยให้คุณแกะเพลงและเล่นตามได้เป๊ะที่สุด</p>
+            <div class="reference-button-group">
+              <button class="small-button reference-button" type="button" data-scroll="#tabGuidebook">📖 คู่มือ TAB</button>
+              <button class="small-button reference-button" type="button" data-scroll="#noteValueGuidebook">🎵 ค่าจังหวะโน้ต</button>
+            </div>
+          </article>
+        </div>
+
+        <section class="mini-course-shelf" id="miniCourseShelf" aria-labelledby="miniCourseShelfTitle" hidden></section>
+
+        <div class="reference-guidebook reference-shelf" id="tabGuidebook" aria-labelledby="tabGuidebookTitle">
+          <button type="button" class="toggle-shelf-button" id="toggleShelfButton" aria-controls="referenceShelfContent" aria-expanded="false">
+            <span>📖 เปิดดูคลังอ้างอิง: TAB Symbol Cheatsheet (เครื่องหมายแปลก ๆ ที่เจอบ่อย)</span>
+            <span id="toggleShelfIcon">▼</span>
+          </button>
+
+          <div id="referenceShelfContent">
+          <div class="reference-guidebook-head">
+            <p class="eyebrow">Reference Shelf</p>
+            <h3 id="tabGuidebookTitle">TAB Symbol Cheatsheet</h3>
+            <p class="subtitle">เครื่องหมายที่เจอบ่อยบน TAB และการอ่านแบบฟอร์มจริง</p>
+            <p>ใช้เปิดดูเวลาคุณเจอ h / p / b / x / P.M. หรือสัญลักษณ์ซับซ้อนที่มักเจอในแท็บเพลงร็อก เพื่อให้แกะเพลงและเล่นตามได้ถูกต้อง ไม่หลงจังหวะ</p>
+          </div>
+
+          <div class="cheatsheet-container">
+            <section class="cheatsheet-principles" aria-label="หลักการอ่าน TAB ห้าชั้น">
+              <h4>อ่าน TAB ให้ครบ 5 ชั้น</h4>
+              <ul class="reference-principle-list">
+                <li><strong>เลข</strong> บอกว่าเล่นอะไรและกดเฟรตไหน</li>
+                <li><strong>Rhythm</strong> บอกว่าเล่นเมื่อไร</li>
+                <li><strong>Technique</strong> บอกว่าเล่นยังไง</li>
+                <li><strong>Rest</strong> บอกว่าต้องเงียบตรงไหน</li>
+                <li><strong>Dynamics</strong> บอกว่าเล่นด้วยอารมณ์และน้ำหนักแบบไหน</li>
+              </ul>
+            </section>
+
+            <h4 class="cheatsheet-layer-title">Layer 1: Technique Symbols (เทคนิคการเล่น)</h4>
+            <div class="tab-symbol-grid">
+              <article class="tab-symbol-card">
+                <div class="card-badge">h</div>
+                <h4>Hammer-on</h4>
+                <p class="meaning"><strong>ความหมาย:</strong> ดีดโน้ตตัวแรก แล้วใช้นิ้วมือซ้ายตบลงบนเฟรตถัดไปเพื่อให้โน้ตตัวที่สองดังขึ้นโดยไม่ดีดซ้ำ</p>
+                <div class="tab-example">e|---5h7---|</div>
+                <p class="tip"><strong>Tip:</strong> นิ้วที่ตบลงไปต้องมีน้ำหนักและลงใกล้เฟรตพอ เพื่อให้โน้ตตัวหลังดังชัดเท่าโน้ตแรก</p>
+              </article>
+
+              <article class="tab-symbol-card">
+                <div class="card-badge">p</div>
+                <h4>Pull-off</h4>
+                <p class="meaning"><strong>ความหมาย:</strong> ดีดโน้ตตัวแรกที่อยู่เฟรตสูงกว่า แล้วใช้นิ้วมือซ้ายเกี่ยวสายออกเบา ๆ เพื่อให้โน้ตตัวล่างหรือสายเปิดดังตามมา</p>
+                <div class="tab-example">e|---7p5---|</div>
+                <p class="tip"><strong>Tip:</strong> อย่าแค่ยกนิ้วขึ้นเฉย ๆ ให้ปลายนิ้วเกี่ยวสายลงเล็กน้อยเพื่อส่งแรงให้โน้ตตัวหลัง</p>
+              </article>
+
+              <article class="tab-symbol-card">
+                <div class="card-badge">/</div>
+                <h4>Slide Up</h4>
+                <p class="meaning"><strong>ความหมาย:</strong> ดีดโน้ตแรกแล้วรูดนิ้วมือซ้ายขึ้นไปยังเฟรตเป้าหมายที่เสียงสูงกว่า โดยไม่ปล่อยแรงกด</p>
+                <div class="tab-example">e|---5/7---|</div>
+                <p class="tip"><strong>Tip:</strong> ให้ปลายทางไปถึงเฟรตเป้าหมายตรงจังหวะพอดี ไม่รีบจนเสียงขาดหรือช้าจนลากเกินเวลา</p>
+              </article>
+
+              <article class="tab-symbol-card">
+                <div class="card-badge">\</div>
+                <h4>Slide Down</h4>
+                <p class="meaning"><strong>ความหมาย:</strong> ดีดโน้ตแรกแล้วรูดนิ้วมือซ้ายลงไปยังเฟรตเป้าหมายที่เสียงต่ำกว่า โดยยังคุมแรงกดไว้</p>
+                <div class="tab-example">e|---7\5---|</div>
+                <p class="tip"><strong>Tip:</strong> อย่าผ่อนแรงกดเร็วเกินไป ไม่อย่างนั้นเสียงจะหายก่อนถึงเฟรตปลายทาง</p>
+              </article>
+
+              <article class="tab-symbol-card">
+                <div class="card-badge">b</div>
+                <h4>Bend</h4>
+                <p class="meaning"><strong>ความหมาย:</strong> ดีดโน้ตแล้วใช้นิ้วมือซ้ายดันสายขึ้นหรือลง เพื่อยกระดับเสียงให้สูงขึ้นตามเป้าหมาย</p>
+                <div class="tab-example">e|---7b9---|</div>
+                <p class="tip"><strong>Tip:</strong> ฝึกฟังเสียงปลายทางก่อนเสมอ เช่น 7b9 คือดีดเฟรต 7 แต่ต้องดันให้เสียงสูงเท่าเฟรต 9</p>
+              </article>
+
+              <article class="tab-symbol-card">
+                <div class="card-badge card-badge-wide">1/2 full</div>
+                <h4>Half-step / Full-step Bend</h4>
+                <p class="meaning"><strong>ความหมาย:</strong> ระยะ bend บอกว่าต้องดันเสียงสูงขึ้นแค่ไหน 1/2 คือครึ่งเสียง ส่วน full คือหนึ่งเสียงเต็ม</p>
+                <div class="tab-example">e|---7b8---7b9---|</div>
+                <p class="tip"><strong>Tip:</strong> ดีดเฟรตเป้าหมายก่อน เช่น 8 หรือ 9 แล้วจำเสียงนั้นไว้ ค่อยกลับมาดันจากเฟรต 7 ให้ถึง pitch เดียวกัน</p>
+              </article>
+
+              <article class="tab-symbol-card">
+                <div class="card-badge">r</div>
+                <h4>Release Bend</h4>
+                <p class="meaning"><strong>ความหมาย:</strong> หลังดันสายขึ้นแล้ว ให้ผ่อนสายกลับลงมาที่เสียงเดิมขณะที่เสียงยังค้างอยู่</p>
+                <div class="tab-example">e|---7b9r7---|</div>
+                <p class="tip"><strong>Tip:</strong> คุมการปล่อยสายให้สมูท อย่าปล่อยมือจนสายดีดกลับเองแบบเสียงสะบัดหลุดจังหวะ</p>
+              </article>
+
+              <article class="tab-symbol-card">
+                <div class="card-badge">~</div>
+                <h4>Vibrato</h4>
+                <p class="meaning"><strong>ความหมาย:</strong> ขยับนิ้วมือซ้ายหรือข้อมือให้เสียงแกว่งรอบ pitch หลัก เพื่อให้โน้ตมีชีวิตและหางเสียงยาวขึ้น</p>
+                <div class="tab-example">e|---7~~~---|</div>
+                <p class="tip"><strong>Tip:</strong> Vibrato ต้องอยู่กับ pulse ของเพลง ไม่ใช่สั่นนิ้วเร็วมั่ว ๆ จนเสียงฟังลน</p>
+              </article>
+
+              <article class="tab-symbol-card">
+                <div class="card-badge">x</div>
+                <h4>Dead Note / Muted Note</h4>
+                <p class="meaning"><strong>ความหมาย:</strong> แตะสายด้วยมือซ้ายแบบไม่กดเฟรต แล้วดีดให้เกิดเสียงบอดที่เน้น rhythm มากกว่า pitch</p>
+                <div class="tab-example">e|---x-x---|</div>
+                <p class="tip"><strong>Tip:</strong> ถึงจะเป็นเสียงบอด แต่จังหวะต้องเป๊ะและชัดเท่ากับโน้ตปกติ</p>
+              </article>
+
+              <article class="tab-symbol-card">
+                <div class="card-badge">P.M.</div>
+                <h4>Palm Mute</h4>
+                <p class="meaning"><strong>ความหมาย:</strong> วางสันมือขวาใกล้ bridge แล้วดีด เพื่อให้เสียงสั้น ทุ้ม แน่น และคุม groove ได้ดีขึ้น</p>
+                <div class="tab-example">P.M.------------<br>E|--0--0--0--0--|</div>
+                <p class="tip"><strong>Tip:</strong> ถ้าเสียงทึบเกินไป ให้ขยับสันมือกลับไปใกล้ bridge มากขึ้นทีละนิด</p>
+              </article>
+
+              <article class="tab-symbol-card">
+                <div class="card-badge card-badge-wide">let ring</div>
+                <h4>Let Ring</h4>
+                <p class="meaning"><strong>ความหมาย:</strong> ปล่อยให้โน้ตหรือคอร์ดสั่นค้างต่อไป ห้ามอุดสายจนกว่าจะครบความยาวที่เพลงต้องการ</p>
+                <div class="tab-example">e|--0~~~~~~~--|</div>
+                <p class="tip"><strong>Tip:</strong> มักเจอใน arpeggio ระวังนิ้วหรืออุ้งมือไปโดนสายข้างเคียงจนเสียงดับเร็วเกินไป</p>
+              </article>
+
+              <article class="tab-symbol-card">
+                <div class="card-badge">&gt;</div>
+                <h4>Accent</h4>
+                <p class="meaning"><strong>ความหมาย:</strong> เล่นโน้ตหรือคอร์ดตัวนั้นให้เด่นและหนักกว่าเสียงรอบข้าง โดยไม่เร่ง tempo</p>
+                <div class="tab-example">e|---&gt;5---5---5---|</div>
+                <p class="tip"><strong>Tip:</strong> เพิ่มน้ำหนักมือขวา ไม่ใช่รีบเล่นเร็วขึ้น Accent คือแรง ไม่ใช่ความเร็ว</p>
+              </article>
+
+              <article class="tab-symbol-card">
+                <div class="card-badge">&lt; &gt;</div>
+                <h4>Natural Harmonic</h4>
+                <p class="meaning"><strong>ความหมาย:</strong> แตะผิวสายเบา ๆ เหนือเฟรต 12, 7 หรือ 5 แล้วดีดพร้อมยกนิ้วออกทันที เพื่อให้ได้เสียงใสคล้ายระฆัง</p>
+                <div class="tab-example">e|---&lt;12&gt;---|</div>
+                <p class="tip"><strong>Tip:</strong> แตะตรงแนวเหล็กเฟรต ไม่ใช่กดลงในช่องเฟรตเหมือนโน้ตปกติ</p>
+              </article>
+
+              <article class="tab-symbol-card">
+                <div class="card-badge">—</div>
+                <h4>Tie / Sustain</h4>
+                <p class="meaning"><strong>ความหมาย:</strong> โน้ตตัวเดิมถูกลากเสียงต่อไปในจังหวะถัดไป ไม่ต้องดีดซ้ำ ให้ปล่อยเสียงค้างตามความยาวที่กำหนด</p>
+                <div class="tab-example">e|---5---(5)---|</div>
+                <p class="tip"><strong>Tip:</strong> ปากยังนับต่อ แต่มือขวาไม่ดีดซ้ำ ตรงนี้เป็นจุดที่มือใหม่มักเล่นเกินหนึ่งครั้ง</p>
+              </article>
+
+              <article class="tab-symbol-card">
+                <div class="card-badge">( )</div>
+                <h4>Ghost / Optional Note</h4>
+                <p class="meaning"><strong>ความหมาย:</strong> โน้ตในวงเล็บมักเป็นเสียงเบา เสียงผ่าน หรือโน้ตที่เล่นได้แต่ไม่ต้องเด่นเท่าโน้ตหลัก</p>
+                <div class="tab-example">e|---5-(5)-7---|</div>
+                <p class="tip"><strong>Tip:</strong> เล่นให้เบากว่าโน้ตหลัก อย่าเน้นจน phrase แข็งเกินไป และให้ดูบริบทของ TAB เสมอ</p>
+              </article>
+
+              <article class="tab-symbol-card">
+                <div class="card-badge">.</div>
+                <h4>Staccato / Choke</h4>
+                <p class="meaning"><strong>ความหมาย:</strong> เล่นโน้ตหรือคอร์ดให้สั้น แล้วหยุดเสียงทันที เหมือนคำสั่งให้ตัดหางเสียงออก</p>
+                <div class="tab-example">e|---5.---5.---|</div>
+                <p class="tip"><strong>Tip:</strong> หยุดด้วยมือซ้ายหรือมือขวาก็ได้ แต่เสียงต้องสั้นจริง ไม่ไหลค้างแบบ let ring</p>
+              </article>
+
+              <article class="tab-symbol-card">
+                <div class="card-badge">rest</div>
+                <h4>Rest / Stop</h4>
+                <p class="meaning"><strong>ความหมาย:</strong> ช่องเงียบในเพลงที่ต้องนับให้ตรง ถึงไม่มีเสียงก็ยังเป็นส่วนหนึ่งของ riff</p>
+                <div class="tab-example">E|--0--x--(rest)--0--|</div>
+                <p class="tip"><strong>Tip:</strong> ให้พูดคำว่า “stop” ตอนซ้อม ถ้าเงียบไม่สนิท riff rock จะไม่ tight</p>
+              </article>
+
+              <article class="tab-symbol-card">
+                <div class="card-badge">T</div>
+                <h4>Tapping</h4>
+                <p class="meaning"><strong>ความหมาย:</strong> ใช้นิ้วมือขวาแตะหรือตบลงบน fretboard เพื่อทำให้โน้ตดัง เป็นเทคนิคขั้นต่อไปที่ยังไม่ต้องรีบฝึกหนัก</p>
+                <div class="tab-example">e|---5h8T12p8---|</div>
+                <p class="tip"><strong>Tip:</strong> ตอนนี้ให้รู้สัญลักษณ์ไว้ก่อน ถ้าเจอใน TAB จริงค่อยแยกซ้อมช้า ๆ อย่าเปลี่ยนเป็น speed exercise</p>
+              </article>
+            </div>
+
+            <h4 class="cheatsheet-layer-title">Layer 2: Real-World TAB Markings (เครื่องหมายในแท็บจริง)</h4>
+            <div class="real-marking-grid">
+              <article class="real-marking-card">
+                <strong>Tempo Marking</strong>
+                <p>เช่น ♩ = 94 หรือ BPM 94 ใช้ตั้ง Metronome ให้ตรงกับความเร็วเพลงจริง</p>
+              </article>
+              <article class="real-marking-card">
+                <strong>Time Signature</strong>
+                <p>เช่น 4/4 หมายถึงหนึ่งห้องมี 4 beat ให้ใช้เป็นกรอบนับก่อนอ่านโน้ต</p>
+              </article>
+              <article class="real-marking-card">
+                <strong>Chord Labels</strong>
+                <p>ชื่อคอร์ดเหนือ TAB เช่น E5, D5, A5 ช่วยให้รู้รูปนิ้วและโครงเพลงล่วงหน้า</p>
+              </article>
+              <article class="real-marking-card">
+                <strong>Measure / Bar Numbers</strong>
+                <p>เลขห้องเพลงช่วยให้จดตำแหน่งซ้อมและคุยกับคนอื่นได้ไม่หลง</p>
+              </article>
+              <article class="real-marking-card">
+                <strong>Section Labels</strong>
+                <p>[Intro], [Verse], [Chorus] บอกโครงเพลง ไม่ใช่โน้ต แต่ช่วยให้เล่นตามฟอร์มถูก</p>
+              </article>
+              <article class="real-marking-card">
+                <strong>Rhythm Notation</strong>
+                <p>หางจังหวะใต้ TAB หรือสัญลักษณ์ rhythm บอกความสั้นยาวของเสียง ไม่ใช่แค่เฟรตที่กด</p>
+              </article>
+              <article class="real-marking-card">
+                <strong>Rest / Silence</strong>
+                <p>เครื่องหมายหยุดคือคำสั่งให้เงียบจริง ต้องอุดเสียง ไม่ปล่อยคอร์ดค้างพร่า</p>
+              </article>
+              <article class="real-marking-card">
+                <strong>Slur / Phrase Arcs</strong>
+                <p>เส้นโค้งเชื่อมโน้ตมักบอกให้เล่นแบบ legato เช่น hammer-on หรือ pull-off</p>
+              </article>
+              <article class="real-marking-card">
+                <strong>Open String 0</strong>
+                <p>เลข 0 คือดีดสายเปิด ไม่ต้องใช้นิ้วมือซ้ายกดเฟรต</p>
+              </article>
+              <article class="real-marking-card">
+                <strong>Bend Distance</strong>
+                <p>Full = ดันขึ้น 1 เสียงเต็ม, 1/2 = ครึ่งเสียง ให้ฝึกเทียบ pitch ก่อนเสมอ</p>
+              </article>
+              <article class="real-marking-card">
+                <strong>Release Mark</strong>
+                <p>เครื่องหมาย release บอกให้ผ่อนสายกลับลงมาอย่างคุมเสียง ไม่ปล่อยหลุด</p>
+              </article>
+              <article class="real-marking-card">
+                <strong>Performance Notes</strong>
+                <p>คำสั้น ๆ เช่น Clean tone, Pick slide หรือ Palm mute คือคำแนะนำการเล่น ไม่ใช่โน้ต</p>
+              </article>
+            </div>
+
+            <section class="rock-tab-breakdown" aria-labelledby="rockTabTitle">
+              <h4 id="rockTabTitle">Real Rock TAB Example Breakdown</h4>
+              <p>
+                ตัวอย่างนี้เป็น riff จำลองสำหรับฝึกอ่าน TAB แบบเพลงร็อกจริง โดยรวม Tempo, 4/4, ชื่อคอร์ด, เลขห้อง,
+                rhythm, rest, stop, power chord, open string, single-note lick, full bend, release และ vibrato
+                โดยไม่อ้างอิงแท็บเพลงลิขสิทธิ์ใด ๆ
+              </p>
+
+              <div class="rock-tab-card" aria-label="Original rock TAB reading example">
+[Original Rock Riff Intro]
+Tempo: ♩ = 94     Time: 4/4
+Performance note: keep power chords short; stop the strings after each hit
+
+         E5                 D5      A5                  E5
+Bar 1     1   &   2   &      3   &   4   &     Bar 2     1   &   2   &   3   &   4   &
+e|-------------------------|---------------------------|-------------------------------|
+B|-------------------------|---------------------------|-------------------------------|
+G|-------------------------|--7---7---2---2------------|-------------------------------|
+D|--2---2---x---x----------|--7---7---2---2------------|--2---2---x--------------------|
+A|--2---2---x---x----------|--5---5---0---0------------|--2---2---x------5--7b9r7~~~---|
+E|--0---0---x---x----------|---------------------------|--0---0---x---7----------------|
+    >   >   stop stop          short   short               >   >  rest      full release vib.
+
+
+         D5      A5                  E5
+Bar 3     1   &   2   &   3   &   4   &     Bar 4
+e|-----------------------------------|--------------------|
+B|-----------------------------------|--------------------|
+G|--7---7---2---2--------------------|--------------------|
+D|--7---7---2---2--------------------|--2-----------------|
+A|--5---5---0---0------5--7--5-------|--2-----------------|
+E|------------------7-----------7\5--|--0-----------------|
+    short   short     single-note lick  slide down          let ring
+              </div>
+
+              <div class="breakdown-analysis-table">
+                <article>
+                  <h5>1. ดูหัวกระดาษก่อนเล่น</h5>
+                  <p>`Tempo: ♩ = 94` บอกความเร็วเพลงจริง และ `4/4` บอกว่าหนึ่งห้องมี 4 beat อย่าเริ่มที่ 94 ทันที ให้ซ้อม 55–65 BPM ก่อนจนอ่าน rhythm ได้จริง</p>
+                </article>
+                <article>
+                  <h5>2. อ่านชื่อคอร์ดด้านบน</h5>
+                  <p>E5, D5, A5 คือ power chord anchor ของ riff นี้ ให้รู้ก่อนว่าท่อนนี้พิงคอร์ดอะไร แล้วค่อยอ่านตัวเลขบน TAB ทีละห้อง</p>
+                </article>
+                <article>
+                  <h5>3. อ่านเลขห้องและ Count Line</h5>
+                  <p>Bar 1, Bar 2, Bar 3, Bar 4 ใช้แบ่งจุดซ้อม ส่วน `1 & 2 & 3 & 4 &` คือแผนที่เวลา ให้ปากนับก่อนมือเล่นเสมอ</p>
+                </article>
+                <article>
+                  <h5>4. Power Chord ต้องสั้นและคุมเสียง</h5>
+                  <p>E5 = 0-2-2, D5 = 5-7-7, A5 = 0-2-2 บนสาย 5-4-3 ในตัวอย่างนี้ จุดสำคัญคือหลัง hit ต้องหยุดเสียงให้สั้น ไม่ปล่อยคอร์ดไหลยาว</p>
+                </article>
+                <article>
+                  <h5>5. x / stop คือเสียงเงียบที่ต้องนับ</h5>
+                  <p>`x` ไม่ใช่โน้ตผิด แต่คือ muted stop หรือ dead note ให้พูดคำว่า “stop” ตรงจุดนั้น ถ้า rest ไม่เงียบ riff จะไม่ tight แบบ rock</p>
+                </article>
+                <article>
+                  <h5>6. Single-note lick ต้องแยกซ้อมจากคอร์ด</h5>
+                  <p>ช่วง `7 - 5 - 7` ให้ซ้อมแยกจาก power chord ก่อน เล่นช้า ๆ แล้วค่อยต่อกลับเข้าหา E5 อย่าพยายามเล่นทั้ง riff พร้อมกันตั้งแต่แรก</p>
+                </article>
+                <article>
+                  <h5>7. Full Bend / Release / Vibrato</h5>
+                  <p>`7b9r7~~~` แปลว่า กดเฟรต 7 แล้วดันให้เสียงสูงเท่าเฟรต 9 จากนั้น release กลับมาที่ 7 แล้วใส่ vibrato หางเสียง ก่อนดันให้เล่นเฟรต 9 ฟังเป็น pitch เป้าหมายก่อน</p>
+                </article>
+                <article>
+                  <h5>8. Slide Down</h5>
+                  <p>`7\5` คือดีดเฟรต 7 แล้วรูดลงมาที่ 5 โดยยังคุมแรงกดไว้ ปลาย slide ต้องถึงจังหวะ ไม่รูดยาวเกินหรือเสียงขาดก่อนถึงเฟรต 5</p>
+                </article>
+                <article>
+                  <h5>9. Let Ring</h5>
+                  <p>Bar 4 ให้ E5 ค้าง เป็นจุดจบ phrase อย่าหยุดเสียงเร็วเกินไป ให้ดีดแล้วนับต่อในใจจนเสียงหายไปอย่างเป็นธรรมชาติ</p>
+                </article>
+              </div>
+              <div class="practice-routine-box">
+                <h4>🎯 วิธีซ้อม 5 รอบ</h4>
+                <ol>
+                  <li><strong>รอบ 1:</strong> ตบ rhythm อย่างเดียว พร้อมนับ 1 & 2 & 3 & 4 & ออกเสียง</li>
+                  <li><strong>รอบ 2:</strong> เล่นเฉพาะ power chord ให้สั้นและตรง beat โดยยังไม่เติม lick</li>
+                  <li><strong>รอบ 3:</strong> เติม stop / x / rest ให้เงียบจริง แล้วเช็กว่ามือไม่ปล่อยเสียงค้าง</li>
+                  <li><strong>รอบ 4:</strong> แยกซ้อม single-note lick, bend, release, vibrato และ slide down ช้า ๆ</li>
+                  <li><strong>รอบ 5:</strong> รวมทั้ง 4 bars ที่ 60 BPM ก่อนค่อยเพิ่ม tempo ทีละนิด</li>
+                </ol>
+              </div>
+            </section>
+          </div>
+          </div>
+
+        </div>
+
+        <div class="reference-guidebook reference-shelf" id="noteValueGuidebook" aria-labelledby="noteValueGuidebookTitle">
+          <!-- ==========================================
+               NOTE VALUE CHEATSHEET TOGGLE & CONTENT
+               ========================================== -->
+          <button type="button" class="toggle-shelf-button" id="toggleNoteValueButton" aria-controls="noteValueShelfContent" aria-expanded="false">
+            <span>🎵 เปิดดูคลังอ้างอิง: Note Value Cheatsheet (ค่าจังหวะตัวโน้ตพื้นฐาน)</span>
+            <span id="toggleNoteValueIcon">▼</span>
+          </button>
+
+          <div id="noteValueShelfContent">
+            <div class="reference-guidebook-head">
+              <p class="eyebrow">Reference Shelf</p>
+              <h3 id="noteValueGuidebookTitle">Note Value Cheatsheet</h3>
+              <p class="subtitle">พื้นฐานการอ่านค่าจังหวะของโน้ต (Rhythm Notation Foundation)</p>
+              <p class="note-value-intro">ใช้ทบทวนค่าความยาวของเสียงและสัญลักษณ์ที่มักเขียนอยู่ใต้เส้นตาราง TAB เพราะการเล่นให้เหมือนต้นฉบับไม่ได้อยู่ที่ตำแหน่งนิ้วอย่างเดียว แต่อยู่ที่ระยะเวลาของเสียงด้วย</p>
+              <p class="note-value-intro note-value-memory-tip">จำภาพของตัวโน้ตให้ได้ก่อน แล้วค่อยจำตัวเลข beat ตามหลัง</p>
+            </div>
+
+            <div class="cheatsheet-container">
+              <div class="tab-symbol-grid">
+
+                <article class="tab-symbol-card">
+                  <div class="card-badge note-value-badge">4 beats</div>
+                  <h4>ตัวกลม (Whole Note)</h4>
+                  <div class="note-value-visual note-value-whole" aria-label="Whole note visual: 4 beats">
+                    <svg class="note-staff-svg" viewBox="0 0 220 86" aria-hidden="true" focusable="false">
+                      <line class="staff-line" x1="14" y1="20" x2="206" y2="20"></line>
+                      <line class="staff-line" x1="14" y1="30" x2="206" y2="30"></line>
+                      <line class="staff-line" x1="14" y1="40" x2="206" y2="40"></line>
+                      <line class="staff-line" x1="14" y1="50" x2="206" y2="50"></line>
+                      <line class="staff-line" x1="14" y1="60" x2="206" y2="60"></line>
+                      <ellipse class="note-head hollow" cx="110" cy="40" rx="18" ry="10" transform="rotate(-18 110 40)"></ellipse>
+                    </svg>
+                    <div class="note-count-strip">
+                      <span class="note-count-pill">Count: 1 - 2 - 3 - 4</span>
+                      <span class="note-count-pill">4 beats</span>
+                    </div>
+                  </div>
+                  <p class="meaning"><strong>ค่าจังหวะ:</strong> 4 Beats (ตบเท้า 4 ครั้ง)</p>
+                  <p class="tip">💡 <strong>วิธีเล่น:</strong> ดีด 1 ครั้งในจังหวะที่ 1 แล้วปล่อยเสียงค้างยาวไปจนครบ 4 จังหวะ (1-2-3-4)</p>
+                </article>
+
+                <article class="tab-symbol-card">
+                  <div class="card-badge note-value-badge">2 beats</div>
+                  <h4>ตัวขาว (Half Note)</h4>
+                  <div class="note-value-visual note-value-half" aria-label="Half note visual: 2 beats">
+                    <svg class="note-staff-svg" viewBox="0 0 220 86" aria-hidden="true" focusable="false">
+                      <line class="staff-line" x1="14" y1="20" x2="206" y2="20"></line>
+                      <line class="staff-line" x1="14" y1="30" x2="206" y2="30"></line>
+                      <line class="staff-line" x1="14" y1="40" x2="206" y2="40"></line>
+                      <line class="staff-line" x1="14" y1="50" x2="206" y2="50"></line>
+                      <line class="staff-line" x1="14" y1="60" x2="206" y2="60"></line>
+                      <ellipse class="note-head hollow" cx="105" cy="50" rx="16" ry="9" transform="rotate(-18 105 50)"></ellipse>
+                      <line class="note-stem" x1="120" y1="50" x2="120" y2="18"></line>
+                    </svg>
+                    <div class="note-count-strip">
+                      <span class="note-count-pill">Count: 1 - 2</span>
+                      <span class="note-count-pill">2 beats</span>
+                    </div>
+                  </div>
+                  <p class="meaning"><strong>ค่าจังหวะ:</strong> 2 Beats (ตบเท้า 2 ครั้ง)</p>
+                  <p class="tip">💡 <strong>วิธีเล่น:</strong> ดีด 1 ครั้งแล้วปล่อยเสียงค้างไว้ 2 จังหวะ (เช่น ตีจังหวะที่ 1 ค้างจังหวะที่ 2)</p>
+                </article>
+
+                <article class="tab-symbol-card">
+                  <div class="card-badge note-value-badge">1 beat</div>
+                  <h4>ตัวดำ (Quarter Note)</h4>
+                  <div class="note-value-visual note-value-quarter" aria-label="Quarter note visual: 1 beat">
+                    <svg class="note-staff-svg" viewBox="0 0 220 86" aria-hidden="true" focusable="false">
+                      <line class="staff-line" x1="14" y1="20" x2="206" y2="20"></line>
+                      <line class="staff-line" x1="14" y1="30" x2="206" y2="30"></line>
+                      <line class="staff-line" x1="14" y1="40" x2="206" y2="40"></line>
+                      <line class="staff-line" x1="14" y1="50" x2="206" y2="50"></line>
+                      <line class="staff-line" x1="14" y1="60" x2="206" y2="60"></line>
+                      <ellipse class="note-head filled" cx="105" cy="50" rx="16" ry="9" transform="rotate(-18 105 50)"></ellipse>
+                      <line class="note-stem" x1="120" y1="50" x2="120" y2="18"></line>
+                    </svg>
+                    <div class="note-count-strip">
+                      <span class="note-count-pill">Count: 1</span>
+                      <span class="note-count-pill">1 beat</span>
+                    </div>
+                  </div>
+                  <p class="meaning"><strong>ค่าจังหวะ:</strong> 1 Beat (ตบเท้า 1 ครั้ง)</p>
+                  <p class="tip">💡 <strong>วิธีเล่น:</strong> ดีด 1 ครั้งต่อ 1 จังหวะตกพอดี ถ้านับ 1-2-3-4 ก็คือการดีดลงทุกตัวเลข</p>
+                </article>
+
+                <article class="tab-symbol-card">
+                  <div class="card-badge note-value-badge">1/2 beat</div>
+                  <h4>เขบ็ต 1 ชั้น (Eighth Note)</h4>
+                  <div class="note-value-visual note-value-eighth" aria-label="Eighth note visual: count 1 and">
+                    <svg class="note-staff-svg" viewBox="0 0 220 86" aria-hidden="true" focusable="false">
+                      <line class="staff-line" x1="14" y1="20" x2="206" y2="20"></line>
+                      <line class="staff-line" x1="14" y1="30" x2="206" y2="30"></line>
+                      <line class="staff-line" x1="14" y1="40" x2="206" y2="40"></line>
+                      <line class="staff-line" x1="14" y1="50" x2="206" y2="50"></line>
+                      <line class="staff-line" x1="14" y1="60" x2="206" y2="60"></line>
+                      <ellipse class="note-head filled" cx="100" cy="50" rx="15" ry="9" transform="rotate(-18 100 50)"></ellipse>
+                      <line class="note-stem" x1="114" y1="50" x2="114" y2="18"></line>
+                      <path class="note-flag" d="M114 18 C140 22, 146 34, 124 42"></path>
+                    </svg>
+                    <div class="note-count-strip">
+                      <span class="note-count-pill">Count: 1 &amp;</span>
+                      <span class="note-count-pill">1/2 beat</span>
+                    </div>
+                  </div>
+                  <p class="meaning"><strong>ค่าจังหวะ:</strong> 1/2 Beat (ครึ่งจังหวะ)</p>
+                  <p class="tip">💡 <strong>วิธีเล่น:</strong> ใน 1 จังหวะตบเท้าต้องดีด 2 ครั้ง (ลง-ขึ้น) เวลานับคือ 1 & 2 & 3 & 4 &</p>
+                </article>
+
+                <article class="tab-symbol-card">
+                  <div class="card-badge note-value-badge">1/4 beat</div>
+                  <h4>เขบ็ต 2 ชั้น (16th Note)</h4>
+                  <div class="note-value-visual note-value-sixteenth" aria-label="Sixteenth note visual: count 1 e and a">
+                    <svg class="note-staff-svg" viewBox="0 0 220 86" aria-hidden="true" focusable="false">
+                      <line class="staff-line" x1="14" y1="20" x2="206" y2="20"></line>
+                      <line class="staff-line" x1="14" y1="30" x2="206" y2="30"></line>
+                      <line class="staff-line" x1="14" y1="40" x2="206" y2="40"></line>
+                      <line class="staff-line" x1="14" y1="50" x2="206" y2="50"></line>
+                      <line class="staff-line" x1="14" y1="60" x2="206" y2="60"></line>
+                      <ellipse class="note-head filled" cx="100" cy="50" rx="15" ry="9" transform="rotate(-18 100 50)"></ellipse>
+                      <line class="note-stem" x1="114" y1="50" x2="114" y2="18"></line>
+                      <path class="note-flag" d="M114 18 C141 22, 148 32, 125 39"></path>
+                      <path class="note-flag" d="M114 29 C139 33, 146 42, 126 49"></path>
+                    </svg>
+                    <div class="note-count-strip">
+                      <span class="note-count-pill">Count: 1 e &amp; a</span>
+                      <span class="note-count-pill">1/4 beat</span>
+                    </div>
+                  </div>
+                  <p class="meaning"><strong>ค่าจังหวะ:</strong> 1/4 Beat (หนึ่งส่วนสี่จังหวะ)</p>
+                  <p class="tip">💡 <strong>วิธีเล่น:</strong> ใน 1 จังหวะตบเท้าต้องดีด 4 ครั้ง เวลานับคือ 1-e-&-a (เจอเยอะในแนว Funk/R&B)</p>
+                </article>
+
+                <article class="tab-symbol-card">
+                  <div class="card-badge note-value-badge-warm">silent</div>
+                  <h4>ตัวหยุด (Rests)</h4>
+                  <div class="note-value-visual note-value-rest" aria-label="Rest visual: count but stay silent">
+                    <svg class="note-staff-svg" viewBox="0 0 220 86" aria-hidden="true" focusable="false">
+                      <line class="staff-line" x1="14" y1="20" x2="206" y2="20"></line>
+                      <line class="staff-line" x1="14" y1="30" x2="206" y2="30"></line>
+                      <line class="staff-line" x1="14" y1="40" x2="206" y2="40"></line>
+                      <line class="staff-line" x1="14" y1="50" x2="206" y2="50"></line>
+                      <line class="staff-line" x1="14" y1="60" x2="206" y2="60"></line>
+                      <path class="note-value-rest-mark" d="M93 23 L132 23 L118 39 L134 39 L100 62 L112 46 L92 46 Z"></path>
+                      <line class="silence-mark" x1="74" y1="18" x2="146" y2="64"></line>
+                    </svg>
+                    <div class="note-count-strip">
+                      <span class="note-count-pill">Count but stay silent</span>
+                      <span class="note-count-pill">Rest</span>
+                    </div>
+                  </div>
+                  <p class="meaning"><strong>ค่าจังหวะ:</strong> ความเงียบ (ตามค่าของตัวหยุดนั้น ๆ เช่น หยุดตัวดำ, หยุดเขบ็ต)</p>
+                  <p class="tip">💡 <strong>วิธีเล่น:</strong> เอาสันมือขวาหรือนิ้วซ้ายอุดสายให้เสียงเงียบสนิท ไม่ใช่การปล่อยเสียงลอยทิ้งไว้</p>
+                </article>
+
+                <article class="tab-symbol-card">
+                  <div class="card-badge note-value-badge">+ half</div>
+                  <h4>จุดประ (Dotted Note)</h4>
+                  <div class="note-value-visual note-value-dotted" aria-label="Dotted note visual: example 1.5 beats">
+                    <svg class="note-staff-svg" viewBox="0 0 220 86" aria-hidden="true" focusable="false">
+                      <line class="staff-line" x1="14" y1="20" x2="206" y2="20"></line>
+                      <line class="staff-line" x1="14" y1="30" x2="206" y2="30"></line>
+                      <line class="staff-line" x1="14" y1="40" x2="206" y2="40"></line>
+                      <line class="staff-line" x1="14" y1="50" x2="206" y2="50"></line>
+                      <line class="staff-line" x1="14" y1="60" x2="206" y2="60"></line>
+                      <ellipse class="note-head filled" cx="98" cy="50" rx="15" ry="9" transform="rotate(-18 98 50)"></ellipse>
+                      <line class="note-stem" x1="112" y1="50" x2="112" y2="18"></line>
+                      <circle class="note-dot" cx="133" cy="48" r="4"></circle>
+                    </svg>
+                    <div class="note-count-strip">
+                      <span class="note-count-pill">Example: 1.5 beats</span>
+                      <span class="note-count-pill">+ half value</span>
+                    </div>
+                  </div>
+                  <p class="meaning"><strong>ค่าจังหวะ:</strong> เพิ่มค่าความยาวอีก "ครึ่งหนึ่ง" ของโน้ตตัวหน้า</p>
+                  <p class="tip">💡 <strong>วิธีเล่น:</strong> เช่น ตัวดำปะจุด = 1 จังหวะ + ครึ่งจังหวะ (รวมเป็น 1.5 จังหวะ) มักตามด้วยเขบ็ต 1 ชั้น</p>
+                </article>
+
+                <article class="tab-symbol-card">
+                  <div class="card-badge note-value-badge">tie</div>
+                  <h4>เส้นโยงเสียง (Tie)</h4>
+                  <div class="note-value-visual note-value-tie" aria-label="Tie visual: do not pick again">
+                    <svg class="note-staff-svg" viewBox="0 0 220 86" aria-hidden="true" focusable="false">
+                      <line class="staff-line" x1="14" y1="20" x2="206" y2="20"></line>
+                      <line class="staff-line" x1="14" y1="30" x2="206" y2="30"></line>
+                      <line class="staff-line" x1="14" y1="40" x2="206" y2="40"></line>
+                      <line class="staff-line" x1="14" y1="50" x2="206" y2="50"></line>
+                      <line class="staff-line" x1="14" y1="60" x2="206" y2="60"></line>
+                      <ellipse class="note-head filled" cx="80" cy="50" rx="14" ry="8" transform="rotate(-18 80 50)"></ellipse>
+                      <line class="note-stem" x1="93" y1="50" x2="93" y2="20"></line>
+                      <ellipse class="note-head filled ghost-note" cx="142" cy="50" rx="14" ry="8" transform="rotate(-18 142 50)"></ellipse>
+                      <line class="note-stem ghost-note" x1="155" y1="50" x2="155" y2="20"></line>
+                      <path class="note-value-tie-arc" d="M91 68 C106 78, 124 78, 141 68"></path>
+                    </svg>
+                    <div class="note-count-strip">
+                      <span class="note-count-pill">Do not pick again</span>
+                      <span class="note-count-pill">Hold sound</span>
+                    </div>
+                  </div>
+                  <p class="meaning"><strong>ค่าจังหวะ:</strong> รวมค่าจังหวะของโน้ตสองตัวที่ระดับเสียงเดียวกันเข้าด้วยกัน</p>
+                  <p class="tip">💡 <strong>วิธีเล่น:</strong> ดีดแค่โน้ตตัวแรกตัวเดียว แล้วปล่อยเสียงลากค้างยาวข้ามไปครอบคลุมความยาวของโน้ตตัวที่สอง</p>
+                </article>
+              </div>
+            </div>
+
+            <section class="rhythm-practice-layer" aria-labelledby="rhythmPracticeLayerTitle">
+              <div class="reference-guidebook-head">
+                <p class="eyebrow">Practice Bridge</p>
+                <h3 id="rhythmPracticeLayerTitle">ฝึกนับค่าจังหวะก่อนจับกีตาร์</h3>
+                <p class="subtitle">เห็นตัวโน้ต → นับออกเสียง → ตบมือ → ค่อยเล่นบนกีตาร์</p>
+              </div>
+
+              <div class="count-clap-grid">
+                <article class="count-clap-card">
+                  <h4>ตัวดำ 4 ตัว</h4>
+                  <div class="rhythm-symbol-line" aria-label="Quarter notes: four beats">♩ ♩ ♩ ♩</div>
+                  <p class="count-line"><strong>Count:</strong> 1 2 3 4</p>
+                  <p>ตบมือทุกตัวเลข แล้วให้เท้าเคาะพร้อม Metronome</p>
+                </article>
+
+                <article class="count-clap-card">
+                  <h4>เขบ็ต 1 ชั้น</h4>
+                  <div class="rhythm-symbol-line" aria-label="Eighth notes: one and two and three and four and">♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪</div>
+                  <p class="count-line"><strong>Count:</strong> 1 &amp; 2 &amp; 3 &amp; 4 &amp;</p>
+                  <p>ตบมือทั้งเลขและ &amp; แต่เท้ายังเคาะเฉพาะ 1 2 3 4</p>
+                </article>
+
+                <article class="count-clap-card">
+                  <h4>เขบ็ต 2 ชั้น</h4>
+                  <div class="rhythm-symbol-line" aria-label="Sixteenth notes across four beats">♬ ♬ ♬ ♬</div>
+                  <p class="count-line"><strong>Count:</strong> 1 e &amp; a 2 e &amp; a 3 e &amp; a 4 e &amp; a</p>
+                  <p>ยังไม่ต้องเล่นเร็ว ให้พูดให้เท่าก่อน แล้วค่อยตบมือเบา ๆ</p>
+                </article>
+
+                <article class="count-clap-card">
+                  <h4>Rest / Stop</h4>
+                  <div class="rhythm-symbol-line" aria-label="Quarter note, rest, quarter note, rest">♩ rest ♩ rest</div>
+                  <p class="count-line"><strong>Count:</strong> 1 stop 3 stop</p>
+                  <p>จุดที่เป็น rest ต้องเงียบจริง อย่าปล่อยเสียงค้าง</p>
+                </article>
+              </div>
+
+              <section class="down-up-section" aria-labelledby="downUpTitle">
+                <h4 id="downUpTitle">จังหวะตก / จังหวะยก</h4>
+                <p>ตัวเลขคือจุดตกหลัก ส่วน &amp; คือจุดยกที่มือขวาต้องรู้สึกให้ตรง</p>
+                <div class="count-map-card" aria-label="Downbeat and upbeat count map">
+                  <div class="count-map-row">
+                    <span class="count-row-label">Count</span>
+                    <span class="count-cell strong">1</span>
+                    <span class="count-cell light">&amp;</span>
+                    <span class="count-cell strong">2</span>
+                    <span class="count-cell light">&amp;</span>
+                    <span class="count-cell strong">3</span>
+                    <span class="count-cell light">&amp;</span>
+                    <span class="count-cell strong">4</span>
+                    <span class="count-cell light">&amp;</span>
+                  </div>
+                  <div class="count-map-row">
+                    <span class="count-row-label">Feel</span>
+                    <span class="count-cell strong">ตก</span>
+                    <span class="count-cell light">ยก</span>
+                    <span class="count-cell strong">ตก</span>
+                    <span class="count-cell light">ยก</span>
+                    <span class="count-cell strong">ตก</span>
+                    <span class="count-cell light">ยก</span>
+                    <span class="count-cell strong">ตก</span>
+                    <span class="count-cell light">ยก</span>
+                  </div>
+                  <div class="count-map-row">
+                    <span class="count-row-label">Strum</span>
+                    <span class="count-cell strong">ลง</span>
+                    <span class="count-cell light">ขึ้น</span>
+                    <span class="count-cell strong">ลง</span>
+                    <span class="count-cell light">ขึ้น</span>
+                    <span class="count-cell strong">ลง</span>
+                    <span class="count-cell light">ขึ้น</span>
+                    <span class="count-cell strong">ลง</span>
+                    <span class="count-cell light">ขึ้น</span>
+                  </div>
+                </div>
+                <p class="count-map-note">อย่าคิดว่า “ยก” คือจังหวะมั่วหรือจังหวะแทรก ยกยังต้องอยู่ใน time เหมือนตัวเลขหลัก</p>
+              </section>
+
+              <section class="six-eight-section" aria-labelledby="sixEightTitle">
+                <h4 id="sixEightTitle">6/8 Starter</h4>
+                <p>ไม่ใช่ 4/4 ที่เร็วขึ้น แต่เป็น feel แบบ 2 กลุ่มใหญ่ กลุ่มละ 3</p>
+                <div class="count-map-card count-map-card--six" aria-label="Six eight starter count map">
+                  <div class="count-map-row">
+                    <span class="count-row-label">Count</span>
+                    <span class="count-cell strong">1</span>
+                    <span class="count-cell light">2</span>
+                    <span class="count-cell light">3</span>
+                    <span class="count-cell strong">4</span>
+                    <span class="count-cell light">5</span>
+                    <span class="count-cell light">6</span>
+                  </div>
+                  <div class="count-map-row">
+                    <span class="count-row-label">Feel</span>
+                    <span class="count-cell strong">หนัก</span>
+                    <span class="count-cell light">เบา</span>
+                    <span class="count-cell light">เบา</span>
+                    <span class="count-cell strong">หนัก</span>
+                    <span class="count-cell light">เบา</span>
+                    <span class="count-cell light">เบา</span>
+                  </div>
+                  <div class="count-map-row">
+                    <span class="count-row-label">Group</span>
+                    <span class="count-cell strong">ONE</span>
+                    <span class="count-cell light">2</span>
+                    <span class="count-cell light">3</span>
+                    <span class="count-cell strong">FOUR</span>
+                    <span class="count-cell light">5</span>
+                    <span class="count-cell light">6</span>
+                  </div>
+                </div>
+                <ul class="rhythm-tab-notes">
+                  <li>6/8 หนึ่งห้องมีเขบ็ต 1 ชั้น 6 ตัว</li>
+                  <li>มักรู้สึกเป็น 2 pulse ใหญ่</li>
+                  <li>เน้น 1 และ 4</li>
+                  <li>เหมาะกับเพลง ballad, folk, worship และ slow blues feel บางแบบ</li>
+                </ul>
+              </section>
+
+              <section class="rhythm-tab-bridge" aria-labelledby="rhythmTabBridgeTitle">
+                <h4 id="rhythmTabBridgeTitle">อ่าน Rhythm ใต้ TAB</h4>
+                <p>TAB บอกว่าเล่นอะไร ส่วนค่าจังหวะบอกว่าเล่นเมื่อไรและปล่อยเสียงนานแค่ไหน</p>
+                <pre class="rhythm-tab-example" aria-label="Rhythm under TAB example">Count:  1   &amp;   2   &amp;   3   &amp;   4   &amp;
+Rhythm: ♩       ♪   ♪       ♩
+TAB:    E|--0-------0---0-------0---|</pre>
+                <ul class="rhythm-tab-notes">
+                  <li>เลข 0 บอกว่าดีดสายเปิด</li>
+                  <li>Rhythm บอกว่าแต่ละเสียงยาวแค่ไหน</li>
+                  <li>ถ้าอ่านแต่เลขแต่ไม่อ่าน rhythm เพลงจะไม่เหมือนต้นฉบับ</li>
+                </ul>
+              </section>
+            </section>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer>
+      <p>ซ้อมช้า ๆ รักษาเวลาให้ดี อัดเสียงตัวเองไว้ฟัง แค่นี้ก็พอสำหรับวันนี้ครับ</p>
+    </footer>
+
+    <button class="scroll-top-button" id="scrollTopButton" type="button" aria-label="กลับขึ้นด้านบน" title="กลับขึ้นด้านบน">
+      <span aria-hidden="true">↑</span>
+    </button>
+
+    <script src="app.js?v=v2.9.4-ui-polish"></script>
+  </body>
+</html>
