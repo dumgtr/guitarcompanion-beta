@@ -89,3 +89,9 @@ The Reference Shelf / Rhythm Notation work is FINAL for the current phase.
 ## Recommended Next Work
 - The project is currently in a Post-Release Monitoring phase. DO NOT initiate new features (like Fretboard Studio) or new Mini Courses. Await user feedback from real-world usage.
 - Month 5-8 remain hidden.
+
+## Month 5 Realignment (July 2026)
+- Month 5 has been pivoted from "Improvisation Foundation" to **"Diatonic Bridge & Melodic Freedom"** (Diatonic Triads, I-IV-V-vi, common-tone chord colors, and melodic phrasing).
+- The legacy "Improvisation Foundation" outline is archived inside `docs/MONTH3_TO_MONTH6_BLUEPRINT.md` (collapsed `<details>` block).
+- The canonical Month 5 production spec is: `docs/MONTH5_CONTENT_SPEC.md`.
+- Month 5 remains strictly hidden in the production UI.

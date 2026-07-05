@@ -22,7 +22,7 @@
 | --- | --- | --- |
 | Month 3 | Chord Tone & Arpeggio Foundation | รู้ว่าโน้ตในคอร์ดคืออะไร ฟังคุณภาพคอร์ดออก และเริ่ม target chord tones ได้ |
 | Month 4 | Scale Atlas Foundation | มอง scale เป็นแผนที่เสียงรอบคอร์ด ไม่ใช่กล่องนิ้ว และเล่นช้า ๆ ให้สะอาด |
-| Month 5 | Improvisation Foundation | เปลี่ยน scale และ chord tones ให้เป็น phrase ที่มี space, motif, bending และ vibrato |
+| Month 5 | Diatonic Bridge & Melodic Freedom | เชื่อม Pentatonic box เข้ากับ Diatonic Harmony, I-IV-V-vi, common-tone chord colors, และ melodic phrasing |
 | Month 6 | Modes as Chord Colors | ฟัง Modes เป็นสีของคอร์ด โดยใช้ Dorian และ Mixolydian เป็นแกน Blues/Rock/Funk |
 
 ---
@@ -143,11 +143,42 @@ Month 4 ทำให้ scale เป็นแผนที่ใช้งาน�
 
 ---
 
-## Month 5: Improvisation Foundation
+## Month 5: Diatonic Bridge & Melodic Freedom (REALIGNED)
+
+> ⚠️ **REALIGNMENT NOTICE (July 2026):**
+> Month 5 has been officially pivoted from its legacy "Improvisation Foundation" outline to **"Diatonic Bridge & Melodic Freedom"**. This layout merges diatonic chord vocabulary (I-IV-V-vi, sus2, add9, and 90s rock common-tone voicings) directly with phrasing mechanics. For the updated production specification, always refer to the canonical file: `docs/MONTH5_CONTENT_SPEC.md`.
+
+Month 5 bridges the gap between the Pentatonic box (Month 4) and Modes as Chord Colors (Month 6). It combines **Diatonic Harmony** (knowing the chords) with **Improvisation Mechanics** (phrasing, space, bending).
+
+### Week 17: Meet the Family & Space
+
+- **Harmony Focus:** The Diatonic Triads (I, ii, iii, IV, V, vi, vii°). Why some are major and some are minor.
+- **Improv Focus:** Motif repetition and deliberate silence (Space).
+- **Renderer:** `fretboardVisuals` showing the 1-3-5 chord tones inside the scale shape.
+
+### Week 18: Core Progression & Call/Response
+
+- **Harmony Focus:** The pop/rock engine: I–IV–V–vi.
+- **Improv Focus:** Conversational soloing (Call & Response) over a Web Audio chord loop.
+- **Renderer:** `chordSoundLabs` with a looping I-IV-V-vi progression and target note visuals.
+
+### Week 19: The 90s Secret (Pedal Tones & Pitch)
+
+- **Harmony Focus:** Common Tone Magic. Holding the top strings (e.g., G and D notes) while moving the bass to create `Cadd9`, `Em7`, and `Dsus4` (Silly Fools / Oasis style).
+- **Improv Focus:** Target pitch bending and vibrato over these color chords.
+- **Renderer:** `miniTabs` showing the locked-finger chord shapes + `phrase-lab` for bending accuracy.
+
+### Week 20: 8-Bar Solo Builder (Capstone)
+
+- **Focus:** Combine rhythm (playing the changes) with lead (target notes). Build a structured 8-bar solo over the Diatonic Bridge.
+- **Renderer:** `technique-drill` mapping out a structured 20-minute daily practice routine.
+
+<details>
+<summary>📦 Legacy "Improvisation Foundation" outline (archived for reference)</summary>
 
 Month 5 เปลี่ยนวัตถุดิบจาก Month 3-4 ให้เป็นภาษา improvisation จริง ผู้เรียนจะเริ่มคิดเป็น phrase, motif, space, dynamics, bending และ vibrato
 
-### Week 17: Phrase, Motif, and Space
+#### Week 17: Phrase, Motif, and Space
 
 1. **Lesson Goal:** สร้าง phrase สั้นที่ฟังเหมือนประโยค ไม่ใช่ scale run
 2. **Core Concept:** Motif คือไอเดียเล็กที่ทำซ้ำและเปลี่ยนนิดหน่อย ส่วน space ทำให้คนฟังหายใจทัน
@@ -160,7 +191,7 @@ Month 5 เปลี่ยนวัตถุดิบจาก Month 3-4 ให�
 9. **Self-Check Criteria:** เล่น phrase 2 ห้องที่มี space ได้; ทำ variation จาก motif เดิมได้; ไม่เติมโน้ตทุกช่องว่าง
 10. **Guardrails:** ไม่ทำ lick dump, ไม่สอน scale ใหม่, ไม่เน้นความเร็ว
 
-### Week 18: Call & Response and Dynamic Phrasing
+#### Week 18: Call & Response and Dynamic Phrasing
 
 1. **Lesson Goal:** เล่นประโยคถาม-ตอบ และควบคุมเบา/ดังให้ phrase มีชีวิต
 2. **Core Concept:** Call & Response ทำให้ improvisation เหมือนบทสนทนา ส่วน dynamics ทำให้อารมณ์ชัดขึ้น
@@ -173,7 +204,7 @@ Month 5 เปลี่ยนวัตถุดิบจาก Month 3-4 ให�
 9. **Self-Check Criteria:** เล่น call และ response ต่างกันชัด; คุม dynamic ได้อย่างน้อย 2 ระดับ; อัดฟังแล้วไม่เป็นโน้ตแบนทั้งชุด
 10. **Guardrails:** ไม่ทำ complex jazz phrasing, ไม่เพิ่ม long backing tracks, ไม่ให้ผู้เรียนเล่นเยอะจนเสีย Groove
 
-### Week 19: Bending and Vibrato Pitch
+#### Week 19: Bending and Vibrato Pitch
 
 1. **Lesson Goal:** คุม bending และ vibrato ให้ pitch อยู่ใน tune และฟังเป็น vocal-like expression
 2. **Core Concept:** Bend ต้องมี target pitch ส่วน vibrato คือการสั่นรอบโน้ตเป้าหมาย ไม่ใช่เขย่าแบบไร้ทิศ
@@ -186,7 +217,7 @@ Month 5 เปลี่ยนวัตถุดิบจาก Month 3-4 ให�
 9. **Self-Check Criteria:** bend ถึง pitch เป้าหมาย 7 จาก 10 ครั้ง; vibrato ไม่รีบ; เล่นแล้วไม่เจ็บมือ
 10. **Guardrails:** ไม่สอน aggressive wide vibrato ก่อนพื้นฐาน, ไม่เน้น speed, microtonal blues bend เป็น taste ไม่ใช่บทหลัก
 
-### Week 20: 8-Bar Solo Builder
+#### Week 20: 8-Bar Solo Builder
 
 1. **Lesson Goal:** รวม phrase, space, dynamics, bend/vibrato และ chord tone targeting เป็น solo 8 ห้อง
 2. **Core Concept:** Solo ที่ดีมีโครง ไม่ใช่การเล่นโน้ตต่อเนื่อง 8 ห้อง
@@ -198,6 +229,8 @@ Month 5 เปลี่ยนวัตถุดิบจาก Month 3-4 ให�
 8. **Daily Practice Structure:** Day 1-2 วาง bar 1-2; Day 3-4 เพิ่ม response; Day 5 ใส่ bend/vibrato; Day 6-7 record full 8 bars
 9. **Self-Check Criteria:** solo มี space; มี motif อย่างน้อย 1 อัน; จบที่ chord tone; dynamic ไม่แบน
 10. **Guardrails:** ไม่ทำ backing-track marketplace, ไม่เพิ่ม solo library ยาว, ไม่สอน shred vocabulary
+
+</details>
 
 ---
 
@@ -292,7 +325,7 @@ Reference-only or later-stage blocks:
 ## Freeze Summary
 
 1. **Blueprint created:** Month 3-6 learning path ถูกล็อกเป็น Week 9-24 โดยไม่เพิ่มสัปดาห์
-2. **Month-by-month learning arc:** Month 3 chord tones/arpeggio, Month 4 scale atlas, Month 5 improvisation, Month 6 modes as chord colors
+2. **Month-by-month learning arc:** Month 3 chord tones/arpeggio, Month 4 scale atlas, Month 5 diatonic bridge & melodic freedom (realigned July 2026; see `docs/MONTH5_CONTENT_SPEC.md`), Month 6 modes as chord colors
 3. **Required future data block types:** เน้น chord-tone overlays, voice-leading maps, technique drills, ear labs, drone practice, mode color labs และ phrase labs
 4. **No roadmap bloat:** ทุก technique และ ear skill ถูกวางเป็น micro-skill block ภายในบท ไม่ใช่ module ใหม่
 5. **Before implementation:** ต้องสร้าง content-pack plan/mock data และ renderer QA แยกต่างหาก โดยยังไม่เปิด Month 3+ ใน production UI
