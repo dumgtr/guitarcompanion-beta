@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Safe Sandbox: Audio Test</title>
+    <style>
+        :root {
+            --paper: #0e0c0a; --surface: #181511; --surface-soft: #221d18;
+            --ink: #f4f0ea; --muted: #b8aaa0; --line: rgba(244, 240, 234, 0.14);
+            --accent: #d8a866;
+        }
+        body {
+            margin: 0; padding: 40px 20px;
+            background: var(--paper); color: var(--ink);
+            font-family: sans-serif; line-height: 1.6;
+            text-align: center;
+        }
+        .engine-card {
+            background: var(--surface); border: 1px solid var(--line);
+            border-radius: 12px; padding: 30px; max-width: 500px; margin: 0 auto;
+        }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; justify-content: center; flex-wrap: wrap;}
+        button {
+            padding: 14px 20px; border-radius: 6px; border: none; font-size: 15px;
+            background: var(--accent); color: #000; font-weight: bold;
+            cursor: pointer; transition: 0.1s;
+        }
+        button:active { transform: scale(0.95); }
+        .btn-secondary { background: var(--surface-soft); color: var(--ink); border: 1px solid var(--muted); }
+        #status { margin-top: 24px; font-size: 14px; color: #70b7a8; font-family: monospace; padding: 10px; background: #000; border-radius: 6px;}
+    </style>
+</head>
+<body>
+
+    <div class="engine-card">
+        <h2>🎸 Guitar Synth Engine Test</h2>
+        <p style="color: var(--muted); font-size: 14px;">ทดสอบปรับ Gain ให้ดังขึ้น + ปลดล็อก Browser Autoplay<br>(ถ้ากด A2 ไม่ได้ยิน ให้ลองกด A4 เพราะลำโพงอาจขับเบสไม่ไหว)</p>
+        
+        <div class="btn-group">
+            <button id="btnTestLow" class="btn-secondary">🎵 Test A2 (เบส)</button>
+            <button id="btnTestHigh" class="btn-secondary">🎵 Test A4 (แหลม)</button>
+            <button id="btnPhrase">🎶 Play Phrase (Loop)</button>
+        </div>
+        
+        <div id="status">สถานะ: รอการคลิกจากผู้ใช้...</div>
+    </div>
+
+    <script>
+        let audioCtx;
+
+        // บังคับปลดล็อก AudioContext แบบ Async เพื่อแก้ปัญหา Browser ดื้อ
+        async function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                await audioCtx.resume();
+            }
+        }
+
+        // แปลงชื่อโน้ตเป็นความถี่ (Hz) แบบสมบูรณ์ (รองรับ # และ b)
+        function getFreq(noteString) {
+            const notes = { "C":0, "C#":1, "Db":1, "D":2, "D#":3, "Eb":3, "E":4, "F":5, "F#":6, "Gb":6, "G":7, "G#":8, "Ab":8, "A":9, "A#":10, "Bb":10, "B":11 };
+            const match = noteString.match(/([A-G][b#]?)(\d+)/);
+            if (!match) return 440;
+            const noteIndex = notes[match[1]];
+            const octave = parseInt(match[2], 10);
+            const midi = 12 * (octave + 1) + noteIndex;
+            return 440 * Math.pow(2, (midi - 69) / 12);
+        }
+
+        // ตัวสร้างเสียงกีตาร์แบบใหม่
+        async function playPluckedString(noteString, timeOffset = 0) {
+            await initAudio();
+            const freq = getFreq(noteString);
+            const startTime = audioCtx.currentTime + timeOffset;
+            const duration = 1.5; // หางเสียง 1.5 วินาที
+
+            const oscTriangle = audioCtx.createOscillator();
+            const oscSine = audioCtx.createOscillator();
+            const filter = audioCtx.createBiquadFilter();
+            const gainNode = audioCtx.createGain();
+
+            // ผสมคลื่นเสียงให้คล้ายสายกีตาร์
+            oscTriangle.type = "triangle";
+            oscSine.type = "sine";
+            oscTriangle.frequency.value = freq;
+            oscSine.frequency.value = freq;
+
+            // ADSR Envelope: เพิ่มความดังจาก 0.2 เป็น 0.6 ให้ดังชัดเจน
+            gainNode.gain.setValueAtTime(0, startTime);
+            gainNode.gain.linearRampToValueAtTime(0.6, startTime + 0.02); // Attack เร็ว
+            gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration); // Decay ธรรมชาติ
+
+            // Filter: ปล่อยย่านแหลมให้ผ่านได้มากขึ้น (3000Hz) เพื่อความใส
+            filter.type = "lowpass";
+            filter.frequency.setValueAtTime(3000, startTime); 
+            filter.frequency.exponentialRampToValueAtTime(600, startTime + duration); 
+
+            oscTriangle.connect(filter);
+            oscSine.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscTriangle.start(startTime);
+            oscSine.start(startTime);
+            oscTriangle.stop(startTime + duration);
+            oscSine.stop(startTime + duration);
+        }
+
+        // ผูก Event Listener
+        document.getElementById("btnTestLow").addEventListener("click", async () => {
+            document.getElementById("status").textContent = "▶ กำลังเล่น: A2 (110.0 Hz)";
+            await playPluckedString("A2");
+        });
+
+        document.getElementById("btnTestHigh").addEventListener("click", async () => {
+            document.getElementById("status").textContent = "▶ กำลังเล่น: A4 (440.0 Hz)";
+            await playPluckedString("A4");
+        });
+
+        document.getElementById("btnPhrase").addEventListener("click", async () => {
+            document.getElementById("status").textContent = "▶ กำลังเล่น: Phrase 7 โน้ต (A Minor Pentatonic)";
+            const phrase = ["A2", "C3", "D3", "Eb3", "E3", "G3", "A3"];
+            
+            for (let i = 0; i < phrase.length; i++) {
+                // หน่วงเวลาให้โน้ตเล่นต่อกันทีละ 0.35 วินาที
+                playPluckedString(phrase[i], i * 0.35); 
+            }
+        });
+    </script>
+</body>
+</html>

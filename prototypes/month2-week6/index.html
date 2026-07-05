@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Month 2 Week 6 Prototype - ขยายแผนที่ด้วย Octave</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./mock-data.js" defer></script>
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="กลับไปด้านบน">
+        <span class="brand-mark">GC</span>
+        <span>
+          <strong>Guitar Companion</strong>
+          <small>Month 2 Prototype</small>
+        </span>
+      </a>
+      <span class="prototype-pill">Week 6 / Octave Shapes</span>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="pageTitle">
+        <p class="eyebrow">Month 2 / Week 6</p>
+        <h1 id="pageTitle">ขยายแผนที่ด้วย Octave</h1>
+        <p id="heroSubtitle" class="hero-subtitle">All String Mapping</p>
+        <p id="heroPromise" class="hero-copy">
+          ขยาย Root จากสาย 6 และ 5 ไปยังสายล่างด้วย Octave Shape เพื่อหาโน้ตชื่อเดียวกันบนคอกีตาร์ได้เร็วขึ้น โดยไม่ต้องท่องจำทั้งคอ
+        </p>
+        <div class="hero-actions">
+          <button class="cta-primary" type="button" data-scroll="#lessonFlow">เริ่มดูบทเรียน</button>
+          <span class="meta-chip">60 BPM</span>
+          <span class="meta-chip">Octave Shape</span>
+        </div>
+      </section>
+
+      <section class="today-card" aria-labelledby="todayTitle">
+        <div>
+          <p class="eyebrow">Today's Focus</p>
+          <h2 id="todayTitle">วันนี้ให้ล็อกรูปทรงก่อน</h2>
+          <p>เริ่มจาก Root ที่หาเจอใน Week 5 แล้วขยับไปหา Octave ด้วยระยะมือเดิม ฟังให้ชัดว่าเป็นโน้ตชื่อเดียวกัน แค่สูงขึ้นคนละชั้นเสียง</p>
+        </div>
+        <div class="focus-stack">
+          <span>Root</span>
+          <span>Octave</span>
+          <span>Shape</span>
+        </div>
+      </section>
+
+      <section id="lessonFlow" class="section-shell" aria-labelledby="lessonTitle">
+        <header class="section-head">
+          <p class="eyebrow">Lesson Flow</p>
+          <h2 id="lessonTitle">ดูรูปทรง ฟังเสียง แล้วค่อยเล่น</h2>
+        </header>
+        <div id="lessonMount"></div>
+      </section>
+
+      <section class="section-shell" aria-labelledby="practiceTitle">
+        <header class="section-head">
+          <p class="eyebrow">Daily Practice</p>
+          <h2 id="practiceTitle">ซ้อมสั้น แต่ล็อกมือให้จำ</h2>
+        </header>
+        <div id="practiceMount"></div>
+      </section>
+
+      <section class="section-shell" aria-labelledby="checkTitle">
+        <header class="section-head">
+          <p class="eyebrow">Self-Check</p>
+          <h2 id="checkTitle">Octave Shape เริ่มนิ่งหรือยัง</h2>
+        </header>
+        <div id="selfCheckMount"></div>
+      </section>
+    </main>
+
+    <footer class="footer-note">
+      Prototype สำหรับทดสอบ Month 2 Week 6 เท่านั้น ยังไม่เปิด Month 2 ในแอปหลัก
+    </footer>
+  </body>
+</html>

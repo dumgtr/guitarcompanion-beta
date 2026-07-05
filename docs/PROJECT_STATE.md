@@ -39,7 +39,7 @@ FINAL for current phase.
 - Two Mini Courses are currently live in the Practice Room: `Rhythm Notation Starter` and `Blues Turnaround Starter`.
 - The system is under observation after the Sprint 8D public reveal and 6/6 smoke-test pass.
 - Do not initiate new features, new Practice Tools, or new Mini Courses during this monitoring period.
-- Await user feedback from real-world usage before planning the next scoped implementation.
+- Month 5 (Diatonic Bridge & Melodic Freedom) content spec and mock data plan are complete. Await explicit task to either draft Month 6 specs or implement Month 5 hidden mock data.
 
 ### v2.9.4 UI Polish (2026-07-04)
 - **Status:** Implemented and QA-passed (6/6 Browser Smoke Test).

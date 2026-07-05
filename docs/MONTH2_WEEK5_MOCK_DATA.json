@@ -1,0 +1,399 @@
+{
+  "weekMeta": {
+    "week": 5,
+    "month": 2,
+    "title": "รู้บ้าน (Root & Landmarks)",
+    "module": "fretboard",
+    "theme": "Fretboard Foundation",
+    "estimatedMinutesPerDay": 20,
+    "teacherPromise": "จบสัปดาห์นี้ผู้เรียนจะเริ่มรู้ว่า Root อยู่ตรงไหนบนคอ และใช้ Landmark เป็นหมุดนำทางได้โดยไม่ต้องเดาสุ่ม"
+  },
+  "lessonBlocks": [
+    {
+      "id": "w5-block-1-home-intro",
+      "type": "text",
+      "title": "เริ่มจากคำว่า บ้าน",
+      "body": "ก่อนจะจำทั้งคอกีตาร์ เราจะเริ่มจากการรู้จักบ้านก่อน บ้านในที่นี้คือ Root หรือโน้ตหลักของคอร์ดและสเกล ถ้ารู้ว่า Root อยู่ตรงไหน เวลาเล่นคอร์ด เปลี่ยนคีย์ หรือเริ่มสเกล มือจะไม่ต้องเดาไปเรื่อย ๆ วันนี้ให้ซ้อมช้า ๆ เหมือนกำลังปักหมุดบนแผนที่ ไม่ต้องรีบจำเยอะ ขอให้รู้จริงทีละตำแหน่ง",
+      "teacherNote": "ถ้าหา Root ได้ช้าแต่มั่นใจ นั่นคือมาถูกทางแล้ว ความนิ่งสำคัญกว่าความเร็วในสัปดาห์นี้"
+    },
+    {
+      "id": "w5-block-2-string-6-visual",
+      "type": "fretboard",
+      "title": "ดูสาย 6 เป็นถนนเส้นแรก",
+      "visualRef": "w5-root-landmarks-s6",
+      "instruction": "มอง G, A, B บนสาย 6 ให้เหมือนหมุดบนแผนที่ ก่อนดีดให้พูดชื่อโน้ตออกมาเบา ๆ"
+    },
+    {
+      "id": "w5-block-3-octave-explain",
+      "type": "text",
+      "title": "Octave Shape คือบ้านเดียวกันคนละชั้น",
+      "body": "พอเจอ Root หนึ่งตำแหน่งแล้ว เราจะเริ่มหาเสียงบ้านเดียวกันในตำแหน่งอื่นด้วย Octave Shape วิธีคิดง่าย ๆ คือเสียงชื่อเดิม แต่ย้ายไปอีกชั้นเสียงหนึ่ง บนกีตาร์รูปทรงที่ใช้บ่อยคือขยับข้าม 2 สาย และขยับขึ้น 2 fret เช่น C บนสาย 5 fret 3 จะเจอ C อีกตัวบนสาย 3 fret 5",
+      "teacherNote": "ยังไม่ต้องจำทุก Octave ทั่วคอ ให้จำความรู้สึกของ shape นี้ก่อน แล้วเล่นให้ตรง Metronome"
+    },
+    {
+      "id": "w5-block-4-octave-visual",
+      "type": "fretboard",
+      "title": "ดูระยะกระโดดของ Octave",
+      "visualRef": "w5-octave-jumps",
+      "instruction": "เล่น C ต่ำ แล้วกระโดดไป C สูง ฟังว่าเป็นชื่อเดียวกันแต่คนละชั้นเสียง"
+    },
+    {
+      "id": "w5-block-5-root-pulse-tab",
+      "type": "tab",
+      "title": "Root Pulse Drill",
+      "tabRef": "w5-tab-root-pulse",
+      "instruction": "เล่น C หนึ่งครั้งต่อหนึ่ง beat ให้เสียงลงพร้อม Metronome ทุกครั้ง อย่ารีบ อย่ากดแรงเกิน"
+    }
+  ],
+  "fretboardVisuals": [
+    {
+      "id": "w5-root-landmarks-s6",
+      "type": "fretboard",
+      "title": "Landmarks บนสาย 6",
+      "caption": "สังเกตจุดบน fret 3, 5, 7 ของสาย 6 เพื่อใช้เป็นหลักหมุดในการหา Root ที่ใช้บ่อย",
+      "config": {
+        "startFret": 1,
+        "endFret": 8,
+        "showNut": true
+      },
+      "legend": [
+        { "type": "root", "color": "orange", "label": "Root (โน้ตบ้าน)" },
+        { "type": "landmark", "color": "gray", "label": "Landmark (หมุดอ้างอิง)" }
+      ],
+      "dots": [
+        { "string": 6, "fret": 3, "label": "G", "type": "root" },
+        { "string": 6, "fret": 5, "label": "A", "type": "landmark" },
+        { "string": 6, "fret": 7, "label": "B", "type": "landmark" }
+      ]
+    },
+    {
+      "id": "w5-octave-jumps",
+      "type": "fretboard",
+      "title": "Octave Jump: C ไป C",
+      "caption": "Root C บนสาย 5 fret 3 สามารถกระโดดไปหา Octave C บนสาย 3 fret 5 ได้ด้วยระยะข้าม 2 สาย ขึ้น 2 fret",
+      "config": {
+        "startFret": 1,
+        "endFret": 6,
+        "showNut": false
+      },
+      "legend": [
+        { "type": "root", "color": "orange", "label": "Root C" },
+        { "type": "octave", "color": "gold", "label": "Octave C" }
+      ],
+      "dots": [
+        { "string": 5, "fret": 3, "label": "C", "type": "root" },
+        { "string": 3, "fret": 5, "label": "C", "type": "octave" }
+      ]
+    }
+  ],
+  "miniTabs": [
+    {
+      "id": "w5-tab-root-pulse",
+      "type": "tab",
+      "title": "Root Pulse Drill: C",
+      "bpm": 60,
+      "ascii": [
+        "e|-----------------|-----------------|-----------------|-----------------|",
+        "B|-----------------|-----------------|-----------------|-----------------|",
+        "G|-----------------|-----------------|-----------------|-----------------|",
+        "D|-----------------|-----------------|-----------------|-----------------|",
+        "A|-3---3---3---3---|-3---3---3---3---|-3---3---3---3---|-3---3---3---3---|",
+        "E|-----------------|-----------------|-----------------|-----------------|"
+      ],
+      "lyrics": [
+        "หนึ่ง(C)",
+        "สอง(C)",
+        "สาม(C)",
+        "สี่(C)",
+        "หนึ่ง(C)",
+        "สอง(C)",
+        "สาม(C)",
+        "สี่(C)",
+        "หนึ่ง(C)",
+        "สอง(C)",
+        "สาม(C)",
+        "สี่(C)",
+        "หนึ่ง(C)",
+        "สอง(C)",
+        "สาม(C)",
+        "สี่(C)"
+      ],
+      "note": "พูดเลขจังหวะในใจ แล้วดีด Root C ให้จมลงไปพร้อม click ของ Metronome ทุก beat"
+    }
+  ],
+  "dailyPractice": {
+    "type": "daily-practice",
+    "id": "w5-daily-practice",
+    "week": 5,
+    "title": "Week 5 Daily Practice: รู้บ้าน",
+    "defaultBpm": 60,
+    "days": [
+      {
+        "day": 1,
+        "title": "สาย 6 เป็นแผนที่แรก",
+        "totalMinutes": 20,
+        "goal": "เริ่มจำ G, A, B บนสาย 6 ด้วย Landmark ไม่ใช่การเดา",
+        "tasks": [
+          {
+            "label": "ฟัง Metronome",
+            "minutes": 3,
+            "instruction": "เปิด 60 BPM แล้วเคาะเท้าตาม 4 ห้อง ยังไม่ต้องจับกีตาร์"
+          },
+          {
+            "label": "ดู Landmark",
+            "minutes": 4,
+            "instruction": "มองสาย 6 fret 3, 5, 7 แล้วพูด G, A, B ช้า ๆ"
+          },
+          {
+            "label": "ดีดทีละ Root",
+            "minutes": 8,
+            "instruction": "ดีด G, A, B หนึ่งโน้ตต่อหนึ่ง click พูดชื่อโน้ตก่อนดีดทุกครั้ง"
+          },
+          {
+            "label": "จดหลังซ้อม",
+            "minutes": 5,
+            "instruction": "จดว่าโน้ตไหนยังหาไม่ทัน และอย่าเพิ่งเพิ่มโน้ตใหม่"
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "title": "เพิ่ม C, D, E แบบใจเย็น",
+        "totalMinutes": 22,
+        "goal": "เริ่มหา Root ใช้บ่อยบนสาย 5 โดยยังรักษา Pulse ให้ตรง",
+        "tasks": [
+          {
+            "label": "ทบทวนสาย 6",
+            "minutes": 5,
+            "instruction": "เล่น G, A, B บนสาย 6 ที่ 60 BPM หนึ่งโน้ตต่อหนึ่ง click"
+          },
+          {
+            "label": "สำรวจสาย 5",
+            "minutes": 6,
+            "instruction": "หา C fret 3, D fret 5, E fret 7 บนสาย 5 แล้วพูดชื่อก่อนเล่น"
+          },
+          {
+            "label": "Root Call",
+            "minutes": 7,
+            "instruction": "สุ่มพูด C, D, E แล้วหาให้เจอช้า ๆ ห้ามเดาแบบรีบกด"
+          },
+          {
+            "label": "หายใจและเช็กเสียง",
+            "minutes": 4,
+            "instruction": "เลือก C หนึ่งตัว เล่น 8 click ติดกันให้เสียงเท่ากัน"
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "title": "Root Hunt 60 วินาที",
+        "totalMinutes": 20,
+        "goal": "หา C, G, D, A, E บนสาย 6 และสาย 5 ได้โดยไม่ลน",
+        "tasks": [
+          {
+            "label": "ฟัง click ก่อนเล่น",
+            "minutes": 3,
+            "instruction": "ฟัง Metronome 4 ห้อง แล้วเคาะเท้าให้ตรง"
+          },
+          {
+            "label": "Root Hunt ช้า",
+            "minutes": 8,
+            "instruction": "หา C, G, D, A, E ทีละตัว พูดชื่อก่อนดีด"
+          },
+          {
+            "label": "จับเวลา",
+            "minutes": 4,
+            "instruction": "จับเวลา 60 วินาที ดูว่าหา Root ถูกได้กี่ตำแหน่งโดยไม่เดา"
+          },
+          {
+            "label": "แก้จุดติด",
+            "minutes": 5,
+            "instruction": "เลือก Root ที่ช้าที่สุด แล้วเล่นซ้ำ 8 ครั้งที่ 60 BPM"
+          }
+        ]
+      },
+      {
+        "day": 4,
+        "title": "Octave คือบ้านเดียวกันอีกชั้น",
+        "totalMinutes": 22,
+        "goal": "รู้สึกและเห็นระยะ Root ไป Octave จาก C บนสาย 5",
+        "tasks": [
+          {
+            "label": "หา C ต่ำ",
+            "minutes": 4,
+            "instruction": "หา C บนสาย 5 fret 3 แล้วเล่นให้ตรง click"
+          },
+          {
+            "label": "หา C สูง",
+            "minutes": 6,
+            "instruction": "ข้ามไป C บนสาย 3 fret 5 แล้วพูดว่า Octave C"
+          },
+          {
+            "label": "Root ไป Octave",
+            "minutes": 8,
+            "instruction": "เล่น C ต่ำ -> C สูง -> C ต่ำ หนึ่งโน้ตต่อหนึ่ง click"
+          },
+          {
+            "label": "ฟังความเหมือน",
+            "minutes": 4,
+            "instruction": "หลับตาฟังว่า C ทั้งสองตำแหน่งเป็นชื่อเดียวกันแต่คนละชั้นเสียง"
+          }
+        ]
+      },
+      {
+        "day": 5,
+        "title": "Root Pulse Drill",
+        "totalMinutes": 20,
+        "goal": "เล่น Root C ให้จมกับ click เหมือนเป็นส่วนหนึ่งของ Metronome",
+        "tasks": [
+          {
+            "label": "นับ 1-2-3-4",
+            "minutes": 3,
+            "instruction": "นับดัง ๆ กับ Metronome โดยยังไม่เล่น"
+          },
+          {
+            "label": "เล่น TAB",
+            "minutes": 8,
+            "instruction": "เล่น w5-tab-root-pulse ที่ 60 BPM หนึ่ง Root ต่อหนึ่ง beat"
+          },
+          {
+            "label": "ลดแรงกด",
+            "minutes": 4,
+            "instruction": "เล่น C ซ้ำโดยเช็กว่านิ้วซ้ายไม่บีบแรงเกิน"
+          },
+          {
+            "label": "เล่น 4 รอบติด",
+            "minutes": 5,
+            "instruction": "เล่น 4 bar ให้ครบ 4 รอบ ถ้าหลุดให้เริ่มใหม่ช้า ๆ"
+          }
+        ]
+      },
+      {
+        "day": 6,
+        "title": "เชื่อม Root กับคอร์ด",
+        "totalMinutes": 22,
+        "goal": "เข้าใจว่า Root กับคอร์ดเป็นบ้านเดียวกัน ไม่ใช่เรื่องแยกกัน",
+        "tasks": [
+          {
+            "label": "หา Root C",
+            "minutes": 4,
+            "instruction": "หา C บนสาย 5 fret 3 แล้วเล่น 4 click"
+          },
+          {
+            "label": "ตีคอร์ด C",
+            "minutes": 5,
+            "instruction": "ตีคอร์ด C หนึ่งครั้งต่อห้อง ฟังว่าคอร์ดกลับมาที่บ้านเดียวกับ Root"
+          },
+          {
+            "label": "Root แล้วคอร์ด",
+            "minutes": 8,
+            "instruction": "เล่น Root C 1 ห้อง แล้วตีคอร์ด C 1 ห้อง วนช้า ๆ"
+          },
+          {
+            "label": "จดความรู้สึก",
+            "minutes": 5,
+            "instruction": "จดว่า Root เดี่ยวกับคอร์ด C ให้ความรู้สึกเหมือนกันตรงไหน"
+          }
+        ]
+      },
+      {
+        "day": 7,
+        "title": "เช็กความนิ่งก่อนเข้า Week 6",
+        "totalMinutes": 25,
+        "goal": "ยืนยันว่าหา Root สำคัญได้ เล่นตรง click และเข้าใจ Octave Shape เบื้องต้น",
+        "tasks": [
+          {
+            "label": "ทบทวน Root",
+            "minutes": 7,
+            "instruction": "หา C, G, D, A, E บนสาย 6 และสาย 5 อย่างช้าและมั่นใจ"
+          },
+          {
+            "label": "ทบทวน Octave",
+            "minutes": 6,
+            "instruction": "เล่น C ต่ำไป C สูงด้วย Octave Shape 8 รอบ"
+          },
+          {
+            "label": "Root Pulse",
+            "minutes": 6,
+            "instruction": "เล่น w5-tab-root-pulse ให้ครบ 4 bar โดยไม่หลุด Metronome"
+          },
+          {
+            "label": "Self-check",
+            "minutes": 6,
+            "instruction": "ทำรายการ selfCheck และอ่าน troubleshooting เฉพาะข้อที่ยังติด"
+          }
+        ]
+      }
+    ]
+  },
+  "selfCheck": {
+    "type": "self-check",
+    "id": "w5-self-check",
+    "week": 5,
+    "title": "เช็กว่าเริ่มรู้บ้านหรือยัง",
+    "questions": [
+      {
+        "id": "w5-q1",
+        "type": "multiple-choice",
+        "prompt": "Root ในสัปดาห์นี้หมายถึงอะไร",
+        "choices": [
+          { "id": "a", "text": "เสียงบ้านของคอร์ดหรือสเกล" },
+          { "id": "b", "text": "โน้ตที่ต้องเล่นเร็วที่สุด" },
+          { "id": "c", "text": "ตำแหน่งที่ใช้เฉพาะตอน solo เท่านั้น" }
+        ],
+        "answer": "a",
+        "feedback": {
+          "correct": "ใช่เลย Root คือเสียงบ้าน ถ้ารู้บ้าน มือจะเริ่มมีทิศทาง",
+          "incorrect": "ลองคิดว่า Root คือจุดที่เพลงอยากพัก ไม่ใช่โน้ตที่ต้องเล่นเร็ว"
+        }
+      },
+      {
+        "id": "w5-q2",
+        "type": "practical-check",
+        "prompt": "จับเวลา 60 วินาที หา C, G, D, A, E บนสาย 6 และสาย 5 ได้กี่ตำแหน่ง",
+        "passCondition": "หาได้อย่างน้อย 8 ตำแหน่ง โดยพูดชื่อโน้ตก่อนเล่นทุกครั้ง"
+      },
+      {
+        "id": "w5-q3",
+        "type": "practical-check",
+        "prompt": "เล่น Root C 4 bar ที่ 60 BPM โดยหนึ่งโน้ตต่อหนึ่ง beat ได้ไหม",
+        "passCondition": "เล่นครบ 4 bar โดยเสียง C ลงพร้อม click และ tempo ไม่แกว่ง"
+      },
+      {
+        "id": "w5-q4",
+        "type": "reflection",
+        "prompt": "เมื่อเล่น C ต่ำไป C สูงด้วย Octave Shape คุณฟังออกไหมว่าเป็นชื่อเดียวกันคนละชั้นเสียง",
+        "passCondition": "อธิบายด้วยคำของตัวเองได้ว่า Octave คือเสียงชื่อเดิมที่สูงหรือต่ำกว่า"
+      }
+    ],
+    "passCriteria": [
+      "หา C, G, D, A, E บนสาย 6 และสาย 5 ได้โดยไม่เดาสุ่ม",
+      "เล่น Root C ที่ 60 BPM ได้ 4 bar โดยไม่หลุด Metronome",
+      "อธิบายได้ว่า Root คือบ้านของคอร์ดหรือสเกล",
+      "เล่น C ต่ำไป C สูงด้วย Octave Shape ได้ช้า ๆ และฟังออกว่าเป็นชื่อเดียวกัน"
+    ],
+    "troubleshooting": [
+      {
+        "problem": "หา Root ถูกบ้างผิดบ้าง",
+        "advice": "ลดจำนวนโน้ตลง เหลือแค่ C, G, A ก่อน แล้วพูดชื่อโน้ตก่อนดีดทุกครั้ง อย่าให้มือไปเร็วกว่าปาก"
+      },
+      {
+        "problem": "เล่นตรงตำแหน่งแต่หลุด Metronome",
+        "advice": "หยุดเล่น 4 click แล้วเคาะเท้าตามก่อน จากนั้นกลับมาเล่นหนึ่งโน้ตต่อหนึ่ง click ด้วยเสียงเบาลง"
+      },
+      {
+        "problem": "กดสายแล้วเสียงบอด",
+        "advice": "ขยับนิ้วเข้าใกล้ fret มากขึ้น ลดแรงบีบที่เกินจำเป็น และดีดให้เสียงออกชัดทีละโน้ต"
+      },
+      {
+        "problem": "จำ Octave Shape ไม่ติด",
+        "advice": "เริ่มจาก C แค่คู่เดียวก่อน: สาย 5 fret 3 ไปสาย 3 fret 5 เล่นซ้ำช้า ๆ จนมือรู้ระยะ"
+      },
+      {
+        "problem": "รู้สึกว่าเนื้อหาเยอะ",
+        "advice": "วันนี้เลือกซ้อมแค่ Root บนสาย 6 ก็พอ เป้าหมายคือปักหมุดให้มั่น ไม่ใช่จำทั้งคอในวันเดียว"
+      }
+    ],
+    "passSummary": "พร้อมไป Week 6 เมื่อหา Root สำคัญได้แบบไม่ลน เล่น Root ตรง Metronome และเข้าใจว่า Octave คือบ้านเดียวกันอีกชั้นเสียง"
+  }
+}

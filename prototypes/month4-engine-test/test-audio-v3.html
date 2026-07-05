@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Safe Audio Engine Test v4 (Loud & Clear)</title>
+    <style>
+        :root {
+            --paper: #0e0c0a; --surface: #181511; --surface-soft: #221d18;
+            --ink: #f4f0ea; --muted: #b8aaa0; --line: rgba(244, 240, 234, 0.14);
+            --accent: #d8a866;
+        }
+        body {
+            margin: 0; padding: 40px 20px;
+            background: var(--paper); color: var(--ink);
+            font-family: sans-serif; line-height: 1.6;
+            text-align: center;
+        }
+        .engine-card {
+            background: var(--surface); border: 1px solid var(--line);
+            border-radius: 12px; padding: 30px; max-width: 500px; margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; justify-content: center; flex-wrap: wrap;}
+        button {
+            padding: 14px 20px; border-radius: 6px; border: 1px solid var(--line); font-size: 15px;
+            background: var(--surface-soft); color: var(--ink);
+            cursor: pointer; transition: 0.1s; flex: 1;
+        }
+        button.primary {
+            background: var(--accent); color: #000; font-weight: bold; border-color: var(--accent);
+        }
+        button:active { transform: scale(0.96); }
+        #status { 
+            margin-top: 24px; font-size: 14px; color: #70b7a8; 
+            font-family: monospace; padding: 12px; background: #000; 
+            border-radius: 6px; border: 1px solid var(--line);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="engine-card">
+        <h2>🎸 Acoustic Synth Engine Test v4</h2>
+        <p style="color: var(--muted); font-size: 14px;">
+            บังคับสร้างเสียงตอนคลิก 100% เพื่อแก้ปัญหาเบราว์เซอร์ใบ้<br>
+            หากยังไม่ได้ยิน ให้ลองเร่งเสียงลำโพงขึ้นอีกนิดครับ
+        </p>
+        
+        <div class="btn-group">
+            <button id="btnTestBeep">🎵 Test A3</button>
+            <button id="btnTestHigh">🎵 Test A4 (แหลม)</button>
+            <button id="btnPhrase" class="primary">🎶 Play Phrase</button>
+            <button id="btnStop">⏹ Stop</button>
+        </div>
+        
+        <div id="status">สถานะ: รอการคลิกจากผู้ใช้...</div>
+    </div>
+
+    <script>
+        // ประกาศตัวแปรไว้ข้างนอก แต่จะถูกกำหนดค่าเมื่อกดคลิกเท่านั้น
+        let audioCtx = null;
+        let masterGain = null;
+        let activeNodes = []; 
+
+        // ฟังก์ชันนี้จะถูกเรียก *ตอนกดปุ่มเสมอ*
+        async function ensureAudioContext() {
+            if (!audioCtx) {
+                // สร้าง Context ใหม่
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+                
+                // สร้าง Master Gain (เร่งเสียงให้ดังขึ้นเป็น 1.2 เพื่อทดสอบ)
+                masterGain = audioCtx.createGain();
+                masterGain.gain.value = 1.2; 
+                masterGain.connect(audioCtx.destination);
+            }
+            // ถ้ามันโดนหยุด (suspended) ให้ปลุกมันขึ้นมา
+            if (audioCtx.state === 'suspended') {
+                await audioCtx.resume();
+            }
+        }
+
+        function stopAllSounds() {
+            activeNodes.forEach(node => {
+                try { 
+                    node.osc1.stop(); 
+                    node.osc2.stop(); 
+                } catch(e) {}
+            });
+            activeNodes = []; 
+        }
+
+        function getFreq(noteString) {
+            const notes = { "C":0, "C#":1, "Db":1, "D":2, "D#":3, "Eb":3, "E":4, "F":5, "F#":6, "Gb":6, "G":7, "G#":8, "Ab":8, "A":9, "A#":10, "Bb":10, "B":11 };
+            const match = noteString.match(/([A-G][b#]?)(\d+)/);
+            if (!match) return 440;
+            const noteIndex = notes[match[1]];
+            const octave = parseInt(match[2], 10);
+            const midi = 12 * (octave + 1) + noteIndex;
+            return 440 * Math.pow(2, (midi - 69) / 12);
+        }
+
+        async function playNote(noteString, timeOffset = 0, duration = 1.2) {
+            // ต้องชัวร์ว่า AudioContext ทำงานแล้ว
+            await ensureAudioContext();
+            
+            const freq = getFreq(noteString);
+            const startTime = audioCtx.currentTime + timeOffset;
+
+            // สร้างส่วนประกอบของเสียง
+            const oscTriangle = audioCtx.createOscillator();
+            const oscSine = audioCtx.createOscillator();
+            const filter = audioCtx.createBiquadFilter();
+            const perNoteGain = audioCtx.createGain();
+
+            // ตั้งค่าคลื่น
+            oscTriangle.type = "triangle";
+            oscSine.type = "sine";
+            oscTriangle.frequency.value = freq;
+            oscSine.frequency.value = freq;
+
+            // ตั้งค่าความดัง (Envelope)
+            perNoteGain.gain.setValueAtTime(0, startTime);
+            perNoteGain.gain.linearRampToValueAtTime(0.5, startTime + 0.015); // ดังขึ้นทันที
+            perNoteGain.gain.exponentialRampToValueAtTime(0.001, startTime + duration); // ค่อยๆ เบาลง
+
+            // ตั้งค่า Filter ให้เสียงไม่แหลมเกิน
+            filter.type = "lowpass";
+            filter.frequency.setValueAtTime(3500, startTime); 
+            filter.frequency.exponentialRampToValueAtTime(700, startTime + duration); 
+
+            // เชื่อมต่อ: คลื่น -> ฟิลเตอร์ -> ความดังโน้ต -> ความดังรวม
+            oscTriangle.connect(filter);
+            oscSine.connect(filter);
+            filter.connect(perNoteGain);
+            perNoteGain.connect(masterGain);
+
+            // สั่งเล่น
+            oscTriangle.start(startTime);
+            oscSine.start(startTime);
+            
+            // สั่งหยุดเมื่อหมดเวลา
+            oscTriangle.stop(startTime + duration);
+            oscSine.stop(startTime + duration);
+
+            // เก็บไว้เคลียร์
+            activeNodes.push({ osc1: oscTriangle, osc2: oscSine });
+        }
+
+        // --- ตั้งค่าปุ่มกด ---
+        document.getElementById("btnTestBeep").addEventListener("click", async () => {
+            stopAllSounds();
+            document.getElementById("status").textContent = "▶ กำลังเล่น: A3 (เสียงทดสอบ)";
+            await playNote("A3", 0, 1.5);
+        });
+
+        document.getElementById("btnTestHigh").addEventListener("click", async () => {
+            stopAllSounds();
+            document.getElementById("status").textContent = "▶ กำลังเล่น: A4 (ทดสอบเสียงแหลม)";
+            await playNote("A4", 0, 1.5);
+        });
+
+        document.getElementById("btnPhrase").addEventListener("click", async () => {
+            stopAllSounds(); 
+            document.getElementById("status").textContent = "▶ กำลังเล่น: Phrase 7 โน้ต...";
+            
+            const phrase = ["A2", "C3", "D3", "Eb3", "E3", "G3", "A3"];
+            
+            phrase.forEach((note, index) => {
+                playNote(note, index * 0.35, 0.75); 
+                
+                setTimeout(() => {
+                    document.getElementById("status").textContent = `▶ กำลังเล่น: ${note}`;
+                }, index * 350);
+            });
+            
+            setTimeout(() => {
+                document.getElementById("status").textContent = "สถานะ: จบ Phrase พร้อมทำงานต่อ";
+            }, phrase.length * 350);
+        });
+
+        document.getElementById("btnStop").addEventListener("click", () => {
+            stopAllSounds();
+            document.getElementById("status").textContent = "⏹ เสียงถูกตัดการทำงานแล้ว";
+        });
+    </script>
+</body>
+</html>

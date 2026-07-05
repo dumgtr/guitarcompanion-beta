@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "scripts": {
+    "serve": "node tools/static-server.mjs 5173"
+  }
+}

@@ -1,0 +1,432 @@
+{
+  "miniCourses": [
+    {
+      "miniCourse": {
+        "id": "rhythm-notation-starter",
+        "title": "Rhythm Notation Starter",
+        "thaiTitle": "อ่านค่าจังหวะ: ตัวดำ ตัวหยุด และจังหวะตก-ยก",
+        "status": "draft",
+        "visibility": "hidden",
+        "placement": "practice-room-mini-course-shelf",
+        "optional": true,
+        "estimatedMinutesPerDay": 10,
+        "language": "th",
+        "implementationNote": "Spec and mock data only. No production UI exists yet.",
+        "totalDays": 7
+      },
+      "modules": [
+        {
+          "id": "rns-day-1-beat-bar-44",
+          "day": 1,
+          "title": "Beat, Bar, and 4/4",
+          "thaiTitle": "Beat, ห้องเพลง และ 4/4",
+          "visualCountMap": {
+            "count": "1   2   3   4",
+            "feel": "หนัก เบา เบา เบา",
+            "barLine": "| 1 2 3 4 |"
+          },
+          "clapTask": {
+            "title": "นับก่อนตบ",
+            "steps": [
+              "เปิด Metronome 60 BPM",
+              "นับ 1 2 3 4 ออกเสียง 1 นาที",
+              "ตบมือเฉพาะเลข 1",
+              "ตบมือทุกเลข"
+            ]
+          },
+          "guitarTask": {
+            "title": "ยังไม่ต้องจับคอร์ด",
+            "steps": [
+              "วางมือบนสายแบบ mute เบา ๆ",
+              "ดีดลงเฉพาะเลข 1",
+              "ถ้านับไม่หลุด ให้ดีดลงทุกเลข 1 2 3 4"
+            ]
+          },
+          "selfCheck": [
+            "นับ 1 2 3 4 ได้โดยไม่เร่ง",
+            "รู้สึกได้ว่า Beat 1 คือจุดเริ่มห้องใหม่"
+          ],
+          "relatedReferences": [
+            {
+              "label": "ค่าจังหวะโน้ต",
+              "target": "#noteValueGuidebook"
+            }
+          ],
+          "relatedWeeks": [
+            0,
+            1
+          ],
+          "summary": "Beat คือ pulse ที่เรานับตาม ส่วน 4/4 ในบทนี้ให้จำง่าย ๆ ว่าหนึ่งห้องมี 4 beat แล้วเริ่มรอบใหม่"
+        },
+        {
+          "id": "rns-day-2-quarter-note",
+          "day": 2,
+          "title": "Quarter Note and Steady Counting",
+          "thaiTitle": "ตัวดำและการนับให้เสมอ",
+          "visualCountMap": {
+            "symbols": "♩   ♩   ♩   ♩",
+            "count": "1   2   3   4",
+            "play": "ดีด ดีด ดีด ดีด"
+          },
+          "clapTask": {
+            "title": "ตบทุก beat",
+            "steps": [
+              "เปิด Metronome 60 BPM",
+              "นับ 1 2 3 4",
+              "ตบมือทุกเลข",
+              "ถ้าเร่ง ให้ลดเหลือ 50 BPM"
+            ]
+          },
+          "guitarTask": {
+            "title": "Muted downstroke",
+            "steps": [
+              "mute ทุกสายด้วยมือซ้าย",
+              "ดีดลงบนเลข 1 2 3 4",
+              "ฟังให้เสียงแต่ละครั้งดังเท่ากัน"
+            ]
+          },
+          "selfCheck": [
+            "เสียงตบหรือดีดตรงกับ click",
+            "มือไม่รีบก่อนปากนับ"
+          ],
+          "relatedReferences": [
+            {
+              "label": "Note Value: Quarter Note",
+              "target": "#noteValueGuidebook"
+            }
+          ],
+          "relatedWeeks": [
+            0,
+            1
+          ],
+          "summary": "ตัวดำในบทนี้คือเล่น 1 ครั้งต่อ 1 beat ให้เสียงออกตรงกับ click ไม่ก่อนหรือหลัง"
+        },
+        {
+          "id": "rns-day-3-quarter-rest",
+          "day": 3,
+          "title": "Quarter Rest and Silent Counting",
+          "thaiTitle": "ตัวหยุดและการนับในความเงียบ",
+          "visualCountMap": {
+            "symbols": "♩   rest   ♩   rest",
+            "count": "1   2      3   4",
+            "play": "ดีด เงียบ  ดีด เงียบ"
+          },
+          "clapTask": {
+            "title": "Play / stop / play / stop",
+            "steps": [
+              "นับ 1 2 3 4 ออกเสียง",
+              "ตบเฉพาะ 1 และ 3",
+              "พูดคำว่า stop บน 2 และ 4",
+              "อย่าหยุดนับตอนที่มือหยุด"
+            ]
+          },
+          "guitarTask": {
+            "title": "Mute the rest",
+            "steps": [
+              "mute strings",
+              "strum on 1 and 3",
+              "หยุดเสียงบน 2 และ 4",
+              "ฟังว่าช่อง rest เงียบจริง"
+            ]
+          },
+          "selfCheck": [
+            "เงียบตรง rest ได้จริง",
+            "ปากยังนับต่อแม้มือหยุด"
+          ],
+          "relatedReferences": [
+            {
+              "label": "Rest / Stop",
+              "target": "#noteValueGuidebook"
+            }
+          ],
+          "relatedWeeks": [
+            0,
+            1
+          ],
+          "summary": "Rest ไม่ใช่ช่องว่างที่เราลืมนับ แต่เป็นจุดที่เพลงตั้งใจให้เงียบในเวลาที่ถูกต้อง"
+        },
+        {
+          "id": "rns-day-4-eighth-notes",
+          "day": 4,
+          "title": "Eighth Notes and 1 & 2 &",
+          "thaiTitle": "เขบ็ต 1 ชั้นและการนับ 1 & 2 &",
+          "visualCountMap": {
+            "symbols": "♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪",
+            "count": "1 & 2 & 3 & 4 &",
+            "foot": "เท้าเฉพาะ 1 2 3 4"
+          },
+          "clapTask": {
+            "title": "ตบเลขและ &",
+            "steps": [
+              "นับ 1 & 2 & 3 & 4 &",
+              "ตบมือทั้งตัวเลขและ &",
+              "ให้เท้าเคาะเฉพาะเลข",
+              "ถ้าเท้าหลุด ให้กลับไป Day 2"
+            ]
+          },
+          "guitarTask": {
+            "title": "Muted eighth-note motion",
+            "steps": [
+              "mute strings",
+              "ดีดลงบนเลข",
+              "ดีดขึ้นบน &",
+              "อย่าเพิ่มความเร็ว ให้ฟังความเท่ากันก่อน"
+            ]
+          },
+          "selfCheck": [
+            "นับ & ได้เท่ากับช่องเลข",
+            "เท้าไม่หลุดไปตามมือ"
+          ],
+          "relatedReferences": [
+            {
+              "label": "Eighth Notes",
+              "target": "#noteValueGuidebook"
+            }
+          ],
+          "relatedWeeks": [
+            1,
+            2
+          ],
+          "summary": "เครื่องหมาย & อยู่ระหว่างเลขหลักพอดี ไม่ใช่จังหวะแทรกมั่ว ๆ และยังต้องอยู่ใน time เหมือนเลข"
+        },
+        {
+          "id": "rns-day-5-downbeat-upbeat",
+          "day": 5,
+          "title": "Downbeat / Upbeat and Stroke Direction",
+          "thaiTitle": "จังหวะตก-ยก และทิศทางมือขวา",
+          "visualCountMap": {
+            "count": "1   &   2   &   3   &   4   &",
+            "feel": "ตก  ยก  ตก  ยก  ตก  ยก  ตก  ยก",
+            "strum": "ลง  ขึ้น ลง  ขึ้น ลง  ขึ้น ลง  ขึ้น"
+          },
+          "clapTask": {
+            "title": "พูด feel ก่อนดีด",
+            "steps": [
+              "นับ 1 & 2 & 3 & 4 &",
+              "พูด ตก / ยก ตามแถว feel",
+              "ตบมือเฉพาะจุดตก",
+              "ตบมือทั้งตกและยก"
+            ]
+          },
+          "guitarTask": {
+            "title": "Down-up motion",
+            "steps": [
+              "mute strings",
+              "downstroke บนตัวเลข",
+              "upstroke บน &",
+              "รักษามือให้แกว่งต่อเนื่อง"
+            ]
+          },
+          "selfCheck": [
+            "แยกได้ว่า downbeat เป็นเวลา ไม่ใช่ทิศทางมือ",
+            "มือขวาไม่หยุดค้างระหว่างเลขกับ &"
+          ],
+          "relatedReferences": [
+            {
+              "label": "Downbeat / Upbeat",
+              "target": "#noteValueGuidebook"
+            }
+          ],
+          "relatedWeeks": [
+            1,
+            2
+          ],
+          "summary": "Downbeat และ upbeat คือจุดเวลา ส่วน downstroke และ upstroke คือทิศทางมือขวา แบบฝึกเริ่มต้นจับคู่กันเพื่อให้จำง่าย"
+        },
+        {
+          "id": "rns-day-6-rhythm-above-tab",
+          "day": 6,
+          "title": "Reading Rhythm Above Simple TAB",
+          "thaiTitle": "อ่าน rhythm เหนือ TAB ง่าย ๆ",
+          "visualCountMap": {
+            "count": "Count:  1   &   2   &   3   &   4   &",
+            "rhythm": "Rhythm: ♩       ♪   ♪       ♩",
+            "tab": "TAB:    E|--0-------0---0-------0---|"
+          },
+          "clapTask": {
+            "title": "Clap rhythm before TAB",
+            "steps": [
+              "อ่าน count line ออกเสียง",
+              "ตบตาม rhythm line",
+              "ยังไม่ต้องเล่น TAB",
+              "วน 4 รอบแบบช้า ๆ"
+            ]
+          },
+          "guitarTask": {
+            "title": "Open E string rhythm",
+            "steps": [
+              "อ่านเลข 0 เป็นสายเปิด",
+              "ดีดสาย 6 หรือสาย 1 แบบเปิดสาย",
+              "เล่นตาม rhythm line",
+              "หยุดถ้านับหลุด แล้วเริ่มใหม่"
+            ]
+          },
+          "selfCheck": [
+            "อ่านเลข 0 เป็นสายเปิดได้",
+            "อ่าน rhythm ก่อนดีดจริงได้"
+          ],
+          "relatedReferences": [
+            {
+              "label": "คู่มือ TAB",
+              "target": "#tabGuidebook"
+            },
+            {
+              "label": "ค่าจังหวะโน้ต",
+              "target": "#noteValueGuidebook"
+            }
+          ],
+          "relatedWeeks": [
+            0,
+            1
+          ],
+          "summary": "เลขใน TAB บอกว่าเล่นอะไร แต่ rhythm บอกว่าเล่นเมื่อไรและยาวแค่ไหน ถ้าอ่านแต่เลข เพลงจะไม่เหมือนต้นฉบับ"
+        },
+        {
+          "id": "rns-day-7-mini-challenge",
+          "day": 7,
+          "title": "Mini Rhythm Reading Challenge with Metronome",
+          "thaiTitle": "โจทย์อ่าน rhythm สั้น ๆ กับ Metronome",
+          "visualCountMap": {
+            "count": "1   &   2   &   3   &   4   &",
+            "rhythm": "♩       rest    ♪   ♪       ♩",
+            "tab": "E|--0-----------0---0-------0---|"
+          },
+          "clapTask": {
+            "title": "5-round challenge",
+            "steps": [
+              "รอบ 1 อ่าน count line",
+              "รอบ 2 ตบ rhythm",
+              "รอบ 3 พูด stop ตรง rest",
+              "รอบ 4 mute strings แล้ว strum",
+              "รอบ 5 เล่น open string ช้า ๆ ที่ 60 BPM"
+            ]
+          },
+          "guitarTask": {
+            "title": "Slow open-string performance",
+            "steps": [
+              "ตั้ง Metronome 60 BPM",
+              "เล่น open string ตาม TAB",
+              "รักษา rest ให้เงียบ",
+              "ถ้าหลุด count ให้หยุดและเริ่มใหม่"
+            ]
+          },
+          "selfCheck": [
+            "นับไม่หลุด",
+            "rest เงียบจริง",
+            "เล่นช้ากับ Metronome ได้โดยไม่รีบ"
+          ],
+          "relatedReferences": [
+            {
+              "label": "Rhythm Under TAB",
+              "target": "#noteValueGuidebook"
+            }
+          ],
+          "relatedWeeks": [
+            0,
+            1,
+            2
+          ],
+          "summary": "วันสุดท้ายรวมการนับ ตบมือ rest และ TAB ง่าย ๆ เข้าด้วยกัน เป้าหมายคือช้าแต่ไม่หลุด"
+        }
+      ],
+      "uiHints": {
+        "surface": "practice-room",
+        "tone": "warm-private-teacher",
+        "density": "compact",
+        "preferredLayout": "stacked",
+        "showDayProgress": true,
+        "showRelatedReferences": true,
+        "mobileScrollableRows": true
+      },
+      "audioAssets": [
+        {
+          "id": "rns-metronome-60",
+          "type": "internal-metronome",
+          "bpm": 60,
+          "beatsPerBar": 4
+        }
+      ],
+      "relatedReferences": [
+        {
+          "id": "tab-guidebook",
+          "label": "คู่มือ TAB",
+          "target": "#tabGuidebook",
+          "source": "Reference Shelf"
+        },
+        {
+          "id": "note-value-cheatsheet",
+          "label": "ค่าจังหวะโน้ต",
+          "target": "#noteValueGuidebook",
+          "source": "Reference Shelf"
+        }
+      ],
+      "relatedWeeks": [
+        {
+          "week": 0,
+          "relationship": "Foundation rhythm survival and TAB survival"
+        },
+        {
+          "week": 1,
+          "relationship": "Pulse and 16th Grid support"
+        },
+        {
+          "week": 2,
+          "relationship": "Downbeat / Upbeat and Syncopation support"
+        }
+      ],
+      "progressModel": {
+        "storageKey": "gc:mini:rhythm-notation-starter:progress:v1",
+        "storagePrefix": "gc:mini:rhythm-notation-starter:",
+        "fields": [
+          "currentDay",
+          "completedDays",
+          "selfCheckByDay"
+        ],
+        "mustNotAffect": [
+          "Week 0 Prelude checklist progress",
+          "Month 1-4 completion progress",
+          "selectedFocusedMonth",
+          "Practice Notes",
+          "Reference Shelf open state"
+        ],
+        "resetBehavior": {
+          "mode": "separate-mini-course-reset",
+          "mainResetClearsMiniCourse": false,
+          "requiresTypeToConfirmWhenProgressOverPercent": 50,
+          "typeToConfirmPhrase": "RESET MINI COURSE",
+          "contextualMainResetCopy": "Mini Course progress is separate. Use the Mini Course reset inside each mini course if you want to clear it.",
+          "mustNotAffect": [
+            "Week 0 Prelude checklist progress",
+            "Month 1-4 completion progress",
+            "selectedFocusedMonth",
+            "Practice Notes",
+            "Reference Shelf open state"
+          ],
+          "migrationNotes": {
+            "legacyResetBehaviorValues": [
+              "pending-decision"
+            ],
+            "legacyStoragePrefix": "gc_mini_course_rhythm_notation_starter_",
+            "acceptedResetBehaviorShape": "object",
+            "policy": "Legacy pending-decision values are obsolete. Future renderer should use the object resetBehavior schema only.",
+            "doNotDeleteOutsideNamespace": true
+          }
+        }
+      },
+      "guardrails": [
+        "Do not create Month 0.",
+        "Do not expose Month 5-8.",
+        "Do not move Reference Shelf content into the main lesson flow.",
+        "Do not duplicate the full TAB Handbook or Note Value Cheatsheet inside this mini course.",
+        "Keep this optional and separate from roadmap progression.",
+        "No external video, network audio, fonts, libraries, or images."
+      ],
+      "rendererNotes": [
+        "No production UI exists yet.",
+        "Next step is renderer planning, not immediate UI implementation.",
+        "Count maps should be text-first and mobile-safe.",
+        "Long rhythm examples may scroll inside their own box."
+      ]
+    }
+  ]
+}

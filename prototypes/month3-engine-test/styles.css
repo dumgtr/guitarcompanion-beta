@@ -1,0 +1,490 @@
+:root {
+  color-scheme: dark;
+  --paper: #0e0c0a;
+  --surface: #181511;
+  --surface-soft: #221d18;
+  --ink: #f4f0ea;
+  --muted: #b8aaa0;
+  --line: rgba(244, 240, 234, 0.14);
+  --accent: #d8a866;
+  --warm: #e57b3a;
+  --root: #e57b3a;
+  --third: #d8a866;
+  --fifth: #70b7a8;
+  --seventh: #8fb4ff;
+  --shadow: 0 20px 70px rgba(0, 0, 0, 0.36);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at top left, rgba(216, 168, 102, 0.14), transparent 34rem),
+    var(--paper);
+  color: var(--ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.6;
+}
+
+button {
+  font: inherit;
+}
+
+.sandbox-hero {
+  padding: 32px 18px 18px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(24, 21, 17, 0.96), rgba(24, 21, 17, 0.72));
+}
+
+.sandbox-hero h1,
+.section-heading h2,
+.block-technique-drill h3,
+.block-mechanics-check h3 {
+  margin: 0;
+  line-height: 1.15;
+}
+
+.sandbox-hero h1 {
+  max-width: 840px;
+  font-size: clamp(2rem, 8vw, 4.4rem);
+  letter-spacing: 0;
+}
+
+.hero-copy,
+.section-heading p {
+  max-width: 760px;
+  margin: 12px 0 0;
+  color: var(--muted);
+}
+
+.eyebrow,
+.block-label {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.hero-tags span {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: rgba(34, 29, 24, 0.86);
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.sandbox-shell {
+  display: grid;
+  gap: 18px;
+  width: min(1180px, calc(100% - 24px));
+  margin: 0 auto;
+  padding: 18px 0;
+}
+
+.dashboard-column {
+  display: contents;
+}
+
+.engine-card--wide { order: 1; }
+.engine-card--audio { order: 2; }
+.engine-card--blocks { order: 3; }
+
+.engine-card,
+.fretboard-card,
+.progression-lab,
+.block-technique-drill,
+.block-mechanics-check {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(24, 21, 17, 0.92);
+  box-shadow: var(--shadow);
+}
+
+.engine-card {
+  min-width: 0;
+  padding: 18px;
+}
+
+.section-heading {
+  margin-bottom: 18px;
+}
+
+.fretboard-card {
+  padding: 14px;
+}
+
+.fretboard-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.fretboard-caption,
+.orientation-note,
+.legend,
+.progression-status {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.fretboard-caption {
+  margin: 6px 0 0;
+}
+
+.orientation-note {
+  margin: 12px 0;
+  border-left: 3px solid var(--accent);
+  padding: 8px 10px;
+  background: rgba(216, 168, 102, 0.08);
+}
+
+.fretboard-shell {
+  display: grid;
+  grid-template-columns: 32px 40px minmax(0, 1fr);
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  align-items: stretch;
+}
+
+.string-labels,
+.open-string-lane,
+.fretboard-grid {
+  display: grid;
+  grid-template-rows: repeat(6, 34px);
+}
+
+.string-label {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.78rem;
+}
+
+.open-string-lane,
+.fretboard-grid {
+  position: relative;
+  overflow: visible;
+  border: 1px solid var(--line);
+  background: rgba(14, 12, 10, 0.58);
+}
+
+.open-string-lane {
+  border-radius: 12px 0 0 12px;
+}
+
+.fretboard-grid {
+  --fret-count: 5;
+  grid-template-columns: repeat(var(--fret-count), minmax(0, 1fr));
+  border-left: 7px solid var(--muted);
+  border-radius: 0 12px 12px 0;
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      transparent 0,
+      transparent calc((100% / var(--fret-count)) - 1px),
+      rgba(244, 240, 234, 0.16) calc((100% / var(--fret-count)) - 1px),
+      rgba(244, 240, 234, 0.16) calc(100% / var(--fret-count))
+    ),
+    linear-gradient(180deg, rgba(216, 168, 102, 0.08), rgba(14, 12, 10, 0.36));
+}
+
+.string-line {
+  grid-column: 1 / -1;
+  align-self: center;
+  height: 1px;
+  background: rgba(244, 240, 234, 0.5);
+  z-index: 1;
+}
+
+.open-string-lane .string-line {
+  grid-column: 1;
+}
+
+.string-line--1 {
+  height: 1px;
+}
+
+.string-line--2,
+.string-line--3 {
+  height: 2px;
+}
+
+.string-line--4,
+.string-line--5 {
+  height: 3px;
+}
+
+.string-line--6 {
+  height: 4px;
+}
+
+.fret-dot {
+  z-index: 3;
+  justify-self: center;
+  align-self: center;
+  display: grid;
+  place-items: center;
+  width: 29px;
+  height: 29px;
+  border: 2px solid rgba(255, 255, 255, 0.34);
+  border-radius: 999px;
+  color: #111;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.42);
+}
+
+.fret-dot small {
+  display: block;
+  margin-top: 1px;
+  font-size: 0.52rem;
+  opacity: 0.9;
+}
+
+.tone-root {
+  background: var(--root);
+}
+
+.tone-third {
+  background: var(--third);
+}
+
+.tone-fifth {
+  background: var(--fifth);
+  border-radius: 9px;
+  transform: rotate(45deg);
+}
+
+.tone-fifth span {
+  transform: rotate(-45deg);
+}
+
+.tone-seventh {
+  background: var(--seventh);
+  border-radius: 50% 50% 50% 12px;
+}
+
+.open-dot {
+  outline: 2px solid rgba(255, 255, 255, 0.65);
+  outline-offset: 2px;
+}
+
+.fret-numbers {
+  display: grid;
+  grid-template-columns: 32px 40px minmax(0, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.fret-number-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--fret-count), minmax(0, 1fr));
+  color: var(--muted);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.legend-item {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+}
+
+.legend-swatch.tone-fifth {
+  border-radius: 4px;
+}
+
+.progression-lab {
+  padding: 14px;
+}
+
+.progression-timeline {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.progression-step {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(34, 29, 24, 0.72);
+}
+
+.progression-step.is-active {
+  border-color: rgba(216, 168, 102, 0.78);
+  background: rgba(216, 168, 102, 0.12);
+}
+
+.progression-step strong {
+  color: var(--ink);
+}
+
+.progression-step span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.progression-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.control-button {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.control-button.primary {
+  border-color: rgba(216, 168, 102, 0.74);
+  background: var(--accent);
+  color: #17110b;
+  font-weight: 900;
+}
+
+.control-button:active {
+  transform: scale(0.98);
+}
+
+.block-technique-drill,
+.block-mechanics-check {
+  margin-top: 14px;
+  padding: 16px;
+}
+
+.block-technique-drill {
+  border-left: 4px solid var(--accent);
+}
+
+.block-mechanics-check {
+  border-left: 4px solid var(--warm);
+}
+
+.block-technique-drill ol,
+.check-list {
+  margin: 12px 0 0;
+  padding-left: 20px;
+}
+
+.check-list {
+  display: grid;
+  gap: 8px;
+  padding-left: 0;
+  list-style: none;
+}
+
+.check-list li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.check-list span {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: rgba(216, 168, 102, 0.1);
+}
+
+@media (min-width: 900px) {
+  .sandbox-shell {
+    grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.85fr);
+    align-items: start;
+    gap: 20px;
+  }
+
+  .dashboard-column {
+    display: grid;
+    gap: 18px;
+    align-content: start;
+  }
+
+  .engine-card--wide .fretboard-card {
+    max-width: 820px;
+    margin-inline: auto;
+    padding: 18px;
+  }
+
+  .engine-card--wide .string-labels,
+  .engine-card--wide .open-string-lane,
+  .engine-card--wide .fretboard-grid {
+    grid-template-rows: repeat(6, 38px);
+  }
+
+  .engine-card--wide .fret-dot {
+    width: 31px;
+    height: 31px;
+    font-size: 0.74rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .sandbox-hero,
+  .sandbox-shell {
+    padding-inline: 12px;
+  }
+
+  .engine-card {
+    padding: 12px;
+  }
+
+  .fretboard-shell,
+  .fret-numbers {
+    grid-template-columns: 28px 34px minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .string-labels,
+  .open-string-lane,
+  .fretboard-grid {
+    grid-template-rows: repeat(6, 30px);
+  }
+
+  .fret-dot {
+    width: 25px;
+    height: 25px;
+    font-size: 0.66rem;
+  }
+}

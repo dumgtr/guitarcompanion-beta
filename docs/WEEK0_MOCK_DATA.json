@@ -1,0 +1,558 @@
+{
+  "weekMeta": {
+    "id": "week0-foundation-reset",
+    "placement": "prelude",
+    "month": null,
+    "week": 0,
+    "title": "Foundation Reset",
+    "subtitle": "ปรับเข็มทิศก่อนเข้า Month 1",
+    "status": "hidden-draft",
+    "visibility": "hidden",
+    "estimatedMinutesPerDay": "10-15",
+    "teacherTone": "ครูส่วนตัวที่ใจเย็น อธิบายช้า ชัด และปลอดภัยกับมือผู้เรียน",
+    "implementationNote": "Week 0 เป็น Prelude / Foundation Reset ไม่ใช่ Month 0 และยังไม่ควรถูกเปิดใน production UI"
+  },
+  "lessonBlocks": [
+    {
+      "id": "w0-foundation-intro",
+      "type": "text",
+      "title": "เริ่มจากปรับเข็มทิศก่อน",
+      "body": "ก่อนเข้า Month 1 เราจะปรับพื้นฐานเล็ก ๆ ให้ตรงกันก่อนครับ บทนี้ไม่ใช่การสอบ ไม่ใช่ Month 0 และไม่ใช่คอร์สทฤษฎี เราแค่ทำให้ร่างกาย มือขวา มือซ้าย และคำศัพท์พื้นฐานพร้อมพอที่จะเริ่มฝึก Rhythm ได้อย่างมั่นใจ",
+      "teacherNote": "ไม่ต้องรีบครับ ถ้าวันนี้คุณรู้ว่าสายไหนคือสาย 1 จับปิ๊กได้สบายขึ้น และนับ 1 2 3 4 กับ Metronome ได้ นั่นถือว่าเราเริ่มถูกทางแล้ว"
+    },
+    {
+      "id": "w0-posture-holding",
+      "type": "mechanics-check",
+      "title": "ตั้งท่า จับกีตาร์ และเช็กความเกร็ง",
+      "checks": [
+        "นั่งหรือยืนโดยไหล่ไม่ยก หลังไม่งอตึง และกีตาร์ไม่ไหลออกจากตัว",
+        "คอกีตาร์ไม่ตกจนข้อมือซ้ายต้องหักแรง",
+        "มือขวาขยับผ่านสายได้โดยไม่บีบไหล่หรือเกร็งข้อมือ",
+        "ถ้ารู้สึกชา เจ็บ หรือเกร็ง ให้หยุดพักและปรับท่าก่อนเล่นต่อ"
+      ],
+      "note": "ท่าที่ดีไม่จำเป็นต้องดูเท่ แต่ต้องทำให้เล่นได้นานขึ้นโดยไม่เจ็บ"
+    },
+    {
+      "id": "w0-pick-grip-single-string-block",
+      "type": "technique-drill",
+      "drillRef": "w0-pick-grip-single-string"
+    },
+    {
+      "id": "w0-string-numbers-tuning",
+      "type": "text",
+      "title": "สาย 1-6, High e / Low E และการตั้งสายพื้นฐาน",
+      "body": "สาย 1 คือสายเล็กสุด เสียงสูงสุด เรียกว่า High e ส่วนสาย 6 คือสายใหญ่สุด เสียงต่ำสุด เรียกว่า Low E ถึงชื่อ E เหมือนกัน แต่เสียงอยู่คนละชั้นกันครับ การตั้งสายมาตรฐานจากสาย 6 ไปสาย 1 คือ E A D G B e ให้ใช้ tuner เป็นเพื่อนช่วยเช็กเสียง ไม่ใช่ข้อสอบที่ต้องผ่านให้สมบูรณ์แบบ",
+      "list": [
+        "สาย 6 = E / Low E",
+        "สาย 5 = A",
+        "สาย 4 = D",
+        "สาย 3 = G",
+        "สาย 2 = B",
+        "สาย 1 = e / High e"
+      ],
+      "orientationNote": "TAB มาตรฐานวางสาย 1 / High e ไว้บรรทัดบน และสาย 6 / Low E ไว้บรรทัดล่าง"
+    },
+    {
+      "id": "w0-strumming-muting-block",
+      "type": "technique-drill",
+      "drillRef": "w0-muted-strumming-motion"
+    },
+    {
+      "id": "w0-chord-diagram-tab-survival",
+      "type": "text",
+      "title": "Chord Diagram และ TAB แบบเอาตัวรอด",
+      "body": "Chord diagram คือแผนที่รูปคอร์ดแบบย่อ เส้นแนวตั้งคือสาย เส้นแนวนอนคือ fret จุดคือจุดที่นิ้วกด X คือไม่เล่นสายนั้น และ O คือสายเปิดที่ตั้งใจให้ดัง ส่วน TAB คือแผนที่ตำแหน่งนิ้ว เลขคือ fret และเลข 0 คือสายเปิด",
+      "teacherNote": "Open strings ที่เขียนว่า O ไม่ใช่สายแถมครับ มันเป็น chord tone ที่ตั้งใจให้ดัง เช่น open C chord มี C, E, G ทั้งจากนิ้วที่กดและสายเปิด"
+    },
+    {
+      "id": "w0-tab-survival-example",
+      "type": "tab",
+      "tabRef": "w0-tab-string-one-open-fret"
+    },
+    {
+      "id": "w0-metronome-fingerpicking",
+      "type": "text",
+      "title": "Metronome ง่าย ๆ และภาษา Fingerpicking เบื้องต้น",
+      "body": "ตั้ง Metronome ที่ 60 BPM แล้วนับ 1 2 3 4 วนไปเรื่อย ๆ ก่อนครับ Beat คือจังหวะหลักที่เราตบเท้าตาม Tempo/BPM คือความเร็ว และ 4/4 ในบทนี้ให้จำง่าย ๆ ว่าเรานับ 1 2 3 4 แล้วขึ้นห้องใหม่ ส่วน fingerpicking เบื้องต้นให้รู้ว่าโป้งมักดูแลสายเบส 6-5-4 และนิ้วชี้/กลาง/นางมักดูแลสาย 3-2-1",
+      "guardrail": "ยังไม่ต้องสอน Travis picking เต็มรูปแบบ และยังไม่ต้องสอน subdivision ซับซ้อน"
+    },
+    {
+      "id": "w0-landmark-preview",
+      "type": "text",
+      "title": "Preview: หมุดบนคอกีตาร์",
+      "body": "Fretboard dots หรือ landmarks คือหมุดบนแผนที่คอกีตาร์ ไม่ใช่ของตกแต่ง วันนี้เราจะดูแค่หมุดสำคัญบนสาย 6 และสาย 5 เพื่อให้รู้ว่าคอไม่ได้เป็นพื้นที่สุ่มทั้งหมด",
+      "landmarkPreviewRef": "w0-fretboard-landmark-preview"
+    },
+    {
+      "id": "w0-root-pulse-tab-block",
+      "type": "tab",
+      "tabRef": "w0-root-pulse-c-c-f-g"
+    },
+    {
+      "id": "w0-first-mini-exercise",
+      "type": "technique-drill",
+      "drillRef": "w0-first-mini-musical-loop"
+    },
+    {
+      "id": "w0-daily-practice-block",
+      "type": "daily-practice",
+      "practiceRef": "w0-daily-practice"
+    },
+    {
+      "id": "w0-self-check-block",
+      "type": "self-check",
+      "selfCheckRef": "w0-self-check"
+    }
+  ],
+  "fretboardLandmarkPreview": {
+    "id": "w0-fretboard-landmark-preview",
+    "title": "Fretboard Landmark Preview",
+    "description": "หมุดอ้างอิงสำหรับเริ่มจำ Root บนสาย 6 และสาย 5 แบบไม่ต้องท่องทั้งคอ",
+    "string6RootAnchors": [
+      {
+        "string": 6,
+        "fret": 1,
+        "note": "F"
+      },
+      {
+        "string": 6,
+        "fret": 3,
+        "note": "G"
+      },
+      {
+        "string": 6,
+        "fret": 5,
+        "note": "A"
+      },
+      {
+        "string": 6,
+        "fret": 7,
+        "note": "B"
+      },
+      {
+        "string": 6,
+        "fret": 8,
+        "note": "C"
+      },
+      {
+        "string": 6,
+        "fret": 10,
+        "note": "D"
+      },
+      {
+        "string": 6,
+        "fret": 12,
+        "note": "E"
+      }
+    ],
+    "string5RootAnchors": [
+      {
+        "string": 5,
+        "fret": 3,
+        "note": "C"
+      },
+      {
+        "string": 5,
+        "fret": 5,
+        "note": "D"
+      }
+    ],
+    "cfgAnchorExplanation": "C, F, G เป็น root/chord anchors ที่เจอบ่อยมาก โดย C อยู่ที่สาย 5 fret 3 ส่วน F และ G อยู่ที่สาย 6 fret 1 และ fret 3 ตามลำดับ ให้มองเป็นหมุดข้ามสาย 5 และสาย 6 ไม่ใช่การจำผิดว่า frets 1-3-5 = C-F-G",
+    "doNotSay": "ห้ามอธิบายว่า frets 1-3-5 = C-F-G เพราะไม่ถูกต้องตามสายเดียวกัน",
+    "futureConnection": "Octave shapes จะถูกพัฒนาต่ออย่างเป็นระบบใน Month 2 Week 6"
+  },
+  "techniqueDrills": [
+    {
+      "id": "w0-pick-grip-single-string",
+      "type": "technique-drill",
+      "title": "Pick Grip + Single-String Picking",
+      "duration": "5 นาที",
+      "tempo": "ไม่ใช้ Metronome ในรอบแรก แล้วค่อยลอง 60 BPM",
+      "goal": "จับปิ๊กให้สบาย และดีดสายเดียวด้วยเสียงที่นิ่งโดยไม่เกร็ง",
+      "steps": [
+        "จับปิ๊กด้วยนิ้วโป้งและนิ้วชี้ ให้ปลายปิ๊กโผล่ออกมานิดเดียว",
+        "ดีดสาย 6 ด้วย downstroke 4 ครั้งแบบช้าและเบา",
+        "ดีดสาย 1 ด้วย downstroke 4 ครั้งแบบช้าและเบา",
+        "เลือกสาย 3 แล้วสลับ downstroke / upstroke ช้า ๆ",
+        "หยุดทันทีถ้าข้อมือแข็งหรือไหล่ยก"
+      ],
+      "listenFor": [
+        "เสียงแต่ละครั้งควรใกล้เคียงกัน",
+        "ปิ๊กไม่ควรจิกสายลึกจนเสียงกระแทก"
+      ],
+      "safety": [
+        "อย่าบีบปิ๊กแน่นเกินไป",
+        "อย่าฝืนเล่นเร็ว"
+      ]
+    },
+    {
+      "id": "w0-muted-strumming-motion",
+      "type": "technique-drill",
+      "title": "Muted Strumming Motion",
+      "duration": "5 นาที",
+      "tempo": "60 BPM",
+      "goal": "ฝึกมือขวาให้เคลื่อนเป็นจังหวะโดยยังไม่ต้องกังวลเรื่องคอร์ด",
+      "steps": [
+        "ใช้มือซ้ายแตะสายเบา ๆ เพื่อ mute ทุกสาย",
+        "เปิด Metronome ที่ 60 BPM",
+        "ดีดลงบนเลข 1 2 3 4",
+        "ถ้ามือเริ่มนิ่ง ให้เพิ่ม upstroke บนเครื่องหมาย &",
+        "ฟังให้เสียง mute เท่ากันและไม่เร่งหนีคลิก"
+      ],
+      "pattern": {
+        "count": "1 & 2 & 3 & 4 &",
+        "stroke": "D U D U D U D U"
+      },
+      "teacherNote": "Muted strumming ไม่ใช่เสียงผิดครับ มันคือโหมดฝึกจังหวะที่ปลอดภัยที่สุด"
+    },
+    {
+      "id": "w0-first-mini-musical-loop",
+      "type": "technique-drill",
+      "title": "First Mini Musical Exercise: C-C-F-G",
+      "duration": "5 นาที",
+      "tempo": "60 BPM",
+      "goal": "เล่น root pulse ง่าย ๆ ที่เริ่มฟังเป็นประโยคดนตรี",
+      "warmUp": "Muted strumming 4 bars at 60 BPM",
+      "mainExercise": {
+        "name": "Root Pulse C-F-G",
+        "count": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "play": [
+          "C",
+          "C",
+          "F",
+          "G"
+        ],
+        "positions": [
+          {
+            "note": "C",
+            "string": 5,
+            "fret": 3
+          },
+          {
+            "note": "F",
+            "string": 6,
+            "fret": 1
+          },
+          {
+            "note": "G",
+            "string": 6,
+            "fret": 3
+          }
+        ]
+      },
+      "steps": [
+        "นับ 1 2 3 4 พร้อม Metronome",
+        "เล่น C บน beat 1 และ beat 2",
+        "เล่น F บน beat 3",
+        "เล่น G บน beat 4",
+        "วนซ้ำช้า ๆ โดยไม่หยุดกลางคัน"
+      ]
+    }
+  ],
+  "miniTabs": [
+    {
+      "id": "w0-tab-string-one-open-fret",
+      "type": "tab",
+      "title": "TAB Survival: เลข 0 คือสายเปิด",
+      "bpm": 60,
+      "ascii": [
+        "e|--0--1--3--|",
+        "B|-----------|",
+        "G|-----------|",
+        "D|-----------|",
+        "A|-----------|",
+        "E|-----------|"
+      ],
+      "lyrics": "   เปิด  1  3",
+      "note": "อ่านว่าเล่นสาย 1 แบบเปิดสาย แล้วกด fret 1 และ fret 3"
+    },
+    {
+      "id": "w0-root-pulse-c-c-f-g",
+      "type": "tab",
+      "title": "Root Pulse C-C-F-G",
+      "bpm": 60,
+      "ascii": [
+        "e|-----------------|",
+        "B|-----------------|",
+        "G|-----------------|",
+        "D|-----------------|",
+        "A|--3---3----------|",
+        "E|----------1---3--|"
+      ],
+      "lyrics": "   1   2   3   4",
+      "count": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "play": [
+        "C",
+        "C",
+        "F",
+        "G"
+      ],
+      "note": "เล่นช้ามาก ๆ ให้ C, C, F, G ลงตรงเลข 1 2 3 4 พอดี"
+    }
+  ],
+  "dailyPractice": {
+    "id": "w0-daily-practice",
+    "type": "daily-practice",
+    "title": "7-Day Foundation Reset",
+    "durationRange": "10-15 นาที",
+    "days": [
+      {
+        "day": 1,
+        "dayLabel": "Day 1",
+        "focus": "Body & String Reset",
+        "tasks": [
+          {
+            "id": "w0-d1-posture",
+            "duration": "2 นาที",
+            "title": "ตั้งท่าและจับกีตาร์",
+            "instruction": "เช็กไหล่ ข้อมือ และตำแหน่งกีตาร์ให้ไม่เกร็ง"
+          },
+          {
+            "id": "w0-d1-strings",
+            "duration": "3 นาที",
+            "title": "ท่องสาย 1-6",
+            "instruction": "พูดออกเสียงว่าสาย 1 คือ High e และสาย 6 คือ Low E"
+          },
+          {
+            "id": "w0-d1-open-strings",
+            "duration": "5 นาที",
+            "title": "ดีดสายเปิดทีละสาย",
+            "instruction": "ดีดสาย 6 ถึงสาย 1 ช้า ๆ ด้วย downstroke เสียงเบาและนิ่ง"
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "dayLabel": "Day 2",
+        "focus": "Body & String Reset",
+        "tasks": [
+          {
+            "id": "w0-d2-tuning",
+            "duration": "3 นาที",
+            "title": "เช็ก tuning E A D G B e",
+            "instruction": "ใช้ tuner เช็กทีละสาย หมุนลูกบิดช้า ๆ ถ้าสายเพี้ยน"
+          },
+          {
+            "id": "w0-d2-pick",
+            "duration": "4 นาที",
+            "title": "Pick Grip เบาแต่มั่นคง",
+            "instruction": "จับปิ๊กให้ปลายโผล่นิดเดียว แล้วดีดสาย 6 และสาย 1 อย่างละ 4 ครั้ง"
+          },
+          {
+            "id": "w0-d2-review",
+            "duration": "3 นาที",
+            "title": "ทบทวน High e / Low E",
+            "instruction": "ชี้สาย 1 และสาย 6 ให้ได้ทันทีโดยไม่ลังเล"
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "dayLabel": "Day 3",
+        "focus": "Right-Hand Motion",
+        "tasks": [
+          {
+            "id": "w0-d3-muted",
+            "duration": "2 นาที",
+            "title": "Mute ทุกสาย",
+            "instruction": "ใช้มือซ้ายแตะสายเบา ๆ โดยไม่กด fret"
+          },
+          {
+            "id": "w0-d3-downstroke",
+            "duration": "4 นาที",
+            "title": "Downstroke บนเลข 1 2 3 4",
+            "instruction": "เปิด Metronome 60 BPM แล้วดีดลงบนทุกคลิก"
+          },
+          {
+            "id": "w0-d3-listen",
+            "duration": "3 นาที",
+            "title": "ฟังความนิ่งของมือขวา",
+            "instruction": "ฟังว่าเสียง mute แต่ละครั้งดังใกล้เคียงกันไหม"
+          }
+        ]
+      },
+      {
+        "day": 4,
+        "dayLabel": "Day 4",
+        "focus": "Right-Hand Motion",
+        "tasks": [
+          {
+            "id": "w0-d4-down-up",
+            "duration": "5 นาที",
+            "title": "Down-Up ช้า ๆ",
+            "instruction": "นับ 1 & 2 & 3 & 4 & แล้วดีด D U D U แบบไม่เร่ง"
+          },
+          {
+            "id": "w0-d4-single-string",
+            "duration": "4 นาที",
+            "title": "Single-string alternate picking",
+            "instruction": "เลือกสาย 3 แล้วดีดลง-ขึ้นช้า ๆ ด้วยเสียงที่เท่ากัน"
+          },
+          {
+            "id": "w0-d4-reset",
+            "duration": "2 นาที",
+            "title": "พักและคลายมือ",
+            "instruction": "ปล่อยไหล่ ข้อมือ และนิ้ว ก่อนเล่นซ้ำอีกรอบ"
+          }
+        ]
+      },
+      {
+        "day": 5,
+        "dayLabel": "Day 5",
+        "focus": "Reading Survival",
+        "tasks": [
+          {
+            "id": "w0-d5-chord-diagram",
+            "duration": "3 นาที",
+            "title": "Chord diagram survival",
+            "instruction": "ทบทวน X, O, จุด และเส้น fret/string บน chord diagram"
+          },
+          {
+            "id": "w0-d5-tab",
+            "duration": "4 นาที",
+            "title": "TAB survival",
+            "instruction": "อ่าน TAB ที่มีเลข 0, 1, 3 แล้วเล่นบนสาย 1 ช้า ๆ"
+          },
+          {
+            "id": "w0-d5-open-string",
+            "duration": "3 นาที",
+            "title": "Open string awareness",
+            "instruction": "พูดออกเสียงว่าเลข 0 ใน TAB และ O ใน chord diagram คือสายเปิดที่ตั้งใจให้ดัง"
+          }
+        ]
+      },
+      {
+        "day": 6,
+        "dayLabel": "Day 6",
+        "focus": "Landmark Preview",
+        "tasks": [
+          {
+            "id": "w0-d6-c",
+            "duration": "3 นาที",
+            "title": "หา C",
+            "instruction": "หา C บนสาย 5 fret 3 แล้วดีดช้า ๆ"
+          },
+          {
+            "id": "w0-d6-f-g",
+            "duration": "4 นาที",
+            "title": "หา F และ G",
+            "instruction": "หา F บนสาย 6 fret 1 และ G บนสาย 6 fret 3"
+          },
+          {
+            "id": "w0-d6-cfg",
+            "duration": "4 นาที",
+            "title": "พูดชื่อโน้ตพร้อมเล่น",
+            "instruction": "เล่น C, F, G ช้า ๆ แล้วพูดชื่อโน้ตออกเสียงทุกครั้ง"
+          }
+        ]
+      },
+      {
+        "day": 7,
+        "dayLabel": "Day 7",
+        "focus": "First Musical Loop",
+        "tasks": [
+          {
+            "id": "w0-d7-warmup",
+            "duration": "4 นาที",
+            "title": "Muted strumming 4 bars",
+            "instruction": "เปิด Metronome 60 BPM แล้ว mute strum 4 ห้อง"
+          },
+          {
+            "id": "w0-d7-root-pulse",
+            "duration": "5 นาที",
+            "title": "Root Pulse C-C-F-G",
+            "instruction": "นับ 1 2 3 4 แล้วเล่น C C F G ให้ตรงกับเลข"
+          },
+          {
+            "id": "w0-d7-self-listen",
+            "duration": "3 นาที",
+            "title": "ฟังตัวเอง",
+            "instruction": "อัดเสียงสั้น ๆ แล้วฟังว่าจังหวะนิ่งไหม ไม่ต้องตัดสินแรง"
+          }
+        ]
+      }
+    ]
+  },
+  "selfCheck": {
+    "id": "w0-self-check",
+    "type": "self-check",
+    "title": "เช็กว่าพร้อมเข้า Month 1 หรือยัง",
+    "criteria": [
+      "ระบุได้ว่าสาย 1 คือ High e และสาย 6 คือ Low E",
+      "อ่าน TAB เลข 0 ว่าเป็นสายเปิดได้",
+      "เข้าใจ X, O และจุดบน chord diagram",
+      "ใช้ Metronome ที่ 60 BPM และนับ 1 2 3 4 ได้",
+      "Mute สายด้วยมือซ้ายแล้ว strum เป็นจังหวะได้",
+      "หา C บนสาย 5 fret 3 ได้",
+      "หา F บนสาย 6 fret 1 ได้",
+      "หา G บนสาย 6 fret 3 ได้",
+      "เล่น C-C-F-G ช้า ๆ โดยไม่หยุดกลางคันได้"
+    ],
+    "questions": [
+      {
+        "id": "w0-check-string-1",
+        "type": "multiple-choice",
+        "prompt": "สาย 1 คือสายแบบไหน?",
+        "choices": [
+          "สายเล็กสุด / High e",
+          "สายใหญ่สุด / Low E",
+          "สาย A",
+          "สาย D"
+        ],
+        "answer": "สายเล็กสุด / High e",
+        "feedback": "ถูกครับ สาย 1 คือ High e เสียงสูงและเส้นบางที่สุด"
+      },
+      {
+        "id": "w0-check-tab-zero",
+        "type": "multiple-choice",
+        "prompt": "เลข 0 ใน TAB หมายถึงอะไร?",
+        "choices": [
+          "เล่นสายเปิด",
+          "ไม่เล่นสายนั้น",
+          "พัก 1 จังหวะ",
+          "ดีดขึ้นเท่านั้น"
+        ],
+        "answer": "เล่นสายเปิด",
+        "feedback": "ใช่ครับ เลข 0 คือเล่นสายนั้นโดยไม่ต้องกด fret"
+      },
+      {
+        "id": "w0-check-root-pulse",
+        "type": "reflection",
+        "prompt": "คุณเล่น C-C-F-G ที่ 60 BPM ได้โดยไม่หยุดกลางคันหรือยัง?",
+        "passHint": "ถ้ายังสะดุด ให้ลดความเร็วในใจ ไม่ต้องเร่งนิ้วครับ"
+      }
+    ]
+  },
+  "backlogPreserved": [
+    "12-bar blues / shuffle / turnarounds",
+    "fingerpicking songs",
+    "Harmony & Progressions / Circle of Fifths",
+    "Full Scale Reference Module",
+    "deeper play-by-ear workflow",
+    "recording/self-review workflow",
+    "Hotel California-style solo study"
+  ],
+  "guardrails": [
+    "Week 0 เป็น Prelude / Foundation Reset ไม่ใช่ Month 0",
+    "ห้ามเปิด Week 0 ใน production UI จนกว่าจะมีงาน implementation แยก",
+    "ห้ามแก้ Month 1-4 จาก mock data นี้",
+    "ห้ามเพิ่ม Month 5 หรือ future module ใน production",
+    "ห้ามใช้ external video, network, framework หรือ audio files",
+    "ถ้าต้องใช้เสียงในอนาคต ให้ใช้ Metronome เดิมหรือ internal Web Audio เท่านั้น"
+  ],
+  "schemaNotes": [
+    "daily-practice และ self-check ถูกใส่เป็น lessonBlocks เพื่อรองรับ future renderer แต่ข้อมูลจริงยังอยู่ที่ root-level dailyPractice และ selfCheck",
+    "mechanics-check ใช้ inline checks ได้ทันที ส่วน technique-drill และ tab ใช้ ref ไปยัง root-level arrays",
+    "ไม่มีการเพิ่ม fretboardVisual เพราะ Week 0 เป็น preview เชิงข้อความก่อน ไม่ใช่ visualizer lesson"
+  ]
+}
