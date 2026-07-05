@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Month 2 Week 7 Prototype - แผนที่สเกลเมเจอร์</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./mock-data.js" defer></script>
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="กลับไปด้านบน">
+        <span class="brand-mark">GC</span>
+        <span>
+          <strong>Guitar Companion</strong>
+          <small>Month 2 Prototype</small>
+        </span>
+      </a>
+      <span class="prototype-pill">Week 7 / Major Scale</span>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="pageTitle">
+        <p class="eyebrow">Month 2 / Week 7</p>
+        <h1 id="pageTitle">แผนที่สเกลเมเจอร์</h1>
+        <p id="heroSubtitle" class="hero-subtitle">Major Scale 1 Octave</p>
+        <p id="heroPromise" class="hero-copy">
+          เชื่อม Root และ Octave ให้เป็นเส้นทาง C Major 1 octave ที่ร้องเลขของเสียงไปพร้อมกับการเล่นได้
+        </p>
+        <div class="hero-actions">
+          <button class="cta-primary" type="button" data-scroll="#lessonFlow">เริ่มดูบทเรียน</button>
+          <span class="meta-chip">60 BPM</span>
+          <span class="meta-chip">1-2-3-4-5-6-7-1</span>
+        </div>
+      </section>
+
+      <section class="today-card" aria-labelledby="todayTitle">
+        <div>
+          <p class="eyebrow">Today's Focus</p>
+          <h2 id="todayTitle">วันนี้ให้เล่นช้า</h2>
+          <p>พูดเลข degree ไปพร้อมกับนิ้ว ฟังว่าเลข 1 ให้ความรู้สึกเหมือนบ้านหรือจุดพัก แล้วปล่อยให้ scale เป็นทางเดินของเสียง ไม่ใช่แบบฝึกความเร็ว</p>
+        </div>
+        <div class="focus-stack">
+          <span>Root = 1</span>
+          <span>Degree</span>
+          <span>Octave = 1</span>
+        </div>
+      </section>
+
+      <section id="lessonFlow" class="section-shell" aria-labelledby="lessonTitle">
+        <header class="section-head">
+          <p class="eyebrow">Lesson Flow</p>
+          <h2 id="lessonTitle">ดูเลข ฟังเสียง แล้วค่อยเล่น</h2>
+        </header>
+        <div id="lessonMount"></div>
+      </section>
+
+      <section class="section-shell" aria-labelledby="practiceTitle">
+        <header class="section-head">
+          <p class="eyebrow">Daily Practice</p>
+          <h2 id="practiceTitle">ซ้อมช้า สะอาด และร้องเลขให้ตรง</h2>
+        </header>
+        <div id="practiceMount"></div>
+      </section>
+
+      <section class="section-shell" aria-labelledby="checkTitle">
+        <header class="section-head">
+          <p class="eyebrow">Self-Check</p>
+          <h2 id="checkTitle">เลขของเสียงเริ่มตรงกับมือหรือยัง</h2>
+        </header>
+        <div id="selfCheckMount"></div>
+      </section>
+    </main>
+
+    <footer class="footer-note">
+      Prototype สำหรับทดสอบ Month 2 Week 7 เท่านั้น ยังไม่เปิด Month 2 ในแอปหลัก
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Month 2 Week 8 Prototype - ห้องทดลองฟังเสียงคอร์ด</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./mock-data.js" defer></script>
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="กลับไปด้านบน">
+        <span class="brand-mark">GC</span>
+        <span>
+          <strong>Guitar Companion</strong>
+          <small>Month 2 Prototype</small>
+        </span>
+      </a>
+      <span class="prototype-pill">Week 8 / Play by Form</span>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="pageTitle">
+        <p class="eyebrow">Month 2 / Week 8</p>
+        <h1 id="pageTitle">ห้องทดลองฟังเสียงคอร์ด</h1>
+        <p id="heroSubtitle" class="hero-subtitle">Play by Form Seed</p>
+        <p id="heroPromise" class="hero-copy">
+          เข้าใจโครงสร้างเพลงว่าไม่ได้เป็นแค่คอร์ดสุ่ม แต่มี 'บ้าน', 'ทางออก', และ 'แรงดึงกลับ' ผ่าน Chord Sound Lab
+        </p>
+        <div class="hero-actions">
+          <button class="cta-primary" type="button" data-scroll="#lessonFlow">เริ่มฟังฟอร์ม</button>
+          <span class="meta-chip">I-IV-V-I</span>
+          <span class="meta-chip">60 BPM</span>
+          <span class="meta-chip">Ear Preview</span>
+        </div>
+      </section>
+
+      <section class="today-card" aria-labelledby="todayTitle">
+        <div>
+          <p class="eyebrow">Today's Focus</p>
+          <h2 id="todayTitle">ฟังให้รู้ว่าคอร์ดกำลังพาเพลงไปทางไหน</h2>
+          <p>
+            วันนี้ไม่ต้องคิดว่า C, F, G เป็นทฤษฎีเยอะ ๆ ให้ฟังเป็นบทบาทก่อน:
+            C คือบ้าน, F คือเปิดออก, G คือแรงดึงกลับ แล้ว C สุดท้ายคือกลับถึงบ้าน
+          </p>
+        </div>
+        <div class="focus-stack" aria-label="บทบาทของคอร์ดวันนี้">
+          <span>C / I = บ้าน</span>
+          <span>F / IV = เปิดออก</span>
+          <span>G / V = ดึงกลับ</span>
+          <span>C / I = กลับบ้าน</span>
+        </div>
+      </section>
+
+      <section id="lessonFlow" class="section-shell" aria-labelledby="lessonTitle">
+        <header class="section-head">
+          <p class="eyebrow">Lesson Flow</p>
+          <h2 id="lessonTitle">ฟังฟอร์ม มอง Root แล้วค่อยเล่น</h2>
+        </header>
+        <div id="lessonMount"></div>
+      </section>
+
+      <section class="section-shell" aria-labelledby="practiceTitle">
+        <header class="section-head">
+          <p class="eyebrow">Daily Practice</p>
+          <h2 id="practiceTitle">ซ้อมฟังบ้าน ทางออก และแรงดึงกลับ</h2>
+        </header>
+        <div id="practiceMount"></div>
+      </section>
+
+      <section class="section-shell" aria-labelledby="checkTitle">
+        <header class="section-head">
+          <p class="eyebrow">Self-Check</p>
+          <h2 id="checkTitle">ฟังออกและเล่นฟอร์มได้หรือยัง</h2>
+        </header>
+        <div id="selfCheckMount"></div>
+      </section>
+    </main>
+
+    <footer class="footer-note">
+      Prototype สำหรับทดสอบ Month 2 Week 8 เท่านั้น ยังไม่เปิด Month 2 ในแอปหลัก
+    </footer>
+  </body>
+</html>

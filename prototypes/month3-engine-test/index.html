@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Month 3 Engine Test Sandbox</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <header class="sandbox-hero">
+      <p class="eyebrow">Isolated Renderer Prototype</p>
+      <h1>Month 3 Engine Test Sandbox</h1>
+      <p class="hero-copy">
+        ทดสอบช่องว่าง renderer ก่อนแตะ production: open strings, chord-tone overlay,
+        progression-lab และ block UI ใหม่สำหรับ Month 3
+      </p>
+      <div class="hero-tags" aria-label="Prototype scope">
+        <span>Vanilla HTML/CSS/JS</span>
+        <span>No outputs/ changes</span>
+        <span>Mobile-first</span>
+      </div>
+    </header>
+
+    <main class="sandbox-shell">
+      <div class="dashboard-column dashboard-column--main">
+        <section class="engine-card engine-card--wide" aria-labelledby="fretboardTitle">
+          <div class="section-heading">
+            <p class="eyebrow">Fretboard Engine</p>
+            <h2 id="fretboardTitle">Open String + Chord Tone Overlay</h2>
+            <p>
+              แผนภาพนี้ใช้ string 1 อยู่ด้านบนเหมือน TAB และทดสอบ `fret: 0`
+              โดยวาง open-string marker ไว้นอก nut อย่างชัดเจน
+            </p>
+          </div>
+          <div id="fretboardMount"></div>
+        </section>
+      </div>
+
+      <div class="dashboard-column dashboard-column--side">
+        <section class="engine-card engine-card--audio" aria-labelledby="audioTitle">
+          <div class="section-heading">
+            <p class="eyebrow">Audio Engine</p>
+            <h2 id="audioTitle">Progression Lab Loop</h2>
+            <p>
+              ทดสอบ Web Audio API สำหรับ loop progression C -> F -> G -> C ที่ 70 BPM
+              โดยเริ่มเสียงจากการกดปุ่มเท่านั้น
+            </p>
+          </div>
+          <div id="progressionLabMount"></div>
+        </section>
+
+        <section class="engine-card engine-card--blocks" aria-labelledby="blockTitle">
+          <div class="section-heading">
+            <p class="eyebrow">New Block UI</p>
+            <h2 id="blockTitle">Technique Drill / Mechanics Check</h2>
+            <p>ตัวอย่าง static blocks ที่จะใช้เป็นฐานหน้าตาให้ Month 3 renderer.</p>
+          </div>
+
+          <article class="block-technique-drill">
+            <div class="block-label">Technique Drill</div>
+            <h3>Slow 1-3-5 Touch Drill</h3>
+            <p>
+              แตะ Root, 3rd, 5th ทีละตัวแบบช้า ๆ แล้วพูดเลขออกเสียง
+              เป้าหมายคือเห็นเสียงในคอร์ด ไม่ใช่เล่นเร็ว
+            </p>
+            <ol>
+              <li>ตั้ง Metronome 60 BPM</li>
+              <li>แตะโน้ต 1 แล้วพูด "Root"</li>
+              <li>แตะโน้ต 3 แล้วฟังสีของคอร์ด</li>
+              <li>แตะโน้ต 5 แล้วปล่อยมือให้ผ่อนคลาย</li>
+            </ol>
+          </article>
+
+          <article class="block-mechanics-check">
+            <div class="block-label">Mechanics Check</div>
+            <h3>Clean Fretting Check</h3>
+            <ul class="check-list">
+              <li><span></span>นิ้วซ้ายไม่เกร็งตอนแตะ open-string map</li>
+              <li><span></span>เสียง Root, 3rd, 5th ไม่บอด</li>
+              <li><span></span>มือขวาดีดเบาแต่ชัด</li>
+              <li><span></span>หยุดทันทีถ้าความเร็วทำให้เสียงเละ</li>
+            </ul>
+          </article>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

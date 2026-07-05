@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Month 2 Week 5 Prototype - รู้บ้าน</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./mock-data.js" defer></script>
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="กลับไปด้านบน">
+        <span class="brand-mark">GC</span>
+        <span>
+          <strong>Guitar Companion</strong>
+          <small>Month 2 Prototype</small>
+        </span>
+      </a>
+      <span class="prototype-pill">Week 5 / Fretboard</span>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="pageTitle">
+        <p class="eyebrow">Month 2 / Week 5</p>
+        <h1 id="pageTitle">รู้บ้าน (Root & Landmarks)</h1>
+        <p id="heroSubtitle" class="hero-subtitle">Fretboard Foundation</p>
+        <p id="heroPromise" class="hero-copy">
+          ฝึกมองคอกีตาร์เป็นแผนที่เล็ก ๆ ก่อน ไม่ต้องจำทั้งคอในวันเดียว แค่รู้ว่า Root อยู่ไหน แล้วเล่นให้ตรง Metronome อย่างใจเย็น
+        </p>
+        <div class="hero-actions">
+          <button class="cta-primary" type="button" data-scroll="#lessonFlow">เริ่มดูบทเรียน</button>
+          <span class="meta-chip">60 BPM</span>
+          <span class="meta-chip">มือถือก่อน</span>
+        </div>
+      </section>
+
+      <section class="today-card" aria-labelledby="todayTitle">
+        <div>
+          <p class="eyebrow">Today's Focus</p>
+          <h2 id="todayTitle">วันนี้ให้หาบ้านก่อน</h2>
+          <p>ถ้าหา Root ได้ มือจะเริ่มไม่หลงทางบนคอ และการเรียน scale / chord ต่อจากนี้จะนิ่งขึ้นมาก</p>
+        </div>
+        <div class="focus-stack">
+          <span>Root</span>
+          <span>Landmark</span>
+          <span>Octave</span>
+        </div>
+      </section>
+
+      <section id="lessonFlow" class="section-shell" aria-labelledby="lessonTitle">
+        <header class="section-head">
+          <p class="eyebrow">Lesson Flow</p>
+          <h2 id="lessonTitle">ดู ฟัง แล้วค่อยเล่น</h2>
+        </header>
+        <div id="lessonMount"></div>
+      </section>
+
+      <section class="section-shell" aria-labelledby="practiceTitle">
+        <header class="section-head">
+          <p class="eyebrow">Daily Practice</p>
+          <h2 id="practiceTitle">ซ้อมสั้น แต่ทำจริง</h2>
+        </header>
+        <div id="practiceMount"></div>
+      </section>
+
+      <section class="section-shell" aria-labelledby="checkTitle">
+        <header class="section-head">
+          <p class="eyebrow">Self-Check</p>
+          <h2 id="checkTitle">พร้อมไปต่อไหม</h2>
+        </header>
+        <div id="selfCheckMount"></div>
+      </section>
+    </main>
+
+    <footer class="footer-note">
+      Prototype สำหรับทดสอบ mobile readability เท่านั้น ยังไม่เปิด Month 2 ในแอปหลัก
+    </footer>
+  </body>
+</html>

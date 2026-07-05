@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Month 4 Engine Test Sandbox</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <header class="sandbox-hero">
+      <p class="eyebrow">Prototype v2 / Isolated Sandbox</p>
+      <h1>Month 4 Engine Test</h1>
+      <p class="hero-copy">
+        ทดสอบ renderer และ audio gap สำหรับ Scale Atlas Foundation ก่อนแตะ production:
+        octave-profile audio, dense fretboard fallback และ root-array technique drill mapping.
+      </p>
+      <div class="hero-tags" aria-label="Prototype scope">
+        <span>Vanilla HTML/CSS/JS</span>
+        <span>No outputs/ changes</span>
+        <span>Orientation Rule v2</span>
+        <span>320px fallback</span>
+      </div>
+    </header>
+
+    <main class="sandbox-shell">
+      <div class="dashboard-column dashboard-column--main">
+        <section class="engine-card engine-card--wide" aria-labelledby="fretboardTitle">
+          <div class="section-heading">
+            <p class="eyebrow">Fretboard Engine</p>
+            <h2 id="fretboardTitle">Week 16 Capstone Synthesis Map</h2>
+            <p>
+              แผนที่นี้ตั้งใจให้แน่นเพื่อทดสอบ fallback: ถ้าการ์ดแคบกว่า 320px
+              ระบบต้องแตกเป็น stacked layer cards แทนการบีบ unified map จนอ่านไม่ออก.
+            </p>
+          </div>
+
+          <div id="fretboardMount"></div>
+        </section>
+
+        <section class="engine-card engine-card--static" aria-labelledby="staticTitle">
+          <div class="section-heading">
+            <p class="eyebrow">Static UI Reference</p>
+            <h2 id="staticTitle">Block Card Shape</h2>
+            <p>ตัวอย่าง static HTML สำหรับดูน้ำหนักสายตาของ upcoming block types บน mobile.</p>
+          </div>
+
+          <article class="block-technique-drill static-example">
+            <div class="block-label">Technique Drill</div>
+            <h3>3-6 Notes, Then Breathe</h3>
+            <p>เล่น phrase สั้น เลือกสีให้ชัด แล้วพัก 1 beat ให้หูได้ยินคำตอบของตัวเอง.</p>
+          </article>
+
+          <article class="block-mechanics-check static-example">
+            <div class="block-label">Mechanics Check</div>
+            <h3>Clean Alternate Picking</h3>
+            <ul class="check-list">
+              <li><span></span>เสียงทุกโน้ตดังเท่ากัน</li>
+              <li><span></span>มือขวาไม่เร่งจนเสีย Groove</li>
+              <li><span></span>หยุดพักได้โดยไม่เสีย Beat</li>
+            </ul>
+          </article>
+        </section>
+      </div>
+
+      <div class="dashboard-column dashboard-column--side">
+        <section class="engine-card engine-card--audio" aria-labelledby="audioTitle">
+          <div class="section-heading">
+            <p class="eyebrow">Audio Engine</p>
+            <h2 id="audioTitle">Scientific Pitch Notation Ear Lab</h2>
+            <p>
+              ปุ่มนี้ทดสอบการ parse โน้ตแบบ `A2`, `C3`, `Eb3`
+              แล้วคำนวณความถี่ด้วย Web Audio API เพื่อใช้กับ `ear-training-lab` ของ Month 4.
+            </p>
+          </div>
+
+          <div class="control-row">
+            <button class="ghost-action" id="testBeep" type="button">Test beep A2</button>
+            <button class="ghost-action" id="testBeepA4" type="button">Test beep A4</button>
+            <button class="primary-action" id="playMinorPhrase" type="button">Play Phrase</button>
+            <button class="ghost-action" id="stopAudio" type="button">หยุดเสียง</button>
+          </div>
+
+          <div class="audio-readout" aria-live="polite">
+            <p id="audioStatus">พร้อมทดสอบเสียงหลังจากกดปุ่ม</p>
+            <strong>Pitch parser output</strong>
+            <ol id="pitchList"></ol>
+          </div>
+
+          <div class="audio-controls" aria-label="Audio playback controls">
+            <label class="volume-control" for="outputVolume">
+              <span>Output volume</span>
+              <input id="outputVolume" type="range" min="0.1" max="1.2" step="0.01" value="0.9">
+              <strong id="volumeReadout">90%</strong>
+            </label>
+
+            <fieldset class="register-control">
+              <legend>Audition register</legend>
+              <label>
+                <input type="radio" name="auditionRegister" value="normal" checked>
+                Normal / guitar
+              </label>
+              <label>
+                <input type="radio" name="auditionRegister" value="up">
+                Audition +1 octave
+              </label>
+            </fieldset>
+
+            <label class="compressor-toggle">
+              <input id="useCompressor" type="checkbox">
+              Use compressor / limiter
+            </label>
+          </div>
+        </section>
+
+        <section class="engine-card engine-card--drill" aria-labelledby="drillTitle">
+          <div class="section-heading">
+            <p class="eyebrow">Schema Resolution</p>
+            <h2 id="drillTitle">Technique Drill Root Array Mapping</h2>
+            <p>
+              ทดสอบ lesson block แบบ `{ "type": "technique-drill", "drillRef": "m4-w16-capstone-drill" }`
+              ให้ค้นหา asset จาก root-level `techniqueDrills[]`.
+            </p>
+          </div>
+
+          <div id="drillMount"></div>
+        </section>
+
+        <section class="engine-card engine-card--qa" aria-labelledby="qaTitle">
+          <div class="section-heading">
+            <p class="eyebrow">QA Notes</p>
+            <h2 id="qaTitle">Sandbox Checklist</h2>
+          </div>
+          <ul class="qa-list">
+            <li>Mobile still good at <=420px.</li>
+            <li>Desktop fretboard no longer leaves a large blank gap.</li>
+            <li>Desktop fretboard no longer stretches too wide.</li>
+            <li>No body horizontal overflow.</li>
+            <li>320px layered fallback still works.</li>
+            <li>Pitch parser still displays MIDI/frequency values.</li>
+            <li>Play Phrase audibly plays a clean plucked sequence in a normal Chrome/Edge browser.</li>
+            <li>Stop clears overlapping notes before a new phrase starts.</li>
+            <li>If no audio is heard in Codex browser preview, status should still show whether AudioContext is running.</li>
+          </ul>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
