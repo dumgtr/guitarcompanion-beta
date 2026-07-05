@@ -87,7 +87,7 @@ The Reference Shelf / Rhythm Notation work is FINAL for the current phase.
    - rollback plan
 
 ## Recommended Next Work
-- The project is currently in a Post-Release Monitoring phase. DO NOT initiate new features (like Fretboard Studio) or new Mini Courses. Await user feedback from real-world usage.
+- The project is currently in a Post-Release Monitoring phase. DO NOT initiate new features (like Fretboard Studio) or new Mini Courses. Month 5 (Diatonic Bridge & Melodic Freedom) content spec and mock data plan are complete. Await explicit task to either draft Month 6 specs or implement Month 5 hidden mock data.
 - Month 5-8 remain hidden.
 
 ## Month 5 Realignment (July 2026)
