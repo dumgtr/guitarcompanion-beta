@@ -1,1 +1,5 @@
 outputs/data.json
+.vscode/
+outputs/data/
+outputs/week0-rev*/
+source_code.md
