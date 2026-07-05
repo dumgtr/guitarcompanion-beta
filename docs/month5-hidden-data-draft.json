@@ -1,0 +1,117 @@
+{
+  "weeks": [
+    {
+      "id": "m5-w17-meet-family",
+      "title": "Week 17: Meet the Family & Space",
+      "isVisible": false,
+      "lessonBlocks": [
+        {
+          "type": "text",
+          "content": "ยินดีต้อนรับสู่ Month 5! ในสัปดาห์นี้เราจะมาทำความรู้จักกับ Diatonic Triads และการเว้นจังหวะ (Space) ในการโซโล่"
+        },
+        {
+          "type": "fretboard-visualizer",
+          "refId": "m5-w17-vis-triads"
+        },
+        {
+          "type": "technique-drill",
+          "refId": "m5-w17-drill-space"
+        }
+      ]
+    },
+    {
+      "id": "m5-w18-core-progression",
+      "title": "Week 18: Core Progression & Call/Response",
+      "isVisible": false,
+      "lessonBlocks": [
+        {
+          "type": "text",
+          "content": "สัปดาห์นี้เราจะฝึก Call & Response บนคอร์ด I-IV-V-vi ซึ่งเป็นหัวใจของเพลงป็อป/ร็อก"
+        },
+        {
+          "type": "chord-sound-lab",
+          "refId": "m5-w18-sound-prog-pop"
+        }
+      ]
+    },
+    {
+      "id": "m5-w19-90s-secret",
+      "title": "Week 19: The 90s Secret",
+      "isVisible": false,
+      "lessonBlocks": [
+        {
+          "type": "text",
+          "content": "ความลับยุค 90s: การค้างนิ้ว (Common Tones) เพื่อสร้างคอร์ดอย่าง Cadd9, Em7 และ Dsus4"
+        },
+        {
+          "type": "tab",
+          "refId": "m5-w19-tab-pedal-chords"
+        },
+        {
+          "type": "technique-drill",
+          "refId": "m5-w19-drill-bending"
+        }
+      ]
+    },
+    {
+      "id": "m5-w20-solo-builder",
+      "title": "Week 20: 8-Bar Solo Builder",
+      "isVisible": false,
+      "lessonBlocks": [
+        {
+          "type": "text",
+          "content": "แบบฝึกหัดสรุป Month 5: สร้างโซโล่ 8 ห้องที่ผสานจังหวะและการเน้นโน้ตเป้าหมายอย่างลงตัว"
+        },
+        {
+          "type": "technique-drill",
+          "refId": "m5-w20-drill-solo-builder"
+        }
+      ]
+    }
+  ],
+  "techniqueDrills": [
+    {
+      "id": "m5-w17-drill-space",
+      "type": "technique-drill",
+      "title": "Motif & Space Drill",
+      "description": "ฝึกเล่น motif ซ้ำๆ และตั้งใจเว้นจังหวะให้คนฟังได้หายใจ"
+    },
+    {
+      "id": "m5-w19-drill-bending",
+      "type": "technique-drill",
+      "title": "Target Pitch Bending",
+      "description": "ดันสายให้ตรง pitch กับคอร์ดที่รองรับ"
+    },
+    {
+      "id": "m5-w20-drill-solo-builder",
+      "type": "technique-drill",
+      "title": "8-Bar Capstone Routine",
+      "description": "แบบฝึกหัดประจำวัน 20 นาที สำหรับสร้าง 8-bar solo"
+    }
+  ],
+  "miniTabs": [
+    {
+      "id": "m5-w19-tab-pedal-chords",
+      "type": "tab",
+      "title": "90s Pedal Chords",
+      "tabData": "e|--3---3---3---3--|\nB|--3---3---3---3--|\nG|--0---0---0---2--|\nD|--0---2---2---0--|\nA|--2---3---2------|\nE|--3-------0------|"
+    }
+  ],
+  "fretboardVisuals": [
+    {
+      "id": "m5-w17-vis-triads",
+      "type": "fretboard-visualizer",
+      "title": "Diatonic 1-3-5 Overlay",
+      "layers": ["major-scale", "chord-tones"]
+    }
+  ],
+  "chordSoundLabs": [
+    {
+      "id": "m5-w18-sound-prog-pop",
+      "type": "chord-sound-lab",
+      "title": "I-IV-V-vi Loop",
+      "progression": ["I", "IV", "V", "vi"],
+      "tempo": 90
+    }
+  ]
+}
