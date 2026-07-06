@@ -12,6 +12,8 @@ FINAL for current phase.
 - Month 1-4 are visible in normal production.
 - Month 5-8 remain hidden.
 - Preview parameters such as `?preview=m3`, `?preview=m4`, `?devPreview=m3`, and `?devPreview=m4` are legacy QA shortcuts / auto-open helpers only; they are not the current production visibility gate.
+- **Month 5 and Month 6 content drafts are COMPLETE** but exist purely as **Hidden Draft Shards** (`outputs/data-shards/month5-preview.json`, `outputs/data-shards/month6-preview.json`).
+- Month 5 and Month 6 MUST REMAIN HIDDEN from normal production. They can only be viewed via the QA parameter hooks implemented in `app.js` (e.g., `?preview=m5`, `?preview=m6`, `?devPreview=all`).
 - Reference Shelf content lives in Practice Room, not in the main lesson flow.
 - **Practice Room Additions:** The Reference Shelf (containing both the TAB Handbook and Note Value Cheatsheet) is LIVE and finalized (v1.0) inside the Practice Lab.
 - **Mini Course Additions:** Rhythm Notation Starter and Blues Turnaround Starter are PUBLIC / LIVE in the Practice Room as optional support courses.
@@ -35,11 +37,16 @@ FINAL for current phase.
 - Reference links inside Mini Course continue to open the existing TAB Handbook and Note Value Cheatsheet.
 - Month 5-8 remain hidden.
 
-### Current Phase: Post-Release Monitoring
+### Current Phase: Phase 2 Hidden Drafts Complete
+- Phase 1 (Shard Infrastructure) and Phase 2 (Content Drafting for M5/M6) are CLOSED.
+- M5/M6 hidden preview shards are loaded in memory and are structurally complete.
+- Runtime preview URLs available: `?preview=m5`, `?preview=m6`, `?devPreview=all`.
+- Production remains strictly locked to Month 1–4.
+- Known UX debt: month switcher horizontal scroll feels step-like.
+- Do not start Month 7/8 or expose Month 5/6 publicly yet.
 - Two Mini Courses are currently live in the Practice Room: `Rhythm Notation Starter` and `Blues Turnaround Starter`.
 - The system is under observation after the Sprint 8D public reveal and 6/6 smoke-test pass.
 - Do not initiate new features, new Practice Tools, or new Mini Courses during this monitoring period.
-- Month 5 (Diatonic Bridge & Melodic Freedom) content spec and mock data plan are complete. Await explicit task to either draft Month 6 specs or implement Month 5 hidden mock data.
 
 ### v2.9.4 UI Polish (2026-07-04)
 - **Status:** Implemented and QA-passed (6/6 Browser Smoke Test).

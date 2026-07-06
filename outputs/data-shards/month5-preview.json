@@ -1,0 +1,490 @@
+{
+  "weeks": [
+    {
+      "id": "m5-w17-meet-family",
+      "title": "Week 17: Meet the Family & Space",
+      "isVisible": false,
+      "lessonBlocks": [
+        {
+          "type": "text",
+          "content": "ยินดีต้อนรับสู่ Month 5: **Diatonic Bridge & Melodic Freedom**! เราจะเริ่มนำความรู้ Chord-Scale ที่สะสมมา มาสร้างเป็น \"วลีดนตรี\" (Musical Phrases) กันครับ"
+        },
+        {
+          "type": "text",
+          "content": "ในสัปดาห์นี้ (Week 17) คีย์เวิร์ดของเราคือ **Space (การเว้นวรรค)** และ **Diatonic Triads (คอร์ดในสเกล)** แทนที่เราจะดีดสเกลขึ้นลงแบบหุ่นยนต์ เราจะเริ่มจับกลุ่มโน้ตที่ตรงกับคอร์ด (Chord Tones) และที่สำคัญที่สุด... *เราจะต้องรู้จักหยุดเพื่อให้โน้ตได้หายใจ*"
+        },
+        {
+          "type": "fretboard-visualizer",
+          "visualRef": "m5-w17-vis-triads"
+        },
+        {
+          "type": "text",
+          "content": "ลองดูแบบฝึกหัดด้านล่าง เราจะดีดโน้ตแค่ 3-4 ตัว แล้วเว้นวรรคยาวๆ จังหวะที่เว้นวรรคคือจังหวะที่คนฟังจดจำทำนองของเราได้ครับ"
+        },
+        {
+          "type": "tab",
+          "tabRef": "m5-w17-tab-space"
+        },
+        {
+          "type": "technique-drill",
+          "drillRef": "m5-w17-drill-space"
+        }
+      ],
+      "month": 5,
+      "module": "diatonic-bridge",
+      "number": 17,
+      "week": 17,
+      "dailyPractice": [
+        "วอร์มอัพนิ้วด้วย Diatonic Triads 5 นาที",
+        "ฝึกเล็งโน้ตเป้าหมาย (Chord Tone Landing) ควบคู่กับโน้ตในคอร์ด 5 นาที",
+        "เล่น Motif สั้นๆ แล้วจงใจหยุดพัก (Space) 10 นาที"
+      ],
+      "selfCheck": [
+        "ฉันสามารถหยุดเว้นวรรคระหว่างโซโล่โดยไม่อึดอัดได้แล้ว",
+        "ฉันเริ่มมองเห็นคอร์ด 1-3-5 ซ้อนอยู่บนสเกลแล้ว",
+        "ฉันรู้ว่าโน้ตตัวไหนคือ Chord Tone เมื่อเปลี่ยนคอร์ด"
+      ]
+    },
+    {
+      "id": "m5-w18-core-progression",
+      "title": "Week 18: Core Progression & Call/Response",
+      "isVisible": false,
+      "lessonBlocks": [
+        {
+          "type": "text",
+          "content": "สัปดาห์นี้เราจะเริ่มเจาะลึก 4 คอร์ดมหัศจรรย์ (I - IV - V - vi) ที่เป็นพื้นฐานของเพลงนับล้านเพลงทั่วโลก สิ่งสำคัญคือการรับรู้ความรู้สึกของแต่ละคอร์ด"
+        },
+        {
+          "type": "chord-sound-lab",
+          "labRef": "m5-w18-sound-prog-pop"
+        },
+        {
+          "type": "text",
+          "content": "แนวคิดการสร้างโซโล่แบบ Call & Response (ถาม-ตอบ) จะใช้ประโยชน์จากอารมณ์ของคอร์ดเหล่านี้ เช่น คอร์ด I คือบ้าน (Home) ส่วน V คือการดึงดูดกลับ (Pull)"
+        },
+        {
+          "type": "tab",
+          "tabRef": "m5-w18-tab-call-response"
+        },
+        {
+          "type": "technique-drill",
+          "drillRef": "m5-w18-drill-call-response"
+        }
+      ],
+      "month": 5,
+      "module": "diatonic-bridge",
+      "number": 18,
+      "week": 18,
+      "dailyPractice": [
+        "ฟังและสังเกตอารมณ์ของคอร์ด I-IV-V-vi 5 นาที",
+        "ดีด Call & Response (ถาม-ตอบ) ตาม Tab 5 นาที",
+        "คิดลวดลาย (Motif) ถาม-ตอบ ของตัวเอง 10 นาที"
+      ],
+      "selfCheck": [
+        "ฉันแยกความรู้สึกของคอร์ด I (บ้าน) และ V (แรงตึง) ได้",
+        "ฉันสามารถดีดวลีถาม (Call) และจบด้วยวลีตอบ (Response) ได้",
+        "ฉันเล่นและเว้นวรรคได้โดยไม่หลุดจังหวะ"
+      ]
+    },
+    {
+      "id": "m5-w19-90s-secret",
+      "title": "Week 19: The 90s Secret",
+      "isVisible": false,
+      "lessonBlocks": [
+        {
+          "type": "text",
+          "content": "คุณเคยสงสัยไหมว่าทำไมเพลงยุค 90s (Oasis, Goo Goo Dolls) ถึงฟังดูมีเสน่ห์ลอยๆ เคล็ดลับคือ **Common Tones** หรือการค้างโน้ตตัวเดิมไว้ขณะที่คอร์ดด้านล่างเปลี่ยนไป"
+        },
+        {
+          "type": "fretboard-visualizer",
+          "visualRef": "m5-w19-vis-common-tones"
+        },
+        {
+          "type": "text",
+          "content": "ลองดีด Pedal Chords ด้านล่างนี้ สังเกตว่านิ้วนางและนิ้วก้อย (โน้ต D และ G) ถูกล็อคค้างไว้บนสาย 1 และ 2 ตลอดเวลา"
+        },
+        {
+          "type": "tab",
+          "tabRef": "m5-w19-tab-pedal-chords"
+        },
+        {
+          "type": "technique-drill",
+          "drillRef": "m5-w19-drill-landing"
+        }
+      ],
+      "month": 5,
+      "module": "diatonic-bridge",
+      "number": 19,
+      "week": 19,
+      "dailyPractice": [
+        "ฝึกจับและเปลี่ยนคอร์ด Pedal (G, Cadd9, Dsus4, Em7) 5 นาที",
+        "ฝึกค้างโน้ต D และ G ขณะเปลี่ยน Bass Note 5 นาที",
+        "Chord Tone Landing Drill 10 นาที"
+      ],
+      "selfCheck": [
+        "ฉันสามารถล็อคนิ้วก้อยและนิ้วนางค้างไว้ตอนเปลี่ยนคอร์ดได้",
+        "ฉันเริ่มฟังออกว่าโน้ตตัวเดียวกันให้ความรู้สึกต่างกันบนคอร์ดต่างกัน",
+        "ฉันดีดโน้ตเป้าหมายได้แม่นยำขึ้น"
+      ]
+    },
+    {
+      "id": "m5-w20-solo-builder",
+      "title": "Week 20: 8-Bar Solo Builder",
+      "isVisible": false,
+      "lessonBlocks": [
+        {
+          "type": "text",
+          "content": "เดินทางมาถึงสัปดาห์สุดท้ายของ Month 5 แล้ว! ถึงเวลาประกอบทุกอย่างเข้าด้วยกัน: **Space, Call & Response, และ Chord Tones** เพื่อสร้างโซโล่ 8 ห้องที่สมบูรณ์"
+        },
+        {
+          "type": "fretboard-visualizer",
+          "visualRef": "m5-w20-vis-solo-map"
+        },
+        {
+          "type": "text",
+          "content": "หัวใจสำคัญคือ 'การเล่าเรื่อง' เราจะไม่ดีดโน้ตรัวๆ แต่เราจะสร้าง Motif ขึ้นมา และค่อยๆ ต่อยอดมันในห้องถัดๆ ไป (Develop the Motif)"
+        },
+        {
+          "type": "tab",
+          "tabRef": "m5-w20-tab-8bar-solo"
+        },
+        {
+          "type": "technique-drill",
+          "drillRef": "m5-w20-drill-solo-builder"
+        }
+      ],
+      "month": 5,
+      "module": "diatonic-bridge",
+      "number": 20,
+      "week": 20,
+      "dailyPractice": [
+        "ฟัง Backing Track คีย์ C วนลูปและจินตนาการทำนองในหัว 5 นาที",
+        "เล่นตาม Tab 'The 8-Bar Story' จนคล่อง 5 นาที",
+        "สร้าง 8-Bar Solo ของตัวเอง 10 นาที"
+      ],
+      "selfCheck": [
+        "ฉันสามารถจำกัดโน้ตของตัวเองให้ไม่เกิน 4-5 ตัวต่อหนึ่งวลีได้",
+        "ฉันรู้จักจุดไคลแม็กซ์ (Climax) ใน 8 ห้อง",
+        "โซโล่ของฉันฟังดูเป็น 'เรื่องราว' มากกว่า 'การไล่สเกล'"
+      ]
+    }
+  ],
+  "techniqueDrills": [
+    {
+      "id": "m5-w17-drill-space",
+      "type": "technique-drill",
+      "title": "Motif & Space Drill",
+      "description": "เปิด Backing Track คีย์ C Major. กำหนดกฎให้ตัวเอง: ดีดได้แค่ 3 โน้ต แล้วต้องหยุดพักอย่างน้อย 1 ห้องเต็ม (4 จังหวะ) ทำแบบนี้วนไป 5 นาทีเพื่อให้ร่างกายชินกับการเว้นวรรค"
+    },
+    {
+      "id": "m5-w19-drill-landing",
+      "type": "technique-drill",
+      "title": "Chord Tone Landing",
+      "description": "ฝึกสไลด์เข้าหาเป้าหมายให้ตรง pitch กับคอร์ดที่รองรับ เพื่อโฟกัสที่การเล็งโน้ตแม่นๆ"
+    },
+    {
+      "id": "m5-w20-drill-solo-builder",
+      "type": "technique-drill",
+      "title": "8-Bar Capstone Routine",
+      "description": "ขั้นตอนการสร้างโซโล่: ห้อง 1-2 ตั้งคำถามเรียบง่าย, ห้อง 3-4 ตอบกลับด้วยท่วงทำนองที่คล้ายเดิมแต่เปลี่ยนโน้ตท้าย, ห้อง 5-6 ไต่ระดับขึ้นจุดสูงสุด (Climax), ห้อง 7-8 ดึงจังหวะกลับและจบลงที่คอร์ด 1 อย่างสวยงาม"
+    },
+    {
+      "id": "m5-w18-drill-call-response",
+      "type": "technique-drill",
+      "title": "Q&A Phrase Drill",
+      "description": "เปิด Backing Track คีย์ G เล่นวลี 2 ห้องแรกเป็นคำถาม โดยจบโน้ตที่รู้สึก 'ไม่จบ' (เช่นโน้ต A หรือ C) จากนั้นอีก 2 ห้องให้แต่งวลีตอบที่จบลงบนโน้ต G (Root) หรือ B (3rd)"
+    }
+  ],
+  "miniTabs": [
+    {
+      "id": "m5-w19-tab-pedal-chords",
+      "type": "tab",
+      "title": "90s Pedal Chords (G - Cadd9 - Em7 - Dsus4)",
+      "ascii": [
+        "e|--3-------3-------|--3-------3-------|",
+        "B|--3-------3-------|--3-------3-------|",
+        "G|--0-------0-------|--0-------2-------|",
+        "D|--0-------2-------|--2-------0-------|",
+        "A|--2-------3-------|--2---------------|",
+        "E|--3---------------|--0---------------|",
+        "    G      Cadd9       Em7     Dsus4"
+      ]
+    },
+    {
+      "id": "m5-w17-tab-space",
+      "type": "tab",
+      "title": "The Power of Space",
+      "ascii": [
+        "e|-----------------------|-----------------------|",
+        "B|-------5--8~-(8)-------|-----------------------|",
+        "G|--5-7------------------|--[ REST FOR 2 BARS ]--|",
+        "D|-----------------------|-----------------------|",
+        "A|-----------------------|-----------------------|",
+        "E|-----------------------|-----------------------|"
+      ]
+    },
+    {
+      "id": "m5-w18-tab-call-response",
+      "type": "tab",
+      "title": "Call & Response Basics",
+      "ascii": [
+        "e|-----------------|-----------------|-----------------|-----------------|",
+        "B|-------8---------|-------8---------|-------8---------|-----------------|",
+        "G|--7-9------------|--7-9------9-----|--7-9------------|--9-7------------|",
+        "D|-----------------|-----------------|-----------------|------9-7~-------|",
+        "A|-----------------|-----------------|-----------------|-----------------|",
+        "E|-----------------|-----------------|-----------------|-----------------|",
+        "    Call (ถาม)       Response (ตอบ)     Call (ถาม)       Response จบสนิท"
+      ]
+    },
+    {
+      "id": "m5-w20-tab-8bar-solo",
+      "type": "tab",
+      "title": "The 8-Bar Story",
+      "ascii": [
+        "Intro ( Motif )     Develop          Climax           Resolve",
+        "e|--------|--------|-------8~|--------|10-8-10/12-|--------|--------|--------|",
+        "B|------5-|8~-(8)--|-----5---|8~-(8)--|------------|8-------|----5---|--------|",
+        "G|--5-7---|--------|-5-7-----|--------|------------|--9-7-5-|5-7---7-|5~-(5)--|",
+        "D|--------|--------|---------|--------|------------|--------|--------|--------|",
+        "A|--------|--------|---------|--------|------------|--------|--------|--------|",
+        "E|--------|--------|---------|--------|------------|--------|--------|--------|"
+      ]
+    }
+  ],
+  "fretboardVisuals": [
+    {
+      "id": "m5-w17-vis-triads",
+      "type": "fretboard-visualizer",
+      "title": "Diatonic 1-3-5 Overlay (Key of C)",
+      "description": "นี่คือโครงสร้างของคอร์ด I, IV, V (C, F, G) ที่ซ่อนอยู่ในโครงสร้างของ C Major Scale บนคอกีตาร์",
+      "config": {
+        "startFret": 5,
+        "endFret": 8
+      },
+      "dots": [
+        {
+          "string": 3,
+          "fret": 5,
+          "label": "C (I)",
+          "type": "root"
+        },
+        {
+          "string": 2,
+          "fret": 5,
+          "label": "E",
+          "type": "normal"
+        },
+        {
+          "string": 2,
+          "fret": 8,
+          "label": "G",
+          "type": "normal"
+        },
+        {
+          "string": 4,
+          "fret": 5,
+          "label": "G (V)",
+          "type": "root"
+        },
+        {
+          "string": 3,
+          "fret": 7,
+          "label": "D",
+          "type": "normal"
+        },
+        {
+          "string": 2,
+          "fret": 6,
+          "label": "F (IV)",
+          "type": "root"
+        },
+        {
+          "string": 4,
+          "fret": 7,
+          "label": "A (vi)",
+          "type": "root"
+        }
+      ],
+      "legend": [
+        {
+          "label": "Root Note",
+          "type": "root"
+        },
+        {
+          "label": "Chord Tones",
+          "type": "normal"
+        }
+      ]
+    },
+    {
+      "id": "m5-w19-vis-common-tones",
+      "type": "fretboard-visualizer",
+      "title": "The Magic Common Tones (G & D)",
+      "config": {
+        "startFret": 0,
+        "endFret": 5
+      },
+      "dots": [
+        {
+          "string": 1,
+          "fret": 3,
+          "label": "G",
+          "type": "root"
+        },
+        {
+          "string": 2,
+          "fret": 3,
+          "label": "D",
+          "type": "target"
+        },
+        {
+          "string": 6,
+          "fret": 3,
+          "label": "G (Bass)",
+          "type": "normal"
+        },
+        {
+          "string": 5,
+          "fret": 3,
+          "label": "C (Bass)",
+          "type": "normal"
+        },
+        {
+          "string": 4,
+          "fret": 0,
+          "label": "D (Bass)",
+          "type": "normal"
+        }
+      ],
+      "legend": [
+        {
+          "label": "โน้ตคงที่ (Common Tones)",
+          "type": "root"
+        },
+        {
+          "label": "โน้ตเบสที่เปลี่ยนไป",
+          "type": "normal"
+        }
+      ]
+    },
+    {
+      "id": "m5-w20-vis-solo-map",
+      "type": "fretboard-visualizer",
+      "title": "C Major Target Notes (Frets 5-8)",
+      "config": {
+        "startFret": 5,
+        "endFret": 9
+      },
+      "dots": [
+        {
+          "string": 3,
+          "fret": 5,
+          "label": "C (Root)",
+          "type": "root"
+        },
+        {
+          "string": 2,
+          "fret": 5,
+          "label": "E (3rd)",
+          "type": "target"
+        },
+        {
+          "string": 2,
+          "fret": 8,
+          "label": "G (5th)",
+          "type": "target"
+        },
+        {
+          "string": 1,
+          "fret": 8,
+          "label": "C (Root)",
+          "type": "root"
+        }
+      ],
+      "legend": [
+        {
+          "label": "Home Notes",
+          "type": "root"
+        },
+        {
+          "label": "Sweet Notes",
+          "type": "target"
+        }
+      ]
+    }
+  ],
+  "chordSoundLabs": [
+    {
+      "id": "m5-w18-sound-prog-pop",
+      "type": "chord-sound-lab",
+      "title": "I-IV-V-vi Emotional Loop (Key of G)",
+      "description": "ฟังและทำความเข้าใจอารมณ์ของ Home (บ้าน), Away (ออกเดินทาง), Pull (ดึงดูด) และ Return (กลับสู่ความเศร้าเล็กๆ)",
+      "tempo": 90,
+      "chords": [
+        {
+          "id": "G",
+          "name": "G Major",
+          "role": "I (Home - มั่นคงปลอดภัย)",
+          "notes": [
+            "G",
+            "B",
+            "D"
+          ]
+        },
+        {
+          "id": "C",
+          "name": "C Major",
+          "role": "IV (Away - ล่องลอยออกเดินทาง)",
+          "notes": [
+            "C",
+            "E",
+            "G"
+          ]
+        },
+        {
+          "id": "D",
+          "name": "D Major",
+          "role": "V (Pull - ตึงเครียด อยากกลับบ้าน)",
+          "notes": [
+            "D",
+            "F#",
+            "A"
+          ]
+        },
+        {
+          "id": "Em",
+          "name": "E Minor",
+          "role": "vi (Melancholy - เศร้าหม่น)",
+          "notes": [
+            "E",
+            "G",
+            "B"
+          ]
+        }
+      ],
+      "sequence": [
+        "G",
+        "C",
+        "D",
+        "Em"
+      ],
+      "listenFor": [
+        "ความรู้สึกโล่งและจบเมื่ออยู่ที่ G Major",
+        "ความรู้สึกอยากพุ่งไปข้างหน้าเมื่ออยู่ที่ D Major",
+        "อารมณ์เปลี่ยนไปเป็นสีหม่นเมื่อเข้าสู่ E Minor"
+      ]
+    }
+  ],
+  "modules": [
+    {
+      "id": "diatonic-bridge",
+      "title": "Diatonic Bridge & Melodic Freedom",
+      "subtitle": "Diatonic triads, melodic space, call-response, and 8-bar solo building",
+      "goal": "Connect chord-scale knowledge to short musical phrases across Weeks 17-20 without exposing the preview publicly.",
+      "concepts": [],
+      "drills": [],
+      "checkpoint": []
+    }
+  ]
+}

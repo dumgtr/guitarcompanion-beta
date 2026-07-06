@@ -1,0 +1,502 @@
+{
+  "weeks": [
+    {
+      "id": "m6-w21-what-modes-really-mean-pitch-axis-",
+      "month": 6,
+      "number": 21,
+      "week": 21,
+      "module": "modes-colors",
+      "title": "Week 21: What Modes Really Mean (Pitch Axis)",
+      "isVisible": false,
+      "lessonBlocks": [
+        {
+          "type": "text",
+          "content": "ยินดีต้อนรับสู่ Month 6! เราจะมาทำความรู้จักกับ Modes ในมุมมองของการใช้งานจริง: การเลือก 'สี' ให้กับคอร์ดที่คุณกำลังเล่น"
+        },
+        {
+          "type": "text",
+          "content": "ทำความเข้าใจว่า Mode คือ 'สีสัน' ของคอร์ด ไม่ใช่แค่สเกลที่เริ่มจากโน้ตตัวอื่น ฟังความแตกต่างระหว่าง Major/Minor ธรรมดากับ Modal color"
+        },
+        {
+          "type": "chord-sound-lab",
+          "labRef": "m6-w21-drone-color-lab"
+        },
+        {
+          "type": "text",
+          "content": "แบบฝึกหัดด้านล่างนี้จะให้คุณลองดีดโน้ตสีสันของแต่ละโหมดทับลงบนคอร์ด A (Pitch Axis Drone)"
+        },
+        {
+          "type": "tab",
+          "tabRef": "m6-w21-tab-pitch-axis"
+        },
+        {
+          "type": "technique-drill",
+          "drillRef": "m6-w21-drill-pitch-axis"
+        }
+      ],
+      "dailyPractice": [
+        "เปิด A Drone Lab และฟังความรู้สึกของ A Major (สว่าง) 5 นาที",
+        "ดีด Tab เปรียบเทียบ Dorian (เท่หม่น) และ Mixolydian (บลูส์) 5 นาที",
+        "ฝึกเล่นสลับระหว่าง 3 สีสันบน Drone เดียว 10 นาที"
+      ],
+      "selfCheck": [
+        "ฉันแยกความรู้สึกของ A Dorian และ A Mixolydian ออก",
+        "ฉันเข้าใจแล้วว่าทำไมเราถึงใช้ A เป็นรากฐาน (Pitch Axis) สำหรับทุกโหมดในการฝึกนี้",
+        "หูของฉันเริ่มจำสีสันของโน้ตตัวที่ 3 (Major vs Minor 3rd) ได้"
+      ]
+    },
+    {
+      "id": "m6-w22-dorian-vs-mixolydian-the-bluesy-cousins-",
+      "month": 6,
+      "number": 22,
+      "week": 22,
+      "module": "modes-colors",
+      "title": "Week 22: Dorian vs Mixolydian (The Bluesy Cousins)",
+      "isVisible": false,
+      "lessonBlocks": [
+        {
+          "type": "text",
+          "content": "สัปดาห์นี้เราจะมาเจาะลึก 2 โหมดที่เป็น 'ลูกพี่ลูกน้อง' กันในสาย Blues/Rock นั่นคือ Dorian และ Mixolydian"
+        },
+        {
+          "type": "text",
+          "content": "ความคล้าย: ทั้งคู่มีโน้ต Flat 7 (b7) ซึ่งให้ความรู้สึก Bluesy\nความต่าง: Mixolydian มี Major 3rd (สว่าง/กวนๆ) ส่วน Dorian มี Minor 3rd และ Natural 6 (หม่น/เท่/แจ๊สซี่)"
+        },
+        {
+          "type": "fretboard-visualizer",
+          "visualRef": "m6-w22-vis-dorian-mixo"
+        },
+        {
+          "type": "tab",
+          "tabRef": "m6-w22-tab-dorian-lick"
+        },
+        {
+          "type": "tab",
+          "tabRef": "m6-w22-tab-mixo-lick"
+        },
+        {
+          "type": "technique-drill",
+          "drillRef": "m6-w22-drill-dorian-mixo"
+        }
+      ],
+      "dailyPractice": [
+        "ดู Visual Map บนคอ และจำตำแหน่งโน้ตสีสัน (3rd, 6th, b7) 5 นาที",
+        "ดีด Tab 2 ตัวอย่างเปรียบเทียบอารมณ์ 5 นาที",
+        "สร้างวลีดนตรี (Phrase) เล็กๆ ของตัวเองที่จบลงบนโน้ตสีสัน 10 นาที"
+      ],
+      "selfCheck": [
+        "ฉันแยกเสียงสว่างแบบ Mixolydian และหม่นเท่แบบ Dorian ออก",
+        "ฉันรู้ว่าโน้ตตัวไหนบนคอคือ Flat 7",
+        "ฉันเห็นความสำคัญของโน้ตตัวที่ 3 ในการชี้วัด Major/Minor"
+      ]
+    },
+    {
+      "id": "m6-w23-lydian-the-floating-dream-",
+      "month": 6,
+      "number": 23,
+      "week": 23,
+      "module": "modes-colors",
+      "title": "Week 23: Lydian (The Floating Dream)",
+      "isVisible": false,
+      "lessonBlocks": [
+        {
+          "type": "text",
+          "content": "ยินดีต้อนรับสู่ Lydian: โหมดแห่งความฝัน ความลอย และเวทมนตร์ สิ่งที่ทำให้ Lydian แตกต่างจาก Major สเกลปกติคือโน้ตตัวเดียว: Sharp 4 (#4)"
+        },
+        {
+          "type": "text",
+          "content": "เพื่อให้ชัดเจน เราจะยึด Pitch Axis เป็นคีย์ F เล่นโน้ต F เป็นฐาน (Fmaj7) แล้วฟังว่าเมื่อโน้ต B ธรรมชาติ (#4 ของ F) ดังขึ้น มันสร้างความรู้สึกแปลกหูอย่างไร"
+        },
+        {
+          "type": "chord-sound-lab",
+          "labRef": "m6-w23-sound-lydian-vamp"
+        },
+        {
+          "type": "fretboard-visualizer",
+          "visualRef": "m6-w23-vis-lydian"
+        },
+        {
+          "type": "tab",
+          "tabRef": "m6-w23-tab-lydian"
+        },
+        {
+          "type": "technique-drill",
+          "drillRef": "m6-w23-drill-lydian"
+        }
+      ],
+      "dailyPractice": [
+        "ฟัง Lydian Vamp 5 นาที ซึมซับอารมณ์ล่องลอย",
+        "เล่น Tab และจงใจค้างเสียงโน้ต #4 ให้ดังกังวาน 5 นาที",
+        "ฝึกหาโน้ต #4 ในตำแหน่งอื่นๆ รอบๆ ตัว 10 นาที"
+      ],
+      "selfCheck": [
+        "ฉันสามารถได้ยินเสียง 'ลอยๆ' ของโน้ต #4 เหนือคอร์ด maj7 ได้",
+        "ฉันรู้ว่า F Lydian ใช้โน้ตชุดเดียวกับ C Major สเกล",
+        "ฉันไม่รู้สึกว่าเสียง #4 คือเสียงเพี้ยน แต่เป็นสีสันชนิดหนึ่ง"
+      ]
+    },
+    {
+      "id": "m6-w24-modal-vamp-integration",
+      "month": 6,
+      "number": 24,
+      "week": 24,
+      "module": "modes-colors",
+      "title": "Week 24: Modal Vamp Integration",
+      "isVisible": false,
+      "lessonBlocks": [
+        {
+          "type": "text",
+          "content": "สัปดาห์สุดท้าย! เราจะรวมทุกอย่างเข้าด้วยกันผ่าน Modal Vamp (การวนคอร์ดเพื่อสร้างบรรยากาศแบบโหมด)"
+        },
+        {
+          "type": "text",
+          "content": "หลักการสำคัญ: ไม่จำเป็นต้องเล่นเร็ว แต่เราจะเลือก 'โน้ตสีสัน' (Color Note) อย่างจงใจ แล้วคลี่คลาย (Resolve) มันเข้าหาโน้ตคอร์ดตัวอื่นๆ"
+        },
+        {
+          "type": "chord-sound-lab",
+          "labRef": "m6-w24-sound-vamp"
+        },
+        {
+          "type": "tab",
+          "tabRef": "m6-w24-tab-resolution-example"
+        },
+        {
+          "type": "technique-drill",
+          "drillRef": "m6-w24-drill-mode-resolution"
+        }
+      ],
+      "dailyPractice": [
+        "วอร์มอัพด้วย Modal Vamp 5 นาที",
+        "จำลองการแต่งวลีดนตรี 8 ห้อง เล่าเรื่องด้วยโน้ตสีสัน 10 นาที",
+        "ประเมินและทบทวนความรู้สึกของตัวเองต่อเสียงของโหมด 5 นาที"
+      ],
+      "selfCheck": [
+        "ฉันสามารถจำกัดการเล่นให้ไม่เกิน 5 โน้ตในหนึ่งวลีได้",
+        "ฉันรู้จักสร้างและคลายความตึงเครียดผ่านการคลี่คลายโน้ต (Resolution)",
+        "หูของฉันเปิดกว้างรับ 'สีสัน' ของดนตรีมากกว่าแค่ท่องจำสเกล"
+      ]
+    }
+  ],
+  "techniqueDrills": [
+    {
+      "id": "m6-w24-drill-mode-resolution",
+      "type": "technique-drill",
+      "title": "8-Bar Modal Phrase Builder",
+      "description": "เปิด A Dorian Vamp เล่นโน้ตน้อยๆ พยายามจบประโยคลงบนโน้ต F# (Color Note) เวลาคอร์ด D9 ดังขึ้น"
+    },
+    {
+      "id": "m6-w21-drill-pitch-axis",
+      "type": "technique-drill",
+      "title": "Pitch Axis Ear Training",
+      "description": "เปิดคอร์ด A Drone ดีดสเกลขึ้นลงช้าๆ แต่ให้ตั้งใจ 'ฟัง' โน้ตตัวที่ 3 (C# vs C) และตัวที่ 7 (G# vs G) เพราะนี่คือตัวชี้วัดสีของโหมด"
+    },
+    {
+      "id": "m6-w22-drill-dorian-mixo",
+      "type": "technique-drill",
+      "title": "Cousin Switching Drill",
+      "description": "เปิด Backing Track คีย์ A (A7 หรือ Am7) เล่นวนลูป โดยรอบแรกให้เล่นสำเนียง Mixolydian เน้นโน้ต C# รอบที่สองเล่นสำเนียง Dorian เน้นโน้ต C ธรรมชาติ"
+    },
+    {
+      "id": "m6-w23-drill-lydian",
+      "type": "technique-drill",
+      "title": "Lydian Color Resolution",
+      "description": "เปิด Fmaj7 Vamp ลากโน้ต B (#4) ค้างไว้ให้ประสานกับคอร์ด แล้วสร้างประโยคจบด้วยการสไลด์จาก B ไป C (5th) อย่างนุ่มนวล"
+    }
+  ],
+  "miniTabs": [
+    {
+      "id": "m6-w22-tab-dorian-lick",
+      "type": "tab",
+      "title": "Dorian Minor 6 Lick",
+      "ascii": [
+        "e|--------------------|",
+        "B|------5-7/8\\7-5-----|",
+        "G|--5-7-----------7-5-|",
+        "D|--------------------|",
+        "A|--------------------|",
+        "E|--------------------|"
+      ]
+    },
+    {
+      "id": "m6-w22-tab-mixo-lick",
+      "type": "tab",
+      "title": "Mixolydian Flat 7 Lick",
+      "ascii": [
+        "e|--------------------|",
+        "B|--------------------|",
+        "G|------5-7-5---------|",
+        "D|--5-7-------7-5-----|",
+        "A|----------------7---|",
+        "E|--------------------|"
+      ]
+    },
+    {
+      "id": "m6-w24-tab-resolution-example",
+      "type": "tab",
+      "title": "Mode Resolution Example (A Dorian)",
+      "ascii": [
+        "    Am7                   D9",
+        "e|----------------------|----------------------|",
+        "B|----------------------|----7~----------------|",
+        "G|--5-7/9~--------------|--5-----(7)\\5---------|",
+        "D|----------------------|--------------7-------|",
+        "A|----------------------|----------------------|",
+        "E|----------------------|----------------------|",
+        "                          (F#)         (A Root)"
+      ]
+    },
+    {
+      "id": "m6-w21-tab-pitch-axis",
+      "type": "tab",
+      "title": "The Colors of A",
+      "ascii": [
+        "   A Major (สว่าง)    A Mixolydian (ขี้เล่น)   A Dorian (หม่นเท่)",
+        "e|-----------------|---------------------|-------------------|",
+        "B|-----------------|---------------------|-------------------|",
+        "G|-------------6---|-------------6-------|-------------5-----|",
+        "D|-------6--7------|-------5--7----------|-------5--7--------|",
+        "A|--7--9-----------|--7--9---------------|--7--9-------------|",
+        "E|-----------------|---------------------|-------------------|"
+      ]
+    },
+    {
+      "id": "m6-w23-tab-lydian",
+      "type": "tab",
+      "title": "Floating Lydian Lick (F)",
+      "ascii": [
+        "e|----------------------|----------------------|",
+        "B|--------0~------------|----------------------|",
+        "G|--2-0-2------2-0-2----|--2-0-2---------------|",
+        "D|-------------------3~-|--------3~----3-------|",
+        "A|----------------------|----------------------|",
+        "E|----------------------|----------------------|",
+        "          (B = #4)                 (F = Root)"
+      ]
+    }
+  ],
+  "fretboardVisuals": [
+    {
+      "id": "m6-w22-vis-dorian-mixo",
+      "type": "fretboard-visualizer",
+      "title": "The Characteristic Notes (Dorian & Mixolydian)",
+      "config": {
+        "startFret": 5,
+        "endFret": 8
+      },
+      "dots": [
+        {
+          "string": 6,
+          "fret": 5,
+          "label": "A (Root)",
+          "type": "root"
+        },
+        {
+          "string": 4,
+          "fret": 7,
+          "label": "A (Root)",
+          "type": "root"
+        },
+        {
+          "string": 3,
+          "fret": 5,
+          "label": "C (Minor 3rd - Dorian)",
+          "type": "target"
+        },
+        {
+          "string": 3,
+          "fret": 6,
+          "label": "C# (Major 3rd - Mixo)",
+          "type": "target"
+        },
+        {
+          "string": 4,
+          "fret": 5,
+          "label": "G (Flat 7)",
+          "type": "normal"
+        },
+        {
+          "string": 2,
+          "fret": 7,
+          "label": "F# (Natural 6 - Dorian)",
+          "type": "target"
+        }
+      ],
+      "legend": [
+        {
+          "label": "Root Note",
+          "type": "root"
+        },
+        {
+          "label": "Shared Flat 7",
+          "type": "normal"
+        },
+        {
+          "label": "Color Notes (3rd, 6th)",
+          "type": "target"
+        }
+      ]
+    },
+    {
+      "id": "m6-w23-vis-lydian",
+      "type": "fretboard-visualizer",
+      "title": "F Lydian Target Map",
+      "config": {
+        "startFret": 0,
+        "endFret": 3
+      },
+      "dots": [
+        {
+          "string": 6,
+          "fret": 1,
+          "label": "F (Root)",
+          "type": "root"
+        },
+        {
+          "string": 4,
+          "fret": 3,
+          "label": "F (Root)",
+          "type": "root"
+        },
+        {
+          "string": 3,
+          "fret": 2,
+          "label": "A (3rd)",
+          "type": "normal"
+        },
+        {
+          "string": 2,
+          "fret": 0,
+          "label": "B (#4 Lydian Color)",
+          "type": "target"
+        },
+        {
+          "string": 1,
+          "fret": 1,
+          "label": "F (Root)",
+          "type": "root"
+        }
+      ],
+      "legend": [
+        {
+          "label": "Root Note",
+          "type": "root"
+        },
+        {
+          "label": "Chord Tones",
+          "type": "normal"
+        },
+        {
+          "label": "Lydian Sharp 4 (#4)",
+          "type": "target"
+        }
+      ]
+    }
+  ],
+  "chordSoundLabs": [
+    {
+      "id": "m6-w21-drone-color-lab",
+      "type": "chord-sound-lab",
+      "title": "A Pitch Axis Drone",
+      "description": "ฟังเสียงโน้ต A ที่ดังกังวานเป็นฐาน (Drone) จากนั้นทดลองดีดสเกล A Major, A Mixolydian, และ A Dorian ทับลงไป แล้วสังเกตความรู้สึกที่เปลี่ยนไป",
+      "tempo": 80,
+      "chords": [
+        {
+          "id": "A5",
+          "name": "A Drone",
+          "role": "Static Root",
+          "notes": [
+            "A",
+            "E"
+          ]
+        }
+      ],
+      "sequence": [
+        "A5"
+      ],
+      "listenFor": [
+        "A Major: สว่าง สดใส",
+        "A Mixolydian: ขี้เล่น กึ่งบลูส์นิดๆ (เพราะมี G ธรรมชาติ)",
+        "A Dorian: เท่ หม่น แต่ไม่เศร้าเกินไป (เพราะมี F#)"
+      ]
+    },
+    {
+      "id": "m6-w23-sound-lydian-vamp",
+      "type": "chord-sound-lab",
+      "title": "Dreamy Lydian Vamp (Fmaj7)",
+      "tempo": 75,
+      "chords": [
+        {
+          "id": "Fmaj7",
+          "name": "Fmaj7",
+          "role": "IVmaj7 (Dreamy)",
+          "notes": [
+            "F",
+            "A",
+            "C",
+            "E"
+          ]
+        }
+      ],
+      "sequence": [
+        "Fmaj7"
+      ],
+      "listenFor": [
+        "เสียงลอยๆ ของ Fmaj7 ที่เหมาะกับการเล่นสเกล C Major (ซึ่งก็คือ F Lydian นั่นเอง)"
+      ]
+    },
+    {
+      "id": "m6-w24-sound-vamp",
+      "type": "chord-sound-lab",
+      "title": "A Dorian Vamp (Am7 - D9)",
+      "description": "นี่คือ Loop คอร์ดสไตล์ Dorian คลาสสิก ฟังเสียงโน้ต F# ที่อยู่ในคอร์ด D9 ให้ดี มันคือหัวใจของ Dorian",
+      "tempo": 90,
+      "chords": [
+        {
+          "id": "Am7",
+          "name": "Am7",
+          "role": "i7 (Home)",
+          "notes": [
+            "A",
+            "C",
+            "E",
+            "G"
+          ]
+        },
+        {
+          "id": "D9",
+          "name": "D9",
+          "role": "IV9 (Color Chaser)",
+          "notes": [
+            "D",
+            "F#",
+            "A",
+            "C",
+            "E"
+          ]
+        }
+      ],
+      "sequence": [
+        "Am7",
+        "D9"
+      ],
+      "listenFor": [
+        "เสียงโน้ต F# ในคอร์ด D9 ที่ทำให้เพลงไม่เศร้าแบบ Minor ปกติ"
+      ]
+    }
+  ],
+  "modules": [
+    {
+      "id": "modes-colors",
+      "title": "Modes as Chord Colors",
+      "subtitle": "Ionian, Dorian, Mixolydian, and modal color awareness",
+      "goal": "Understand and hear modes as specific colors over chords, moving beyond simple scale shapes.",
+      "concepts": [
+        "Modes are sounds, not just positions.",
+        "Drone practice (Pitch Axis) is key to hearing modal colors.",
+        "Focusing on the characteristic notes of Dorian, Mixolydian, and Lydian."
+      ],
+      "drills": [],
+      "checkpoint": []
+    }
+  ]
+}
