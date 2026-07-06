@@ -4,7 +4,7 @@ const flatToSharp = { Db: "C#", Eb: "D#", Gb: "F#", Ab: "G#", Bb: "A#" };
 const majorIntervals = [0, 2, 4, 5, 7, 9, 11];
 const flatKeys = ["F", "Bb", "Eb", "Ab", "Db", "Gb"];
 const themeStorageKey = "guitarCourseTheme";
-const futureDataUrl = "./data.json";
+
 const selectedFocusedMonthStorageKey = "guitarCourseSelectedFocusedMonth";
 const stringTunings = [
   { name: "e", note: "E" },
@@ -201,50 +201,131 @@ function week(number, month, title, module, goal, practice, checks) {
   return { number, month, title, module, goal, practice, checks };
 }
 
+const shardUrls = [
+  './data-shards/core-m1-m4.json',
+  './data-shards/month5-preview.json',
+  './data-shards/month6-preview.json'
+];
+
+async function loadJsonShard(url) {
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`Status ${res.status}`);
+    return await res.json();
+  } catch (e) {
+    console.warn(`Shard failed: ${url}`, e);
+    return null;
+  }
+}
+
+function mergeById(existing, incoming) {
+  if (!incoming || !Array.isArray(incoming)) return existing;
+  const map = new Map(existing.map(item => [item.id, item]));
+  incoming.forEach(item => { if (item.id) map.set(item.id, item); });
+  return Array.from(map.values());
+}
+
+function mergeWeeks(existing, incoming) {
+  if (!incoming || !Array.isArray(incoming)) return existing;
+  const map = new Map(existing.map(item => [`${item.month}:${item.number}`, item]));
+  incoming.forEach(item => { if (item.number) map.set(`${item.month}:${item.number}`, item); });
+  return Array.from(map.values()).sort((a, b) => a.number - b.number);
+}
+
 async function loadFutureData() {
   if (futureDataPromise) return futureDataPromise;
   futureDataPromise = (async () => {
     try {
-      updateDebugState({ dataJsonUrl: futureDataUrl, lastAction: "loading data.json", lastError: null });
-      setDataStatus("Loading companion data...", "info");
-      const response = await fetch(futureDataUrl, { cache: "no-store" });
-      if (!response.ok) throw new Error(`Future data failed: ${response.status}`);
-      const data = await response.json();
-      courseData = data;
-      const rhythmModule = modules.filter((item) => item.id === "rhythm");
-      const futureModules = Array.isArray(data.modules) ? data.modules.filter((item) => item.id !== "rhythm") : [];
+      updateDebugState({ dataJsonUrl: 'data-shards', lastAction: 'loading shards', lastError: null });
+      setDataStatus('Loading companion data...', 'info');
+      
+      const core = await loadJsonShard(shardUrls[0]);
+      if (!core) throw new Error('Core shard could not be loaded');
+      
+      const m5 = await loadJsonShard(shardUrls[1]);
+      const m6 = await loadJsonShard(shardUrls[2]);
+      const shards = [core, m5, m6].filter(Boolean);
+      
+      let merged = {
+          modules: [], tonePresets: [], quizItems: [], fretboardVisuals: [], miniTabs: [], chordSoundLabs: [], techniqueDrills: [], miniCourses: [], weeks: []
+      };
+      
+      shards.forEach(shard => {
+          merged.modules = mergeById(merged.modules, shard.modules);
+          merged.tonePresets = mergeById(merged.tonePresets, shard.tonePresets);
+          merged.quizItems = mergeById(merged.quizItems, shard.quizItems);
+          merged.fretboardVisuals = mergeById(merged.fretboardVisuals, shard.fretboardVisuals);
+          merged.miniTabs = mergeById(merged.miniTabs, shard.miniTabs);
+          merged.chordSoundLabs = mergeById(merged.chordSoundLabs, shard.chordSoundLabs);
+          merged.techniqueDrills = mergeById(merged.techniqueDrills, shard.techniqueDrills);
+          merged.miniCourses = mergeById(merged.miniCourses, shard.miniCourses);
+          merged.weeks = mergeWeeks(merged.weeks, shard.weeks);
+      });
+      
+      courseData = merged;
+      
+      const rhythmModule = modules.filter(item => item.id === 'rhythm');
+      const futureModules = merged.modules.filter(item => item.id !== 'rhythm');
       modules = [...rhythmModule, ...futureModules];
-      tonePresets = Array.isArray(data.tonePresets) ? data.tonePresets : [];
-      quizItems = Array.isArray(data.quizItems) ? data.quizItems : [];
-      fretboardVisuals = Array.isArray(data.fretboardVisuals) ? data.fretboardVisuals : [];
-      miniTabs = Array.isArray(data.miniTabs) ? data.miniTabs : [];
-      chordSoundLabs = Array.isArray(data.chordSoundLabs) ? data.chordSoundLabs : [];
-      techniqueDrills = Array.isArray(data.techniqueDrills) ? data.techniqueDrills : [];
-      miniCourses = Array.isArray(data.miniCourses) ? data.miniCourses : [];
-      const knownWeeks = new Set(weeks.map((item) => item.number));
-      const futureWeeks = Array.isArray(data.weeks) ? data.weeks.filter((item) => !knownWeeks.has(item.number)) : [];
+      
+      tonePresets = merged.tonePresets;
+      quizItems = merged.quizItems;
+      fretboardVisuals = merged.fretboardVisuals;
+      miniTabs = merged.miniTabs;
+      chordSoundLabs = merged.chordSoundLabs;
+      techniqueDrills = merged.techniqueDrills;
+      miniCourses = merged.miniCourses;
+      
+      const knownWeeks = new Set(weeks.map(item => item.number));
+      const futureWeeks = merged.weeks.filter(item => !knownWeeks.has(item.number));
       weeks = [...weeks, ...futureWeeks].sort((a, b) => a.number - b.number);
-      if (!modules.some((item) => item.id === selectedModule)) selectedModule = modules[0]?.id || selectedModule;
-      if (tonePresets.length && !tonePresets.some((item) => item.id === selectedTone)) selectedTone = tonePresets[0].id;
+      
+      if (!modules.some(item => item.id === selectedModule)) selectedModule = modules[0]?.id || selectedModule;
+      if (tonePresets.length && !tonePresets.some(item => item.id === selectedTone)) selectedTone = tonePresets[0].id;
+      
       const loadedMonths = getLoadedMonths();
       const visibleMonths = getVisibleMonths();
-      updateDebugState({ dataJsonLoaded: true, loadedMonths, visibleMonths, loadedWeeks: weeks.length, miniCourses: miniCourses.length, lastAction: "data.json loaded" });
-      console.info("Guitar Companion data.json loaded", window.__GC_DEBUG__);
-      const readyMonths = visibleMonths.filter((month) => month > 1);
-      const readyMonthLabel = readyMonths.length ? readyMonths.join(", ") : "1";
-      setDataStatus(`data.json loaded: Month ${readyMonthLabel} ready.`, "success");
-      showToast(`Extra lessons loaded. Month ${readyMonthLabel} ready.`, "success");
+      
+      const m5Exists = merged.weeks.some(w => w.month === 5);
+      const m6Exists = merged.weeks.some(w => w.month === 6);
+      const devMode = getDevPreviewMode();
+      
+      let debugMessage = 'shards loaded';
+      if (devMode === "all" && !m6Exists) {
+        debugMessage = 'QA Preview warning: Month 6 shard did not load.';
+        setDataStatus(debugMessage, 'error');
+        showToast(debugMessage, 'error', 3000);
+      }
+      
+      updateDebugState({
+          dataJsonLoaded: true, 
+          loadedMonths, 
+          visibleMonths, 
+          currentMonth: selectedFocusedMonth,
+          devPreviewMode: devMode,
+          m5Exists,
+          m6Exists,
+          loadedWeeks: weeks.length, 
+          miniCourses: miniCourses.length, 
+          lastAction: debugMessage 
+      });
+      
+      const readyMonths = visibleMonths.filter(month => month > 1);
+      const readyMonthLabel = readyMonths.length ? readyMonths.join(', ') : '1';
+      setDataStatus(`Data loaded: Month ${readyMonthLabel} ready.`, 'success');
+      showToast(`Extra lessons loaded. Month ${readyMonthLabel} ready.`, 'success');
+      
       renderMonthSwitcher();
       renderModules();
       renderModuleDetail();
       renderMiniCourseShelf();
-      return data;
+      return merged;
     } catch (error) {
-      console.warn("Future course data could not be loaded.", error);
+      console.warn('Future course data could not be loaded.', error);
       const message = error?.message || String(error);
-      updateDebugState({ dataJsonLoaded: false, lastError: message, lastAction: "data.json failed" });
-      setDataStatus(`Cannot load data.json. Extra lessons are unavailable. ${message}`, "error");
-      showToast("Could not load data.json. Check file path or server.", "error", 5000);
+      updateDebugState({ dataJsonLoaded: false, lastError: message, lastAction: 'shards failed' });
+      setDataStatus(`Cannot load data shards. ${message}`, 'error');
+      showToast('Could not load data shards. Check file path or server.', 'error', 5000);
       courseData = { modules, weeks: [], tonePresets, quizItems };
       miniCourses = [];
       renderMiniCourseShelf();
@@ -269,14 +350,22 @@ function loadJson(key, fallback) {
   }
 }
 
+function safeSetItem(key, value) {
+  if (typeof isDevPreviewActive === 'function' && isDevPreviewActive() && typeof selectedFocusedMonth !== 'undefined' && selectedFocusedMonth > 4) {
+    console.warn("Dev Preview: Progress saving is disabled for hidden months.");
+    return;
+  }
+  localStorage.setItem(key, value);
+}
+
 function saveJson(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
+  safeSetItem(key, JSON.stringify(value));
 }
 
 function updateDebugState(patch) {
   window.__GC_DEBUG__ = {
     dataJsonLoaded: false,
-    dataJsonUrl: futureDataUrl,
+    dataJsonUrl: "data-shards",
     loadedMonths: [1],
     devPreviewMode,
     preludePreviewMode,
@@ -293,7 +382,7 @@ function updateDebugState(patch) {
 function parseDevPreviewMode() {
   const params = new URLSearchParams(window.location.search);
   const value = String(params.get("devPreview") || params.get("preview") || "").trim().toLowerCase();
-  return ["m3", "m4", "all"].includes(value) ? value : "";
+  return ["m3", "m4", "m5", "5", "m6", "6", "all"].includes(value) ? value : "";
 }
 
 function parsePreludePreviewMode() {
@@ -344,20 +433,29 @@ function getVisibleMonths() {
   const mode = getDevPreviewMode();
   if (mode === "m3") return loadedMonths.filter((month) => month <= 4);
   if (mode === "m4") return loadedMonths.filter((month) => month <= 4);
-  if (mode === "all") return loadedMonths.filter((month) => month <= 4);
+  if (mode === "m5" || mode === "5") return loadedMonths.filter((month) => month <= 5);
+  if (mode === "m6" || mode === "6") return loadedMonths.filter((month) => month <= 6);
+  if (mode === "all") return loadedMonths.filter((month) => month <= 6);
+  
   return loadedMonths.filter((month) => month <= 4);
 }
 
 function canOpenMonth(month) {
-  return getVisibleMonths().includes(Number(month));
+  return getVisibleMonths().includes(month);
 }
 
 function getDevPreviewAutoMonth() {
   if (!isDevPreviewActive()) return 0;
   const visible = getVisibleMonths().filter((month) => month > 2);
   if (!visible.length) return 0;
-  if (getDevPreviewMode() === "m3") return visible.includes(3) ? 3 : 0;
-  if (getDevPreviewMode() === "m4") return visible.includes(4) ? 4 : 0;
+  
+  const mode = getDevPreviewMode();
+  if (mode === "m3") return visible.includes(3) ? 3 : 0;
+  if (mode === "m4") return visible.includes(4) ? 4 : 0;
+  if (mode === "m5" || mode === "5") return visible.includes(5) ? 5 : 0;
+  if (mode === "m6" || mode === "6") return visible.includes(6) ? 6 : 0;
+  if (mode === "all") return visible.includes(6) ? 6 : (visible.includes(5) ? 5 : visible[visible.length - 1]);
+  
   return visible[0];
 }
 
@@ -390,7 +488,7 @@ function getMonthMeta(month) {
   };
   return metadata[month] || {
     shortLabel: `Month ${month}`,
-    moduleLabel: weeks.find((item) => item.month === month)?.module || "Hidden Preview",
+    moduleLabel: getModuleDisplayName(weeks.find((item) => item.month === month)?.module) || "Hidden Preview",
     switcherLabel: `เดือน ${month}: Preview`,
     brandSub: `Dev Preview: Month ${month}`
   };
@@ -454,7 +552,7 @@ function applyTheme(theme) {
 
 function toggleTheme() {
   const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-  localStorage.setItem(themeStorageKey, nextTheme);
+  safeSetItem(themeStorageKey, nextTheme);
   applyTheme(nextTheme);
 }
 
@@ -504,6 +602,7 @@ function init() {
   renderSetlist();
   bindEvents();
   updateGrooveHint();
+
 }
 
 function fillKeySelects() {
@@ -559,6 +658,11 @@ function renderProgress() {
   `;
 }
 
+function getModuleDisplayName(moduleIdOrTitle) {
+  const found = modules.find((item) => item.id === moduleIdOrTitle);
+  return found?.title || moduleIdOrTitle || "";
+}
+
 async function renderWeeks() {
   const selectedMonth = Number(document.getElementById("monthFilter").value || 0);
   await ensureFutureCourseData(selectedMonth);
@@ -569,7 +673,7 @@ async function renderWeeks() {
       type="button" data-week="${item.number}">
       <small>Week ${item.number} · Month ${item.month}</small>
       <strong>${item.title}</strong>
-      <span>${item.module}</span>
+      <span>${getModuleDisplayName(item.module)}</span>
     </button>
   `).join("");
   grid.querySelectorAll("[data-week]").forEach((button) => {
@@ -592,7 +696,7 @@ function renderWeekDetail() {
     <div class="tag-row">
       <span class="tag">Week ${item.number}</span>
       <span class="tag">Month ${item.month}</span>
-      <span class="tag">${item.module}</span>
+      <span class="tag">${getModuleDisplayName(item.module)}</span>
     </div>
     <h3>${item.title}</h3>
     <p>${item.goal}</p>
@@ -1759,9 +1863,35 @@ let focusedSelectedWeek = 1;
 let selectedFocusedMonth = 1;
 let isViewingPrelude = false;
 
+
+function renderQaPreviewBadge() {
+  if (document.getElementById('qaPreviewBadge')) return;
+  const mode = getDevPreviewMode();
+  if (mode && (mode === 'm5' || mode === '5' || mode === 'm6' || mode === '6' || mode === 'all')) {
+    const badge = document.createElement('div');
+    badge.id = 'qaPreviewBadge';
+    badge.style.position = 'fixed';
+    badge.style.bottom = '10px';
+    badge.style.right = '10px';
+    badge.style.background = '#ff4444';
+    badge.style.color = '#fff';
+    badge.style.padding = '8px 12px';
+    badge.style.borderRadius = '8px';
+    badge.style.fontWeight = 'bold';
+    badge.style.zIndex = '9999';
+    badge.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
+    badge.style.fontSize = '12px';
+    badge.style.pointerEvents = 'none';
+    const num = mode.includes('5') ? '5' : (mode.includes('6') ? '6' : '5 & 6');
+    badge.textContent = 'QA Preview: Month ' + num + ' Active';
+    document.body.appendChild(badge);
+  }
+}
+
 function initFocusedApp() {
   applyTheme(getInitialTheme());
   renderDevPreviewBanner();
+  renderQaPreviewBadge();
   updateDebugState({ currentMonth: selectedFocusedMonth, lastAction: "app boot" });
   setDataStatus("Loading companion data...", "info");
   const savedMonth = getSavedSelectedFocusedMonth();
@@ -2308,7 +2438,7 @@ function scrollToMission() {
   document.getElementById("todayChecklist")?.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-function renderMonthSwitcher() {
+function renderMonthSwitcher(autoScroll = false) {
   const tracker = document.getElementById("monthSwitcher");
   const switcher = document.getElementById("lessonMonthSwitcher");
 
@@ -2331,9 +2461,25 @@ function renderMonthSwitcher() {
       </button>
     `).join("");
 
+    switcher.style.display = "flex";
+    switcher.style.flexWrap = "nowrap";
+    switcher.style.overflowX = "auto";
+    switcher.style.scrollBehavior = "smooth";
+    switcher.style.WebkitOverflowScrolling = "touch";
+    switcher.style.touchAction = "pan-x";
+    
     switcher.querySelectorAll("[data-month]").forEach((button) => {
       button.addEventListener("click", () => openFocusedMonth(Number(button.dataset.month)));
     });
+    
+    if (autoScroll) {
+      setTimeout(() => {
+        const activeBtn = switcher.querySelector(".month-btn.active");
+        if (activeBtn) {
+          activeBtn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+        }
+      }, 50);
+    }
   }
 }
 
@@ -2367,10 +2513,10 @@ async function openFocusedMonth(month) {
     brandSub.textContent = getMonthMeta(month).brandSub;
   }
   focusedSelectedWeek = month === 1 ? getCurrentFoundationWeek() : monthWeeks[0].number;
-  if (!isDevPreviewActive()) localStorage.setItem(selectedFocusedMonthStorageKey, String(month));
+  if (!isDevPreviewActive()) safeSetItem(selectedFocusedMonthStorageKey, String(month));
   updateDebugState({ currentMonth: month, loadedMonths: getLoadedMonths(), visibleMonths: getVisibleMonths(), loadedWeeks: weeks.length, lastAction: `Month ${month} opened` });
   setDataStatus(month === 1 ? "Month 1 ready." : `Month ${month} ready: ${monthWeeks.length} ${getMonthMeta(month).shortLabel} lessons.`, "success");
-  renderMonthSwitcher();
+  renderMonthSwitcher(true);
   renderFocusedDashboard();
   renderFocusedWeekTabs();
   renderFocusedLesson();
@@ -2391,7 +2537,7 @@ function renderFocusedWeekTabs() {
   const lessonsTitle = document.getElementById("lessonsTitle");
   const monthWeeks = getFocusedMonthWeeks();
   const monthMeta = getMonthMeta(selectedFocusedMonth);
-  lessonsTitle.textContent = selectedFocusedMonth === 1 ? "พื้นฐานเดือนที่ 1" : `เดือน ${selectedFocusedMonth}: ${monthMeta.moduleLabel}`;
+  lessonsTitle.textContent = `เดือน ${selectedFocusedMonth}: ${monthMeta.moduleLabel}`;
   tabs.setAttribute("aria-label", selectedFocusedMonth === 1 ? "บทเรียนพื้นฐาน 4 สัปดาห์" : `บทเรียน Month ${selectedFocusedMonth}`);
   if (selectedFocusedMonth !== 1) {
     tabs.innerHTML = monthWeeks.map((weekItem) => `
@@ -2638,7 +2784,7 @@ function renderMonth2PracticeTaskCard(item = {}, weekNumber, fallbackId) {
     checkbox.setAttribute("aria-label", "Progress disabled in dev preview");
   } else {
     checkbox.checked = localStorage.getItem(storageKey) === "true";
-    checkbox.addEventListener("change", () => localStorage.setItem(storageKey, String(checkbox.checked)));
+    checkbox.addEventListener("change", () => safeSetItem(storageKey, String(checkbox.checked)));
   }
 
   const body = month2CreateElement("span");
@@ -3116,27 +3262,31 @@ function renderLessonBlocks(blocks, visualsById = {}, tabsById = {}, labsById = 
       return;
     }
 
-    if (block.type === "fretboard") {
-      const visualData = visuals[block.visualRef] || block.visual || block.fretboardVisual;
-      flow.appendChild(renderFretboardVisual(visualData, block, block.visualRef));
+    if (block.type === "fretboard" || block.type === "fretboard-visualizer") {
+      const vRef = block.visualRef || block.visualId || block.refId || "";
+      const visualData = visuals[vRef] || block.visual || block.fretboardVisual;
+      flow.appendChild(renderFretboardVisual(visualData, block, vRef));
       return;
     }
 
     if (block.type === "tab") {
-      const tabData = tabs[block.tabRef] || block.tab || block.miniTab;
-      flow.appendChild(renderMiniTab(tabData, block, block.tabRef));
+      const tRef = block.tabRef || block.tabId || block.refId || "";
+      const tabData = tabs[tRef] || block.tab || block.miniTab;
+      flow.appendChild(renderMiniTab(tabData, block, tRef));
       return;
     }
 
     if (block.type === "chord-lab" || block.type === "chord-sound-lab" || block.type === "ear-training-lab" || block.type === "progression-lab") {
-      const labData = labs[block.labRef] || block.lab || block.chordSoundLab || (block.notes || block.chords ? block : null);
-      flow.appendChild(renderChordSoundLab(labData, block, block.labRef));
+      const lRef = block.labRef || block.labId || block.refId || "";
+      const labData = labs[lRef] || block.lab || block.chordSoundLab || (block.notes || block.chords ? block : null);
+      flow.appendChild(renderChordSoundLab(labData, block, lRef));
       return;
     }
 
     if (block.type === "technique-drill") {
-      const drillData = drills[block.drillRef] || block.drill || block.techniqueDrill || (!block.drillRef ? block : null);
-      flow.appendChild(renderTechniqueDrillBlock(drillData, block, block.drillRef));
+      const dRef = block.drillRef || block.drillId || block.refId || "";
+      const drillData = drills[dRef] || block.drill || block.techniqueDrill || (!dRef ? block : null);
+      flow.appendChild(renderTechniqueDrillBlock(drillData, block, dRef));
       return;
     }
 
@@ -3242,7 +3392,7 @@ function renderMechanicsCheckBlock(block = {}) {
       checkbox.addEventListener("change", () => {
         if (!shouldPersist) return;
         try {
-          localStorage.setItem(storageKey, checkbox.checked ? "true" : "false");
+          safeSetItem(storageKey, checkbox.checked ? "true" : "false");
         } catch {
           // Ignore private browsing storage failures; the lesson still works.
         }
@@ -3979,7 +4129,7 @@ function savePracticeNotes() {
   const noteInput = document.getElementById("practiceNotes");
   const savedLabel = document.getElementById("notesSaved");
   if (!noteInput) return;
-  localStorage.setItem(foundationStorage.notes, noteInput.value);
+  safeSetItem(foundationStorage.notes, noteInput.value);
   if (savedLabel) savedLabel.textContent = "บันทึกไว้ในเครื่องแล้ว";
 }
 
@@ -4356,7 +4506,7 @@ function saveMiniCourseProgress(courseId, progress) {
     updatedAt: new Date().toISOString()
   };
   try {
-    localStorage.setItem(getMiniCourseStorageKey(courseId), JSON.stringify(nextProgress));
+    safeSetItem(getMiniCourseStorageKey(courseId), JSON.stringify(nextProgress));
     emitMiniCourseEvent("progress-save", { courseId, currentDay: nextProgress.currentDay, completedDays: nextProgress.completedDays });
   } catch (error) {
     console.warn("Mini Course progress could not be saved.", error);

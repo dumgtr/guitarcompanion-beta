@@ -1,9 +1,13 @@
 # AI Handoff
 
 ## Current State
+- Phase 1 (Shard Infrastructure) and Phase 2 (Content Drafting for M5/M6) are officially CLOSED.
+- M5/M6 hidden preview shards are structurally complete and loaded in memory.
+- Runtime preview URLs available: `?preview=m5`, `?preview=m6`, `?devPreview=all`.
+- Production remains locked to Month 1–4.
+- Known UX debt: month switcher horizontal scroll feels step-like.
+- Do not start Month 7/8 or expose Month 5/6 publicly yet.
 - Week 0 Prelude / Foundation Reset is public.
-- Month 1-4 are visible in normal production.
-- Month 5-8 remain hidden.
 - Rhythm Notation Starter and Blues Turnaround Starter are PUBLIC / LIVE as optional Mini Courses in the Practice Room.
 - Mini Courses are not Months, not Weeks, and do not appear in topbar navigation, Month Switcher, or week tabs.
 - Dev preview flags (`?miniCoursePreview=1`, `?devPreview=miniCourse`, or `?preview=miniCourse`) remain available only as legacy QA shortcuts / future hidden-course helpers.
@@ -87,11 +91,13 @@ The Reference Shelf / Rhythm Notation work is FINAL for the current phase.
    - rollback plan
 
 ## Recommended Next Work
-- The project is currently in a Post-Release Monitoring phase. DO NOT initiate new features (like Fretboard Studio) or new Mini Courses. Month 5 (Diatonic Bridge & Melodic Freedom) content spec and mock data plan are complete. Await explicit task to either draft Month 6 specs or implement Month 5 hidden mock data.
-- Month 5-8 remain hidden.
+- Next steps involve integrating these hidden shards into a formal branch merge, or conducting final QA. DO NOT set Month 5 or 6 to public.
+- The project is currently in a Post-Release Monitoring phase. DO NOT initiate new features (like Fretboard Studio) or new Mini Courses.
+- Known UX debt: month switcher horizontal scroll feels step-like.
 
-## Month 5 Realignment (July 2026)
+## Month 5 & 6 Realignment (July 2026)
 - Month 5 has been pivoted from "Improvisation Foundation" to **"Diatonic Bridge & Melodic Freedom"** (Diatonic Triads, I-IV-V-vi, common-tone chord colors, and melodic phrasing).
+- Month 6 focuses on **"Modes as Chord Colors"** (understanding modes not just as shapes, but as sonic colors over specific chords).
 - The legacy "Improvisation Foundation" outline is archived inside `docs/MONTH3_TO_MONTH6_BLUEPRINT.md` (collapsed `<details>` block).
 - The canonical Month 5 production spec is: `docs/MONTH5_CONTENT_SPEC.md`.
-- Month 5 remains strictly hidden in the production UI.
+- Both Month 5 and Month 6 remain strictly hidden in the production UI.
