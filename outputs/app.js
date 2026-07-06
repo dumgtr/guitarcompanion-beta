@@ -3454,8 +3454,8 @@ function renderFretboardVisual(visual, block = {}, visualRef = "") {
   );
 
   const config = visual.config || {};
-  const start = Number(config.startFret || 1);
-  const end = Number(config.endFret || start);
+  const start = Number(config.startFret ?? 1);
+  const end = Number(config.endFret ?? start);
   const fretCount = Math.max(1, end - start + 1);
   const frame = month2CreateElement("div", "fretboard-frame");
   const fretboardWithLabels = month2CreateElement("div", "fretboard-with-labels");
@@ -3505,12 +3505,13 @@ function renderFretboardVisual(visual, block = {}, visualRef = "") {
   month2AsArray(visual.dots).forEach((dot = {}) => {
     const fretValue = Number(dot.fret);
     const isOpenString = fretValue === 0;
-    const marker = month2CreateElement("span", `fret-dot dot-${dot.type || "default"}${isOpenString ? " open-string" : ""}`, dot.label || "");
+    const displayStr = dot.displayLabel || dot.shortLabel || dot.label || "";
+    const marker = month2CreateElement("span", `fret-dot dot-${dot.type || "default"}${isOpenString ? " open-string" : ""}`, displayStr);
     const visualRow = dot.string;
     const visualColumn = isOpenString ? 1 : fretValue - start + 1;
     marker.style.gridRow = String(visualRow);
     marker.style.gridColumn = String(visualColumn);
-    marker.setAttribute("aria-label", `${dot.label || "note"} สาย ${dot.string} เฟรต ${dot.fret}`);
+    marker.setAttribute("aria-label", dot.ariaLabel || dot.label || `${displayStr} สาย ${dot.string} เฟรต ${dot.fret}`);
     grid.appendChild(marker);
   });
 

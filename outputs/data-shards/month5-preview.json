@@ -266,8 +266,9 @@
         {
           "string": 3,
           "fret": 5,
-          "label": "C (I)",
-          "type": "root"
+          "label": "C",
+          "type": "root",
+          "ariaLabel": "C (I)"
         },
         {
           "string": 2,
@@ -284,8 +285,9 @@
         {
           "string": 4,
           "fret": 5,
-          "label": "G (V)",
-          "type": "root"
+          "label": "G",
+          "type": "root",
+          "ariaLabel": "G (V)"
         },
         {
           "string": 3,
@@ -296,14 +298,16 @@
         {
           "string": 2,
           "fret": 6,
-          "label": "F (IV)",
-          "type": "root"
+          "label": "F",
+          "type": "root",
+          "ariaLabel": "F (IV)"
         },
         {
           "string": 4,
           "fret": 7,
-          "label": "A (vi)",
-          "type": "root"
+          "label": "A",
+          "type": "root",
+          "ariaLabel": "A (vi)"
         }
       ],
       "legend": [
@@ -322,8 +326,9 @@
       "type": "fretboard-visualizer",
       "title": "The Magic Common Tones (G & D)",
       "config": {
-        "startFret": 0,
-        "endFret": 5
+        "startFret": 1,
+        "endFret": 5,
+        "showNut": true
       },
       "dots": [
         {
@@ -341,20 +346,23 @@
         {
           "string": 6,
           "fret": 3,
-          "label": "G (Bass)",
-          "type": "normal"
+          "label": "G",
+          "type": "normal",
+          "ariaLabel": "G (Bass)"
         },
         {
           "string": 5,
           "fret": 3,
-          "label": "C (Bass)",
-          "type": "normal"
+          "label": "C",
+          "type": "normal",
+          "ariaLabel": "C (Bass)"
         },
         {
           "string": 4,
           "fret": 0,
-          "label": "D (Bass)",
-          "type": "normal"
+          "label": "D",
+          "type": "normal",
+          "ariaLabel": "D (Bass)"
         }
       ],
       "legend": [
@@ -380,26 +388,30 @@
         {
           "string": 3,
           "fret": 5,
-          "label": "C (Root)",
-          "type": "root"
+          "label": "C",
+          "type": "root",
+          "ariaLabel": "C (Root)"
         },
         {
           "string": 2,
           "fret": 5,
-          "label": "E (3rd)",
-          "type": "target"
+          "label": "E/3",
+          "type": "target",
+          "ariaLabel": "E (3rd)"
         },
         {
           "string": 2,
           "fret": 8,
-          "label": "G (5th)",
-          "type": "target"
+          "label": "G/5",
+          "type": "target",
+          "ariaLabel": "G (5th)"
         },
         {
           "string": 1,
           "fret": 8,
-          "label": "C (Root)",
-          "type": "root"
+          "label": "C",
+          "type": "root",
+          "ariaLabel": "C (Root)"
         }
       ],
       "legend": [

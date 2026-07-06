@@ -287,38 +287,44 @@
         {
           "string": 6,
           "fret": 5,
-          "label": "A (Root)",
-          "type": "root"
+          "label": "A",
+          "type": "root",
+          "ariaLabel": "A (Root)"
         },
         {
           "string": 4,
           "fret": 7,
-          "label": "A (Root)",
-          "type": "root"
+          "label": "A",
+          "type": "root",
+          "ariaLabel": "A (Root)"
         },
         {
           "string": 3,
           "fret": 5,
-          "label": "C (Minor 3rd - Dorian)",
-          "type": "target"
+          "label": "C/b3",
+          "type": "target",
+          "ariaLabel": "C (Minor 3rd - Dorian)"
         },
         {
           "string": 3,
           "fret": 6,
-          "label": "C# (Major 3rd - Mixo)",
-          "type": "target"
+          "label": "C#/3",
+          "type": "target",
+          "ariaLabel": "C# (Major 3rd - Mixo)"
         },
         {
           "string": 4,
           "fret": 5,
-          "label": "G (Flat 7)",
-          "type": "normal"
+          "label": "G/b7",
+          "type": "normal",
+          "ariaLabel": "G (Flat 7)"
         },
         {
           "string": 2,
           "fret": 7,
-          "label": "F# (Natural 6 - Dorian)",
-          "type": "target"
+          "label": "F#/6",
+          "type": "target",
+          "ariaLabel": "F# (Natural 6 - Dorian)"
         }
       ],
       "legend": [
@@ -341,21 +347,24 @@
       "type": "fretboard-visualizer",
       "title": "F Lydian Target Map",
       "config": {
-        "startFret": 0,
-        "endFret": 3
+        "startFret": 1,
+        "endFret": 3,
+        "showNut": true
       },
       "dots": [
         {
           "string": 6,
           "fret": 1,
-          "label": "F (Root)",
-          "type": "root"
+          "label": "F",
+          "type": "root",
+          "ariaLabel": "F (Root)"
         },
         {
           "string": 4,
           "fret": 3,
-          "label": "F (Root)",
-          "type": "root"
+          "label": "F",
+          "type": "root",
+          "ariaLabel": "F (Root)"
         },
         {
           "string": 3,
@@ -366,14 +375,16 @@
         {
           "string": 2,
           "fret": 0,
-          "label": "B (#4 Lydian Color)",
-          "type": "target"
+          "label": "B/#4",
+          "type": "target",
+          "ariaLabel": "B (#4 Lydian Color)"
         },
         {
           "string": 1,
           "fret": 1,
-          "label": "F (Root)",
-          "type": "root"
+          "label": "F",
+          "type": "root",
+          "ariaLabel": "F (Root)"
         }
       ],
       "legend": [

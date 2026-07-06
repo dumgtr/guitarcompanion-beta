@@ -3766,7 +3766,22 @@ footer p {
   font-weight: 850;
 }
 
+.month2-fretboard-card {
+  --fb-root: var(--warm);
+  --fb-target: color-mix(in srgb, var(--accent) 88%, var(--warm));
+  --fb-chord: color-mix(in srgb, var(--accent) 70%, var(--surface-soft));
+  --fb-normal: color-mix(in srgb, var(--muted) 62%, var(--surface-soft));
+  --fb-bass: color-mix(in srgb, var(--line) 72%, var(--warm));
+  --fb-tension: color-mix(in srgb, var(--warm) 72%, #6f2a18);
+  --fb-return: color-mix(in srgb, #67d18f 58%, var(--accent));
+  --fb-ink-dark: #150f0a;
+  --fb-ink-light: var(--ink);
+}
+
 .month2-fretboard-card .fretboard-frame {
+  display: grid;
+  visibility: visible;
+  opacity: 1;
   width: 100%;
   margin-top: 12px;
   --string-gap: 31px;
@@ -3779,6 +3794,8 @@ footer p {
 .month2-fretboard-card .fretboard-with-labels,
 .month2-fretboard-card .fret-numbers-row {
   display: grid;
+  visibility: visible;
+  opacity: 1;
   grid-template-columns: minmax(42px, auto) minmax(0, 1fr);
   gap: 7px;
   width: 100%;
@@ -3809,6 +3826,9 @@ footer p {
 .month2-fretboard-card .fretboard-grid {
   position: relative;
   display: grid;
+  visibility: visible;
+  opacity: 1;
+  min-height: calc(6 * var(--string-gap));
   width: 100%;
   max-width: 100%;
   grid-template-columns: repeat(var(--fret-count), minmax(0, 1fr));
@@ -3941,7 +3961,8 @@ footer p {
   background: var(--paper);
   border-color: var(--accent);
   color: var(--accent);
-  transform: translateX(calc(-100% - 12px));
+  justify-self: start;
+  transform: translateX(-50%);
   box-shadow:
     0 8px 18px rgba(0, 0, 0, 0.44),
     0 0 0 2px color-mix(in srgb, var(--accent), transparent 64%);
@@ -3949,38 +3970,49 @@ footer p {
 
 .month2-fretboard-card .dot-root,
 .month2-fretboard-card .dot-home {
-  background: var(--warm);
+  background: var(--fb-root);
+  color: var(--fb-ink-dark);
 }
 
+.month2-fretboard-card .dot-target {
+  background: var(--fb-target);
+  color: var(--fb-ink-dark);
+}
+
+.month2-fretboard-card .dot-normal,
 .month2-fretboard-card .dot-landmark,
 .month2-fretboard-card .dot-scale {
-  background: #7f766c;
-  color: var(--ink);
+  background: var(--fb-normal);
+  color: var(--fb-ink-light);
 }
 
-.month2-fretboard-card .dot-octave,
+.month2-fretboard-card .dot-common-tone,
 .month2-fretboard-card .dot-chord-tone,
+.month2-fretboard-card .dot-octave,
 .month2-fretboard-card .dot-away {
-  background: var(--accent);
+  background: var(--fb-chord);
+  color: var(--fb-ink-dark);
 }
 
-.month2-fretboard-card .dot-chord-tone {
-  outline: 2px solid var(--warm);
-  outline-offset: 1px;
+.month2-fretboard-card .dot-bass {
+  background: var(--fb-bass);
+  color: var(--fb-ink-light);
 }
 
+.month2-fretboard-card .dot-changed,
 .month2-fretboard-card .dot-pull {
-  background: #ff6f61;
-  color: #1b0d0a;
+  background: var(--fb-tension);
+  color: var(--fb-ink-light);
 }
 
 .month2-fretboard-card .dot-return {
-  background: #67d18f;
-  color: #08140c;
+  background: var(--fb-return);
+  color: var(--fb-ink-dark);
 }
 
 .month2-fretboard-card .dot-default {
-  background: var(--accent);
+  background: var(--fb-normal);
+  color: var(--fb-ink-light);
 }
 
 .month2-fretboard-card .fret-numbers {
@@ -4024,30 +4056,38 @@ footer p {
 
 .month2-fretboard-card .swatch-root,
 .month2-fretboard-card .swatch-home {
-  background: var(--warm);
+  background: var(--fb-root);
 }
 
+.month2-fretboard-card .swatch-target {
+  background: var(--fb-target);
+}
+
+.month2-fretboard-card .swatch-normal,
 .month2-fretboard-card .swatch-landmark,
-.month2-fretboard-card .swatch-scale {
-  background: #7f766c;
+.month2-fretboard-card .swatch-scale,
+.month2-fretboard-card .swatch-default {
+  background: var(--fb-normal);
 }
 
+.month2-fretboard-card .swatch-common-tone,
+.month2-fretboard-card .swatch-chord-tone,
 .month2-fretboard-card .swatch-octave,
 .month2-fretboard-card .swatch-away {
-  background: var(--accent);
+  background: var(--fb-chord);
 }
 
-.month2-fretboard-card .swatch-chord-tone {
-  background: var(--accent);
-  box-shadow: 0 0 0 2px var(--warm);
+.month2-fretboard-card .swatch-bass {
+  background: var(--fb-bass);
 }
 
+.month2-fretboard-card .swatch-changed,
 .month2-fretboard-card .swatch-pull {
-  background: #ff6f61;
+  background: var(--fb-tension);
 }
 
 .month2-fretboard-card .swatch-return {
-  background: #67d18f;
+  background: var(--fb-return);
 }
 
 .month2-fretboard-card .unified-fretboard,
@@ -4095,7 +4135,7 @@ footer p {
   background: transparent;
 }
 
-@container (max-width: 319px) {
+/* @container (max-width: 319px) {
   .month2-fretboard-card.responsive-fretboard > .unified-fretboard {
     display: none;
   }
@@ -4103,7 +4143,7 @@ footer p {
   .month2-fretboard-card.responsive-fretboard > .layered-fallback {
     display: grid;
   }
-}
+} */
 
 .month2-mini-tab-card .mini-tab-scroll-area {
   width: 100%;
