@@ -3757,11 +3757,16 @@ async function playLabItem(lab = {}, chord = {}, card, block = {}, options = {})
         sequenceTimers.push(noteTimer);
       }
 
-      return playPluckedString(
+      const voice = lab.audioEngine?.voice;
+      const gainMultiplier = lab.audioEngine?.gain ?? 1.0;
+      const peakGain = (timing.sequential ? 0.86 : getStackedChordPeakGain(note, notes.length)) * gainMultiplier;
+      const synthFn = (voice === 'soft-piano' || voice === 'piano') ? playSoftPiano : playPluckedString;
+      
+      return synthFn(
         note,
         timeOffset,
         duration,
-        timing.sequential ? 0.86 : getStackedChordPeakGain(note, notes.length),
+        peakGain,
         { isChord: !timing.sequential }
       );
     }));
@@ -3809,24 +3814,16 @@ function configurePluckedCompressor() {
 
 function stopAllSounds() {
   activeNodes.forEach((node) => {
+    try { node.osc1?.stop(); } catch {}
+    try { node.osc2?.stop(); } catch {}
+    try { node.osc3?.stop(); } catch {}
     try {
-      node.osc1.stop();
-    } catch {
-      // Oscillator may already be stopped.
-    }
-    try {
-      node.osc2.stop();
-    } catch {
-      // Oscillator may already be stopped.
-    }
-    try {
-      node.filter.disconnect();
-      node.envelopeGain.disconnect();
+      node.filter?.disconnect();
+      node.envelopeGain?.disconnect();
       node.osc1Gain?.disconnect();
       node.osc2Gain?.disconnect();
-    } catch {
-      // Nodes may already be disconnected.
-    }
+      node.osc3Gain?.disconnect();
+    } catch {}
   });
   activeNodes = [];
 }
@@ -3914,12 +3911,15 @@ async function playChord(chord = {}, audioEngine = {}) {
     const duration = Number(audioEngine.durationMs || 850) / 1000;
     const strumMs = Number(audioEngine.strumMs ?? 35);
     const notes = getChordNotes(chord);
+    const voice = audioEngine.voice;
+    const gainMultiplier = audioEngine.gain ?? 1.0;
+    const synthFn = (voice === 'soft-piano' || voice === 'piano') ? playSoftPiano : playPluckedString;
     if (!notes.length) return false;
-    await Promise.all(notes.map((note, index) => playPluckedString(
+    await Promise.all(notes.map((note, index) => synthFn(
       note,
       (index * strumMs) / 1000,
       duration,
-      getStackedChordPeakGain(note, notes.length),
+      getStackedChordPeakGain(note, notes.length) * gainMultiplier,
       { isChord: true }
     )));
     return true;
@@ -3927,6 +3927,81 @@ async function playChord(chord = {}, audioEngine = {}) {
     stopAllSounds();
     return false;
   }
+}
+
+async function playSoftPiano(noteString, timeOffset = 0, duration = 1.2, peakGain = 0.55, options = {}) {
+  const context = await ensureAudioContext();
+  if (!context || !pluckedMasterGain) return false;
+
+  const frequency = getFreq(noteString);
+  if (!frequency) return false;
+
+  const startTime = context.currentTime + timeOffset;
+  const osc1 = context.createOscillator();
+  const osc2 = context.createOscillator();
+  const osc3 = context.createOscillator();
+  const osc1Gain = context.createGain();
+  const osc2Gain = context.createGain();
+  const osc3Gain = context.createGain();
+  const filter = context.createBiquadFilter();
+  const envelopeGain = context.createGain();
+
+  osc1.type = "sine";
+  osc2.type = "triangle";
+  osc3.type = "sine";
+  
+  osc1.frequency.setValueAtTime(frequency, startTime);
+  osc2.frequency.setValueAtTime(frequency * 2, startTime); // Harmonic 2
+  osc3.frequency.setValueAtTime(frequency * 3, startTime); // Harmonic 3
+
+  // Warm balance
+  osc1Gain.gain.setValueAtTime(0.8, startTime);
+  osc2Gain.gain.setValueAtTime(0.22, startTime);
+  osc3Gain.gain.setValueAtTime(0.08, startTime);
+
+  filter.type = "lowpass";
+  filter.frequency.setValueAtTime(4800, startTime);
+  filter.frequency.exponentialRampToValueAtTime(1400, startTime + 0.2);
+
+  // Softer peak overall than plucked string
+  const boostedPeakGain = Math.min(peakGain * 0.85, 0.7);
+  
+  envelopeGain.gain.setValueAtTime(0, startTime);
+  envelopeGain.gain.linearRampToValueAtTime(boostedPeakGain, startTime + 0.012); // slightly slower attack
+  envelopeGain.gain.exponentialRampToValueAtTime(boostedPeakGain * 0.3, startTime + 0.2); // quick decay
+  envelopeGain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+  osc1.connect(osc1Gain);
+  osc2.connect(osc2Gain);
+  osc3.connect(osc3Gain);
+  osc1Gain.connect(filter);
+  osc2Gain.connect(filter);
+  osc3Gain.connect(filter);
+  filter.connect(envelopeGain);
+  envelopeGain.connect(pluckedMasterGain);
+
+  osc1.start(startTime);
+  osc2.start(startTime);
+  osc3.start(startTime);
+  osc1.stop(startTime + duration + 0.04);
+  osc2.stop(startTime + duration + 0.04);
+  osc3.stop(startTime + duration + 0.04);
+
+  const activeNode = { osc1, osc2, osc3, osc1Gain, osc2Gain, osc3Gain, filter, envelopeGain };
+  activeNodes.push(activeNode);
+  osc1.addEventListener("ended", () => {
+    activeNodes = activeNodes.filter((node) => node !== activeNode);
+    try {
+      osc1Gain.disconnect();
+      osc2Gain.disconnect();
+      osc3Gain.disconnect();
+      filter.disconnect();
+      envelopeGain.disconnect();
+    } catch {
+      // Nodes may already be disconnected by stopAllSounds().
+    }
+  }, { once: true });
+  return true;
 }
 
 function getChordNotes(chord = {}) {

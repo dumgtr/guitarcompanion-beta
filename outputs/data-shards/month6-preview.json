@@ -416,8 +416,10 @@
           "name": "A Drone",
           "role": "Static Root",
           "notes": [
-            "A",
-            "E"
+            "A2",
+            "E3",
+            "A3",
+            "E4"
           ]
         }
       ],
@@ -428,7 +430,14 @@
         "A Major: สว่าง สดใส",
         "A Mixolydian: ขี้เล่น กึ่งบลูส์นิดๆ (เพราะมี G ธรรมชาติ)",
         "A Dorian: เท่ หม่น แต่ไม่เศร้าเกินไป (เพราะมี F#)"
-      ]
+      ],
+      "audioEngine": {
+        "voice": "soft-piano",
+        "durationMs": 1200,
+        "gapMs": 160,
+        "strumMs": 28,
+        "gain": 1.08
+      }
     },
     {
       "id": "m6-w23-sound-lydian-vamp",
@@ -441,10 +450,10 @@
           "name": "Fmaj7",
           "role": "IVmaj7 (Dreamy)",
           "notes": [
-            "F",
-            "A",
-            "C",
-            "E"
+            "F3",
+            "A3",
+            "C4",
+            "E4"
           ]
         }
       ],
@@ -453,7 +462,13 @@
       ],
       "listenFor": [
         "เสียงลอยๆ ของ Fmaj7 ที่เหมาะกับการเล่นสเกล C Major (ซึ่งก็คือ F Lydian นั่นเอง)"
-      ]
+      ],
+      "audioEngine": {
+        "voice": "soft-piano",
+        "durationMs": 1200,
+        "gapMs": 160,
+        "strumMs": 28
+      }
     },
     {
       "id": "m6-w24-sound-vamp",
@@ -467,10 +482,11 @@
           "name": "Am7",
           "role": "i7 (Home)",
           "notes": [
-            "A",
-            "C",
-            "E",
-            "G"
+            "A2",
+            "E3",
+            "G3",
+            "C4",
+            "E4"
           ]
         },
         {
@@ -478,11 +494,11 @@
           "name": "D9",
           "role": "IV9 (Color Chaser)",
           "notes": [
-            "D",
-            "F#",
-            "A",
-            "C",
-            "E"
+            "D3",
+            "F#3",
+            "C4",
+            "E4",
+            "A4"
           ]
         }
       ],
@@ -492,7 +508,14 @@
       ],
       "listenFor": [
         "เสียงโน้ต F# ในคอร์ด D9 ที่ทำให้เพลงไม่เศร้าแบบ Minor ปกติ"
-      ]
+      ],
+      "audioEngine": {
+        "voice": "soft-piano",
+        "durationMs": 1200,
+        "gapMs": 160,
+        "strumMs": 28,
+        "gain": 1.08
+      }
     }
   ],
   "modules": [
