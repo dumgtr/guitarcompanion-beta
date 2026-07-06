@@ -2,7 +2,9 @@
 
 ## Current State
 - Phase 1 (Shard Infrastructure) and Phase 2 (Content Drafting for M5/M6) are officially CLOSED.
-- M5/M6 hidden preview shards are structurally complete and loaded in memory.
+- Main is stable at merge commit `7a5456c` following the v2.9.5 fretboard restore and hidden audio QA hotfix.
+- Current mode: Post-hotfix monitoring / bugfix-only.
+- M5/M6 hidden preview shards are structurally complete and loaded in memory, now featuring polished soft-piano audio.
 - Runtime preview URLs available: `?preview=m5`, `?preview=m6`, `?devPreview=all`.
 - Production remains locked to Month 1–4.
 - Known UX debt: month switcher horizontal scroll feels step-like.
@@ -91,7 +93,8 @@ The Reference Shelf / Rhythm Notation work is FINAL for the current phase.
    - rollback plan
 
 ## Recommended Next Work
-- Next steps involve integrating these hidden shards into a formal branch merge, or conducting final QA. DO NOT set Month 5 or 6 to public.
+- The hotfix branch (`fix/fretboard-visual-restore`) was merged but kept for now. No release tag was created.
+- DO NOT set Month 5 or 6 to public.
 - The project is currently in a Post-Release Monitoring phase. DO NOT initiate new features (like Fretboard Studio) or new Mini Courses.
 - Known UX debt: month switcher horizontal scroll feels step-like.
 

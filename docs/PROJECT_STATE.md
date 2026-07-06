@@ -55,7 +55,13 @@ FINAL for current phase.
 - Top Progression Tracker is strictly read-only (`<div>` with `aria-hidden="true"`, `pointer-events: none`, stepper/timeline DOM).
 - No horizontal overflow on 390px / 430px viewports.
 - Topbar / Metronome is completely free from z-index / sticky interference.
-- Month 5-8 remain hidden. No new features were started.
+### v2.9.5 Hotfix & Audio Polish (2026-07-06)
+- **Status:** Main is stable at merge commit `7a5456c`. Current mode: Post-hotfix monitoring / bugfix-only.
+- **Fretboard Restore:** Fretboard visuals successfully restored across all devices.
+- **Hidden Audio QA:** Hidden Month 5/6 soft-piano audio QA passed. M5/M6 `chordSoundLabs` now utilize an opt-in soft-piano voice and strictly explicit octave voicings.
+- Normal production remains Month 1-4 only. Month 5/6 remain strictly hidden (Preview URLs: `?preview=m5`, `?preview=m6`, `?devPreview=all`).
+- `outputs/data.json` and `.gitignore` remained completely untouched. No release tag was created.
+- The hotfix branch (`fix/fretboard-visual-restore`) was kept for now.
 
 ## Sprint 7A - Controlled Public Reveal Plan
 - Sprint 7A Controlled Public Reveal Plan created: `docs/MINI_COURSE_PUBLIC_REVEAL_PLAN.md`.
