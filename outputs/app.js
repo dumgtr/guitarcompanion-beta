@@ -3697,8 +3697,8 @@ function normalizeAuditionPitch(note) {
   const pitchName = `${rawLetter.toUpperCase()}${accidental}`;
 
   // Keep audition notes in a tuner/mobile-friendly register.
-  // Example: G2 -> G3, A2 -> A3, E2 -> E3.
-  if (octave < 3) return `${pitchName}3`;
+  // Example: G2/G3 -> G4, C3 -> C4.
+  if (octave < 4) return `${pitchName}4`;
 
   return `${pitchName}${octave}`;
 }
@@ -3842,17 +3842,22 @@ async function playLabItem(lab = {}, chord = {}, card, block = {}, options = {})
       const maxPeakGain = singleAudition ? 1.35 : 1.0;
       const peakGain = Math.min(basePeakGain * gainMultiplier, maxPeakGain);
 
-      const synthFn = (voice === 'soft-piano' || voice === 'piano') ? playSoftPiano : playPluckedString;
+      const synthFn = singleAudition
+        ? playSoundLabGuideTone
+        : (voice === 'soft-piano' || voice === 'piano')
+          ? playSoftPiano
+          : playPluckedString;
+
+      const finalPeakGain = singleAudition
+        ? Number(lab.audioEngine?.guideTonePeakGain || 0.92)
+        : peakGain;
 
       return synthFn(
         note,
         timeOffset,
         duration,
-        peakGain,
-        {
-          isChord: stackedPlayback,
-          isAudition: singleAudition
-        }
+        finalPeakGain,
+        { isChord: stackedPlayback }
       );
     }));
 
@@ -4014,6 +4019,110 @@ async function playChord(chord = {}, audioEngine = {}) {
   }
 }
 
+async function playSoundLabGuideTone(noteString, timeOffset = 0, duration = 1.2, peakGain = 0.92, options = {}) {
+  const context = await ensureAudioContext();
+  if (!context || !pluckedMasterGain) return false;
+
+  const frequency = getFreq(noteString);
+  if (!frequency) return false;
+
+  const startTime = context.currentTime + timeOffset;
+  const endTime = startTime + duration;
+
+  const osc1 = context.createOscillator();
+  const osc2 = context.createOscillator();
+  const osc3 = context.createOscillator();
+
+  const osc1Gain = context.createGain();
+  const osc2Gain = context.createGain();
+  const osc3Gain = context.createGain();
+
+  const filter = context.createBiquadFilter();
+  const envelopeGain = context.createGain();
+
+  // Guide tone goal:
+  // clear fundamental for tuner/human ear,
+  // enough dimension to avoid dead/thin sound,
+  // no strong 3rd harmonic that can imply a fifth.
+  osc1.type = "triangle";
+  osc2.type = "sine";
+  osc3.type = "sine";
+
+  osc1.frequency.setValueAtTime(frequency, startTime);
+  osc2.frequency.setValueAtTime(frequency, startTime);
+  osc3.frequency.setValueAtTime(frequency * 2, startTime);
+
+  // Subtle detune adds dimension without changing the perceived note.
+  osc1.detune.setValueAtTime(0, startTime);
+  osc2.detune.setValueAtTime(-3, startTime);
+  osc3.detune.setValueAtTime(0, startTime);
+
+  osc1Gain.gain.setValueAtTime(0.82, startTime);
+  osc2Gain.gain.setValueAtTime(0.24, startTime);
+  osc3Gain.gain.setValueAtTime(0.12, startTime);
+
+  filter.type = "lowpass";
+  filter.frequency.setValueAtTime(6500, startTime);
+  filter.frequency.exponentialRampToValueAtTime(2800, startTime + 0.28);
+  filter.Q.setValueAtTime(0.7, startTime);
+
+  const safePeak = Math.min(Math.max(Number(peakGain || 0.92), 0.78), 1.0);
+  const sustain = safePeak * 0.7;
+
+  envelopeGain.gain.setValueAtTime(0.0001, startTime);
+  envelopeGain.gain.exponentialRampToValueAtTime(safePeak, startTime + 0.018);
+  envelopeGain.gain.exponentialRampToValueAtTime(sustain, startTime + 0.16);
+  envelopeGain.gain.setValueAtTime(sustain, Math.max(startTime + 0.18, endTime - 0.18));
+  envelopeGain.gain.exponentialRampToValueAtTime(0.0001, endTime);
+
+  osc1.connect(osc1Gain);
+  osc2.connect(osc2Gain);
+  osc3.connect(osc3Gain);
+
+  osc1Gain.connect(filter);
+  osc2Gain.connect(filter);
+  osc3Gain.connect(filter);
+
+  filter.connect(envelopeGain);
+  envelopeGain.connect(pluckedMasterGain);
+
+  osc1.start(startTime);
+  osc2.start(startTime);
+  osc3.start(startTime);
+
+  osc1.stop(endTime + 0.06);
+  osc2.stop(endTime + 0.06);
+  osc3.stop(endTime + 0.06);
+
+  const activeNode = {
+    osc1,
+    osc2,
+    osc3,
+    osc1Gain,
+    osc2Gain,
+    osc3Gain,
+    filter,
+    envelopeGain
+  };
+
+  activeNodes.push(activeNode);
+
+  osc1.addEventListener("ended", () => {
+    activeNodes = activeNodes.filter((node) => node !== activeNode);
+    try {
+      osc1Gain.disconnect();
+      osc2Gain.disconnect();
+      osc3Gain.disconnect();
+      filter.disconnect();
+      envelopeGain.disconnect();
+    } catch {
+      // Nodes may already be disconnected by stopAllSounds().
+    }
+  }, { once: true });
+
+  return true;
+}
+
 async function playSoftPiano(noteString, timeOffset = 0, duration = 1.2, peakGain = 0.55, options = {}) {
   const context = await ensureAudioContext();
   if (!context || !pluckedMasterGain) return false;
@@ -4039,21 +4148,17 @@ async function playSoftPiano(noteString, timeOffset = 0, duration = 1.2, peakGai
   osc2.frequency.setValueAtTime(frequency * 2, startTime); // Harmonic 2
   osc3.frequency.setValueAtTime(frequency * 3, startTime); // Harmonic 3
 
-  const isAudition = Boolean(options.isAudition);
-
   // Warm balance
-  osc1Gain.gain.setValueAtTime(isAudition ? 1.0 : 0.8, startTime);
-  osc2Gain.gain.setValueAtTime(isAudition ? 0.12 : 0.22, startTime);
-  osc3Gain.gain.setValueAtTime(isAudition ? 0.0 : 0.08, startTime);
+  osc1Gain.gain.setValueAtTime(0.8, startTime);
+  osc2Gain.gain.setValueAtTime(0.22, startTime);
+  osc3Gain.gain.setValueAtTime(0.08, startTime);
 
   filter.type = "lowpass";
   filter.frequency.setValueAtTime(4800, startTime);
   filter.frequency.exponentialRampToValueAtTime(1400, startTime + 0.2);
 
   // Softer peak overall than plucked string
-  const boostedPeakGain = isAudition
-    ? Math.min(Math.max(peakGain, 1.05), 1.15)
-    : Math.min(peakGain * 0.85, 0.7);
+  const boostedPeakGain = Math.min(peakGain * 0.85, 0.7);
   
   envelopeGain.gain.setValueAtTime(0, startTime);
   envelopeGain.gain.linearRampToValueAtTime(boostedPeakGain, startTime + 0.012); // slightly slower attack
