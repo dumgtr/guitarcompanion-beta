@@ -39,7 +39,7 @@
         "Day 2: ดีดสเกล Major ปกติทับลงบน Drone (สัมผัสความสว่างแบบโหมด Ionian)",
         "Day 3: ลดโน้ตตัวที่ 7 ลงครึ่งเสียง (b7) เล่นทับบน Drone (สัมผัสความเท่แบบโหมด Mixolydian)",
         "Day 4: สลับเล่น Ionian 1 รอบ และ Mixolydian 1 รอบ สังเกตสีสันที่ต่างกัน",
-        "Day 5: เปลี่ยนจากสเกล Major มาดีดสเกล Minor ทับ Drone (สัมผัสความเศร้าแบบโหมด Aeolian)",
+        "Day 5: เปลี่ยนจาก Major/Mixolydian มาดีด A Dorian ทับ Drone (สัมผัสความหม่นเท่แบบ Minor ที่ไม่เศร้าจนเกินไป)",
         "Day 6: ทบทวนลายนิ้วและพยายามหาโน้ต Character ของแต่ละโหมดให้เจอ",
         "Day 7: อัดคลิป Output Task ประจำสัปดาห์"
       ],
@@ -476,10 +476,10 @@
         "A7"
       ],
       "listenFor": [
-        "A7 has C# and feels major/blues-rock.",
-        "Am7 has C natural and feels minor/cool.",
-        "D9 adds F# which reveals the Dorian natural 6 color.",
-        "The b7 G is shared, so both can still feel bluesy."
+        "A7 มี C# จึงให้ความรู้สึก Major / Blues-Rock",
+        "Am7 มี C ธรรมชาติ จึงให้ความรู้สึก Minor / Cool",
+        "D9 เพิ่ม F# ซึ่งเป็นสี Natural 6 ของ Dorian",
+        "โน้ต G/b7 เป็นสีร่วม ทำให้ทั้งสองโหมดยังมีกลิ่น Bluesy"
       ],
       "audioEngine": {
         "voice": "soft-piano",
