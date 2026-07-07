@@ -3849,7 +3849,10 @@ async function playLabItem(lab = {}, chord = {}, card, block = {}, options = {})
         timeOffset,
         duration,
         peakGain,
-        { isChord: stackedPlayback }
+        {
+          isChord: stackedPlayback,
+          isAudition: singleAudition
+        }
       );
     }));
 
@@ -4036,17 +4039,21 @@ async function playSoftPiano(noteString, timeOffset = 0, duration = 1.2, peakGai
   osc2.frequency.setValueAtTime(frequency * 2, startTime); // Harmonic 2
   osc3.frequency.setValueAtTime(frequency * 3, startTime); // Harmonic 3
 
+  const isAudition = Boolean(options.isAudition);
+
   // Warm balance
-  osc1Gain.gain.setValueAtTime(0.8, startTime);
-  osc2Gain.gain.setValueAtTime(0.22, startTime);
-  osc3Gain.gain.setValueAtTime(0.08, startTime);
+  osc1Gain.gain.setValueAtTime(isAudition ? 1.0 : 0.8, startTime);
+  osc2Gain.gain.setValueAtTime(isAudition ? 0.12 : 0.22, startTime);
+  osc3Gain.gain.setValueAtTime(isAudition ? 0.0 : 0.08, startTime);
 
   filter.type = "lowpass";
   filter.frequency.setValueAtTime(4800, startTime);
   filter.frequency.exponentialRampToValueAtTime(1400, startTime + 0.2);
 
   // Softer peak overall than plucked string
-  const boostedPeakGain = Math.min(peakGain * 0.85, 0.7);
+  const boostedPeakGain = isAudition
+    ? Math.min(Math.max(peakGain, 1.05), 1.15)
+    : Math.min(peakGain * 0.85, 0.7);
   
   envelopeGain.gain.setValueAtTime(0, startTime);
   envelopeGain.gain.linearRampToValueAtTime(boostedPeakGain, startTime + 0.012); // slightly slower attack
