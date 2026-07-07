@@ -4257,41 +4257,143 @@ footer p {
   padding: 12px;
 }
 
-.sound-lab-coach {
+.sound-lab-digital-sign {
+  position: relative;
   display: grid;
-  gap: 0.55rem;
+  min-height: 132px;
+  align-content: stretch;
+  gap: 0.65rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent), var(--line) 36%);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--accent), transparent 82%), transparent 32%),
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-soft), var(--paper) 10%), var(--surface));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--ink), transparent 92%),
+    inset 0 -18px 40px rgba(0, 0, 0, 0.16);
+  padding: 0.8rem 0.9rem;
 }
 
-.sound-lab-status-main {
-  display: block;
+.sound-lab-display-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.sound-lab-display-state {
+  overflow: hidden;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sound-lab-display-led {
+  flex: 0 0 auto;
+  color: var(--warm);
+  font-size: 0.72rem;
+  text-shadow: 0 0 10px color-mix(in srgb, var(--warm), transparent 35%);
+}
+
+.sound-lab-display-readout {
+  display: grid;
+  min-width: 0;
+  gap: 0.38rem;
+}
+
+.sound-lab-display-primary {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.sound-lab-display-chord {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: clamp(1.05rem, 2.4vw, 1.45rem);
+  font-weight: 950;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sound-lab-display-guide {
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--accent), var(--line) 35%);
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.76rem;
+  font-weight: 950;
+  line-height: 1;
+  padding: 0.35rem 0.55rem;
+  white-space: nowrap;
+}
+
+.sound-lab-display-role,
+.sound-lab-display-sequence {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sound-lab-display-role {
+  color: var(--ink);
+  font-size: 0.9rem;
   font-weight: 800;
 }
 
-.sound-lab-status-grid {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.sound-lab-status-row {
-  display: grid;
-  grid-template-columns: minmax(90px, 0.45fr) 1fr;
-  gap: 0.5rem;
-  align-items: start;
-}
-
-.sound-lab-status-label {
-  opacity: 0.72;
-  font-size: 0.85rem;
-}
-
-.sound-lab-status-value {
-  font-weight: 700;
+.sound-lab-display-sequence {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 800;
 }
 
 @media (max-width: 560px) {
-  .sound-lab-status-row {
-    grid-template-columns: 1fr;
-    gap: 0.15rem;
+  .sound-lab-digital-sign {
+    min-height: 138px;
+    padding: 0.75rem;
+  }
+
+  .sound-lab-display-primary {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .sound-lab-display-guide {
+    width: fit-content;
+  }
+
+  .sound-lab-display-chord {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .sound-lab-display-role,
+  .sound-lab-display-sequence {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .sound-lab-display-role {
+    -webkit-line-clamp: 2;
+  }
+
+  .sound-lab-display-sequence {
+    -webkit-line-clamp: 2;
   }
 }
 

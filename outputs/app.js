@@ -3654,19 +3654,30 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
   stopButton.addEventListener("click", () => {
     stopActiveAudio();
     clearActiveChord(card);
-    setLabStatus(card, "หยุดแล้ว ลองฟังใหม่ทีละคอร์ดได้เลยครับ");
+    setLabStatus(card, "", {
+      state: "STOPPED",
+      primary: "หยุดเสียงแล้ว",
+      hint: "เลือกคอร์ดหรือกด Play เพื่อฟังใหม่",
+      sequence: formatSoundLabSequenceLabel(lab)
+    });
   });
   actionRow.append(progressionButton, stopButton);
 
-  const status = month2CreateElement("div", "chord-lab-status sound-lab-coach");
+  const status = month2CreateElement("div", "chord-lab-status sound-lab-coach sound-lab-digital-sign");
   status.setAttribute("role", "status");
   status.setAttribute("aria-live", "polite");
-  status.textContent = "เลือกคอร์ดหรือกดฟังทั้งฟอร์ม";
+  card.append(head, controls, actionRow, status);
+  setLabStatus({ querySelector: () => status }, "", {
+    state: "SOUND LAB",
+    primary: "เลือกคอร์ดหรือกด Play",
+    hint: "Guide Tone Ready",
+    sequence: formatSoundLabSequenceLabel(lab)
+  });
+
   const listenList = month2CreateElement("ul", "listen-for-list");
   month2AsArray(lab.listenFor).forEach((item) => listenList.appendChild(month2CreateElement("li", "", item)));
   const fallback = month2CreateElement("p", "audio-fallback-note", lab.uiCopy?.fallback || "ถ้าเสียงไม่ทำงาน ให้ใช้ข้อความบนการ์ดเป็นตัวนำการฟังแทน");
 
-  card.append(head, controls, actionRow, status);
   if (listenList.children.length) card.appendChild(listenList);
   card.appendChild(fallback);
 
@@ -3722,6 +3733,16 @@ function getSoundLabGuideToneText(lab = {}, chord = {}, block = {}) {
   const notes = getLabPlaybackNotes(lab, chord, block);
   if (!notes.length) return "";
   return notes.join(" → ");
+}
+
+function getSoundLabPrimaryName(chord = {}) {
+  return chord.chord || chord.label || chord.id || "Chord";
+}
+
+function getSoundLabCompactRole(chord = {}) {
+  return [chord.degree, chord.role, chord.feeling]
+    .filter((value) => typeof value === "string" && value.trim())
+    .join(" • ");
 }
 
 function normalizeAuditionPitch(note) {
@@ -3854,24 +3875,17 @@ async function playLabItem(lab = {}, chord = {}, card, block = {}, options = {})
     if (!notes.length) return false;
 
     const timing = getLabItemPlaybackTiming(lab, chord, block);
-    setLabStatus(card, "กำลังเล่น Guide Tone", {
-      chord: formatSoundLabLabel(chord),
+    setLabStatus(card, "", {
+      state: "NOW PLAYING",
+      primary: getSoundLabPrimaryName(chord),
       guideTone: notes.join(" → "),
-      role: chord.role || chord.degree || "",
-      listenFor: chord.feeling || month2AsArray(lab.listenFor)[0] || "",
+      role: getSoundLabCompactRole(chord),
       sequence: formatSoundLabSequenceLabel(lab)
     });
 
     await Promise.all(notes.map((note, index) => {
       const timeOffset = timing.sequential ? (index * timing.stepMs) / 1000 : (index * timing.strumMs) / 1000;
       const duration = timing.durationMs / 1000;
-
-      if (timing.sequential) {
-        const noteTimer = window.setTimeout(() => {
-          setLabStatus(card, `Playing: ${note}`);
-        }, index * timing.stepMs);
-        sequenceTimers.push(noteTimer);
-      }
 
       const voice = lab.audioEngine?.voice;
       const gainMultiplier = Number(lab.audioEngine?.gain ?? 1.0);
@@ -4290,9 +4304,11 @@ function playSequence(lab = {}, card, block = {}) {
   const gapMs = Number(lab.audioEngine?.gapMs || 160);
   let nextStartMs = 0;
 
-  setLabStatus(card, "กำลังเล่น Progression", {
-    sequence: formatSoundLabSequenceLabel(lab),
-    listenFor: month2AsArray(lab.listenFor)[0] || ""
+  setLabStatus(card, "", {
+    state: "PROGRESSION",
+    primary: formatSoundLabSequenceLabel(lab),
+    hint: "Guide Tone Sequence",
+    sequence: formatSoundLabSequenceLabel(lab)
   });
 
   chords.forEach((chord) => {
@@ -4307,9 +4323,11 @@ function playSequence(lab = {}, card, block = {}) {
 
   const clearTimer = window.setTimeout(() => {
     clearActiveChord(card);
-    setLabStatus(card, "ฟังครบ Progression แล้ว", {
-      sequence: formatSoundLabSequenceLabel(lab),
-      listenFor: month2AsArray(lab.listenFor)[0] || "ลองฟังความต่างของสีเสียงแต่ละจุดอีกครั้ง"
+    setLabStatus(card, "", {
+      state: "COMPLETE",
+      primary: "ฟังครบ Progression แล้ว",
+      hint: "ลองกดแต่ละคอร์ดซ้ำ แล้วฟังสีของ Guide Tone",
+      sequence: formatSoundLabSequenceLabel(lab)
     });
   }, nextStartMs);
   sequenceTimers.push(clearTimer);
@@ -4355,47 +4373,59 @@ function clearActiveChord(card) {
 }
 
 function updateLabStatus(card, chord = {}, audioPlayed, lab = {}, block = {}) {
-  const prefix = audioPlayed ? "ฟังแล้ว" : "Text-only preview";
   const guideTone = getSoundLabGuideToneText(lab, chord, block);
-  setLabStatus(card, `${prefix}: ${chord.chord || "Chord"}`, {
-    chord: formatSoundLabLabel(chord),
+  setLabStatus(card, "", {
+    state: audioPlayed ? "PLAYED" : "TEXT PREVIEW",
+    primary: getSoundLabPrimaryName(chord),
     guideTone,
-    role: chord.role || chord.degree || "",
-    listenFor: chord.feeling || lab.listenFor?.[0] || "",
+    role: getSoundLabCompactRole(chord),
     sequence: formatSoundLabSequenceLabel(lab)
   });
 }
 
-function setLabStatus(card, text, meta = {}) {
+function setLabStatus(card, text = "", meta = {}) {
   const status = card?.querySelector(".chord-lab-status");
   if (!status) return;
 
+  const state = meta.state || "SOUND LAB";
+  const primary = meta.primary || text || "เลือกคอร์ดหรือกด Play";
+  const guide = meta.guideTone || "";
+  const role = meta.role || "";
+  const sequence = meta.sequence || "";
+  const hint = meta.hint || "";
+
   status.replaceChildren();
+  status.classList.add("sound-lab-digital-sign");
 
-  const main = month2CreateElement("strong", "sound-lab-status-main", text || "เลือกคอร์ดหรือกดฟังทั้งฟอร์ม");
-  status.appendChild(main);
+  const header = month2CreateElement("div", "sound-lab-display-header");
+  header.append(
+    month2CreateElement("span", "sound-lab-display-state", state),
+    month2CreateElement("span", "sound-lab-display-led", "●")
+  );
 
-  const rows = [
-    meta.chord ? ["กำลังฟัง", meta.chord] : null,
-    meta.guideTone ? ["Guide tone", meta.guideTone] : null,
-    meta.role ? ["หน้าที่", meta.role] : null,
-    meta.sequence ? ["Progression", meta.sequence] : null,
-    meta.listenFor ? ["ฟังหาอะไร", meta.listenFor] : null
-  ].filter(Boolean);
+  const readout = month2CreateElement("div", "sound-lab-display-readout");
 
-  if (!rows.length) return;
+  const primaryLine = month2CreateElement("div", "sound-lab-display-primary");
+  primaryLine.appendChild(month2CreateElement("strong", "sound-lab-display-chord", primary));
 
-  const list = month2CreateElement("div", "sound-lab-status-grid");
-  rows.forEach(([label, value]) => {
-    const row = month2CreateElement("div", "sound-lab-status-row");
-    row.append(
-      month2CreateElement("span", "sound-lab-status-label", label),
-      month2CreateElement("span", "sound-lab-status-value", value)
-    );
-    list.appendChild(row);
-  });
+  if (guide) {
+    primaryLine.appendChild(month2CreateElement("span", "sound-lab-display-guide", `GUIDE ${guide}`));
+  }
 
-  status.appendChild(list);
+  const roleLine = month2CreateElement(
+    "div",
+    "sound-lab-display-role",
+    role || hint || "ฟังสีของคอร์ด แล้วเทียบกับฟอร์มด้านล่าง"
+  );
+
+  const sequenceLine = month2CreateElement(
+    "div",
+    "sound-lab-display-sequence",
+    sequence || "พร้อมฟังทีละคอร์ด"
+  );
+
+  readout.append(primaryLine, roleLine, sequenceLine);
+  status.append(header, readout);
 }
 
 function renderMonth2MissingCard(message) {
