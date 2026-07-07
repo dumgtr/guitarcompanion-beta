@@ -3829,16 +3829,27 @@ async function playLabItem(lab = {}, chord = {}, card, block = {}, options = {})
       }
 
       const voice = lab.audioEngine?.voice;
-      const gainMultiplier = lab.audioEngine?.gain ?? 1.0;
-      const peakGain = (timing.sequential ? 0.86 : getStackedChordPeakGain(note, notes.length)) * gainMultiplier;
+      const gainMultiplier = Number(lab.audioEngine?.gain ?? 1.0);
+      const stackedPlayback = notes.length > 1 && !timing.sequential;
+      const singleAudition = notes.length === 1 && !stackedPlayback;
+
+      const basePeakGain = singleAudition
+        ? Number(lab.audioEngine?.singleNotePeakGain || lab.audioEngine?.auditionPeakGain || 1.18)
+        : timing.sequential
+          ? 0.95
+          : getStackedChordPeakGain(note, notes.length);
+
+      const maxPeakGain = singleAudition ? 1.35 : 1.0;
+      const peakGain = Math.min(basePeakGain * gainMultiplier, maxPeakGain);
+
       const synthFn = (voice === 'soft-piano' || voice === 'piano') ? playSoftPiano : playPluckedString;
-      
+
       return synthFn(
         note,
         timeOffset,
         duration,
         peakGain,
-        { isChord: !timing.sequential }
+        { isChord: stackedPlayback }
       );
     }));
 
