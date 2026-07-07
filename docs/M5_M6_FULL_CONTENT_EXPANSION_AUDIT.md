@@ -42,104 +42,111 @@ The content expansion will map directly to our existing schema and renderer bloc
 - **Output Task:** record 4 bars of C-F-G-Am and reflect on timing and chord feeling
 
 ### Week 18
-**Goal:** (Placeholder)
+**Goal:** Core Progression & Call/Response (I-IV-V-vi).
 
 **Audit:**
-- **Teacher-style explanation:** Needs inspection
-- **Context & Feeling:** Needs inspection
-- **7-day practice:** Missing
-- **Troubleshooting:** Needs inspection
-- **Measurable self-check:** Needs inspection
-- **Phrase Builder:** Needs inspection
-- **Quiz / Ear-check:** Needs inspection
-- **Bridge:** Needs inspection
-- **Output Task:** Needs inspection
+- **Teacher-style explanation:** Partial (has basic text about 4 magic chords and Call/Response concept)
+- **Context & Feeling:** Present (m5-w18-sound-prog-pop)
+- **7-day practice:** Partial (has 3 items, needs 7-day expansion)
+- **Troubleshooting:** Missing
+- **Measurable self-check:** Present (3 items)
+- **Phrase Builder:** Present (m5-w18-tab-call-response, m5-w18-drill-call-response)
+- **Quiz / Ear-check:** Missing
+- **Bridge:** Missing
+- **Output Task:** Missing
+**Recommended Expansion Direction:** Expand explanation of I-IV-V-vi emotional arc, add full 7-day practice schedule, add ear-check for identifying the V chord tension.
 
 ### Week 19
-**Goal:** (Placeholder)
+**Goal:** The 90s Secret (Common Tones / Pedal Chords).
 
 **Audit:**
-- **Teacher-style explanation:** Needs inspection
-- **Context & Feeling:** Needs inspection
-- **7-day practice:** Missing
-- **Troubleshooting:** Needs inspection
-- **Measurable self-check:** Needs inspection
-- **Phrase Builder:** Needs inspection
-- **Quiz / Ear-check:** Needs inspection
-- **Bridge:** Needs inspection
-- **Output Task:** Needs inspection
+- **Teacher-style explanation:** Partial (explains common tones, Oasis/Goo Goo Dolls context)
+- **Context & Feeling:** Missing (needs chord-sound-lab for Pedal Chords)
+- **7-day practice:** Partial (has 3 items, needs 7-day expansion)
+- **Troubleshooting:** Missing
+- **Measurable self-check:** Present (3 items)
+- **Phrase Builder:** Present (m5-w19-vis-common-tones, m5-w19-tab-pedal-chords)
+- **Quiz / Ear-check:** Missing
+- **Bridge:** Missing
+- **Output Task:** Missing
+**Recommended Expansion Direction:** Add chord-sound-lab for Pedal Chords to demonstrate the floating effect. Add troubleshooting for holding pedal notes cleanly while changing bass notes.
 
 ### Week 20
-**Goal:** (Placeholder)
+**Goal:** 8-Bar Solo Builder (Capstone).
 
 **Audit:**
-- **Teacher-style explanation:** Needs inspection
-- **Context & Feeling:** Needs inspection
-- **7-day practice:** Missing
-- **Troubleshooting:** Needs inspection
-- **Measurable self-check:** Needs inspection
-- **Phrase Builder:** Needs inspection
-- **Quiz / Ear-check:** Needs inspection
-- **Bridge:** Needs inspection
-- **Output Task:** Needs inspection
+- **Teacher-style explanation:** Partial (explains 8-bar story arc)
+- **Context & Feeling:** Missing (needs chord-sound-lab or backing track reference block)
+- **7-day practice:** Partial (has 3 items, needs 7-day expansion)
+- **Troubleshooting:** Missing
+- **Measurable self-check:** Present (3 items)
+- **Phrase Builder:** Present (m5-w20-vis-solo-map, m5-w20-tab-8bar-solo, m5-w20-drill-solo-builder)
+- **Quiz / Ear-check:** Missing
+- **Bridge:** Missing (needs bridge linking motif development to modal colors in Month 6)
+**Output Task:** Missing
+**Recommended Expansion Direction:** Add Capstone Output Task where the user records their own 8-bar solo. Add a bridge section introducing the concept of "colors" for Month 6.
 
 ## 5. Month 6 Audit: Modes as Chord Colors
 
 ### Week 21
-**Goal:** (Placeholder)
+**Goal:** What Modes Really Mean (Pitch Axis Drone).
 
 **Audit:**
-- **Teacher-style explanation:** Needs inspection
-- **Context & Feeling:** Needs inspection
-- **7-day practice:** Missing
-- **Troubleshooting:** Needs inspection
-- **Measurable self-check:** Needs inspection
-- **Phrase Builder:** Needs inspection
-- **Quiz / Ear-check:** Needs inspection
-- **Bridge:** Needs inspection
-- **Output Task:** Needs inspection
+- **Teacher-style explanation:** Partial (pitch axis concept)
+- **Context & Feeling:** Present (m6-w21-drone-color-lab)
+- **7-day practice:** Partial (has 3 items, needs 7-day expansion)
+- **Troubleshooting:** Missing
+- **Measurable self-check:** Present
+- **Phrase Builder:** Present (m6-w21-tab-pitch-axis)
+- **Quiz / Ear-check:** Missing
+- **Bridge:** Missing
+- **Output Task:** Missing
+**Recommended Expansion Direction:** Expand pitch axis explanation, add ear-training quiz to identify Major vs Mixolydian vs Dorian over the drone.
 
 ### Week 22
-**Goal:** (Placeholder)
+**Goal:** Dorian vs Mixolydian (The Bluesy Cousins).
 
 **Audit:**
-- **Teacher-style explanation:** Needs inspection
-- **Context & Feeling:** Needs inspection
-- **7-day practice:** Missing
-- **Troubleshooting:** Needs inspection
-- **Measurable self-check:** Needs inspection
-- **Phrase Builder:** Needs inspection
-- **Quiz / Ear-check:** Needs inspection
-- **Bridge:** Needs inspection
-- **Output Task:** Needs inspection
+- **Teacher-style explanation:** Partial (explains b7 similarity, 3rd difference)
+- **Context & Feeling:** Missing (needs chord-sound-lab comparing Dorian vs Mixo vamps)
+- **7-day practice:** Partial (has 3 items, needs 7-day expansion)
+- **Troubleshooting:** Missing
+- **Measurable self-check:** Present
+- **Phrase Builder:** Present (m6-w22-vis-dorian-mixo, tabs, drill)
+- **Quiz / Ear-check:** Missing
+- **Bridge:** Missing
+- **Output Task:** Missing
+**Recommended Expansion Direction:** Add chord-sound-lab comparing Am7-D9 (Dorian) vs A7-D7 (Mixolydian). Expand troubleshooting for accidentally hitting the wrong 3rd.
 
 ### Week 23
-**Goal:** (Placeholder)
+**Goal:** Lydian (The Floating Dream).
 
 **Audit:**
-- **Teacher-style explanation:** Needs inspection
-- **Context & Feeling:** Needs inspection
-- **7-day practice:** Missing
-- **Troubleshooting:** Needs inspection
-- **Measurable self-check:** Needs inspection
-- **Phrase Builder:** Needs inspection
-- **Quiz / Ear-check:** Needs inspection
-- **Bridge:** Needs inspection
-- **Output Task:** Needs inspection
+- **Teacher-style explanation:** Partial (#4 concept)
+- **Context & Feeling:** Present (m6-w23-sound-lydian-vamp)
+- **7-day practice:** Partial (has 3 items, needs 7-day expansion)
+- **Troubleshooting:** Missing
+- **Measurable self-check:** Present
+- **Phrase Builder:** Present (m6-w23-vis-lydian, m6-w23-tab-lydian)
+- **Quiz / Ear-check:** Missing
+- **Bridge:** Missing
+- **Output Task:** Missing
+**Recommended Expansion Direction:** Expand practice to 7 days, add a quiz identifying the #4 tension, and add an output task for composing a Lydian floating phrase.
 
 ### Week 24
-**Goal:** (Placeholder)
+**Goal:** Modal Vamp Integration (Capstone).
 
 **Audit:**
-- **Teacher-style explanation:** Needs inspection
-- **Context & Feeling:** Needs inspection
-- **7-day practice:** Missing
-- **Troubleshooting:** Needs inspection
-- **Measurable self-check:** Needs inspection
-- **Phrase Builder:** Needs inspection
-- **Quiz / Ear-check:** Needs inspection
-- **Bridge:** Needs inspection
-- **Output Task:** Needs inspection
+- **Teacher-style explanation:** Partial
+- **Context & Feeling:** Present (m6-w24-sound-vamp)
+- **7-day practice:** Partial (has 3 items, needs 7-day expansion)
+- **Troubleshooting:** Missing
+- **Measurable self-check:** Present
+- **Phrase Builder:** Present (m6-w24-tab-resolution-example)
+- **Quiz / Ear-check:** Missing
+- **Bridge:** Missing
+- **Output Task:** Missing (needs Capstone task)
+**Recommended Expansion Direction:** Add Month 6 Capstone output task (Record a Modal Vamp jam). Provide troubleshooting for overplaying color notes instead of resolving them.
 
 ## 6. Recommended Execution Plan
 - **Phase A:** Complete audit for all W17-W24
