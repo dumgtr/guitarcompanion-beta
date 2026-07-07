@@ -4257,6 +4257,44 @@ footer p {
   padding: 12px;
 }
 
+.sound-lab-coach {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.sound-lab-status-main {
+  display: block;
+  font-weight: 800;
+}
+
+.sound-lab-status-grid {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.sound-lab-status-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.45fr) 1fr;
+  gap: 0.5rem;
+  align-items: start;
+}
+
+.sound-lab-status-label {
+  opacity: 0.72;
+  font-size: 0.85rem;
+}
+
+.sound-lab-status-value {
+  font-weight: 700;
+}
+
+@media (max-width: 560px) {
+  .sound-lab-status-row {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+}
+
 .month2-chord-lab-card .listen-for-list {
   display: grid;
   gap: 8px;

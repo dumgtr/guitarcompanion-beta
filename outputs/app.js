@@ -3632,20 +3632,20 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
   const labItems = getLabPlaybackItems(lab);
   const controls = month2CreateElement("div", "chord-lab-controls");
   labItems.forEach((chord = {}) => {
-    const button = month2CreateElement("button", "chord-button", `${chord.chord || chord.id || "Chord"} / ${chord.degree || ""} / ${chord.role || ""}`);
+    const button = month2CreateElement("button", "chord-button", formatSoundLabLabel(chord));
     button.type = "button";
     button.dataset.chordId = chord.id || chord.chord || "";
     button.addEventListener("click", async () => {
       clearSequenceTimers();
       activateChordButton(card, button.dataset.chordId);
       const played = await playLabItem(lab, chord, card, blockData);
-      if (!played) updateLabStatus(card, chord, false);
+      if (!played) updateLabStatus(card, chord, false, lab, blockData);
     });
     controls.appendChild(button);
   });
 
   const actionRow = month2CreateElement("div", "chord-lab-actions");
-  const progressionButton = month2CreateElement("button", "progression-button", lab.uiCopy?.playSequence || "Play Progression (I-IV-V-I)");
+  const progressionButton = month2CreateElement("button", "progression-button", lab.uiCopy?.playSequence || `Play: ${formatSoundLabSequenceLabel(lab)}`);
   progressionButton.type = "button";
   progressionButton.addEventListener("click", () => playSequence(lab, card, blockData));
 
@@ -3658,7 +3658,10 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
   });
   actionRow.append(progressionButton, stopButton);
 
-  const status = month2CreateElement("p", "chord-lab-status", "เลือกคอร์ดหรือกดฟังทั้งฟอร์ม");
+  const status = month2CreateElement("div", "chord-lab-status sound-lab-coach");
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-live", "polite");
+  status.textContent = "เลือกคอร์ดหรือกดฟังทั้งฟอร์ม";
   const listenList = month2CreateElement("ul", "listen-for-list");
   month2AsArray(lab.listenFor).forEach((item) => listenList.appendChild(month2CreateElement("li", "", item)));
   const fallback = month2CreateElement("p", "audio-fallback-note", lab.uiCopy?.fallback || "ถ้าเสียงไม่ทำงาน ให้ใช้ข้อความบนการ์ดเป็นตัวนำการฟังแทน");
@@ -3683,6 +3686,42 @@ function getLabPlaybackItems(lab = {}) {
     feeling: lab.feeling || lab.description || "",
     notes
   }];
+}
+
+function formatSoundLabLabel(chord = {}) {
+  const primary = chord.chord || chord.label || chord.id || "Chord";
+  const details = [
+    chord.degree,
+    chord.role,
+    chord.feeling
+  ].filter((value) => typeof value === "string" && value.trim());
+
+  return [primary, ...details].join(" • ");
+}
+
+function getSoundLabSequenceItems(lab = {}) {
+  const labItems = getLabPlaybackItems(lab);
+  if (month2AsArray(lab.sequence).length) {
+    return month2AsArray(lab.sequence)
+      .map((id) => labItems.find((chord) => chord.id === id))
+      .filter(Boolean);
+  }
+  return labItems;
+}
+
+function formatSoundLabSequenceLabel(lab = {}) {
+  const sequenceItems = getSoundLabSequenceItems(lab);
+  const names = sequenceItems
+    .map((item) => item?.chord || item?.label || item?.id)
+    .filter(Boolean);
+
+  return names.length ? names.join(" → ") : "Progression";
+}
+
+function getSoundLabGuideToneText(lab = {}, chord = {}, block = {}) {
+  const notes = getLabPlaybackNotes(lab, chord, block);
+  if (!notes.length) return "";
+  return notes.join(" → ");
 }
 
 function normalizeAuditionPitch(note) {
@@ -3815,7 +3854,13 @@ async function playLabItem(lab = {}, chord = {}, card, block = {}, options = {})
     if (!notes.length) return false;
 
     const timing = getLabItemPlaybackTiming(lab, chord, block);
-    setLabStatus(card, "กำลังเล่น...");
+    setLabStatus(card, "กำลังเล่น Guide Tone", {
+      chord: formatSoundLabLabel(chord),
+      guideTone: notes.join(" → "),
+      role: chord.role || chord.degree || "",
+      listenFor: chord.feeling || month2AsArray(lab.listenFor)[0] || "",
+      sequence: formatSoundLabSequenceLabel(lab)
+    });
 
     await Promise.all(notes.map((note, index) => {
       const timeOffset = timing.sequential ? (index * timing.stepMs) / 1000 : (index * timing.strumMs) / 1000;
@@ -3862,7 +3907,7 @@ async function playLabItem(lab = {}, chord = {}, card, block = {}, options = {})
     }));
 
     const doneTimer = window.setTimeout(() => {
-      updateLabStatus(card, chord, true);
+      updateLabStatus(card, chord, true, lab, block);
     }, getLabItemTotalDurationMs(lab, chord, block));
     sequenceTimers.push(doneTimer);
     return true;
@@ -4245,11 +4290,16 @@ function playSequence(lab = {}, card, block = {}) {
   const gapMs = Number(lab.audioEngine?.gapMs || 160);
   let nextStartMs = 0;
 
+  setLabStatus(card, "กำลังเล่น Progression", {
+    sequence: formatSoundLabSequenceLabel(lab),
+    listenFor: month2AsArray(lab.listenFor)[0] || ""
+  });
+
   chords.forEach((chord) => {
     const timer = window.setTimeout(async () => {
       activateChordButton(card, chord.id);
       const played = await playLabItem(lab, chord, card, block, { clearTimers: false });
-      if (!played) updateLabStatus(card, chord, false);
+      if (!played) updateLabStatus(card, chord, false, lab, block);
     }, nextStartMs);
     sequenceTimers.push(timer);
     nextStartMs += getLabItemTotalDurationMs(lab, chord, block) + gapMs;
@@ -4257,7 +4307,10 @@ function playSequence(lab = {}, card, block = {}) {
 
   const clearTimer = window.setTimeout(() => {
     clearActiveChord(card);
-    setLabStatus(card, "ฟังครบฟอร์มแล้ว ลองพูด Home / Away / Pull / Home ตามอีกครั้งครับ");
+    setLabStatus(card, "ฟังครบ Progression แล้ว", {
+      sequence: formatSoundLabSequenceLabel(lab),
+      listenFor: month2AsArray(lab.listenFor)[0] || "ลองฟังความต่างของสีเสียงแต่ละจุดอีกครั้ง"
+    });
   }, nextStartMs);
   sequenceTimers.push(clearTimer);
 }
@@ -4301,14 +4354,48 @@ function clearActiveChord(card) {
   card.querySelectorAll(".chord-button").forEach((button) => button.classList.remove("is-active"));
 }
 
-function updateLabStatus(card, chord = {}, audioPlayed) {
-  const prefix = audioPlayed ? "" : "Text-only preview: ";
-  setLabStatus(card, `${prefix}${chord.chord || "Chord"} / ${chord.degree || ""} = ${chord.role || ""}${chord.feeling ? ` (${chord.feeling})` : ""}`);
+function updateLabStatus(card, chord = {}, audioPlayed, lab = {}, block = {}) {
+  const prefix = audioPlayed ? "ฟังแล้ว" : "Text-only preview";
+  const guideTone = getSoundLabGuideToneText(lab, chord, block);
+  setLabStatus(card, `${prefix}: ${chord.chord || "Chord"}`, {
+    chord: formatSoundLabLabel(chord),
+    guideTone,
+    role: chord.role || chord.degree || "",
+    listenFor: chord.feeling || lab.listenFor?.[0] || "",
+    sequence: formatSoundLabSequenceLabel(lab)
+  });
 }
 
-function setLabStatus(card, text) {
+function setLabStatus(card, text, meta = {}) {
   const status = card?.querySelector(".chord-lab-status");
-  if (status) status.textContent = text;
+  if (!status) return;
+
+  status.replaceChildren();
+
+  const main = month2CreateElement("strong", "sound-lab-status-main", text || "เลือกคอร์ดหรือกดฟังทั้งฟอร์ม");
+  status.appendChild(main);
+
+  const rows = [
+    meta.chord ? ["กำลังฟัง", meta.chord] : null,
+    meta.guideTone ? ["Guide tone", meta.guideTone] : null,
+    meta.role ? ["หน้าที่", meta.role] : null,
+    meta.sequence ? ["Progression", meta.sequence] : null,
+    meta.listenFor ? ["ฟังหาอะไร", meta.listenFor] : null
+  ].filter(Boolean);
+
+  if (!rows.length) return;
+
+  const list = month2CreateElement("div", "sound-lab-status-grid");
+  rows.forEach(([label, value]) => {
+    const row = month2CreateElement("div", "sound-lab-status-row");
+    row.append(
+      month2CreateElement("span", "sound-lab-status-label", label),
+      month2CreateElement("span", "sound-lab-status-value", value)
+    );
+    list.appendChild(row);
+  });
+
+  status.appendChild(list);
 }
 
 function renderMonth2MissingCard(message) {
