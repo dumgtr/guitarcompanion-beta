@@ -636,6 +636,10 @@
         "D",
         "Em"
       ],
+      "uiCopy": {
+        "playSequence": "Play Progression (I-IV-V-I → V-vi)",
+        "stopSequence": "หยุดเสียง"
+      },
       "listenFor": [
         "D -> G ให้ความรู้สึกกลับบ้าน / จบสนิท",
         "D -> Em ให้ความรู้สึกหลอกทาง / เปลี่ยนเป็นสีหม่น",
