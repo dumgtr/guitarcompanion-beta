@@ -3685,6 +3685,66 @@ function getLabPlaybackItems(lab = {}) {
   }];
 }
 
+function normalizeAuditionPitch(note) {
+  const normalized = normalizePitchName(note);
+  if (typeof normalized !== "string") return normalized;
+
+  const match = /^([A-Ga-g])([#b]?)(-?\d+)$/.exec(normalized);
+  if (!match) return normalized;
+
+  const [, rawLetter, accidental, rawOctave] = match;
+  const octave = Number(rawOctave);
+  const pitchName = `${rawLetter.toUpperCase()}${accidental}`;
+
+  // Keep audition notes in a tuner/mobile-friendly register.
+  // Example: G2 -> G3, A2 -> A3, E2 -> E3.
+  if (octave < 3) return `${pitchName}3`;
+
+  return `${pitchName}${octave}`;
+}
+
+function getLabPlaybackNotes(lab = {}, chord = {}, block = {}, options = {}) {
+  const notes = getChordNotes(chord);
+  if (!notes.length) return [];
+
+  const explicitMode = String(
+    options.noteMode ||
+    chord.noteMode ||
+    lab.noteMode ||
+    lab.audioEngine?.noteMode ||
+    ""
+  ).toLowerCase();
+
+  // Explicit escape hatch for future labs that really want all chord tones.
+  if (["all", "full", "arpeggio", "arpeggiated"].includes(explicitMode)) {
+    return notes;
+  }
+
+  const explicitAuditionNotes = month2AsArray(
+    chord.auditionNotes ||
+    chord.playNotes ||
+    lab.auditionNotes
+  ).map(normalizePitchName).filter(Boolean);
+
+  if (explicitAuditionNotes.length) {
+    return explicitAuditionNotes.map(normalizeAuditionPitch);
+  }
+
+  const explicitAuditionNote =
+    chord.auditionNote ||
+    chord.playNote ||
+    chord.rootNote ||
+    lab.auditionNote;
+
+  if (explicitAuditionNote) {
+    return [normalizeAuditionPitch(explicitAuditionNote)];
+  }
+
+  // Default: one representative note per chord item.
+  // Current chord data stores root as the first note.
+  return [normalizeAuditionPitch(notes[0])];
+}
+
 function shouldPlaySequentialLabItem(lab = {}, chord = {}, block = {}) {
   const explicitPlayback = String(chord.playback || lab.playback || lab.playbackMode || "").toLowerCase();
 
@@ -3693,18 +3753,6 @@ function shouldPlaySequentialLabItem(lab = {}, chord = {}, block = {}) {
   if (["sequence", "sequential", "phrase", "melody", "arpeggio", "arpeggiated"].includes(explicitPlayback)) return true;
 
   if (block.type === "ear-training-lab") return true;
-
-  // Sound Lab default should be ear-training safe:
-  // play chord notes one by one so pitch is clear and tuner-checkable.
-  if (
-    block.type === "chord-sound-lab" ||
-    block.type === "chord-lab" ||
-    lab.type === "chord-sound-lab" ||
-    lab.type === "chord-lab" ||
-    Array.isArray(lab.chords)
-  ) {
-    return true;
-  }
 
   const source = [
     lab.type,
@@ -3733,7 +3781,7 @@ function getLabItemPlaybackTiming(lab = {}, chord = {}, block = {}) {
 
   const durationMs = sequential
     ? Number(lab.audioEngine?.phraseNoteDurationMs || lab.audioEngine?.noteDurationMs || 600)
-    : Number(lab.audioEngine?.durationMs || 2000);
+    : Number(lab.audioEngine?.durationMs || 1200);
 
   const stepMs = Number(
     lab.audioEngine?.stepMs ||
@@ -3747,11 +3795,11 @@ function getLabItemPlaybackTiming(lab = {}, chord = {}, block = {}) {
 }
 
 function getLabItemTotalDurationMs(lab = {}, chord = {}, block = {}) {
-  const notes = getChordNotes(chord);
+  const notes = getLabPlaybackNotes(lab, chord, block);
   const timing = getLabItemPlaybackTiming(lab, chord, block);
   if (!notes.length) return timing.durationMs;
-  if (timing.sequential) return ((notes.length - 1) * timing.stepMs) + timing.durationMs + 120;
-  return ((notes.length - 1) * timing.strumMs) + timing.durationMs + 120;
+  if (timing.sequential && notes.length > 1) return ((notes.length - 1) * timing.stepMs) + timing.durationMs + 120;
+  return timing.durationMs + 120;
 }
 
 async function playLabItem(lab = {}, chord = {}, card, block = {}, options = {}) {
@@ -3763,7 +3811,7 @@ async function playLabItem(lab = {}, chord = {}, card, block = {}, options = {})
     const context = await ensureAudioContext();
     if (!context) return false;
 
-    const notes = getChordNotes(chord);
+    const notes = getLabPlaybackNotes(lab, chord, block, options);
     if (!notes.length) return false;
 
     const timing = getLabItemPlaybackTiming(lab, chord, block);
