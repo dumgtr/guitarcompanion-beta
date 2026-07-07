@@ -3632,20 +3632,20 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
   const labItems = getLabPlaybackItems(lab);
   const controls = month2CreateElement("div", "chord-lab-controls");
   labItems.forEach((chord = {}) => {
-    const button = month2CreateElement("button", "chord-button", `${chord.chord || chord.id || "Chord"} / ${chord.degree || ""} / ${chord.role || ""}`);
+    const button = month2CreateElement("button", "chord-button", formatSoundLabLabel(chord));
     button.type = "button";
     button.dataset.chordId = chord.id || chord.chord || "";
     button.addEventListener("click", async () => {
       clearSequenceTimers();
       activateChordButton(card, button.dataset.chordId);
       const played = await playLabItem(lab, chord, card, blockData);
-      if (!played) updateLabStatus(card, chord, false);
+      if (!played) updateLabStatus(card, chord, false, lab, blockData);
     });
     controls.appendChild(button);
   });
 
   const actionRow = month2CreateElement("div", "chord-lab-actions");
-  const progressionButton = month2CreateElement("button", "progression-button", lab.uiCopy?.playSequence || "Play Progression (I-IV-V-I)");
+  const progressionButton = month2CreateElement("button", "progression-button", lab.uiCopy?.playSequence || `Play: ${formatSoundLabSequenceLabel(lab)}`);
   progressionButton.type = "button";
   progressionButton.addEventListener("click", () => playSequence(lab, card, blockData));
 
@@ -3654,16 +3654,30 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
   stopButton.addEventListener("click", () => {
     stopActiveAudio();
     clearActiveChord(card);
-    setLabStatus(card, "หยุดแล้ว ลองฟังใหม่ทีละคอร์ดได้เลยครับ");
+    setLabStatus(card, "", {
+      state: "STOPPED",
+      primary: "หยุดเสียงแล้ว",
+      hint: "เลือกคอร์ดหรือกด Play เพื่อฟังใหม่",
+      sequence: formatSoundLabSequenceLabel(lab)
+    });
   });
   actionRow.append(progressionButton, stopButton);
 
-  const status = month2CreateElement("p", "chord-lab-status", "เลือกคอร์ดหรือกดฟังทั้งฟอร์ม");
+  const status = month2CreateElement("div", "chord-lab-status sound-lab-coach sound-lab-digital-sign");
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-live", "polite");
+  card.append(head, controls, actionRow, status);
+  setLabStatus({ querySelector: () => status }, "", {
+    state: "SOUND LAB",
+    primary: "เลือกคอร์ดหรือกด Play",
+    hint: "Guide Tone Ready",
+    sequence: formatSoundLabSequenceLabel(lab)
+  });
+
   const listenList = month2CreateElement("ul", "listen-for-list");
   month2AsArray(lab.listenFor).forEach((item) => listenList.appendChild(month2CreateElement("li", "", item)));
   const fallback = month2CreateElement("p", "audio-fallback-note", lab.uiCopy?.fallback || "ถ้าเสียงไม่ทำงาน ให้ใช้ข้อความบนการ์ดเป็นตัวนำการฟังแทน");
 
-  card.append(head, controls, actionRow, status);
   if (listenList.children.length) card.appendChild(listenList);
   card.appendChild(fallback);
 
@@ -3685,10 +3699,119 @@ function getLabPlaybackItems(lab = {}) {
   }];
 }
 
+function formatSoundLabLabel(chord = {}) {
+  const primary = chord.chord || chord.label || chord.id || "Chord";
+  const details = [
+    chord.degree,
+    chord.role,
+    chord.feeling
+  ].filter((value) => typeof value === "string" && value.trim());
+
+  return [primary, ...details].join(" • ");
+}
+
+function getSoundLabSequenceItems(lab = {}) {
+  const labItems = getLabPlaybackItems(lab);
+  if (month2AsArray(lab.sequence).length) {
+    return month2AsArray(lab.sequence)
+      .map((id) => labItems.find((chord) => chord.id === id))
+      .filter(Boolean);
+  }
+  return labItems;
+}
+
+function formatSoundLabSequenceLabel(lab = {}) {
+  const sequenceItems = getSoundLabSequenceItems(lab);
+  const names = sequenceItems
+    .map((item) => item?.chord || item?.label || item?.id)
+    .filter(Boolean);
+
+  return names.length ? names.join(" → ") : "Progression";
+}
+
+function getSoundLabGuideToneText(lab = {}, chord = {}, block = {}) {
+  const notes = getLabPlaybackNotes(lab, chord, block);
+  if (!notes.length) return "";
+  return notes.join(" → ");
+}
+
+function getSoundLabPrimaryName(chord = {}) {
+  return chord.chord || chord.label || chord.id || "Chord";
+}
+
+function getSoundLabCompactRole(chord = {}) {
+  return [chord.degree, chord.role, chord.feeling]
+    .filter((value) => typeof value === "string" && value.trim())
+    .join(" • ");
+}
+
+function normalizeAuditionPitch(note) {
+  const normalized = normalizePitchName(note);
+  if (typeof normalized !== "string") return normalized;
+
+  const match = /^([A-Ga-g])([#b]?)(-?\d+)$/.exec(normalized);
+  if (!match) return normalized;
+
+  const [, rawLetter, accidental, rawOctave] = match;
+  const octave = Number(rawOctave);
+  const pitchName = `${rawLetter.toUpperCase()}${accidental}`;
+
+  // Keep audition notes in a tuner/mobile-friendly register.
+  // Example: G2/G3 -> G4, C3 -> C4.
+  if (octave < 4) return `${pitchName}4`;
+
+  return `${pitchName}${octave}`;
+}
+
+function getLabPlaybackNotes(lab = {}, chord = {}, block = {}, options = {}) {
+  const notes = getChordNotes(chord);
+  if (!notes.length) return [];
+
+  const explicitMode = String(
+    options.noteMode ||
+    chord.noteMode ||
+    lab.noteMode ||
+    lab.audioEngine?.noteMode ||
+    ""
+  ).toLowerCase();
+
+  // Explicit escape hatch for future labs that really want all chord tones.
+  if (["all", "full", "arpeggio", "arpeggiated"].includes(explicitMode)) {
+    return notes;
+  }
+
+  const explicitAuditionNotes = month2AsArray(
+    chord.auditionNotes ||
+    chord.playNotes ||
+    lab.auditionNotes
+  ).map(normalizePitchName).filter(Boolean);
+
+  if (explicitAuditionNotes.length) {
+    return explicitAuditionNotes.map(normalizeAuditionPitch);
+  }
+
+  const explicitAuditionNote =
+    chord.auditionNote ||
+    chord.playNote ||
+    chord.rootNote ||
+    lab.auditionNote;
+
+  if (explicitAuditionNote) {
+    return [normalizeAuditionPitch(explicitAuditionNote)];
+  }
+
+  // Default: one representative note per chord item.
+  // Current chord data stores root as the first note.
+  return [normalizeAuditionPitch(notes[0])];
+}
+
 function shouldPlaySequentialLabItem(lab = {}, chord = {}, block = {}) {
   const explicitPlayback = String(chord.playback || lab.playback || lab.playbackMode || "").toLowerCase();
-  if (["chord", "stack", "simultaneous"].includes(explicitPlayback)) return false;
-  if (["sequence", "sequential", "phrase", "melody"].includes(explicitPlayback)) return true;
+
+  if (["chord", "stack", "stacked", "simultaneous"].includes(explicitPlayback)) return false;
+
+  if (["sequence", "sequential", "phrase", "melody", "arpeggio", "arpeggiated"].includes(explicitPlayback)) return true;
+
   if (block.type === "ear-training-lab") return true;
 
   const source = [
@@ -3715,20 +3838,28 @@ function shouldPlaySequentialLabItem(lab = {}, chord = {}, block = {}) {
 
 function getLabItemPlaybackTiming(lab = {}, chord = {}, block = {}) {
   const sequential = shouldPlaySequentialLabItem(lab, chord, block);
+
   const durationMs = sequential
-    ? Number(lab.audioEngine?.phraseNoteDurationMs || lab.audioEngine?.noteDurationMs || 800)
-    : Number(lab.audioEngine?.durationMs || 2000);
-  const stepMs = Number(lab.audioEngine?.stepMs || lab.audioEngine?.noteGapMs || 350);
+    ? Number(lab.audioEngine?.phraseNoteDurationMs || lab.audioEngine?.noteDurationMs || 600)
+    : Number(lab.audioEngine?.durationMs || 1200);
+
+  const stepMs = Number(
+    lab.audioEngine?.stepMs ||
+    lab.audioEngine?.noteGapMs ||
+    (sequential ? 850 : 350)
+  );
+
   const strumMs = Number(lab.audioEngine?.strumMs ?? 35);
+
   return { sequential, durationMs, stepMs, strumMs };
 }
 
 function getLabItemTotalDurationMs(lab = {}, chord = {}, block = {}) {
-  const notes = getChordNotes(chord);
+  const notes = getLabPlaybackNotes(lab, chord, block);
   const timing = getLabItemPlaybackTiming(lab, chord, block);
   if (!notes.length) return timing.durationMs;
-  if (timing.sequential) return ((notes.length - 1) * timing.stepMs) + timing.durationMs + 120;
-  return ((notes.length - 1) * timing.strumMs) + timing.durationMs + 120;
+  if (timing.sequential && notes.length > 1) return ((notes.length - 1) * timing.stepMs) + timing.durationMs + 120;
+  return timing.durationMs + 120;
 }
 
 async function playLabItem(lab = {}, chord = {}, card, block = {}, options = {}) {
@@ -3740,39 +3871,57 @@ async function playLabItem(lab = {}, chord = {}, card, block = {}, options = {})
     const context = await ensureAudioContext();
     if (!context) return false;
 
-    const notes = getChordNotes(chord);
+    const notes = getLabPlaybackNotes(lab, chord, block, options);
     if (!notes.length) return false;
 
     const timing = getLabItemPlaybackTiming(lab, chord, block);
-    setLabStatus(card, "กำลังเล่น...");
+    setLabStatus(card, "", {
+      state: "NOW PLAYING",
+      primary: getSoundLabPrimaryName(chord),
+      guideTone: notes.join(" → "),
+      role: getSoundLabCompactRole(chord),
+      sequence: formatSoundLabSequenceLabel(lab)
+    });
 
     await Promise.all(notes.map((note, index) => {
       const timeOffset = timing.sequential ? (index * timing.stepMs) / 1000 : (index * timing.strumMs) / 1000;
       const duration = timing.durationMs / 1000;
 
-      if (timing.sequential) {
-        const noteTimer = window.setTimeout(() => {
-          setLabStatus(card, `Playing: ${note}`);
-        }, index * timing.stepMs);
-        sequenceTimers.push(noteTimer);
-      }
-
       const voice = lab.audioEngine?.voice;
-      const gainMultiplier = lab.audioEngine?.gain ?? 1.0;
-      const peakGain = (timing.sequential ? 0.86 : getStackedChordPeakGain(note, notes.length)) * gainMultiplier;
-      const synthFn = (voice === 'soft-piano' || voice === 'piano') ? playSoftPiano : playPluckedString;
-      
+      const gainMultiplier = Number(lab.audioEngine?.gain ?? 1.0);
+      const stackedPlayback = notes.length > 1 && !timing.sequential;
+      const singleAudition = notes.length === 1 && !stackedPlayback;
+
+      const basePeakGain = singleAudition
+        ? Number(lab.audioEngine?.singleNotePeakGain || lab.audioEngine?.auditionPeakGain || 1.18)
+        : timing.sequential
+          ? 0.95
+          : getStackedChordPeakGain(note, notes.length);
+
+      const maxPeakGain = singleAudition ? 1.35 : 1.0;
+      const peakGain = Math.min(basePeakGain * gainMultiplier, maxPeakGain);
+
+      const synthFn = singleAudition
+        ? playSoundLabGuideTone
+        : (voice === 'soft-piano' || voice === 'piano')
+          ? playSoftPiano
+          : playPluckedString;
+
+      const finalPeakGain = singleAudition
+        ? Number(lab.audioEngine?.guideTonePeakGain || 0.92)
+        : peakGain;
+
       return synthFn(
         note,
         timeOffset,
         duration,
-        peakGain,
-        { isChord: !timing.sequential }
+        finalPeakGain,
+        { isChord: stackedPlayback }
       );
     }));
 
     const doneTimer = window.setTimeout(() => {
-      updateLabStatus(card, chord, true);
+      updateLabStatus(card, chord, true, lab, block);
     }, getLabItemTotalDurationMs(lab, chord, block));
     sequenceTimers.push(doneTimer);
     return true;
@@ -3929,6 +4078,110 @@ async function playChord(chord = {}, audioEngine = {}) {
   }
 }
 
+async function playSoundLabGuideTone(noteString, timeOffset = 0, duration = 1.2, peakGain = 0.92, options = {}) {
+  const context = await ensureAudioContext();
+  if (!context || !pluckedMasterGain) return false;
+
+  const frequency = getFreq(noteString);
+  if (!frequency) return false;
+
+  const startTime = context.currentTime + timeOffset;
+  const endTime = startTime + duration;
+
+  const osc1 = context.createOscillator();
+  const osc2 = context.createOscillator();
+  const osc3 = context.createOscillator();
+
+  const osc1Gain = context.createGain();
+  const osc2Gain = context.createGain();
+  const osc3Gain = context.createGain();
+
+  const filter = context.createBiquadFilter();
+  const envelopeGain = context.createGain();
+
+  // Guide tone goal:
+  // clear fundamental for tuner/human ear,
+  // enough dimension to avoid dead/thin sound,
+  // no strong 3rd harmonic that can imply a fifth.
+  osc1.type = "triangle";
+  osc2.type = "sine";
+  osc3.type = "sine";
+
+  osc1.frequency.setValueAtTime(frequency, startTime);
+  osc2.frequency.setValueAtTime(frequency, startTime);
+  osc3.frequency.setValueAtTime(frequency * 2, startTime);
+
+  // Subtle detune adds dimension without changing the perceived note.
+  osc1.detune.setValueAtTime(0, startTime);
+  osc2.detune.setValueAtTime(-3, startTime);
+  osc3.detune.setValueAtTime(0, startTime);
+
+  osc1Gain.gain.setValueAtTime(0.82, startTime);
+  osc2Gain.gain.setValueAtTime(0.24, startTime);
+  osc3Gain.gain.setValueAtTime(0.12, startTime);
+
+  filter.type = "lowpass";
+  filter.frequency.setValueAtTime(6500, startTime);
+  filter.frequency.exponentialRampToValueAtTime(2800, startTime + 0.28);
+  filter.Q.setValueAtTime(0.7, startTime);
+
+  const safePeak = Math.min(Math.max(Number(peakGain || 0.92), 0.78), 1.0);
+  const sustain = safePeak * 0.7;
+
+  envelopeGain.gain.setValueAtTime(0.0001, startTime);
+  envelopeGain.gain.exponentialRampToValueAtTime(safePeak, startTime + 0.018);
+  envelopeGain.gain.exponentialRampToValueAtTime(sustain, startTime + 0.16);
+  envelopeGain.gain.setValueAtTime(sustain, Math.max(startTime + 0.18, endTime - 0.18));
+  envelopeGain.gain.exponentialRampToValueAtTime(0.0001, endTime);
+
+  osc1.connect(osc1Gain);
+  osc2.connect(osc2Gain);
+  osc3.connect(osc3Gain);
+
+  osc1Gain.connect(filter);
+  osc2Gain.connect(filter);
+  osc3Gain.connect(filter);
+
+  filter.connect(envelopeGain);
+  envelopeGain.connect(pluckedMasterGain);
+
+  osc1.start(startTime);
+  osc2.start(startTime);
+  osc3.start(startTime);
+
+  osc1.stop(endTime + 0.06);
+  osc2.stop(endTime + 0.06);
+  osc3.stop(endTime + 0.06);
+
+  const activeNode = {
+    osc1,
+    osc2,
+    osc3,
+    osc1Gain,
+    osc2Gain,
+    osc3Gain,
+    filter,
+    envelopeGain
+  };
+
+  activeNodes.push(activeNode);
+
+  osc1.addEventListener("ended", () => {
+    activeNodes = activeNodes.filter((node) => node !== activeNode);
+    try {
+      osc1Gain.disconnect();
+      osc2Gain.disconnect();
+      osc3Gain.disconnect();
+      filter.disconnect();
+      envelopeGain.disconnect();
+    } catch {
+      // Nodes may already be disconnected by stopAllSounds().
+    }
+  }, { once: true });
+
+  return true;
+}
+
 async function playSoftPiano(noteString, timeOffset = 0, duration = 1.2, peakGain = 0.55, options = {}) {
   const context = await ensureAudioContext();
   if (!context || !pluckedMasterGain) return false;
@@ -4051,11 +4304,18 @@ function playSequence(lab = {}, card, block = {}) {
   const gapMs = Number(lab.audioEngine?.gapMs || 160);
   let nextStartMs = 0;
 
+  setLabStatus(card, "", {
+    state: "PROGRESSION",
+    primary: formatSoundLabSequenceLabel(lab),
+    hint: "Guide Tone Sequence",
+    sequence: formatSoundLabSequenceLabel(lab)
+  });
+
   chords.forEach((chord) => {
     const timer = window.setTimeout(async () => {
       activateChordButton(card, chord.id);
       const played = await playLabItem(lab, chord, card, block, { clearTimers: false });
-      if (!played) updateLabStatus(card, chord, false);
+      if (!played) updateLabStatus(card, chord, false, lab, block);
     }, nextStartMs);
     sequenceTimers.push(timer);
     nextStartMs += getLabItemTotalDurationMs(lab, chord, block) + gapMs;
@@ -4063,7 +4323,12 @@ function playSequence(lab = {}, card, block = {}) {
 
   const clearTimer = window.setTimeout(() => {
     clearActiveChord(card);
-    setLabStatus(card, "ฟังครบฟอร์มแล้ว ลองพูด Home / Away / Pull / Home ตามอีกครั้งครับ");
+    setLabStatus(card, "", {
+      state: "COMPLETE",
+      primary: "ฟังครบ Progression แล้ว",
+      hint: "ลองกดแต่ละคอร์ดซ้ำ แล้วฟังสีของ Guide Tone",
+      sequence: formatSoundLabSequenceLabel(lab)
+    });
   }, nextStartMs);
   sequenceTimers.push(clearTimer);
 }
@@ -4107,14 +4372,60 @@ function clearActiveChord(card) {
   card.querySelectorAll(".chord-button").forEach((button) => button.classList.remove("is-active"));
 }
 
-function updateLabStatus(card, chord = {}, audioPlayed) {
-  const prefix = audioPlayed ? "" : "Text-only preview: ";
-  setLabStatus(card, `${prefix}${chord.chord || "Chord"} / ${chord.degree || ""} = ${chord.role || ""}${chord.feeling ? ` (${chord.feeling})` : ""}`);
+function updateLabStatus(card, chord = {}, audioPlayed, lab = {}, block = {}) {
+  const guideTone = getSoundLabGuideToneText(lab, chord, block);
+  setLabStatus(card, "", {
+    state: audioPlayed ? "PLAYED" : "TEXT PREVIEW",
+    primary: getSoundLabPrimaryName(chord),
+    guideTone,
+    role: getSoundLabCompactRole(chord),
+    sequence: formatSoundLabSequenceLabel(lab)
+  });
 }
 
-function setLabStatus(card, text) {
+function setLabStatus(card, text = "", meta = {}) {
   const status = card?.querySelector(".chord-lab-status");
-  if (status) status.textContent = text;
+  if (!status) return;
+
+  const state = meta.state || "SOUND LAB";
+  const primary = meta.primary || text || "เลือกคอร์ดหรือกด Play";
+  const guide = meta.guideTone || "";
+  const role = meta.role || "";
+  const sequence = meta.sequence || "";
+  const hint = meta.hint || "";
+
+  status.replaceChildren();
+  status.classList.add("sound-lab-digital-sign");
+
+  const header = month2CreateElement("div", "sound-lab-display-header");
+  header.append(
+    month2CreateElement("span", "sound-lab-display-state", state),
+    month2CreateElement("span", "sound-lab-display-led", "●")
+  );
+
+  const readout = month2CreateElement("div", "sound-lab-display-readout");
+
+  const primaryLine = month2CreateElement("div", "sound-lab-display-primary");
+  primaryLine.appendChild(month2CreateElement("strong", "sound-lab-display-chord", primary));
+
+  if (guide) {
+    primaryLine.appendChild(month2CreateElement("span", "sound-lab-display-guide", `GUIDE ${guide}`));
+  }
+
+  const roleLine = month2CreateElement(
+    "div",
+    "sound-lab-display-role",
+    role || hint || "ฟังสีของคอร์ด แล้วเทียบกับฟอร์มด้านล่าง"
+  );
+
+  const sequenceLine = month2CreateElement(
+    "div",
+    "sound-lab-display-sequence",
+    sequence || "พร้อมฟังทีละคอร์ด"
+  );
+
+  readout.append(primaryLine, roleLine, sequenceLine);
+  status.append(header, readout);
 }
 
 function renderMonth2MissingCard(message) {
