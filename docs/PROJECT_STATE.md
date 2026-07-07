@@ -9,11 +9,10 @@ FINAL for current phase.
 
 ## Current Visible Scope
 - Week 0 Prelude / Foundation Reset is public.
-- Month 1-4 are visible in normal production.
-- Month 5-8 remain hidden.
-- Preview parameters such as `?preview=m3`, `?preview=m4`, `?devPreview=m3`, and `?devPreview=m4` are legacy QA shortcuts / auto-open helpers only; they are not the current production visibility gate.
-- **Month 5 and Month 6 content drafts are COMPLETE** but exist purely as **Hidden Draft Shards** (`outputs/data-shards/month5-preview.json`, `outputs/data-shards/month6-preview.json`).
-- Month 5 and Month 6 MUST REMAIN HIDDEN from normal production. They can only be viewed via the QA parameter hooks implemented in `app.js` (e.g., `?preview=m5`, `?preview=m6`, `?devPreview=all`).
+- Month 1-6 are visible in normal production.
+- Month 7-8 remain hidden.
+- Preview parameters such as `?preview=m7`, `?preview=m8`, `?devPreview=all` are legacy QA shortcuts / auto-open helpers only.
+- Month 5 and Month 6 content shards are loaded dynamically and are fully public.
 - Reference Shelf content lives in Practice Room, not in the main lesson flow.
 - **Practice Room Additions:** The Reference Shelf (containing both the TAB Handbook and Note Value Cheatsheet) is LIVE and finalized (v1.0) inside the Practice Lab.
 - **Mini Course Additions:** Rhythm Notation Starter and Blues Turnaround Starter are PUBLIC / LIVE in the Practice Room as optional support courses.
@@ -37,17 +36,16 @@ FINAL for current phase.
 - Reference links inside Mini Course continue to open the existing TAB Handbook and Note Value Cheatsheet.
 - Month 5-8 remain hidden.
 
-### Current Phase: Phase 2 Hidden Drafts Complete
-- Phase 1 (Shard Infrastructure) and Phase 2 (Content Drafting for M5/M6) are CLOSED.
-- M5/M6 hidden preview shards are loaded in memory and are structurally complete.
-- Month 5 hidden data merged into main.
-- Month 6 hidden data merged into main.
-- Month 5/6 remain hidden.
-- Sound Lab phase frozen.
-- Runtime preview URLs available: `?preview=m5`, `?preview=m6`, `?devPreview=all`.
-- Production remains strictly locked to Month 1–4.
+### Current Phase: Month 5 and Month 6 Live
+- Current production curriculum is Month 1-6 live.
+- Month 5: Diatonic Bridge & Melodic Freedom is live.
+- Month 6: Modes as Chord Colors is live.
+- Sound Lab phase is frozen/stable.
+- Final real smoke QA passed.
+- Next recommended phase is Next.js Dashboard spike (branch: `spike/next-dashboard-shell`).
+- Production remains locked up to Month 6.
 - Known UX debt: month switcher horizontal scroll feels step-like.
-- Do not start Month 7/8 or expose Month 5/6 publicly yet.
+- Do not start Month 7/8 publicly yet.
 - Two Mini Courses are currently live in the Practice Room: `Rhythm Notation Starter` and `Blues Turnaround Starter`.
 - The system is under observation after the Sprint 8D public reveal and 6/6 smoke-test pass.
 - Do not initiate new features, new Practice Tools, or new Mini Courses during this monitoring period.
@@ -62,8 +60,7 @@ FINAL for current phase.
 ### v2.9.5 Hotfix & Audio Polish (2026-07-06)
 - **Status:** Main is stable at merge commit `7a5456c`. Current mode: Post-hotfix monitoring / bugfix-only.
 - **Fretboard Restore:** Fretboard visuals successfully restored across all devices.
-- **Hidden Audio QA:** Hidden Month 5/6 soft-piano audio QA passed. M5/M6 `chordSoundLabs` now utilize an opt-in soft-piano voice and strictly explicit octave voicings.
-- Normal production remains Month 1-4 only. Month 5/6 remain strictly hidden (Preview URLs: `?preview=m5`, `?preview=m6`, `?devPreview=all`).
+- **Month 5/6 Audio QA:** Month 5/6 soft-piano audio QA passed historically. M5/M6 `chordSoundLabs` now utilize an opt-in soft-piano voice and strictly explicit octave voicings.
 - `outputs/data.json` and `.gitignore` remained completely untouched. No release tag was created.
 - The hotfix branch (`fix/fretboard-visual-restore`) was kept for now.
 
@@ -72,7 +69,7 @@ FINAL for current phase.
 - This was documentation only. No production code was changed during Sprint 7A.
 - Sprint 7A is now historical planning and was superseded by the successful Sprint 7B public reveal.
 - The reveal strategy was completed as a data-driven launch: `visibility` changed from `"hidden"` to `"public"` in data and the renderer filter now shows public courses on normal load.
-- Month 5-8 remain hidden.
+- Month 7-8 remain hidden.
 - Week 0 remains Week 0, not Month 0.
 - Fretboard Studio Lite was not implemented.
 
