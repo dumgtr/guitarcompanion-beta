@@ -7,7 +7,7 @@
       "week": 21,
       "module": "modes-colors",
       "title": "Week 21: What Modes Really Mean (Pitch Axis)",
-      "isVisible": false,
+      "isVisible": true,
       "lessonBlocks": [
         {
           "type": "text",
@@ -58,7 +58,7 @@
       "week": 22,
       "module": "modes-colors",
       "title": "Week 22: Dorian vs Mixolydian (The Bluesy Cousins)",
-      "isVisible": false,
+      "isVisible": true,
       "lessonBlocks": [
         {
           "type": "text",
@@ -119,7 +119,7 @@
       "week": 23,
       "module": "modes-colors",
       "title": "Week 23: Lydian (The Floating Dream)",
-      "isVisible": false,
+      "isVisible": true,
       "lessonBlocks": [
         {
           "type": "text",
@@ -176,7 +176,7 @@
       "week": 24,
       "module": "modes-colors",
       "title": "Week 24: Modal Vamp Integration",
-      "isVisible": false,
+      "isVisible": true,
       "lessonBlocks": [
         {
           "type": "text",
