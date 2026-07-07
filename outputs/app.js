@@ -3687,9 +3687,24 @@ function getLabPlaybackItems(lab = {}) {
 
 function shouldPlaySequentialLabItem(lab = {}, chord = {}, block = {}) {
   const explicitPlayback = String(chord.playback || lab.playback || lab.playbackMode || "").toLowerCase();
-  if (["chord", "stack", "simultaneous"].includes(explicitPlayback)) return false;
-  if (["sequence", "sequential", "phrase", "melody"].includes(explicitPlayback)) return true;
+
+  if (["chord", "stack", "stacked", "simultaneous"].includes(explicitPlayback)) return false;
+
+  if (["sequence", "sequential", "phrase", "melody", "arpeggio", "arpeggiated"].includes(explicitPlayback)) return true;
+
   if (block.type === "ear-training-lab") return true;
+
+  // Sound Lab default should be ear-training safe:
+  // play chord notes one by one so pitch is clear and tuner-checkable.
+  if (
+    block.type === "chord-sound-lab" ||
+    block.type === "chord-lab" ||
+    lab.type === "chord-sound-lab" ||
+    lab.type === "chord-lab" ||
+    Array.isArray(lab.chords)
+  ) {
+    return true;
+  }
 
   const source = [
     lab.type,
@@ -3715,11 +3730,19 @@ function shouldPlaySequentialLabItem(lab = {}, chord = {}, block = {}) {
 
 function getLabItemPlaybackTiming(lab = {}, chord = {}, block = {}) {
   const sequential = shouldPlaySequentialLabItem(lab, chord, block);
+
   const durationMs = sequential
-    ? Number(lab.audioEngine?.phraseNoteDurationMs || lab.audioEngine?.noteDurationMs || 800)
+    ? Number(lab.audioEngine?.phraseNoteDurationMs || lab.audioEngine?.noteDurationMs || 600)
     : Number(lab.audioEngine?.durationMs || 2000);
-  const stepMs = Number(lab.audioEngine?.stepMs || lab.audioEngine?.noteGapMs || 350);
+
+  const stepMs = Number(
+    lab.audioEngine?.stepMs ||
+    lab.audioEngine?.noteGapMs ||
+    (sequential ? 850 : 350)
+  );
+
   const strumMs = Number(lab.audioEngine?.strumMs ?? 35);
+
   return { sequential, durationMs, stepMs, strumMs };
 }
 
