@@ -107,4 +107,4 @@ The Reference Shelf / Rhythm Notation work is FINAL for the current phase.
 - Month 6 focuses on **"Modes as Chord Colors"** (understanding modes not just as shapes, but as sonic colors over specific chords).
 - The legacy "Improvisation Foundation" outline is archived inside `docs/MONTH3_TO_MONTH6_BLUEPRINT.md` (collapsed `<details>` block).
 - The canonical Month 5 production spec is: `docs/MONTH5_CONTENT_SPEC.md`.
-- Both Month 5 and Month 6 remain strictly hidden in the production UI.
+- Month 5 and Month 6 are live in production. Month 7-8 remain hidden.

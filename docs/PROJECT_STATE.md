@@ -34,7 +34,7 @@ FINAL for current phase.
 - Sprint 6.5 bugfix: the reset type-to-confirm input has `aria-label="Mini Course reset confirmation phrase"`.
 - Sprint 7C Public Reveal QA / logic check: **PASS**. Rhythm Notation Starter is public in Practice Room, Month 1 remains the default fresh-load month, Month 1-4 only remain visible in Month Switcher, no Month 0 is created, no keyboard trap is expected from the existing button/focus contract, and mobile overflow protections remain in place for 390px/430px layouts.
 - Reference links inside Mini Course continue to open the existing TAB Handbook and Note Value Cheatsheet.
-- Month 5-8 remain hidden.
+- Month 7-8 remain hidden.
 
 ### Current Phase: Month 5 and Month 6 Live
 - Current production curriculum is Month 1-6 live.
@@ -79,7 +79,7 @@ FINAL for current phase.
 - `outputs/app.js`: targeted renderer updates were applied for data-driven public visibility, public shelf copy, public card label, and public CTA copy.
 - `FEATURE_MINI_COURSE_SHELF` remains `false`; the reveal is data-driven, not flag-driven.
 - Dev preview flags still work for future hidden Mini Courses.
-- Month 5-8 remain hidden.
+- Month 7-8 remain hidden.
 - Week 0 remains Week 0 with `month: null`; no Month 0 was created.
 - Reference Shelf was not touched.
 - Fretboard Studio Lite was not implemented.
