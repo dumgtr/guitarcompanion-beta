@@ -3,7 +3,7 @@
     {
       "id": "m5-w17-meet-family",
       "title": "Week 17: Meet the Family & Space",
-      "isVisible": false,
+      "isVisible": true,
       "lessonBlocks": [
         {
           "type": "text",
@@ -73,7 +73,7 @@
     {
       "id": "m5-w18-core-progression",
       "title": "Week 18: Core Progression & The V Chord Tension",
-      "isVisible": false,
+      "isVisible": true,
       "lessonBlocks": [
         {
           "type": "text",
@@ -130,7 +130,7 @@
     {
       "id": "m5-w19-90s-secret",
       "title": "Week 19: The 90s Secret",
-      "isVisible": false,
+      "isVisible": true,
       "lessonBlocks": [
         {
           "type": "text",
@@ -191,7 +191,7 @@
     {
       "id": "m5-w20-solo-builder",
       "title": "Week 20: 8-Bar Solo Builder",
-      "isVisible": false,
+      "isVisible": true,
       "lessonBlocks": [
         {
           "type": "text",

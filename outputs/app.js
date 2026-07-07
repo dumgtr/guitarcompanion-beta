@@ -428,7 +428,7 @@ function getLoadedMonths() {
 
 function getVisibleMonths() {
   const loadedMonths = getLoadedMonths();
-  if (!isDevPreviewActive()) return loadedMonths.filter((month) => month <= 4);
+  if (!isDevPreviewActive()) return loadedMonths.filter((month) => month <= 6);
 
   const mode = getDevPreviewMode();
   if (mode === "m3") return loadedMonths.filter((month) => month <= 4);
@@ -437,7 +437,7 @@ function getVisibleMonths() {
   if (mode === "m6" || mode === "6") return loadedMonths.filter((month) => month <= 6);
   if (mode === "all") return loadedMonths.filter((month) => month <= 6);
   
-  return loadedMonths.filter((month) => month <= 4);
+  return loadedMonths.filter((month) => month <= 6);
 }
 
 function canOpenMonth(month) {
@@ -484,6 +484,18 @@ function getMonthMeta(month) {
       moduleLabel: "Scale Atlas Foundation",
       switcherLabel: "เดือน 4: Scale Atlas",
       brandSub: "พื้นฐาน Scale Atlas 4 สัปดาห์"
+    },
+    5: {
+      shortLabel: "Diatonic",
+      moduleLabel: "Diatonic Bridge & Melodic Freedom",
+      switcherLabel: "เดือน 5: Diatonic Bridge",
+      brandSub: "Diatonic Bridge & Melodic Freedom"
+    },
+    6: {
+      shortLabel: "Modes",
+      moduleLabel: "Modes as Chord Colors",
+      switcherLabel: "เดือน 6: Modes",
+      brandSub: "Modes as Chord Colors"
     }
   };
   return metadata[month] || {
@@ -1922,7 +1934,7 @@ function initFocusedApp() {
 
 function getSavedSelectedFocusedMonth() {
   const saved = Number(localStorage.getItem(selectedFocusedMonthStorageKey) || 1);
-  return saved >= 2 && saved <= 4 ? saved : 1;
+  return saved >= 2 && saved <= 6 ? saved : 1;
 }
 
 function bindFocusedEvents() {
