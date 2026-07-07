@@ -523,7 +523,8 @@
         {
           "id": "C",
           "name": "C Major",
-          "role": "I / Home",
+          "degree": "I",
+          "role": "Home",
           "notes": [
             "C3",
             "G3",
@@ -533,7 +534,8 @@
         {
           "id": "F",
           "name": "F Major",
-          "role": "IV / Open",
+          "degree": "IV",
+          "role": "Open",
           "notes": [
             "F3",
             "A3",
@@ -543,7 +545,8 @@
         {
           "id": "G",
           "name": "G Major",
-          "role": "V / Pull",
+          "degree": "V",
+          "role": "Pull",
           "notes": [
             "G2",
             "D3",
@@ -553,7 +556,8 @@
         {
           "id": "Am",
           "name": "A Minor",
-          "role": "vi / Minor Color",
+          "degree": "vi",
+          "role": "Minor Color",
           "notes": [
             "A2",
             "E3",
@@ -567,6 +571,10 @@
         "G",
         "Am"
       ],
+      "uiCopy": {
+        "playSequence": "Play: C-F-G-Am",
+        "stop": "หยุดเสียง"
+      },
       "listenFor": [
         "C รู้สึกเหมือนบ้าน",
         "F เหมือนเปิดประตูออกจากบ้าน",
@@ -661,7 +669,8 @@
         {
           "id": "G",
           "name": "G",
-          "role": "I / Home",
+          "degree": "I",
+          "role": "Home",
           "notes": [
             "G2",
             "B2",
@@ -674,7 +683,8 @@
         {
           "id": "Cadd9",
           "name": "Cadd9",
-          "role": "IV / Open",
+          "degree": "IV",
+          "role": "Open",
           "notes": [
             "C3",
             "E3",
@@ -686,7 +696,8 @@
         {
           "id": "Dsus4",
           "name": "Dsus4",
-          "role": "V / Pull",
+          "degree": "V",
+          "role": "Pull",
           "notes": [
             "D3",
             "A3",
@@ -697,7 +708,8 @@
         {
           "id": "Em7",
           "name": "Em7",
-          "role": "vi / Minor Color",
+          "degree": "vi",
+          "role": "Minor Color",
           "notes": [
             "E2",
             "B2",
@@ -714,6 +726,10 @@
         "Dsus4",
         "Em7"
       ],
+      "uiCopy": {
+        "playSequence": "Play: G-Cadd9-Dsus4-Em7",
+        "stop": "หยุดเสียง"
+      },
       "listenFor": [
         "ฟัง D และ G ที่ค้างอยู่บนสาย 1-2 ว่ายังต่อเนื่องแม้เบสเปลี่ยน",
         "ฟังว่า Cadd9 และ Dsus4 ทำให้ progression ลอยและเชื่อมกันมากขึ้น",
@@ -721,9 +737,9 @@
       ],
       "audioEngine": {
         "voice": "soft-piano",
-        "durationMs": 1400,
+        "durationMs": 1200,
         "gapMs": 160,
-        "strumMs": 40
+        "strumMs": 28
       }
     }
   ],
