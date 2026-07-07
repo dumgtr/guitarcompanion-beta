@@ -40,6 +40,10 @@ FINAL for current phase.
 ### Current Phase: Phase 2 Hidden Drafts Complete
 - Phase 1 (Shard Infrastructure) and Phase 2 (Content Drafting for M5/M6) are CLOSED.
 - M5/M6 hidden preview shards are loaded in memory and are structurally complete.
+- Month 5 hidden data merged into main.
+- Month 6 hidden data merged into main.
+- Month 5/6 remain hidden.
+- Sound Lab phase frozen.
 - Runtime preview URLs available: `?preview=m5`, `?preview=m6`, `?devPreview=all`.
 - Production remains strictly locked to Month 1–4.
 - Known UX debt: month switcher horizontal scroll feels step-like.
@@ -89,3 +93,4 @@ FINAL for current phase.
 - Do not continue polishing the Reference Shelf, TAB Handbook, or Note Value Cheatsheet unless the user reports a real bug.
 - Future additions should be spec-first and should not expose new months or modules.
 - Rollback: revert `visibility` to `"hidden"` in data.json and restore the previous `getMiniCourses()` filter. See `docs/MINI_COURSE_PUBLIC_REVEAL_PLAN.md` Section 8.
+- Next recommended phase: Next.js Dashboard planning/spike.

@@ -94,9 +94,11 @@ The Reference Shelf / Rhythm Notation work is FINAL for the current phase.
 
 ## Recommended Next Work
 - The hotfix branch (`fix/fretboard-visual-restore`) was merged but kept for now. No release tag was created.
-- DO NOT set Month 5 or 6 to public.
+- DO NOT set Month 5 or 6 to public. Month 5/6 remain hidden.
+- Sound Lab phase is frozen. Month 5 hidden data merged. Month 6 hidden data merged.
 - The project is currently in a Post-Release Monitoring phase. DO NOT initiate new features (like Fretboard Studio) or new Mini Courses.
 - Known UX debt: month switcher horizontal scroll feels step-like.
+- Next recommended phase: Next.js Dashboard planning/spike (branch: spike/next-dashboard-shell).
 
 ## Month 5 & 6 Realignment (July 2026)
 - Month 5 has been pivoted from "Improvisation Foundation" to **"Diatonic Bridge & Melodic Freedom"** (Diatonic Triads, I-IV-V-vi, common-tone chord colors, and melodic phrasing).
