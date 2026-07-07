@@ -62,11 +62,15 @@
       "lessonBlocks": [
         {
           "type": "text",
-          "content": "สัปดาห์นี้เราจะมาเจาะลึก 2 โหมดที่เป็น 'ลูกพี่ลูกน้อง' กันในสาย Blues/Rock นั่นคือ Dorian และ Mixolydian"
+          "content": "สัปดาห์นี้เราจะมาเจาะลึก 2 โหมดที่เป็น 'ลูกพี่ลูกน้อง' กันในสาย Blues/Rock นั่นคือ Dorian และ Mixolydian ทั้งคู่มีโน้ต b7 เหมือนกัน ทำให้มีกลิ่นอาย Bluesy ทั้งคู่"
         },
         {
           "type": "text",
-          "content": "ความคล้าย: ทั้งคู่มีโน้ต Flat 7 (b7) ซึ่งให้ความรู้สึก Bluesy\nความต่าง: Mixolydian มี Major 3rd (สว่าง/กวนๆ) ส่วน Dorian มี Minor 3rd และ Natural 6 (หม่น/เท่/แจ๊สซี่)"
+          "content": "จุดเปลี่ยนอารมณ์หลักคือโน้ตตัวที่ 3:\n- Dorian ใช้ b3 (C natural) ให้ความรู้สึก Minor, เท่, หม่น, แจ๊สซี่\n- Mixolydian ใช้ 3 (C#) ให้ความรู้สึก Major, มั่นใจ, บลูส์-ร็อก"
+        },
+        {
+          "type": "chord-sound-lab",
+          "labRef": "m6-w22-sound-dorian-vs-mixo"
         },
         {
           "type": "fretboard-visualizer",
@@ -83,17 +87,29 @@
         {
           "type": "technique-drill",
           "drillRef": "m6-w22-drill-dorian-mixo"
+        },
+        {
+          "type": "text",
+          "heading": "ครูช่วยแก้",
+          "content": "ถ้าฟังสองโหมดนี้แล้วรู้สึกเหมือนๆ กัน ให้ชะลอความเร็วลงและลองแยกฟังเฉพาะโน้ตตัวที่ 3",
+          "teacherNote": "ลองเปิด A Drone หรือดีดคอร์ด A7/Am7 ค้างไว้ แล้วดีดสลับแค่โน้ต C กับ C# ช้าๆ อย่าเพิ่งพยายามวิ่งสเกลเต็มรูปแบบจนกว่าหูจะแยกสองสีนี้ออกชัดเจนครับ"
         }
       ],
       "dailyPractice": [
-        "ดู Visual Map บนคอ และจำตำแหน่งโน้ตสีสัน (3rd, 6th, b7) 5 นาที",
-        "ดีด Tab 2 ตัวอย่างเปรียบเทียบอารมณ์ 5 นาที",
-        "สร้างวลีดนตรี (Phrase) เล็กๆ ของตัวเองที่จบลงบนโน้ตสีสัน 10 นาที"
+        "Day 1: ฟัง A7 แล้วหาเสียง C# / major 3rd",
+        "Day 2: ฟัง Am7 แล้วหาเสียง C natural / minor 3rd",
+        "Day 3: เล่น A Mixolydian lick แล้วเน้น C# และ G",
+        "Day 4: เล่น A Dorian lick แล้วเน้น C และ F#",
+        "Day 5: สลับ Dorian กับ Mixolydian ทีละรอบ แล้วอัดเสียงสั้น ๆ",
+        "Day 6: สร้างวลี 2 ห้องแบบ Dorian และ 2 ห้องแบบ Mixolydian",
+        "Day 7: Output Task — อัดคลิปเปรียบเทียบสองสี"
       ],
       "selfCheck": [
-        "ฉันแยกเสียงสว่างแบบ Mixolydian และหม่นเท่แบบ Dorian ออก",
-        "ฉันรู้ว่าโน้ตตัวไหนบนคอคือ Flat 7",
-        "ฉันเห็นความสำคัญของโน้ตตัวที่ 3 ในการชี้วัด Major/Minor"
+        "ฉันระบุได้ว่าโน้ต b7 คือสีสันที่แชร์กันระหว่าง 2 โหมดนี้",
+        "ฉันสามารถอธิบายความแตกต่างระหว่าง C และ C# บนคอร์ด A ได้",
+        "ฉันฟังออกว่า A7 ให้ความรู้สึก Mixolydian/Major และ Am7 ให้ความรู้สึก Dorian/Minor",
+        "Quiz: โน้ตตัวไหนเป็นตัวตัดสินว่า A Dorian กับ A Mixolydian ฟังต่างกันมากที่สุด? (คำตอบ: โน้ตตัวที่ 3 — C หรือ C#)",
+        "Output Task: อัดคลิป 4 ห้อง: 2 ห้องแรกเล่น A Mixolydian โดยเน้น C#, 2 ห้องถัดมาเล่น A Dorian โดยเน้น C และ F#. ฟังย้อนหลังว่าสองสีต่างกันชัดหรือไม่"
       ]
     },
     {
@@ -410,6 +426,69 @@
     }
   ],
   "chordSoundLabs": [
+    {
+      "id": "m6-w22-sound-dorian-vs-mixo",
+      "type": "chord-sound-lab",
+      "title": "Dorian vs Mixolydian: The 3rd Decides",
+      "chords": [
+        {
+          "id": "A7",
+          "name": "A7",
+          "role": "Mixolydian Home / Major Blues",
+          "notes": [
+            "A2",
+            "E3",
+            "G3",
+            "C#4",
+            "E4"
+          ]
+        },
+        {
+          "id": "Am7",
+          "name": "Am7",
+          "role": "Dorian Home / Minor Cool",
+          "notes": [
+            "A2",
+            "E3",
+            "G3",
+            "C4",
+            "E4"
+          ]
+        },
+        {
+          "id": "D9",
+          "name": "D9",
+          "role": "Dorian IV9 Color",
+          "notes": [
+            "D3",
+            "F#3",
+            "C4",
+            "E4",
+            "A4"
+          ]
+        }
+      ],
+      "sequence": [
+        "A7",
+        "Am7",
+        "D9",
+        "Am7",
+        "A7"
+      ],
+      "listenFor": [
+        "A7 has C# and feels major/blues-rock.",
+        "Am7 has C natural and feels minor/cool.",
+        "D9 adds F# which reveals the Dorian natural 6 color.",
+        "The b7 G is shared, so both can still feel bluesy."
+      ],
+      "audioEngine": {
+        "voice": "soft-piano",
+        "durationMs": 1200,
+        "gapMs": 160,
+        "strumMs": 28,
+        "gain": 1.08
+      }
+    },
     {
       "id": "m6-w21-drone-color-lab",
       "type": "chord-sound-lab",
