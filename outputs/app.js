@@ -2378,9 +2378,12 @@ function renderMonth2Dashboard() {
   const weekItem = monthWeeks.find((week) => week.number === focusedSelectedWeek) || monthWeeks[0];
   const moduleLabel = monthMeta.moduleLabel;
   const nextDayButton = document.getElementById("nextDayButton");
+  const currentIndex = monthWeeks.findIndex((week) => Number(week.number) === Number(weekItem.number));
+  const isLastWeek = currentIndex === monthWeeks.length - 1;
+
   if (nextDayButton) {
     nextDayButton.hidden = false;
-    nextDayButton.textContent = "สัปดาห์ถัดไป";
+    nextDayButton.textContent = isLastWeek ? "กลับสัปดาห์แรก" : "สัปดาห์ถัดไป";
   }
 
   if (!weekItem) {
@@ -2495,6 +2498,39 @@ function renderMonthSwitcher(autoScroll = false) {
   }
 }
 
+function openFocusedWeek(weekNumber, options = {}) {
+  const source = options.source || "manual";
+  const shouldScroll = Boolean(options.scroll);
+  const monthWeeks = getFocusedMonthWeeks(selectedFocusedMonth);
+
+  if (!monthWeeks.length) return;
+
+  const numericWeek = Number(weekNumber);
+  const targetWeek = monthWeeks.some((week) => Number(week.number) === numericWeek)
+    ? numericWeek
+    : monthWeeks[0].number;
+
+  focusedSelectedWeek = targetWeek;
+
+  updateDebugState({
+    currentMonth: selectedFocusedMonth,
+    lastAction: `Week ${targetWeek} opened via ${source}`
+  });
+
+  renderFocusedDashboard();
+  renderFocusedWeekTabs();
+  renderFocusedLesson();
+  renderFocusedProgressTracking();
+
+  if (shouldScroll) {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById("dashboard")?.scrollIntoView({
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+      block: "start"
+    });
+  }
+}
+
 async function openFocusedMonth(month) {
   if (isViewingPrelude) {
     isViewingPrelude = false;
@@ -2561,11 +2597,9 @@ function renderFocusedWeekTabs() {
     `).join("");
     tabs.querySelectorAll("[data-course-week]").forEach((button) => {
       button.addEventListener("click", () => {
-        focusedSelectedWeek = Number(button.dataset.courseWeek);
-        updateDebugState({ currentMonth: selectedFocusedMonth, lastAction: `Week ${focusedSelectedWeek} opened` });
-        renderFocusedDashboard();
-        renderFocusedWeekTabs();
-        renderFocusedLesson();
+        openFocusedWeek(Number(button.dataset.courseWeek), {
+          source: "week-tab"
+        });
       });
     });
     return;
@@ -5034,10 +5068,18 @@ function renderMiniCourseFallback(message, code = "") {
 function goToNextPracticeDay() {
   if (selectedFocusedMonth !== 1) {
     const monthWeeks = getFocusedMonthWeeks(selectedFocusedMonth);
-    const currentIndex = monthWeeks.findIndex((week) => week.number === focusedSelectedWeek);
-    const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % monthWeeks.length : 0;
-    focusedSelectedWeek = monthWeeks[nextIndex]?.number || focusedSelectedWeek;
-    renderFocusedApp();
+    if (!monthWeeks.length) return;
+
+    const currentIndex = monthWeeks.findIndex((week) => Number(week.number) === Number(focusedSelectedWeek));
+    const safeIndex = currentIndex >= 0 ? currentIndex : 0;
+    const nextIndex = (safeIndex + 1) % monthWeeks.length;
+    const nextWeek = monthWeeks[nextIndex];
+
+    openFocusedWeek(nextWeek.number, {
+      source: "next-week-button",
+      scroll: false
+    });
+
     return;
   }
   const currentWeekNumber = getCurrentFoundationWeek();
