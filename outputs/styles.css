@@ -4257,26 +4257,36 @@ footer p {
   padding: 12px;
 }
 
-.sound-lab-digital-sign {
+.month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign {
   position: relative;
   display: grid;
   min-height: 132px;
   align-content: stretch;
   gap: 0.65rem;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, #ffb347, #0d0d0d 80%);
-  border-radius: 12px;
+  border: 1px solid rgba(255, 179, 71, 0.48);
+  border-radius: 14px;
   background:
-    radial-gradient(circle at 12% 18%, color-mix(in srgb, #ffb347, transparent 94%), transparent 32%),
-    linear-gradient(180deg, #161616, #0a0a0a);
+    radial-gradient(circle at 12% 18%, rgba(255, 179, 71, 0.11), transparent 34%),
+    repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.035) 0 1px,
+      transparent 1px 4px
+    ),
+    linear-gradient(180deg, #080808 0%, #020202 100%);
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, #fff, transparent 96%),
-    inset 0 -15px 35px rgba(0, 0, 0, 0.4),
-    inset 0 0 10px rgba(0, 0, 0, 0.8);
-  padding: 0.8rem 0.9rem;
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -20px 44px rgba(0, 0, 0, 0.72),
+    inset 0 0 26px rgba(255, 179, 71, 0.08),
+    0 0 0 1px rgba(0, 0, 0, 0.78);
+  color: #fff3d6;
+  font-size: clamp(0.98rem, 4vw, 1.15rem);
+  font-weight: 900;
+  line-height: 1.5;
+  padding: 0.85rem 0.95rem;
 }
 
-.sound-lab-display-header {
+.month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -4284,31 +4294,34 @@ footer p {
   min-width: 0;
 }
 
-.sound-lab-display-state {
+.month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-state {
   overflow: hidden;
   color: #ffbf66;
   font-size: 0.72rem;
   font-weight: 950;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-shadow: 0 0 10px rgba(255, 191, 102, 0.42);
 }
 
-.sound-lab-display-led {
+.month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-led {
   flex: 0 0 auto;
-  color: #ff3300;
+  color: #ff7a2f;
   font-size: 0.72rem;
-  text-shadow: 0 0 8px color-mix(in srgb, #ff3300, transparent 20%);
+  text-shadow:
+    0 0 8px rgba(255, 122, 47, 0.9),
+    0 0 18px rgba(255, 122, 47, 0.38);
 }
 
-.sound-lab-display-readout {
+.month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-readout {
   display: grid;
   min-width: 0;
   gap: 0.38rem;
 }
 
-.sound-lab-display-primary {
+.month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-primary {
   display: flex;
   min-width: 0;
   align-items: baseline;
@@ -4316,72 +4329,74 @@ footer p {
   gap: 0.75rem;
 }
 
-.sound-lab-display-chord {
+.month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-chord {
   min-width: 0;
   overflow: hidden;
   color: #fff3d6;
-  font-size: clamp(1.05rem, 2.4vw, 1.45rem);
+  font-size: clamp(1.08rem, 2.4vw, 1.5rem);
   font-weight: 950;
   line-height: 1.15;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-shadow: 0 0 12px rgba(255, 243, 214, 0.18);
 }
 
-.sound-lab-display-guide {
+.month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-guide {
   flex: 0 0 auto;
-  border: 1px solid color-mix(in srgb, #ffbf66, transparent 65%);
+  border: 1px solid rgba(255, 179, 71, 0.45);
   border-radius: 999px;
-  background: color-mix(in srgb, #ffbf66, #000 85%);
+  background: rgba(255, 179, 71, 0.09);
   color: #ffbf66;
   font-size: 0.76rem;
   font-weight: 950;
   line-height: 1;
   padding: 0.35rem 0.55rem;
   white-space: nowrap;
+  box-shadow: inset 0 0 14px rgba(255, 179, 71, 0.08);
 }
 
-.sound-lab-display-role,
-.sound-lab-display-sequence {
+.month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-role {
   min-width: 0;
   overflow: hidden;
+  color: #e9c48d;
+  font-size: 0.9rem;
+  font-weight: 850;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.sound-lab-display-role {
-  color: #d8c8b8;
-  font-size: 0.9rem;
-  font-weight: 800;
-}
-
-.sound-lab-display-sequence {
-  color: #8a8275;
+.month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-sequence {
+  min-width: 0;
+  overflow: hidden;
+  color: #a99572;
   font-size: 0.86rem;
   font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (max-width: 560px) {
-  .sound-lab-digital-sign {
+  .month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign {
     min-height: 138px;
     padding: 0.75rem;
   }
 
-  .sound-lab-display-primary {
+  .month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-primary {
     display: grid;
     gap: 0.35rem;
   }
 
-  .sound-lab-display-guide {
+  .month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-guide {
     width: fit-content;
   }
 
-  .sound-lab-display-chord {
+  .month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-chord {
     white-space: normal;
     overflow-wrap: anywhere;
   }
 
-  .sound-lab-display-role,
-  .sound-lab-display-sequence {
+  .month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-role,
+  .month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-sequence {
     white-space: normal;
     overflow-wrap: anywhere;
     display: -webkit-box;
@@ -4389,11 +4404,11 @@ footer p {
     overflow: hidden;
   }
 
-  .sound-lab-display-role {
+  .month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-role {
     -webkit-line-clamp: 2;
   }
 
-  .sound-lab-display-sequence {
+  .month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-sequence {
     -webkit-line-clamp: 2;
   }
 }
