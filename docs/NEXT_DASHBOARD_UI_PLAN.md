@@ -1,3 +1,6 @@
+> [!WARNING]
+> **PARKED / DEPRIORITIZED (2026-07-08):** The project direction has shifted to prioritize learning value through Sound Lab V2 and a Sound Engine / Tone.js Sampler spike. This Next.js Dashboard UI overhaul is currently parked and serves as historical context only.
+
 # Next.js Dashboard UI Plan
 
 ## 1. Design Goals
