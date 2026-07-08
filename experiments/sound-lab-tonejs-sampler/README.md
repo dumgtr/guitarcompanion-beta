@@ -33,3 +33,16 @@ The UI now provides real-time feedback on the state of the audio engine:
 ## Known limitations
 - **CDN loading time**: The Salamander Grand Piano samples are loaded from the Tone.js GitHub CDN.
 - **Strictly isolated**: This code is a proof of concept only and is strictly isolated from production (`outputs/app.js`). Do not attempt to merge this UI into the main application.
+
+## Phase 1 Manual QA PASS
+**Observed Results:**
+- **Local URL**: http://127.0.0.1:5173/experiments/sound-lab-tonejs-sampler/
+- **Tone.js Script**: Loaded v14.8.49
+- **AudioContext State**: running
+- **Synth Ready**: Yes
+- **Sampler Status**: Ready (Salamander)
+- **Last Error**: None
+- Audible output confirmed
+
+**Conclusion:**
+Phase 1 proves that Tone.js, combined with a Synth fallback and Tone.Sampler, can successfully produce sound in this isolated prototype. Note that this is **not production approval yet**. Phase 2 should evaluate instrument tone, sample strategy, licensing, mobile loudness, and adherence to Sound Lab V2 guardrails before any integration is considered.
