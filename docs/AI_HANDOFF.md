@@ -100,7 +100,7 @@ The Reference Shelf / Rhythm Notation work is FINAL for the current phase.
 - Keep Sound Lab baseline unchanged (black LED display, single guide tone, no arpeggios, no stacked chords).
 - The project is currently in a Post-Release Monitoring phase. DO NOT initiate new features (like Fretboard Studio) or new Mini Courses.
 - Known UX debt: month switcher horizontal scroll feels step-like.
-- Next branch recommendation: spike/next-dashboard-shell.
+- Next branch recommendation: Sound Lab V2 planning + Sound Engine / Tone.js Sampler spike.
 
 ## Month 5 & 6 Realignment (July 2026)
 - Month 5 has been pivoted from "Improvisation Foundation" to **"Diatonic Bridge & Melodic Freedom"** (Diatonic Triads, I-IV-V-vi, common-tone chord colors, and melodic phrasing).

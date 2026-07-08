@@ -42,7 +42,8 @@ FINAL for current phase.
 - Month 6: Modes as Chord Colors is live.
 - Sound Lab phase is frozen/stable.
 - Final real smoke QA passed.
-- Next recommended phase is Next.js Dashboard spike (branch: `spike/next-dashboard-shell`).
+- The Next.js Dashboard spike (branch: `spike/next-dashboard-shell`) is currently parked and deprioritized.
+- Next preferred direction is Sound Lab V2 planning + Sound Engine / Tone.js Sampler spike.
 - Production remains locked up to Month 6.
 - Known UX debt: month switcher horizontal scroll feels step-like.
 - Do not start Month 7/8 publicly yet.
@@ -90,4 +91,4 @@ FINAL for current phase.
 - Do not continue polishing the Reference Shelf, TAB Handbook, or Note Value Cheatsheet unless the user reports a real bug.
 - Future additions should be spec-first and should not expose new months or modules.
 - Rollback: revert `visibility` to `"hidden"` in data.json and restore the previous `getMiniCourses()` filter. See `docs/MINI_COURSE_PUBLIC_REVEAL_PLAN.md` Section 8.
-- Next recommended phase: Next.js Dashboard planning/spike.
+- Next recommended phase: Sound Lab V2 planning + Sound Engine / Tone.js Sampler spike.
