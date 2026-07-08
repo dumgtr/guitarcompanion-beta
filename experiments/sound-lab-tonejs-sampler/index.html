@@ -15,6 +15,7 @@
             --error: #e57373;
             --surface: #1e1e1e;
             --surface-hover: #2c2c2c;
+            --warning: #ffb74d;
         }
         body {
             font-family: monospace, sans-serif;
@@ -27,7 +28,17 @@
             align-items: center;
         }
         h1 { color: var(--accent); margin-bottom: 5px; }
-        .warning { color: #ffb74d; margin-bottom: 20px; }
+        .warning { color: var(--warning); margin-bottom: 20px; }
+        .info-box {
+            background-color: rgba(255, 183, 77, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 500px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
         
         .panel {
             background-color: var(--surface);
@@ -88,24 +99,37 @@
 <body>
 
     <h1>Audio Diagnostics</h1>
-    <div class="warning">Spike Phase 1 - Fix Sound Loading & Stacked Notes</div>
+    <div class="warning">Spike Phase 1B - Register Normalization</div>
+
+    <div class="info-box">
+        Low notes such as A2 may be too quiet on phone/laptop speakers. Sound Lab V2 may normalize audition notes to a clearer register.
+    </div>
 
     <div class="panel">
         <div class="status-grid">
             <span class="status-label">Tone.js Script:</span>
             <span class="status-val" id="stat-script">Checking...</span>
 
-            <span class="status-label">AudioContext State:</span>
+            <span class="status-label">AudioContext:</span>
             <span class="status-val" id="stat-ctx">Locked</span>
 
-            <span class="status-label">Synth Ready (Fallback):</span>
+            <span class="status-label">Synth (Fallback):</span>
             <span class="status-val" id="stat-synth">No</span>
-
-            <span class="status-label">Sampler Base URL:</span>
-            <span class="status-val" id="stat-url">https://tonejs.github.io/audio/salamander/</span>
 
             <span class="status-label">Sampler Status:</span>
             <span class="status-val" id="stat-sampler">Idle</span>
+
+            <span class="status-label" style="margin-top:10px; border-top: 1px solid #333; padding-top: 10px;">Theory Note:</span>
+            <span class="status-val" id="stat-theory" style="margin-top:10px; border-top: 1px solid #333; padding-top: 10px;">--</span>
+
+            <span class="status-label">Playback Note:</span>
+            <span class="status-val" id="stat-playback">--</span>
+
+            <span class="status-label">Normalization:</span>
+            <span class="status-val" id="stat-norm">--</span>
+
+            <span class="status-label">Loudness Obs.:</span>
+            <span class="status-val" id="stat-loudness" style="color:var(--warning)">--</span>
 
             <span class="status-label" style="margin-top:10px;">Last Action:</span>
             <span class="status-val" id="stat-action" style="margin-top:10px; color:var(--accent)">None</span>
@@ -117,25 +141,28 @@
 
     <div class="controls">
         <div class="control-group" style="border-color: var(--accent)">
-            <h3>Step 1 & 2: Base Audio (No external files)</h3>
+            <h3>Step 1 & 2: Base Audio</h3>
             <button id="btn-unlock" class="btn-primary" onclick="unlockAudio()">Unlock Audio Context</button>
             <button id="btn-beep" disabled onclick="testBeep()">Test Beep (Synth)</button>
+            <button id="btn-load-sampler" disabled onclick="loadSampler()">Load Sampler</button>
         </div>
 
         <div class="control-group">
-            <h3>Step 3: Musical Notes & Sequential Play (Fallback Synth until Sampler is ready)</h3>
-            <button id="btn-c4" disabled onclick="playNote('C4')">C4</button>
-            <button id="btn-e4" disabled onclick="playNote('E4')">E4</button>
-            <button id="btn-a4" disabled onclick="playNote('A4')">A4</button>
-            <br>
-            <button id="btn-seq-min" disabled onclick="playSequential(['A2', 'C4'], 'A Minor Seq')">A2 -> C4</button>
-            <button id="btn-seq-maj" disabled onclick="playSequential(['A2', 'C#4'], 'A Major Seq')">A2 -> C#4</button>
+            <h3>Group A: Raw Low-Register Test</h3>
+            <button disabled class="play-btn" onclick="playRaw('A2')">Play A2 raw</button>
+            <button disabled class="play-btn" onclick="playRaw('A3')">Play A3 raw</button>
+            <button disabled class="play-btn" onclick="playRaw('A4')">Play A4 raw</button>
         </div>
 
         <div class="control-group">
-            <h3>Step 4: Load Sampler</h3>
-            <button id="btn-load-sampler" disabled onclick="loadSampler()">Start Loading Sampler</button>
-            <button disabled onclick="stopAll()">Stop Audio</button>
+            <h3>Group B: Normalized Sound Lab Test</h3>
+            <button disabled class="play-btn" onclick="playNormalized('A2')">A2 -> A4</button>
+            <button disabled class="play-btn" onclick="playNormalizedSeq(['A2', 'C4'], 'Min')">A2 -> C4</button>
+            <button disabled class="play-btn" onclick="playNormalizedSeq(['A2', 'C#4'], 'Maj')">A2 -> C#4</button>
+        </div>
+        
+        <div class="control-group" style="border-color: var(--error)">
+            <button disabled class="play-btn" onclick="stopAll()">Stop Audio</button>
         </div>
     </div>
 
@@ -145,6 +172,10 @@
         const elCtx = document.getElementById('stat-ctx');
         const elSynth = document.getElementById('stat-synth');
         const elSampler = document.getElementById('stat-sampler');
+        const elTheory = document.getElementById('stat-theory');
+        const elPlayback = document.getElementById('stat-playback');
+        const elNorm = document.getElementById('stat-norm');
+        const elLoudness = document.getElementById('stat-loudness');
         const elAction = document.getElementById('stat-action');
         const elError = document.getElementById('stat-error');
         
@@ -153,7 +184,6 @@
         let isSynthReady = false;
         let isSamplerReady = false;
 
-        // Check if Tone loaded
         if (typeof Tone !== 'undefined') {
             elScript.textContent = "Loaded v" + Tone.version;
             elScript.style.color = "var(--success)";
@@ -180,13 +210,11 @@
                 elCtx.textContent = Tone.context.state;
                 elCtx.style.color = "var(--success)";
                 
-                // Initialize fallback Synth (Dry - No effects for diagnostic clarity)
                 synth = new Tone.Synth().toDestination();
                 isSynthReady = true;
                 elSynth.textContent = "Yes";
                 elSynth.style.color = "var(--success)";
                 
-                // Enable buttons
                 document.querySelectorAll('button').forEach(b => b.disabled = false);
                 document.getElementById('btn-unlock').disabled = true;
                 
@@ -203,7 +231,60 @@
             if (synth) synth.triggerAttackRelease("C5", "8n");
         }
 
-        function playNote(note) {
+        // Normalization Helper
+        function normalizeNote(note) {
+            return note.replace(/\d+/, match => {
+                const octave = parseInt(match, 10);
+                return octave < 4 ? '4' : octave.toString();
+            });
+        }
+
+        function playRaw(note) {
+            elTheory.textContent = note;
+            elPlayback.textContent = note;
+            elNorm.textContent = "Off";
+            elNorm.style.color = "var(--text)";
+            
+            // Log observed loudness
+            const oct = parseInt(note.match(/\d+/)[0], 10);
+            if (oct <= 2) elLoudness.textContent = "Likely very quiet on mobile";
+            else if (oct === 3) elLoudness.textContent = "Borderline";
+            else elLoudness.textContent = "Clear and audible";
+            
+            triggerNote(note);
+        }
+
+        function playNormalized(note) {
+            const normNote = normalizeNote(note);
+            elTheory.textContent = note;
+            elPlayback.textContent = normNote;
+            elNorm.textContent = "On";
+            elNorm.style.color = "var(--success)";
+            elLoudness.textContent = "Clear and audible (Shifted up)";
+            
+            triggerNote(normNote);
+        }
+        
+        function playNormalizedSeq(notes, label) {
+            const normNotes = notes.map(normalizeNote);
+            elTheory.textContent = notes.join(" -> ");
+            elPlayback.textContent = normNotes.join(" -> ");
+            elNorm.textContent = "On";
+            elNorm.style.color = "var(--success)";
+            elLoudness.textContent = "Clear sequential playback";
+            
+            const engine = isSamplerReady ? sampler : synth;
+            const engineName = isSamplerReady ? "Sampler" : "Synth";
+            logAction(`Seq: ${label} via ${engineName}`);
+            
+            if (engine) {
+                const now = Tone.now();
+                engine.triggerAttackRelease(normNotes[0], "4n", now);
+                engine.triggerAttackRelease(normNotes[1], "2n", now + 0.5);
+            }
+        }
+
+        function triggerNote(note) {
             const engine = isSamplerReady ? sampler : synth;
             const engineName = isSamplerReady ? "Sampler" : "Synth";
             logAction(`Playing ${note} via ${engineName}`);
@@ -215,20 +296,6 @@
             }
         }
 
-        function playSequential(notes, label) {
-            const engine = isSamplerReady ? sampler : synth;
-            const engineName = isSamplerReady ? "Sampler" : "Synth";
-            logAction(`Seq: ${label} via ${engineName}`);
-            
-            if (engine) {
-                const now = Tone.now();
-                // Play first note immediately, second note 0.5s later.
-                // Ensures single guide tone rule is respected, no stacked chords.
-                engine.triggerAttackRelease(notes[0], "4n", now);
-                engine.triggerAttackRelease(notes[1], "2n", now + 0.5);
-            }
-        }
-
         function loadSampler() {
             logAction("Loading Sampler...");
             elSampler.textContent = "Loading...";
@@ -236,15 +303,9 @@
             document.getElementById('btn-load-sampler').disabled = true;
 
             let onloadFired = false;
-
             try {
                 sampler = new Tone.Sampler({
-                    urls: {
-                        "C4": "C4.mp3",
-                        "D#4": "Ds4.mp3",
-                        "F#4": "Fs4.mp3",
-                        "A4": "A4.mp3",
-                    },
+                    urls: { "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3", "A4": "A4.mp3" },
                     release: 1.5,
                     baseUrl: "https://tonejs.github.io/audio/salamander/",
                     onload: () => {
@@ -254,9 +315,8 @@
                         elSampler.style.color = "var(--success)";
                         logAction("Sampler load complete");
                     }
-                }).toDestination(); // Dry output initially
+                }).toDestination();
 
-                // Timeout check
                 setTimeout(() => {
                     if (!onloadFired) {
                         elSampler.textContent = "Failed (Timeout)";
@@ -265,7 +325,6 @@
                         logError("Sampler load timed out after 8 seconds. Using Synth fallback.");
                     }
                 }, 8000);
-
             } catch (err) {
                 logError("Sampler init error: " + err.message);
                 elSampler.textContent = "Failed";
