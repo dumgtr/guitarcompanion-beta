@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tone.js Sampler Spike (Isolated)</title>
+    <title>Tone.js Audio Diagnostics</title>
     <!-- Load Tone.js from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         :root {
             --bg: #121212;
             --text: #e0e0e0;
-            --accent: #bb86fc;
-            --error: #cf6679;
+            --accent: #4fc3f7;
+            --success: #81c784;
+            --error: #e57373;
             --surface: #1e1e1e;
             --surface-hover: #2c2c2c;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: monospace, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
@@ -25,171 +26,218 @@
             flex-direction: column;
             align-items: center;
         }
-        h1 {
-            color: var(--accent);
-            text-align: center;
-        }
-        .warning {
-            color: #ffb74d;
-            font-size: 0.9em;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .status-panel {
+        h1 { color: var(--accent); margin-bottom: 5px; }
+        .warning { color: #ffb74d; margin-bottom: 20px; }
+        
+        .panel {
             background-color: var(--surface);
             border: 1px solid #333;
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 20px;
             width: 100%;
-            max-width: 400px;
+            max-width: 500px;
             box-sizing: border-box;
         }
-        .status-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-        .status-row:last-child {
-            margin-bottom: 0;
-        }
-        .status-label {
-            color: #888;
-        }
-        .status-value {
-            font-weight: bold;
-        }
-        #error-msg {
-            color: var(--error);
-            font-size: 0.9em;
-            margin-top: 10px;
-            display: none;
-        }
-        .controls {
+        .status-grid {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-            width: 100%;
-            max-width: 400px;
+            grid-template-columns: 180px 1fr;
+            gap: 8px;
+            font-size: 14px;
         }
-        button {
-            background-color: var(--surface);
-            color: var(--text);
-            border: 1px solid #444;
-            border-radius: 6px;
-            padding: 12px 16px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-        }
-        button:hover {
-            background-color: var(--surface-hover);
-        }
-        button:active {
-            transform: scale(0.98);
-        }
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .stop-btn {
-            background-color: #331515;
-            border-color: var(--error);
-            color: var(--error);
-            margin-top: 10px;
-        }
+        .status-label { color: #888; }
+        .status-val { font-weight: bold; }
         
-        /* Mobile Audio Unlock Overlay */
-        #unlock-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0, 0, 0, 0.9);
+        .controls {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
+            gap: 10px;
+            width: 100%;
+            max-width: 500px;
         }
-        #unlock-btn {
-            background-color: var(--accent);
-            color: #000;
-            font-weight: bold;
-            font-size: 1.2rem;
-            padding: 15px 30px;
+        .control-group {
+            background: #191919;
+            padding: 15px;
+            border-left: 3px solid #333;
+            margin-bottom: 10px;
+        }
+        .control-group h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        button {
+            background-color: #333;
+            color: var(--text);
             border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-family: inherit;
+            margin-right: 5px;
+            margin-bottom: 5px;
         }
-        #unlock-btn:hover {
-            background-color: #d1a3ff;
-        }
+        button:hover { background-color: #444; }
+        button:disabled { opacity: 0.3; cursor: not-allowed; }
+        .btn-primary { background-color: var(--accent); color: #000; font-weight: bold; }
+        .btn-primary:hover { background-color: #81d4fa; }
+
     </style>
 </head>
 <body>
 
-    <div id="unlock-overlay">
-        <h2 style="color: white; margin-bottom: 20px;">Audio Context Locked</h2>
-        <p style="color: #ccc; margin-bottom: 30px; text-align: center; max-width: 300px;">
-            Browsers require interaction to start audio. Tap the button below to begin.
-        </p>
-        <button id="unlock-btn">Unlock Audio</button>
+    <h1>Audio Diagnostics</h1>
+    <div class="warning">Spike Phase 1 - Fix Sound Loading & Stacked Notes</div>
+
+    <div class="panel">
+        <div class="status-grid">
+            <span class="status-label">Tone.js Script:</span>
+            <span class="status-val" id="stat-script">Checking...</span>
+
+            <span class="status-label">AudioContext State:</span>
+            <span class="status-val" id="stat-ctx">Locked</span>
+
+            <span class="status-label">Synth Ready (Fallback):</span>
+            <span class="status-val" id="stat-synth">No</span>
+
+            <span class="status-label">Sampler Base URL:</span>
+            <span class="status-val" id="stat-url">https://tonejs.github.io/audio/salamander/</span>
+
+            <span class="status-label">Sampler Status:</span>
+            <span class="status-val" id="stat-sampler">Idle</span>
+
+            <span class="status-label" style="margin-top:10px;">Last Action:</span>
+            <span class="status-val" id="stat-action" style="margin-top:10px; color:var(--accent)">None</span>
+
+            <span class="status-label">Last Error:</span>
+            <span class="status-val" id="stat-error" style="color:var(--error)">None</span>
+        </div>
     </div>
 
-    <h1>Tone.js Sampler Spike</h1>
-    <div class="warning">EXPERIMENT ONLY - Isolated from production app</div>
+    <div class="controls">
+        <div class="control-group" style="border-color: var(--accent)">
+            <h3>Step 1 & 2: Base Audio (No external files)</h3>
+            <button id="btn-unlock" class="btn-primary" onclick="unlockAudio()">Unlock Audio Context</button>
+            <button id="btn-beep" disabled onclick="testBeep()">Test Beep (Synth)</button>
+        </div>
 
-    <div class="status-panel">
-        <div class="status-row">
-            <span class="status-label">Context State:</span>
-            <span class="status-value" id="status-state">Locked</span>
+        <div class="control-group">
+            <h3>Step 3: Musical Notes & Sequential Play (Fallback Synth until Sampler is ready)</h3>
+            <button id="btn-c4" disabled onclick="playNote('C4')">C4</button>
+            <button id="btn-e4" disabled onclick="playNote('E4')">E4</button>
+            <button id="btn-a4" disabled onclick="playNote('A4')">A4</button>
+            <br>
+            <button id="btn-seq-min" disabled onclick="playSequential(['A2', 'C4'], 'A Minor Seq')">A2 -> C4</button>
+            <button id="btn-seq-maj" disabled onclick="playSequential(['A2', 'C#4'], 'A Major Seq')">A2 -> C#4</button>
         </div>
-        <div class="status-row">
-            <span class="status-label">Engine Ready:</span>
-            <span class="status-value" id="status-engine">Loading samples...</span>
-        </div>
-        <div class="status-row">
-            <span class="status-label">Now Playing:</span>
-            <span class="status-value" id="status-playing" style="color: var(--accent);">--</span>
-        </div>
-        <div id="error-msg"></div>
-    </div>
 
-    <div class="controls" id="main-controls" style="opacity: 0.5; pointer-events: none;">
-        <button onclick="playNote('C4')">Play C4 (Root)</button>
-        <button onclick="playNote('E4')">Play E4 (Major 3rd)</button>
-        <button onclick="playNote('A4')">Play A4</button>
-        <hr style="width: 100%; border-color: #333; margin: 10px 0;">
-        <button onclick="playCompare(['A2', 'C4'], 'A Minor Feel')">Compare: A2 + C4 (Minor feel)</button>
-        <button onclick="playCompare(['A2', 'C#4'], 'A Major Feel')">Compare: A2 + C#4 (Major feel)</button>
-        <button class="stop-btn" onclick="stopAudio()">Stop / Release</button>
+        <div class="control-group">
+            <h3>Step 4: Load Sampler</h3>
+            <button id="btn-load-sampler" disabled onclick="loadSampler()">Start Loading Sampler</button>
+            <button disabled onclick="stopAll()">Stop Audio</button>
+        </div>
     </div>
 
     <script>
-        const stateEl = document.getElementById('status-state');
-        const engineEl = document.getElementById('status-engine');
-        const playingEl = document.getElementById('status-playing');
-        const errorEl = document.getElementById('error-msg');
-        const overlay = document.getElementById('unlock-overlay');
-        const controls = document.getElementById('main-controls');
-
-        let sampler;
-        let isEngineReady = false;
+        // DOM Elements
+        const elScript = document.getElementById('stat-script');
+        const elCtx = document.getElementById('stat-ctx');
+        const elSynth = document.getElementById('stat-synth');
+        const elSampler = document.getElementById('stat-sampler');
+        const elAction = document.getElementById('stat-action');
+        const elError = document.getElementById('stat-error');
         
-        function showError(msg) {
-            errorEl.textContent = msg;
-            errorEl.style.display = 'block';
-            console.error(msg);
+        let synth = null;
+        let sampler = null;
+        let isSynthReady = false;
+        let isSamplerReady = false;
+
+        // Check if Tone loaded
+        if (typeof Tone !== 'undefined') {
+            elScript.textContent = "Loaded v" + Tone.version;
+            elScript.style.color = "var(--success)";
+        } else {
+            elScript.textContent = "Failed to load!";
+            elScript.style.color = "var(--error)";
+            logError("Tone.js global object is missing.");
         }
 
-        // 1. Setup Tone.js Sampler and effects
-        async function initAudioEngine() {
-            try {
-                // Soft Piano Effects Chain
-                const filter = new Tone.Filter(2000, "lowpass");
-                const reverb = new Tone.Reverb(2.5); // 2.5s decay
-                
-                // Wait for reverb to generate impulse response
-                await reverb.generate();
+        function logAction(msg) {
+            console.log("Action:", msg);
+            elAction.textContent = msg;
+        }
 
+        function logError(msg) {
+            console.error("Error:", msg);
+            elError.textContent = msg;
+        }
+
+        async function unlockAudio() {
+            try {
+                logAction("Unlocking audio...");
+                await Tone.start();
+                elCtx.textContent = Tone.context.state;
+                elCtx.style.color = "var(--success)";
+                
+                // Initialize fallback Synth (Dry - No effects for diagnostic clarity)
+                synth = new Tone.Synth().toDestination();
+                isSynthReady = true;
+                elSynth.textContent = "Yes";
+                elSynth.style.color = "var(--success)";
+                
+                // Enable buttons
+                document.querySelectorAll('button').forEach(b => b.disabled = false);
+                document.getElementById('btn-unlock').disabled = true;
+                
+                logAction("Context Unlocked. Synth Ready.");
+            } catch (err) {
+                logError("Failed to unlock audio: " + err.message);
+                elCtx.textContent = "Error";
+                elCtx.style.color = "var(--error)";
+            }
+        }
+
+        function testBeep() {
+            logAction("Testing beep...");
+            if (synth) synth.triggerAttackRelease("C5", "8n");
+        }
+
+        function playNote(note) {
+            const engine = isSamplerReady ? sampler : synth;
+            const engineName = isSamplerReady ? "Sampler" : "Synth";
+            logAction(`Playing ${note} via ${engineName}`);
+            
+            if (engine) {
+                engine.triggerAttackRelease(note, "2n");
+            } else {
+                logError("No audio engine available!");
+            }
+        }
+
+        function playSequential(notes, label) {
+            const engine = isSamplerReady ? sampler : synth;
+            const engineName = isSamplerReady ? "Sampler" : "Synth";
+            logAction(`Seq: ${label} via ${engineName}`);
+            
+            if (engine) {
+                const now = Tone.now();
+                // Play first note immediately, second note 0.5s later.
+                // Ensures single guide tone rule is respected, no stacked chords.
+                engine.triggerAttackRelease(notes[0], "4n", now);
+                engine.triggerAttackRelease(notes[1], "2n", now + 0.5);
+            }
+        }
+
+        function loadSampler() {
+            logAction("Loading Sampler...");
+            elSampler.textContent = "Loading...";
+            elSampler.style.color = "#ffb74d";
+            document.getElementById('btn-load-sampler').disabled = true;
+
+            let onloadFired = false;
+
+            try {
                 sampler = new Tone.Sampler({
                     urls: {
                         "C4": "C4.mp3",
@@ -200,55 +248,35 @@
                     release: 1.5,
                     baseUrl: "https://tonejs.github.io/audio/salamander/",
                     onload: () => {
-                        isEngineReady = true;
-                        engineEl.textContent = "Ready (Salamander Grand)";
-                        engineEl.style.color = "#81c784";
-                        controls.style.opacity = "1";
-                        controls.style.pointerEvents = "auto";
+                        onloadFired = true;
+                        isSamplerReady = true;
+                        elSampler.textContent = "Ready (Salamander)";
+                        elSampler.style.color = "var(--success)";
+                        logAction("Sampler load complete");
                     }
-                }).chain(filter, reverb, Tone.Destination);
+                }).toDestination(); // Dry output initially
 
-                // Lower volume slightly for soft piano feel
-                sampler.volume.value = -6;
-                
+                // Timeout check
+                setTimeout(() => {
+                    if (!onloadFired) {
+                        elSampler.textContent = "Failed (Timeout)";
+                        elSampler.style.color = "var(--error)";
+                        isSamplerReady = false;
+                        logError("Sampler load timed out after 8 seconds. Using Synth fallback.");
+                    }
+                }, 8000);
+
             } catch (err) {
-                showError("Failed to load sampler: " + err.message);
-                engineEl.textContent = "Error";
-                engineEl.style.color = "var(--error)";
+                logError("Sampler init error: " + err.message);
+                elSampler.textContent = "Failed";
+                elSampler.style.color = "var(--error)";
             }
         }
 
-        // 2. Handle Audio Unlock
-        document.getElementById('unlock-btn').addEventListener('click', async () => {
-            await Tone.start();
-            stateEl.textContent = "Unlocked (Running)";
-            stateEl.style.color = "#81c784";
-            overlay.style.display = 'none';
-            
-            // Initialize engine after unlock
-            initAudioEngine();
-        });
-
-        // 3. Playback functions
-        function playNote(note) {
-            if (!isEngineReady) return;
-            sampler.releaseAll(); // Clean stop before new note
-            sampler.triggerAttackRelease(note, "2n");
-            playingEl.textContent = note;
-        }
-
-        function playCompare(notes, label) {
-            if (!isEngineReady) return;
-            sampler.releaseAll();
-            // Trigger multiple notes as a chord to demonstrate color
-            sampler.triggerAttackRelease(notes, "2n");
-            playingEl.textContent = label + " (" + notes.join(" + ") + ")";
-        }
-
-        function stopAudio() {
-            if (!isEngineReady) return;
-            sampler.releaseAll();
-            playingEl.textContent = "Stopped";
+        function stopAll() {
+            logAction("Stop All");
+            if (synth) synth.triggerRelease();
+            if (sampler) sampler.releaseAll();
         }
     </script>
 </body>
