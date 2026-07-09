@@ -11,11 +11,20 @@ if ($branch -ne "spike/sound-lab-tonejs-sampler") {
     Write-Error "Must be on branch spike/sound-lab-tonejs-sampler. Current branch is $branch."
 }
 
+Write-Host "`n============================================="
+Write-Host "[4/4] Codex Integrator / Approved Patch Only"
+Write-Host "============================================="
+
 # 3. Check for approval file
 $ApprovalFile = "reports/phase2-approval.md"
 if (!(Test-Path $ApprovalFile)) {
-    Write-Error "Approval file $ApprovalFile not found! Aborting integration."
+    Write-Error "Approval file $ApprovalFile not found! Aborting integration.`nReview reports must be read first. You must write explicit approval to this file.`nThe integrator cannot decide A2 -> A4 or remove sequential compare by itself."
 }
+
+Write-Host "`nContents of $ApprovalFile:"
+Write-Host "---------------------------------------------"
+Get-Content $ApprovalFile | ForEach-Object { Write-Host $_ }
+Write-Host "---------------------------------------------`n"
 
 # 4. Check prompt
 $PromptFile = "prompts/phase2-integrator-approved.md"
@@ -25,17 +34,10 @@ if (!(Test-Path $PromptFile)) {
 
 # 5. Define timestamped files
 $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-$ReportFile = "reports/integrator-report-$timestamp.md"
-$DiffAfterFile = "reports/diff-after-integrate-$timestamp.txt"
-$HeadBeforeFile = "reports/head-before-integrate-$timestamp.txt"
-$HeadAfterFile = "reports/head-after-integrate-$timestamp.txt"
-
-# 6. Save before status
+$ReportFile = "reports/phase2-integrator-$timestamp.md"
 $HeadBefore = (git rev-parse HEAD).Trim()
-$HeadBefore | Out-File -FilePath $HeadBeforeFile -Encoding utf8
-Write-Host "Pre-run HEAD saved to $HeadBeforeFile"
 
-# 7. Run Codex CLI
+# 6. Run Codex CLI
 Write-Host "Running Codex Integrator..."
 Get-Content $PromptFile -Raw | codex exec `
   --sandbox workspace-write `
@@ -47,24 +49,24 @@ if ($LASTEXITCODE -ne 0) {
     Write-Error "Codex CLI failed with exit code $LASTEXITCODE."
 }
 
-# 8. Post-run validation
-$HeadAfter = (git rev-parse HEAD).Trim()
-$HeadAfter | Out-File -FilePath $HeadAfterFile -Encoding utf8
-git diff --check > $DiffAfterFile
-git diff --name-only >> $DiffAfterFile
-git diff --cached --name-only >> $DiffAfterFile
-git diff --name-only "$HeadBefore..HEAD" >> $DiffAfterFile
-
-# 9. Fail the script if any working, staged, or committed file matches `^outputs/`
+# 7. Post-run validation
 $workingFiles = @(git diff --name-only)
 $stagedFiles = @(git diff --cached --name-only)
 $committedFiles = @(git diff --name-only "$HeadBefore..HEAD")
-$protectedFiles = @($workingFiles + $stagedFiles + $committedFiles) | Where-Object { $_ -match "^outputs/" } | Sort-Object -Unique
-foreach ($file in $protectedFiles) {
-    if ($file -match "^outputs/") {
-        Write-Error "FAIL: Production file modified! ($file)"
-    }
+$allChanged = @($workingFiles + $stagedFiles + $committedFiles) | Sort-Object -Unique
+
+$outputsChanged = $allChanged | Where-Object { $_ -match "^outputs/" }
+if ($outputsChanged.Count -gt 0) {
+    Write-Error "FAIL: Production file modified! ($($outputsChanged -join ", "))"
 }
 
-Write-Host "PASS: No production files were changed in working tree, staged changes, or commits created during this run."
-Write-Host "Integration complete. Report saved to $ReportFile."
+Write-Host "`n============================================="
+Write-Host "Integration complete!"
+Write-Host "-> Report saved to $ReportFile"
+Write-Host "`nGit Status:"
+git status --short
+Write-Host "`nGit Diff Names:"
+git diff --name-only
+
+Write-Host "`nPASS: No outputs/* files were changed."
+Write-Host "REMINDER: Do not commit until human reviews diff."

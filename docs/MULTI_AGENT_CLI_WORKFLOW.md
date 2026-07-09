@@ -2,49 +2,45 @@
 
 This document describes the CLI-based multi-agent orchestration workflow for Guitar Companion.
 
-## What the CLI Runner Does
-The `scripts/gc-multi-agent.ps1` script acts as a safe, reproducible wrapper for executing a multi-agent review via the Antigravity (Codex) CLI.
-When run, the script will:
-1. Validate that you are on the `spike/sound-lab-tonejs-sampler` branch.
-2. Ensure you are running from the root of the Git repository.
-3. Save a pre-run Git status to the `reports/` directory.
-4. Pass the master prompt (`prompts/gc-multi-agent-tone-phase2.md`) to the Codex CLI via stdin.
-5. Execute the multi-agent review under a **workspace-write** sandbox.
-6. Automatically save the final agent report to a timestamped markdown file in the `reports/` directory.
-7. Run a post-run validation (`git status`, `git diff --check`, `git diff --name-only`).
-8. **Enforce hard guardrails**: It will fail the script immediately if ANY production file (under `outputs/`) is modified.
+## Visible Multi-Agent Process (Runner V2)
 
-## How to Run It
+The workflow is explicitly separated into two distinct phases to ensure the multi-agent review process is fully transparent, visible, and strictly supervised.
 
-To execute the multi-agent review:
+### Phase 1: Review-Only Mode (3 Stages)
+
+Run this phase to allow specialized agents to evaluate the current branch. This phase is strictly read-only and **must produce no file changes**.
 
 ```powershell
-git checkout spike/sound-lab-tonejs-sampler
-powershell -ExecutionPolicy Bypass -File scripts\gc-multi-agent.ps1
+powershell -ExecutionPolicy Bypass -File scripts\gc-phase2-review-only.ps1
 ```
 
-## Review-Only Mode
-If you wish to run the orchestrator in a strictly read-only mode (where agents cannot edit any files at all, even in the `experiments/` folder), you can modify the script's `codex exec` line to use the `read-only` sandbox:
+When run, the script executes three visible reviewer stages sequentially:
+1. `[1/3] Audio-Web Reviewer`: Checks web audio constraints, mobile loudness, and Tone.js usage.
+2. `[2/3] Risk / Guardrail Reviewer`: Checks production guardrail safety.
+3. `[3/3] Learning UX Reviewer`: Checks labels, pedagogy, and beginner safety.
+
+**Outputs:**
+Each stage generates its own timestamped report in the `reports/` folder. An index report is also generated summarizing the status and verifying that no files were modified.
+
+### Phase 2: Integration Mode (1 Stage)
+
+After reading the review reports, the human must write explicit approval instructions into a file named `reports/phase2-approval.md`.
+
+Once written, execute the Integrator stage:
+
 ```powershell
-Get-Content $PromptFile -Raw | codex exec `
-  --sandbox read-only `
-  -c approval_policy=never `
-  --output-last-message $ReportFile `
-  -
+powershell -ExecutionPolicy Bypass -File scripts\gc-phase2-integrate-approved.ps1
 ```
 
-## What Files It Creates
-The runner will generate timestamped log files in the `reports/` directory for every run:
-- `multi-agent-tone-phase2-YYYYMMDD-HHMMSS.md`: The final multi-agent markdown report.
-- `head-before-YYYYMMDD-HHMMSS.txt`: Commit SHA before execution.
-- `head-after-YYYYMMDD-HHMMSS.txt`: Commit SHA after execution.
-- `status-before-YYYYMMDD-HHMMSS.txt`: Output of `git status` before execution.
-- `status-after-YYYYMMDD-HHMMSS.txt`: Output of `git status` after execution.
-- `diff-after-YYYYMMDD-HHMMSS.txt`: Output of `git diff --check`, working tree diff names, staged diff names, and committed diff names after execution.
+**Guardrails:**
+- **Approval Gated:** The integrator is a fourth stage gated entirely by `reports/phase2-approval.md`. If the file is missing, the script aborts.
+- **Strict Execution:** The Integrator may produce changes under a `workspace-write` sandbox but **never auto-commits**.
+- **Human Supervision:** The user or Antigravity must inspect reports and diffs before manually committing.
+- **Production Isolation:** The script fails immediately if `outputs/*` files are modified in the working tree, staged changes, or commits created during the run.
 
 ## Guardrails Enforced
 - **Branch Enforcement**: Will not run unless on the specific spike branch.
-- **Production Safety**: Fails the script and alerts the user if `outputs/*` files are modified in the working tree, staged changes, or commits created during the run.
+- **Production Safety**: Fails the script and alerts the user if `outputs/*` files are modified.
 - **No Merging**: The script does not automatically merge changes to `main`.
 - **No Release Tags**: The script does not create or push release tags.
-- **Reporting**: All reports are safely isolated in the `reports/` folder (which contains a `.gitkeep` to track it).
+- **Reporting**: All reports are safely isolated in the `reports/` folder.
