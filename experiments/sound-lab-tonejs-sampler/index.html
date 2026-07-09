@@ -160,6 +160,15 @@
             <button disabled class="play-btn" onclick="playAuditionSeq(['A2', 'C4'], 'Min')">A2 -> C4</button>
             <button disabled class="play-btn" onclick="playAuditionSeq(['A2', 'C#4'], 'Maj')">A2 -> C#4</button>
         </div>
+
+        <div class="panel">
+            <h3>3. Low Frequency Curriculum Test (M5/M6)</h3>
+            <p style="font-size: 0.9em; color: #aaa; margin-bottom: 10px;">Testing extreme bass notes used in Month 5 (e.g., E2 in Em7, G2 in G). Compare the Normalized version vs the Raw (Bypassed) version to simulate mobile speaker limitations.</p>
+            <button disabled class="play-btn" onclick="playNote('E2')">Play E2 (Normalized)</button>
+            <button disabled class="play-btn" onclick="playRawNote('E2')">Play E2 (RAW - Bypassed)</button>
+            <button disabled class="play-btn" onclick="playNote('G2')">Play G2 (Normalized)</button>
+            <button disabled class="play-btn" onclick="playNote('B2')">Play B2 (Normalized)</button>
+        </div>
         
         <div class="control-group" style="border-color: var(--error)">
             <button disabled class="play-btn" onclick="stopAll()">Stop Audio</button>
@@ -264,6 +273,21 @@
             
             logAction(`Theory: ${note} -> Audition: ${auditionNote}`);
             triggerNote(auditionNote);
+        }
+
+        function playNote(note) {
+            playAudition(note);
+        }
+
+        function playRawNote(note) {
+            elTheory.textContent = note;
+            elPlayback.textContent = note + " (RAW)";
+            elNorm.textContent = "BYPASSED";
+            elNorm.style.color = "var(--error)";
+            elLoudness.textContent = "Likely Inaudible on Mobile";
+            
+            logAction(`Theory: ${note} -> Audition: ${note} (RAW)`);
+            triggerNote(note);
         }
         
         function playAuditionSeq(notes, label) {
