@@ -99,10 +99,10 @@
 <body>
 
     <h1>Audio Diagnostics</h1>
-    <div class="warning">Spike Phase 1B - Register Normalization</div>
+    <div class="warning">Spike Phase 2 - Approved A2 to A3 Audition Baseline</div>
 
     <div class="info-box">
-        Low notes such as A2 may be too quiet on phone/laptop speakers. Sound Lab V2 may normalize audition notes to a clearer register.
+        Low notes such as A2 may be too quiet on phone/laptop speakers. This spike keeps theoryNote/playbackNote separation and normalizes octave 2 teaching notes to octave 3 playback for the approved Phase 2 baseline.
     </div>
 
     <div class="panel">
@@ -157,13 +157,13 @@
         <div class="control-group">
             <h3>Group B: Normalized Sound Lab Test (Audition Note)</h3>
             <button disabled class="play-btn" onclick="playAudition('A2')">A2 -> A3</button>
-            <button disabled class="play-btn" onclick="playAuditionSeq(['A2', 'C4'], 'Min')">A2 -> C4</button>
-            <button disabled class="play-btn" onclick="playAuditionSeq(['A2', 'C#4'], 'Maj')">A2 -> C#4</button>
+            <button disabled class="play-btn" onclick="playAuditionSeq(['A2', 'C4'], 'Min compare')">A2 -> C4 (one at a time)</button>
+            <button disabled class="play-btn" onclick="playAuditionSeq(['A2', 'C#4'], 'Maj compare')">A2 -> C#4 (one at a time)</button>
         </div>
 
         <div class="panel">
-            <h3>3. Low Frequency Curriculum Test (M5/M6)</h3>
-            <p style="font-size: 0.9em; color: #aaa; margin-bottom: 10px;">Testing extreme bass notes used in Month 5 (e.g., E2 in Em7, G2 in G). Compare the Normalized version vs the Raw (Bypassed) version to simulate mobile speaker limitations.</p>
+            <h3>3. Low-Register Audibility Test</h3>
+            <p style="font-size: 0.9em; color: #aaa; margin-bottom: 10px;">Testing extreme bass-register notes that may be hard to hear on mobile speakers. Compare the normalized version vs the raw bypassed version without changing production lessons.</p>
             <button disabled class="play-btn" onclick="playNote('E2')">Play E2 (Normalized)</button>
             <button disabled class="play-btn" onclick="playRawNote('E2')">Play E2 (RAW - Bypassed)</button>
             <button disabled class="play-btn" onclick="playNote('G2')">Play G2 (Normalized)</button>
@@ -192,6 +192,7 @@
         let sampler = null;
         let isSynthReady = false;
         let isSamplerReady = false;
+        let sequenceTimer = null;
 
         if (typeof Tone !== 'undefined') {
             elScript.textContent = "Loaded v" + Tone.version;
@@ -237,7 +238,17 @@
 
         function testBeep() {
             logAction("Testing beep...");
+            releaseActiveVoices();
             if (synth) synth.triggerAttackRelease("C5", "8n");
+        }
+
+        function releaseActiveVoices() {
+            if (sequenceTimer) {
+                clearTimeout(sequenceTimer);
+                sequenceTimer = null;
+            }
+            if (synth) synth.triggerRelease();
+            if (sampler) sampler.releaseAll();
         }
 
         // Audition Note Helper
@@ -296,17 +307,33 @@
             elPlayback.textContent = auditionNotes.join(" -> ");
             elNorm.textContent = "On";
             elNorm.style.color = "var(--success)";
-            elLoudness.textContent = "Clear sequential playback";
+            elLoudness.textContent = "Sequential diagnostic: one note at a time";
             
             const engine = isSamplerReady ? sampler : synth;
             const engineName = isSamplerReady ? "Sampler" : "Synth";
-            logAction(`Seq: ${label} via ${engineName} (Theory: ${notes.join(", ")} -> Audition: ${auditionNotes.join(", ")})`);
+            logAction(`Sequential diagnostic: ${label} via ${engineName} (Theory: ${notes.join(", ")} -> Audition: ${auditionNotes.join(", ")})`);
             
-            if (engine) {
-                const now = Tone.now();
-                engine.triggerAttackRelease(auditionNotes[0], "4n", now);
-                engine.triggerAttackRelease(auditionNotes[1], "2n", now + 0.5);
+            if (!engine || auditionNotes.length === 0) {
+                logError("No audio engine available!");
+                return;
             }
+
+            let index = 0;
+            const playNext = () => {
+                releaseActiveVoices();
+                const currentEngine = isSamplerReady ? sampler : synth;
+                if (!currentEngine) {
+                    logError("No audio engine available!");
+                    return;
+                }
+                currentEngine.triggerAttackRelease(auditionNotes[index], "8n");
+                index += 1;
+                if (index < auditionNotes.length) {
+                    sequenceTimer = setTimeout(playNext, 650);
+                }
+            };
+
+            playNext();
         }
 
         function triggerNote(note) {
@@ -315,6 +342,7 @@
             logAction(`Playing ${note} via ${engineName}`);
             
             if (engine) {
+                releaseActiveVoices();
                 engine.triggerAttackRelease(note, "2n");
             } else {
                 logError("No audio engine available!");
@@ -371,8 +399,7 @@
 
         function stopAll() {
             logAction("Stop All");
-            if (synth) synth.triggerRelease();
-            if (sampler) sampler.releaseAll();
+            releaseActiveVoices();
         }
     </script>
 </body>
