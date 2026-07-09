@@ -155,10 +155,10 @@
         </div>
 
         <div class="control-group">
-            <h3>Group B: Normalized Sound Lab Test</h3>
-            <button disabled class="play-btn" onclick="playNormalized('A2')">A2 -> A4</button>
-            <button disabled class="play-btn" onclick="playNormalizedSeq(['A2', 'C4'], 'Min')">A2 -> C4</button>
-            <button disabled class="play-btn" onclick="playNormalizedSeq(['A2', 'C#4'], 'Maj')">A2 -> C#4</button>
+            <h3>Group B: Normalized Sound Lab Test (Audition Note)</h3>
+            <button disabled class="play-btn" onclick="playAudition('A2')">A2 -> A3</button>
+            <button disabled class="play-btn" onclick="playAuditionSeq(['A2', 'C4'], 'Min')">A2 -> C4</button>
+            <button disabled class="play-btn" onclick="playAuditionSeq(['A2', 'C#4'], 'Maj')">A2 -> C#4</button>
         </div>
         
         <div class="control-group" style="border-color: var(--error)">
@@ -231,11 +231,11 @@
             if (synth) synth.triggerAttackRelease("C5", "8n");
         }
 
-        // Normalization Helper
-        function normalizeNote(note) {
-            return note.replace(/\d+/, match => {
+        // Audition Note Helper
+        function getAuditionNote(theoryNote) {
+            return theoryNote.replace(/\d+/, match => {
                 const octave = parseInt(match, 10);
-                return octave < 4 ? '4' : octave.toString();
+                return octave === 2 ? '3' : octave.toString();
             });
         }
 
@@ -254,33 +254,34 @@
             triggerNote(note);
         }
 
-        function playNormalized(note) {
-            const normNote = normalizeNote(note);
+        function playAudition(note) {
+            const auditionNote = getAuditionNote(note);
             elTheory.textContent = note;
-            elPlayback.textContent = normNote;
+            elPlayback.textContent = auditionNote;
             elNorm.textContent = "On";
             elNorm.style.color = "var(--success)";
             elLoudness.textContent = "Clear and audible (Shifted up)";
             
-            triggerNote(normNote);
+            logAction(`Theory: ${note} -> Audition: ${auditionNote}`);
+            triggerNote(auditionNote);
         }
         
-        function playNormalizedSeq(notes, label) {
-            const normNotes = notes.map(normalizeNote);
+        function playAuditionSeq(notes, label) {
+            const auditionNotes = notes.map(getAuditionNote);
             elTheory.textContent = notes.join(" -> ");
-            elPlayback.textContent = normNotes.join(" -> ");
+            elPlayback.textContent = auditionNotes.join(" -> ");
             elNorm.textContent = "On";
             elNorm.style.color = "var(--success)";
             elLoudness.textContent = "Clear sequential playback";
             
             const engine = isSamplerReady ? sampler : synth;
             const engineName = isSamplerReady ? "Sampler" : "Synth";
-            logAction(`Seq: ${label} via ${engineName}`);
+            logAction(`Seq: ${label} via ${engineName} (Theory: ${notes.join(", ")} -> Audition: ${auditionNotes.join(", ")})`);
             
             if (engine) {
                 const now = Tone.now();
-                engine.triggerAttackRelease(normNotes[0], "4n", now);
-                engine.triggerAttackRelease(normNotes[1], "2n", now + 0.5);
+                engine.triggerAttackRelease(auditionNotes[0], "4n", now);
+                engine.triggerAttackRelease(auditionNotes[1], "2n", now + 0.5);
             }
         }
 
@@ -315,7 +316,19 @@
                         elSampler.style.color = "var(--success)";
                         logAction("Sampler load complete");
                     }
-                }).toDestination();
+                });
+
+                // Add Mastering Chain
+                const compressor = new Tone.Compressor({ threshold: -15, ratio: 3 });
+                const filter = new Tone.Filter(2000, "lowpass");
+                const reverb = new Tone.Reverb(2.5);
+                const limiter = new Tone.Limiter(-1);
+                
+                sampler.volume.value = 4;
+                
+                reverb.generate().then(() => {
+                    sampler.chain(compressor, filter, reverb, limiter, Tone.Destination);
+                });
 
                 setTimeout(() => {
                     if (!onloadFired) {
