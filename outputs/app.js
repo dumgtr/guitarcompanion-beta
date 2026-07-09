@@ -3696,7 +3696,13 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
   });
 
   const actionRow = month2CreateElement("div", "chord-lab-actions");
-  const progressionButton = month2CreateElement("button", "progression-button", lab.uiCopy?.playSequence || `Play: ${formatSoundLabSequenceLabel(lab)}`);
+
+  let playSeqText = lab.uiCopy?.playSequence;
+  if (!playSeqText) {
+    const seqLabel = formatSoundLabSequenceLabel(lab);
+    playSeqText = seqLabel.length < 30 ? `ฟัง ${seqLabel}` : "ฟังชุดนี้ทีละเสียง";
+  }
+  const progressionButton = month2CreateElement("button", "progression-button", playSeqText);
   progressionButton.type = "button";
   progressionButton.addEventListener("click", () => playSequence(lab, card, blockData));
 
@@ -3750,15 +3756,35 @@ function getLabPlaybackItems(lab = {}) {
   }];
 }
 
-function formatSoundLabLabel(chord = {}) {
-  const primary = chord.chord || chord.label || chord.id || "Chord";
-  const details = [
-    chord.degree,
-    chord.role,
-    chord.feeling
-  ].filter((value) => typeof value === "string" && value.trim());
+function getSoundLabShortLabel(item) {
+  if (!item) return "";
+  if (item.shortLabel) return item.shortLabel;
+  if (item.guideToneLabel && item.guideToneLabel.length < 24) return item.guideToneLabel;
 
-  return [primary, ...details].join(" • ");
+  const rawText = item.chord || item.label || item.id || "";
+  const lowerText = rawText.toLowerCase();
+
+  if (lowerText.includes("root") && lowerText.includes("anchor")) return "Root A";
+  if (lowerText.includes("minor color") && lowerText.includes("c")) return "Minor b3";
+  if (lowerText.includes("major color") && lowerText.includes("c#")) return "Major 3";
+  if (lowerText.includes("compare") || lowerText.includes("c vs c#")) return "Compare";
+
+  let cleaned = rawText.split(/[-—•\n]/)[0].trim();
+  return cleaned.length > 24 ? cleaned.substring(0, 24).trim() + "..." : cleaned;
+}
+
+function getSoundLabDetailLabel(item) {
+  if (!item) return "";
+  const details = [
+    item.degree,
+    item.role,
+    item.feeling
+  ].filter((value) => typeof value === "string" && value.trim());
+  return details.join(" • ");
+}
+
+function formatSoundLabLabel(chord = {}) {
+  return `ฟัง ${getSoundLabShortLabel(chord)}`;
 }
 
 function getSoundLabSequenceItems(lab = {}) {
@@ -3774,9 +3800,8 @@ function getSoundLabSequenceItems(lab = {}) {
 function formatSoundLabSequenceLabel(lab = {}) {
   const sequenceItems = getSoundLabSequenceItems(lab);
   const names = sequenceItems
-    .map((item) => item?.chord || item?.label || item?.id)
+    .map(getSoundLabShortLabel)
     .filter(Boolean);
-
   return names.length ? names.join(" → ") : "Progression";
 }
 
@@ -3791,13 +3816,11 @@ function getSoundLabGuideToneText(lab = {}, chord = {}, block = {}) {
 }
 
 function getSoundLabPrimaryName(chord = {}) {
-  return chord.chord || chord.label || chord.id || "Chord";
+  return getSoundLabShortLabel(chord);
 }
 
 function getSoundLabCompactRole(chord = {}) {
-  return [chord.degree, chord.role, chord.feeling]
-    .filter((value) => typeof value === "string" && value.trim())
-    .join(" • ");
+  return getSoundLabDetailLabel(chord);
 }
 
 function normalizeAuditionPitch(note) {
