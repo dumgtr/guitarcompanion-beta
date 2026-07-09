@@ -120,3 +120,13 @@ The Reference Shelf / Rhythm Notation work is FINAL for the current phase.
 - Next: Phase B0: Sound Lab V2 schema fixture / mock data outside `outputs/*`, no production data edit yet.
 - Production `outputs/data.json` changes require a separate explicit approval.
 - **Spec Created:** `docs/SOUND_LAB_V2_INTEGRATION_SPEC.md`
+- **Phase B0 Fixture Created:** `experiments/sound-lab-v2-schema-fixture/` contains schema + mock data outside `outputs/*`; no production data edit yet.
+- **Next:** Phase B1 renderer compatibility review against the fixture.
+
+## Sound Lab V2 C1.1 QA Note
+- Manual QA passed for the Sound Lab V2 preview integration.
+- Low-register audibility note: `E2 -> E3` remains quiet on small speakers.
+- This is not a blocker for the current V2 preview as long as no production V2 preview item uses `E2` as its `playbackNote`.
+- Future V2 data must choose `playbackNote` manually per item; do not rely on `E2`/`E3` as learner-facing playback notes without mobile speaker QA.
+- A2 -> A3 remains the approved baseline.
+- Do not change to A2 -> A4 unless separately approved.
