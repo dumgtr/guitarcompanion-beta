@@ -1,0 +1,262 @@
+:root {
+  --bg-color: #121212;
+  --panel-bg: #1e1e1e;
+  --text-primary: #f5f5f5;
+  --text-muted: #a0a0a0;
+  --accent: #e56b25;
+  --fretboard-wood: #2c251e;
+  --fret-wire: #888;
+  --string-color: #d0d0d0;
+
+  --root-color: #e56b25; /* Orange */
+  --major3-color: #4caf50; /* Green */
+  --minor3-color: #9c27b0; /* Purple */
+  --fifth-color: #03a9f4; /* Blue */
+  --flat7-color: #f44336; /* Red */
+  --penta-color: #ff9800; /* Amber */
+  --default-note-color: #666;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.app-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+header {
+  margin-bottom: 1.5rem;
+}
+
+header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+header h1 span {
+  font-size: 0.8rem;
+  background: var(--accent);
+  color: #fff;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.status-line {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.controls-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: var(--panel-bg);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 140px;
+}
+
+.control-group label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.control-group select {
+  background: #333;
+  color: #fff;
+  border: 1px solid #444;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.fretboard-wrapper {
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+}
+
+.fretboard {
+  display: flex;
+  flex-direction: column;
+  background: var(--fretboard-wood);
+  border-radius: 4px;
+  border: 1px solid #444;
+  width: max-content;
+  min-width: 100%;
+}
+
+.fret-markers {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  margin-top: 0.5rem;
+}
+
+.fret-marker-cell {
+  width: 60px; /* Base fret width */
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.fret-marker-cell.fret-0 {
+  width: 40px;
+}
+
+/* Individual strings */
+.string-row {
+  display: flex;
+  height: 44px;
+  position: relative;
+}
+
+/* Physical string line */
+.string-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--string-color);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  z-index: 1;
+}
+
+.string-row:nth-child(1)::before { height: 1px; }
+.string-row:nth-child(2)::before { height: 1.5px; }
+.string-row:nth-child(3)::before { height: 2px; }
+.string-row:nth-child(4)::before { height: 2.5px; }
+.string-row:nth-child(5)::before { height: 3px; }
+.string-row:nth-child(6)::before { height: 4px; }
+
+/* Fret cell */
+.fret-cell {
+  position: relative;
+  width: 60px;
+  border-right: 2px solid var(--fret-wire);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.fret-cell.fret-0 {
+  width: 40px;
+  border-right: 6px solid #e0e0e0; /* Nut */
+  background: #111;
+}
+
+.fret-cell.fret-12 {
+  border-right: none;
+}
+
+/* Fret inlay dots (rendered in background of fret-cell somehow? Or absolute) */
+.inlay-dot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+}
+
+/* Note node */
+.note-node {
+  position: relative;
+  z-index: 2;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--default-note-color);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  opacity: 0.15; /* faded by default if outside overlay */
+  transition: opacity 0.2s, background 0.2s;
+}
+
+.note-node[data-active="true"] {
+  opacity: 1;
+}
+
+.note-node.root { background: var(--root-color); }
+.note-node.major-3 { background: var(--major3-color); }
+.note-node.minor-3 { background: var(--minor3-color); }
+.note-node.fifth { background: var(--fifth-color); }
+.note-node.flat-7 { background: var(--flat7-color); }
+.note-node.pentatonic { background: var(--penta-color); }
+
+.legend-panel {
+  background: var(--panel-bg);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.legend-panel h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+}
+
+.legend-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.legend-list li {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.legend-dot.root { background: var(--root-color); }
+.legend-dot.major-3 { background: var(--major3-color); }
+.legend-dot.minor-3 { background: var(--minor3-color); }
+.legend-dot.fifth { background: var(--fifth-color); }
+.legend-dot.flat-7 { background: var(--flat7-color); }
+.legend-dot.pentatonic { background: var(--penta-color); }
+
+@media (max-width: 560px) {
+  .fret-cell {
+    width: 54px;
+  }
+}

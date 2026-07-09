@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fretboard Studio Lite V1 - Sandbox</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>Fretboard Studio Lite <span>V1 Prototype</span></h1>
+      <div id="debug-status" class="status-line">
+        Ready
+      </div>
+    </header>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label for="key-select">Key</label>
+        <select id="key-select">
+          <option value="C">C</option>
+          <option value="G">G</option>
+          <option value="D">D</option>
+          <option value="A" selected>A</option>
+          <option value="E">E</option>
+          <option value="F">F</option>
+          <option value="Bb">Bb</option>
+          <option value="Eb">Eb</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="overlay-select">Overlay</label>
+        <select id="overlay-select">
+          <option value="notes">Diatonic Notes</option>
+          <option value="intervals">Intervals</option>
+          <option value="triad">Triad (1-3-5)</option>
+          <option value="guide-tones">7th Guide Tones (3, b7)</option>
+          <option value="minor-pentatonic" selected>Minor Pentatonic</option>
+          <option value="major-pentatonic">Major Pentatonic</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="position-select">Position</label>
+        <select id="position-select">
+          <option value="0-12" selected>Full (0-12)</option>
+          <option value="0-4">Open (0-4)</option>
+          <option value="5-9">Mid (5-9)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fretboard-wrapper">
+      <div class="fretboard" id="fretboard">
+        <!-- Rendered via JS -->
+      </div>
+      <div class="fret-markers" id="fret-markers">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+
+    <div class="legend-panel">
+      <h3>สัญลักษณ์ (Legend)</h3>
+      <ul class="legend-list">
+        <li><span class="legend-dot root"></span> <strong>Root (1)</strong> = บ้าน (Home)</li>
+        <li><span class="legend-dot major-3"></span> <strong>3</strong> = สี Major</li>
+        <li><span class="legend-dot minor-3"></span> <strong>b3</strong> = สี Minor</li>
+        <li><span class="legend-dot fifth"></span> <strong>5</strong> = โครงคอร์ด (Power)</li>
+        <li><span class="legend-dot flat-7"></span> <strong>b7</strong> = Blues / Dominant Guide Tone</li>
+        <li><span class="legend-dot pentatonic"></span> <strong>Pentatonic</strong> = Safe note set for phrasing</li>
+      </ul>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
