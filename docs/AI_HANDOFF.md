@@ -108,3 +108,12 @@ The Reference Shelf / Rhythm Notation work is FINAL for the current phase.
 - The legacy "Improvisation Foundation" outline is archived inside `docs/MONTH3_TO_MONTH6_BLUEPRINT.md` (collapsed `<details>` block).
 - The canonical Month 5 production spec is: `docs/MONTH5_CONTENT_SPEC.md`.
 - Month 5 and Month 6 are live in production. Month 7-8 remain hidden.
+
+## Tone.js Sampler Spike (Phase 2 Closeout)
+- Tone.js Sampler Phase 2 PASS
+- A2 → A3 approved baseline
+- UX copy cleaned
+- Risk guardrail cleaned
+- Tone.js remains spike-only
+- Production Sound Lab untouched
+- Next: Sound Lab V2 integration spec, not production merge
