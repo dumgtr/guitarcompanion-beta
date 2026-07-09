@@ -5932,48 +5932,55 @@
     {
       "id": "m4-w13-ear-scale-color",
       "type": "ear-training-lab",
-      "title": "Minor vs Major Pentatonic Color",
-      "description": "ฟังสี Minor Pentatonic เทียบ Major Pentatonic โดย Root ยังเป็น A เหมือนเดิม",
+      "title": "Root A and the 3rd: Minor vs Major Color",
+      "description": "A คือบ้าน/root เหมือนกันทั้ง major และ minor ความต่างของสีอยู่ที่ C กับ C#: C คือ b3 ของ minor ส่วน C# คือ 3 ของ major",
       "audioEngine": {
         "voice": "plucked-string",
         "durationMs": 850,
         "gapMs": 140
       },
+      "listenFor": [
+        "A คือบ้าน/root เหมือนกันทั้ง major และ minor",
+        "Minor color ให้ฟัง C (b3)",
+        "Major color ให้ฟัง C# (3)",
+        "เปรียบเทียบ C กับ C# ทีละเสียง ไม่ใช่ A กับ A"
+      ],
       "chords": [
         {
-          "id": "m4-w13-ear-a-minor-pent",
-          "chord": "A Minor Pentatonic",
-          "degree": "1-b3-4-5-b7",
-          "role": "tough / bluesy",
-          "notes": [
-            "A2",
-            "C3",
-            "D3",
-            "E3",
-            "G3"
-          ]
-        },
-        {
-          "id": "m4-w13-ear-a-major-pent",
-          "chord": "A Major Pentatonic",
-          "degree": "1-2-3-5-6",
-          "role": "sweet / country",
-          "notes": [
-            "A2",
-            "B2",
-            "C#3",
-            "E3",
-            "F#3"
-          ]
-        },
-        {
-          "id": "m4-w13-ear-root-a",
-          "chord": "A Root Drone",
+          "id": "m4-w13-ear-root-a-anchor",
+          "chord": "A Root Anchor",
           "degree": "1",
-          "role": "home base",
+          "role": "บ้าน/root เหมือนกันทั้ง major และ minor",
           "notes": [
-            "A2",
-            "A3"
+            "A2"
+          ]
+        },
+        {
+          "id": "m4-w13-ear-minor-color-c",
+          "chord": "Minor Color: C",
+          "degree": "b3",
+          "role": "C คือ b3 ของ A minor - สีหม่น / tough",
+          "notes": [
+            "C3"
+          ]
+        },
+        {
+          "id": "m4-w13-ear-major-color-c-sharp",
+          "chord": "Major Color: C#",
+          "degree": "3",
+          "role": "C# คือ 3 ของ A major - สีสว่าง / sweet",
+          "notes": [
+            "C#3"
+          ]
+        },
+        {
+          "id": "m4-w13-ear-c-vs-c-sharp",
+          "chord": "Compare: C vs C#",
+          "degree": "b3 -> 3",
+          "role": "ฟัง minor color เทียบ major color โดย Root ยังเป็น A บ้านเดิม",
+          "notes": [
+            "C3",
+            "C#3"
           ]
         }
       ]
