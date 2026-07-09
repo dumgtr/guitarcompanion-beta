@@ -4521,9 +4521,13 @@ function setLabStatus(card, text = "", meta = {}) {
   const primaryLine = month2CreateElement("div", "sound-lab-display-primary");
   primaryLine.appendChild(month2CreateElement("strong", "sound-lab-display-chord", primary));
 
-  if (guide) {
-    primaryLine.appendChild(month2CreateElement("span", "sound-lab-display-guide", `GUIDE ${guide}`));
-  }
+  const guideBadge = month2CreateElement(
+    "span",
+    `sound-lab-display-guide${guide ? "" : " is-placeholder"}`,
+    guide ? `GUIDE ${guide}` : "GUIDE --"
+  );
+  if (!guide) guideBadge.setAttribute("aria-hidden", "true");
+  primaryLine.appendChild(guideBadge);
 
   const roleLine = month2CreateElement(
     "div",
