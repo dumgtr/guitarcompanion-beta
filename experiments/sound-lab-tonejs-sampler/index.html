@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tone.js Audio Diagnostics</title>
+    <title>Tone.js ทดสอบเสียง Sound Lab</title>
     <!-- Load Tone.js from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
@@ -98,7 +98,7 @@
 </head>
 <body>
 
-    <h1>Audio Diagnostics</h1>
+    <h1>ทดสอบเสียง Sound Lab</h1>
     <div class="warning">Spike Phase 2 - Approved A2 to A3 Audition Baseline</div>
 
     <div class="info-box">
@@ -119,16 +119,16 @@
             <span class="status-label">Sampler Status:</span>
             <span class="status-val" id="stat-sampler">Idle</span>
 
-            <span class="status-label" style="margin-top:10px; border-top: 1px solid #333; padding-top: 10px;">Theory Note:</span>
+            <span class="status-label" style="margin-top:10px; border-top: 1px solid #333; padding-top: 10px;">โน้ตที่กำลังเรียน:</span>
             <span class="status-val" id="stat-theory" style="margin-top:10px; border-top: 1px solid #333; padding-top: 10px;">--</span>
 
-            <span class="status-label">Playback Note:</span>
+            <span class="status-label">เสียงที่เปิดให้ฟัง:</span>
             <span class="status-val" id="stat-playback">--</span>
 
-            <span class="status-label">Normalization:</span>
+            <span class="status-label">ปรับ octave ให้ฟังชัด:</span>
             <span class="status-val" id="stat-norm">--</span>
 
-            <span class="status-label">Loudness Obs.:</span>
+            <span class="status-label">ความชัดของเสียง:</span>
             <span class="status-val" id="stat-loudness" style="color:var(--warning)">--</span>
 
             <span class="status-label" style="margin-top:10px;">Last Action:</span>
@@ -142,30 +142,30 @@
     <div class="controls">
         <div class="control-group" style="border-color: var(--accent)">
             <h3>Step 1 & 2: Base Audio</h3>
-            <button id="btn-unlock" class="btn-primary" onclick="unlockAudio()">Unlock Audio Context</button>
-            <button id="btn-beep" disabled onclick="testBeep()">Test Beep (Synth)</button>
+            <button id="btn-unlock" class="btn-primary" onclick="unlockAudio()">เริ่มระบบเสียง</button>
+            <button id="btn-beep" disabled onclick="testBeep()">ลองเสียงสั้นๆ</button>
             <button id="btn-load-sampler" disabled onclick="loadSampler()">Load Sampler</button>
         </div>
 
         <div class="control-group">
-            <h3>Group A: Raw Low-Register Test</h3>
+            <h3>ฟังโน้ตต่ำแบบเดิม</h3>
             <button disabled class="play-btn" onclick="playRaw('A2')">Play A2 raw</button>
             <button disabled class="play-btn" onclick="playRaw('A3')">Play A3 raw</button>
             <button disabled class="play-btn" onclick="playRaw('A4')">Play A4 raw</button>
         </div>
 
         <div class="control-group">
-            <h3>Group B: Normalized Sound Lab Test (Audition Note)</h3>
+            <h3>ฟังโน้ตที่ปรับให้ชัดขึ้น (เสียงที่เปิดให้ฟัง)</h3>
             <button disabled class="play-btn" onclick="playAudition('A2')">A2 -> A3</button>
-            <button disabled class="play-btn" onclick="playAuditionSeq(['A2', 'C4'], 'Min compare')">A2 -> C4 (one at a time)</button>
-            <button disabled class="play-btn" onclick="playAuditionSeq(['A2', 'C#4'], 'Maj compare')">A2 -> C#4 (one at a time)</button>
+            <button disabled class="play-btn" onclick="playAuditionSeq(['A2', 'C4'], 'เทียบเสียงทีละโน้ต')">A2 -> C4 (เทียบเสียงทีละโน้ต)</button>
+            <button disabled class="play-btn" onclick="playAuditionSeq(['A2', 'C#4'], 'เทียบเสียงทีละโน้ต')">A2 -> C#4 (เทียบเสียงทีละโน้ต)</button>
         </div>
 
         <div class="panel">
             <h3>3. Low-Register Audibility Test</h3>
             <p style="font-size: 0.9em; color: #aaa; margin-bottom: 10px;">Testing extreme bass-register notes that may be hard to hear on mobile speakers. Compare the normalized version vs the raw bypassed version without changing production lessons.</p>
             <button disabled class="play-btn" onclick="playNote('E2')">Play E2 (Normalized)</button>
-            <button disabled class="play-btn" onclick="playRawNote('E2')">Play E2 (RAW - Bypassed)</button>
+            <button disabled class="play-btn" onclick="playRawNote('E2')">Play E2 (เสียงเดิม ไม่ปรับ octave)</button>
             <button disabled class="play-btn" onclick="playNote('G2')">Play G2 (Normalized)</button>
             <button disabled class="play-btn" onclick="playNote('B2')">Play B2 (Normalized)</button>
         </div>
