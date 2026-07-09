@@ -3681,8 +3681,15 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
   card.dataset.labId = lab.id || labRef || "";
 
   const head = month2CreateElement("header", "component-head");
+  
+  const eyebrowRow = month2CreateElement("div", "sound-lab-eyebrow-row");
+  eyebrowRow.appendChild(month2CreateElement("p", "eyebrow", "ห้องทดลองฟังเสียงคอร์ด"));
+  if (isV2Preview && lab?.audioEngine?.model === "sound-lab-v2") {
+    eyebrowRow.appendChild(month2CreateElement("span", "sound-lab-v2-badge", "V2 PREVIEW"));
+  }
+
   head.append(
-    month2CreateElement("p", "eyebrow", "ห้องทดลองฟังเสียงคอร์ด"),
+    eyebrowRow,
     month2CreateElement("h3", "", blockData.title || lab.title || "ห้องทดลองฟังเสียงคอร์ด"),
     month2CreateElement("p", "caption", lab.description || "")
   );
@@ -4555,10 +4562,14 @@ function setLabStatus(card, text = "", meta = {}) {
     sequence || "พร้อมฟังทีละคอร์ด"
   );
 
-  readout.append(primaryLine, roleLine, sequenceLine);
-  if (meta.helperLine) {
-    readout.append(month2CreateElement("div", "sound-lab-display-helper", meta.helperLine));
-  }
+  const helperLine = month2CreateElement(
+    "div",
+    `sound-lab-display-helper${meta.helperLine ? "" : " is-placeholder"}`,
+    meta.helperLine || "โน้ตที่เรียน / เสียงที่เปิดให้ฟัง"
+  );
+  if (!meta.helperLine) helperLine.setAttribute("aria-hidden", "true");
+
+  readout.append(primaryLine, roleLine, sequenceLine, helperLine);
 
   status.append(header, readout);
 }

@@ -1,0 +1,6 @@
+﻿Role: Learning UX Reviewer
+Backend: External command
+Command template: py agent_tools/gc_copilot_agent.py --prompt "{PROMPT_FILE}" --output "{REPORT_FILE}"
+Expanded command: py agent_tools/gc_copilot_agent.py --prompt "{PROMPT_FILE}" --output "{REPORT_FILE}"
+
+----- raw output -----

@@ -123,10 +123,14 @@ The Reference Shelf / Rhythm Notation work is FINAL for the current phase.
 - **Phase B0 Fixture Created:** `experiments/sound-lab-v2-schema-fixture/` contains schema + mock data outside `outputs/*`; no production data edit yet.
 - **Next:** Phase B1 renderer compatibility review against the fixture.
 
-## Sound Lab V2 C1.1 QA Note
-- Manual QA passed for the Sound Lab V2 preview integration.
-- Low-register audibility note: `E2 -> E3` remains quiet on small speakers.
-- This is not a blocker for the current V2 preview as long as no production V2 preview item uses `E2` as its `playbackNote`.
-- Future V2 data must choose `playbackNote` manually per item; do not rely on `E2`/`E3` as learner-facing playback notes without mobile speaker QA.
-- A2 -> A3 remains the approved baseline.
-- Do not change to A2 -> A4 unless separately approved.
+## Sound Lab V2 Phase C1.x Stabilization Complete
+- Sound Lab C1.x stabilization is complete.
+- Labels cleaned globally for robust rendering in narrow cards.
+- LED layout stabilized. Fixed rows and min-width badges ensure no layout shift between idle/playing states, including hard-locked mobile layouts.
+- Light mode LED theme complete.
+- M5/M6 selfCheck rendering fixed.
+- Sound Lab V2 preview badge added.
+- V2 remains preview-only behind `?soundLabV2Preview=1`.
+- Known issue: E2 -> E3 can still be quiet on small speakers.
+- Normal production users remain on existing Sound Lab behavior.
+- Next recommended feature: Fretboard Studio Lite V1 spec.
