@@ -101,3 +101,5 @@ FINAL for current phase.
 - Tone.js remains spike-only
 - Production Sound Lab untouched
 - Next: Sound Lab V2 integration spec, not production merge
+- **Spec Created:** `docs/SOUND_LAB_V2_INTEGRATION_SPEC.md`
+
