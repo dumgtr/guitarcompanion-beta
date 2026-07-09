@@ -21,7 +21,7 @@ if (!(Test-Path $ApprovalFile)) {
     Write-Error "Approval file $ApprovalFile not found! Aborting integration.`nReview reports must be read first. You must write explicit approval to this file.`nThe integrator cannot decide A2 -> A4 or remove sequential compare by itself."
 }
 
-Write-Host "`nContents of $ApprovalFile:"
+Write-Host "`nContents of ${ApprovalFile}:"
 Write-Host "---------------------------------------------"
 Get-Content $ApprovalFile | ForEach-Object { Write-Host $_ }
 Write-Host "---------------------------------------------`n"
