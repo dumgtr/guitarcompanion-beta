@@ -114,3 +114,10 @@ FINAL for current phase.
 - A2 -> A3 remains the approved baseline.
 - Do not change to A2 -> A4 unless separately approved.
 
+
+## Sound Lab V2 Phase C0/C1 Post-Merge Status
+- Sound Lab V2 preview merged to main.
+- Normal production remains unchanged.
+- Preview available via ?soundLabV2Preview=1.
+- Known issue: E2->E3 remains quiet on small speakers.
+- Next phase: post-merge monitoring / no new Sound Lab expansion until preview QA is stable.
