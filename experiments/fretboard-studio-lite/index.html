@@ -3,53 +3,97 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fretboard Studio Lite V1 - Sandbox</title>
+  <title>Fretboard Studio Lite V1 - Interactive Sandbox</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="app-container">
     <header>
       <h1>Fretboard Studio Lite <span>V1 Prototype</span></h1>
-      <div id="debug-status" class="status-line">
-        Ready
-      </div>
+      <div id="debug-status" class="status-line">Ready</div>
     </header>
 
-    <div class="controls-panel">
-      <div class="control-group">
-        <label for="key-select">Key</label>
-        <select id="key-select">
-          <option value="C">C</option>
-          <option value="G">G</option>
-          <option value="D">D</option>
-          <option value="A" selected>A</option>
-          <option value="E">E</option>
-          <option value="F">F</option>
-          <option value="Bb">Bb</option>
-          <option value="Eb">Eb</option>
-        </select>
+    <div class="teaching-panel">
+      <p><strong>คำแนะนำ:</strong> วันนี้ให้หาเสียงบ้าน (Root) ก่อน... จากนั้นหา b3/3 เพื่อฟังสี minor/major... ส่วน b7 คือกลิ่น blues/dominant tension.</p>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="controls-panel panel-card">
+        <h3>ตั้งค่า Fretboard</h3>
+        <div class="control-group">
+          <label for="key-select">Key</label>
+          <select id="key-select">
+            <option value="C">C</option>
+            <option value="G">G</option>
+            <option value="D">D</option>
+            <option value="A" selected>A</option>
+            <option value="E">E</option>
+            <option value="F">F</option>
+            <option value="Bb">Bb</option>
+            <option value="Eb">Eb</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="overlay-select">Overlay</label>
+          <select id="overlay-select">
+            <option value="notes">Diatonic Notes</option>
+            <option value="intervals">Intervals</option>
+            <option value="triad">Triad (1-3-5)</option>
+            <option value="guide-tones">7th Guide Tones (3, b7)</option>
+            <option value="minor-pentatonic" selected>Minor Pentatonic</option>
+            <option value="major-pentatonic">Major Pentatonic</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="position-select">Position</label>
+          <select id="position-select">
+            <option value="0-12" selected>Full (0-12)</option>
+            <option value="0-4">Open (0-4)</option>
+            <option value="5-9">Mid (5-9)</option>
+          </select>
+        </div>
       </div>
 
-      <div class="control-group">
-        <label for="overlay-select">Overlay</label>
-        <select id="overlay-select">
-          <option value="notes">Diatonic Notes</option>
-          <option value="intervals">Intervals</option>
-          <option value="triad">Triad (1-3-5)</option>
-          <option value="guide-tones">7th Guide Tones (3, b7)</option>
-          <option value="minor-pentatonic" selected>Minor Pentatonic</option>
-          <option value="major-pentatonic">Major Pentatonic</option>
-        </select>
+      <div class="inspector-panel panel-card">
+        <h3>โน้ตที่เลือก (Inspector)</h3>
+        <div id="inspector-content" class="inspector-empty">
+          จิ้มที่โน้ตบนคอกีตาร์เพื่อดูรายละเอียด
+        </div>
       </div>
 
-      <div class="control-group">
-        <label for="position-select">Position</label>
-        <select id="position-select">
-          <option value="0-12" selected>Full (0-12)</option>
-          <option value="0-4">Open (0-4)</option>
-          <option value="5-9">Mid (5-9)</option>
-        </select>
+      <div class="compare-panel panel-card">
+        <h3>สี Major vs Minor</h3>
+        <div class="compare-content" id="compare-content">
+          <!-- Populated by JS -->
+        </div>
       </div>
+
+      <div class="challenge-panel panel-card">
+        <h3>โหมดท้าทาย (Challenge)</h3>
+        <div class="challenge-controls">
+          <select id="challenge-select">
+            <option value="">เลือกบททดสอบ...</option>
+            <option value="0">หา Root ให้ครบ</option>
+            <option value="3">หา b3 ให้ครบ</option>
+            <option value="4">หา 3 ให้ครบ</option>
+            <option value="10">หา b7 ให้ครบ</option>
+          </select>
+          <button id="challenge-reset-btn" class="btn">Reset</button>
+        </div>
+        <div id="challenge-feedback" class="challenge-feedback">
+          เลือกบททดสอบเพื่อเริ่ม
+        </div>
+      </div>
+    </div>
+
+    <div class="focus-bar">
+      <strong>Interval Focus:</strong>
+      <button class="focus-chip" data-interval="0">Root</button>
+      <button class="focus-chip" data-interval="3">b3</button>
+      <button class="focus-chip" data-interval="4">3</button>
+      <button class="focus-chip" data-interval="7">5</button>
+      <button class="focus-chip" data-interval="10">b7</button>
+      <button class="focus-chip active" data-interval="all">Show All</button>
     </div>
 
     <div class="fretboard-wrapper">
@@ -61,15 +105,15 @@
       </div>
     </div>
 
-    <div class="legend-panel">
+    <div class="legend-panel panel-card">
       <h3>สัญลักษณ์ (Legend)</h3>
       <ul class="legend-list">
         <li><span class="legend-dot root"></span> <strong>Root (1)</strong> = บ้าน (Home)</li>
         <li><span class="legend-dot major-3"></span> <strong>3</strong> = สี Major</li>
         <li><span class="legend-dot minor-3"></span> <strong>b3</strong> = สี Minor</li>
         <li><span class="legend-dot fifth"></span> <strong>5</strong> = โครงคอร์ด (Power)</li>
-        <li><span class="legend-dot flat-7"></span> <strong>b7</strong> = Blues / Dominant Guide Tone</li>
-        <li><span class="legend-dot pentatonic"></span> <strong>Pentatonic</strong> = Safe note set for phrasing</li>
+        <li><span class="legend-dot flat-7"></span> <strong>b7</strong> = Blues / Dominant Tension</li>
+        <li><span class="legend-dot pentatonic"></span> <strong>Pentatonic</strong> = Safe note</li>
       </ul>
     </div>
   </div>
