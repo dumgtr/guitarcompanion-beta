@@ -32,6 +32,10 @@
         {
           "type": "technique-drill",
           "drillRef": "m6-w21-drill-pitch-axis"
+        },
+        {
+          "type": "chord-sound-lab",
+          "labRef": "sl-v2-m6-w21-a-mixolydian-flat-seven"
         }
       ],
       "dailyPractice": [
@@ -93,6 +97,10 @@
           "heading": "ครูช่วยแก้",
           "content": "ถ้าฟังสองโหมดนี้แล้วรู้สึกเหมือนๆ กัน ให้ชะลอความเร็วลงและลองแยกฟังเฉพาะโน้ตตัวที่ 3",
           "teacherNote": "ลองเปิด A Drone หรือดีดคอร์ด A7/Am7 ค้างไว้ แล้วดีดสลับแค่โน้ต C กับ C# ช้าๆ อย่าเพิ่งพยายามวิ่งสเกลเต็มรูปแบบจนกว่าหูจะแยกสองสีนี้ออกชัดเจนครับ"
+        },
+        {
+          "type": "chord-sound-lab",
+          "labRef": "sl-v2-m6-w22-a-dorian-natural-six"
         }
       ],
       "dailyPractice": [
@@ -633,6 +641,68 @@
         "strumMs": 28,
         "gain": 1.08
       }
+    },
+    {
+      "id": "sl-v2-m6-w21-a-mixolydian-flat-seven",
+      "type": "chord-sound-lab",
+      "title": "A7",
+      "description": "Month 6: Modes as Chord Colors / A Mixolydian color",
+      "listenFor": [
+        "ฟัง G เป็น b7 ที่ทำให้ A7 มีสี dominant และกลิ่น blues-rock",
+        "ให้ผู้เรียนฟัง b7 เป็นสีของคอร์ด ไม่ใช่ท่อง mode เป็นตาราง"
+      ],
+      "audioEngine": {
+        "model": "sound-lab-v2",
+        "voice": "guide-tone",
+        "durationMs": 1200
+      },
+      "chords": [
+        {
+          "id": "sl-v2-m6-w21-a-mixolydian-flat-seven",
+          "chord": "A7",
+          "degree": "dominant color / Mixolydian",
+          "role": "G (b7)",
+          "theoryNote": "G3",
+          "playbackNote": "G3",
+          "playbackRule": "none",
+          "guideToneLabel": "G (b7)",
+          "notes": [
+            "G3"
+          ],
+          "auditionNote": "G3"
+        }
+      ]
+    },
+    {
+      "id": "sl-v2-m6-w22-a-dorian-natural-six",
+      "type": "chord-sound-lab",
+      "title": "Am7",
+      "description": "Month 6: Dorian vs Mixolydian / A Dorian color",
+      "listenFor": [
+        "ฟัง F# เป็น natural 6 ที่ทำให้ A Dorian หม่นแต่ยังสว่างและเท่",
+        "จุดสอนคือสีของ natural 6 ตัวเดียว ไม่ใช่การไล่สเกล Dorian ทั้งกล่อง"
+      ],
+      "audioEngine": {
+        "model": "sound-lab-v2",
+        "voice": "guide-tone",
+        "durationMs": 1200
+      },
+      "chords": [
+        {
+          "id": "sl-v2-m6-w22-a-dorian-natural-six",
+          "chord": "Am7",
+          "degree": "minor color with lift / Dorian",
+          "role": "F# (natural 6)",
+          "theoryNote": "F#3",
+          "playbackNote": "F#3",
+          "playbackRule": "none",
+          "guideToneLabel": "F# (natural 6)",
+          "notes": [
+            "F#3"
+          ],
+          "auditionNote": "F#3"
+        }
+      ]
     }
   ],
   "modules": [

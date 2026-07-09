@@ -238,18 +238,18 @@ async function loadFutureData() {
     try {
       updateDebugState({ dataJsonUrl: 'data-shards', lastAction: 'loading shards', lastError: null });
       setDataStatus('Loading companion data...', 'info');
-      
+
       const core = await loadJsonShard(shardUrls[0]);
       if (!core) throw new Error('Core shard could not be loaded');
-      
+
       const m5 = await loadJsonShard(shardUrls[1]);
       const m6 = await loadJsonShard(shardUrls[2]);
       const shards = [core, m5, m6].filter(Boolean);
-      
+
       let merged = {
           modules: [], tonePresets: [], quizItems: [], fretboardVisuals: [], miniTabs: [], chordSoundLabs: [], techniqueDrills: [], miniCourses: [], weeks: []
       };
-      
+
       shards.forEach(shard => {
           merged.modules = mergeById(merged.modules, shard.modules);
           merged.tonePresets = mergeById(merged.tonePresets, shard.tonePresets);
@@ -261,13 +261,13 @@ async function loadFutureData() {
           merged.miniCourses = mergeById(merged.miniCourses, shard.miniCourses);
           merged.weeks = mergeWeeks(merged.weeks, shard.weeks);
       });
-      
+
       courseData = merged;
-      
+
       const rhythmModule = modules.filter(item => item.id === 'rhythm');
       const futureModules = merged.modules.filter(item => item.id !== 'rhythm');
       modules = [...rhythmModule, ...futureModules];
-      
+
       tonePresets = merged.tonePresets;
       quizItems = merged.quizItems;
       fretboardVisuals = merged.fretboardVisuals;
@@ -275,46 +275,46 @@ async function loadFutureData() {
       chordSoundLabs = merged.chordSoundLabs;
       techniqueDrills = merged.techniqueDrills;
       miniCourses = merged.miniCourses;
-      
+
       const knownWeeks = new Set(weeks.map(item => item.number));
       const futureWeeks = merged.weeks.filter(item => !knownWeeks.has(item.number));
       weeks = [...weeks, ...futureWeeks].sort((a, b) => a.number - b.number);
-      
+
       if (!modules.some(item => item.id === selectedModule)) selectedModule = modules[0]?.id || selectedModule;
       if (tonePresets.length && !tonePresets.some(item => item.id === selectedTone)) selectedTone = tonePresets[0].id;
-      
+
       const loadedMonths = getLoadedMonths();
       const visibleMonths = getVisibleMonths();
-      
+
       const m5Exists = merged.weeks.some(w => w.month === 5);
       const m6Exists = merged.weeks.some(w => w.month === 6);
       const devMode = getDevPreviewMode();
-      
+
       let debugMessage = 'shards loaded';
       if (devMode === "all" && !m6Exists) {
         debugMessage = 'QA Preview warning: Month 6 shard did not load.';
         setDataStatus(debugMessage, 'error');
         showToast(debugMessage, 'error', 3000);
       }
-      
+
       updateDebugState({
-          dataJsonLoaded: true, 
-          loadedMonths, 
-          visibleMonths, 
+          dataJsonLoaded: true,
+          loadedMonths,
+          visibleMonths,
           currentMonth: selectedFocusedMonth,
           devPreviewMode: devMode,
           m5Exists,
           m6Exists,
-          loadedWeeks: weeks.length, 
-          miniCourses: miniCourses.length, 
-          lastAction: debugMessage 
+          loadedWeeks: weeks.length,
+          miniCourses: miniCourses.length,
+          lastAction: debugMessage
       });
-      
+
       const readyMonths = visibleMonths.filter(month => month > 1);
       const readyMonthLabel = readyMonths.length ? readyMonths.join(', ') : '1';
       setDataStatus(`Data loaded: Month ${readyMonthLabel} ready.`, 'success');
       showToast(`Extra lessons loaded. Month ${readyMonthLabel} ready.`, 'success');
-      
+
       renderMonthSwitcher();
       renderModules();
       renderModuleDetail();
@@ -436,7 +436,7 @@ function getVisibleMonths() {
   if (mode === "m5" || mode === "5") return loadedMonths.filter((month) => month <= 5);
   if (mode === "m6" || mode === "6") return loadedMonths.filter((month) => month <= 6);
   if (mode === "all") return loadedMonths.filter((month) => month <= 6);
-  
+
   return loadedMonths.filter((month) => month <= 6);
 }
 
@@ -448,14 +448,14 @@ function getDevPreviewAutoMonth() {
   if (!isDevPreviewActive()) return 0;
   const visible = getVisibleMonths().filter((month) => month > 2);
   if (!visible.length) return 0;
-  
+
   const mode = getDevPreviewMode();
   if (mode === "m3") return visible.includes(3) ? 3 : 0;
   if (mode === "m4") return visible.includes(4) ? 4 : 0;
   if (mode === "m5" || mode === "5") return visible.includes(5) ? 5 : 0;
   if (mode === "m6" || mode === "6") return visible.includes(6) ? 6 : 0;
   if (mode === "all") return visible.includes(6) ? 6 : (visible.includes(5) ? 5 : visible[visible.length - 1]);
-  
+
   return visible[0];
 }
 
@@ -2482,11 +2482,11 @@ function renderMonthSwitcher(autoScroll = false) {
     switcher.style.scrollBehavior = "smooth";
     switcher.style.WebkitOverflowScrolling = "touch";
     switcher.style.touchAction = "pan-x";
-    
+
     switcher.querySelectorAll("[data-month]").forEach((button) => {
       button.addEventListener("click", () => openFocusedMonth(Number(button.dataset.month)));
     });
-    
+
     if (autoScroll) {
       setTimeout(() => {
         const activeBtn = switcher.querySelector(".month-btn.active");
@@ -3658,6 +3658,11 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
   const blockData = container ? {} : block;
   if (!lab) return month2AppendResult(renderMonth2MissingCard(`ยังไม่มีห้องทดลองฟังเสียงคอร์ดสำหรับบล็อกนี้${labRef ? ` (${labRef})` : ""}`), container);
 
+  const isV2Preview = new URLSearchParams(window.location.search).get('soundLabV2Preview') === '1';
+  if (lab?.audioEngine?.model === "sound-lab-v2" && !isV2Preview) {
+    return month2AppendResult(document.createDocumentFragment(), container);
+  }
+
   const card = month2CreateElement("article", "month2-component month2-chord-lab-card chord-lab-card");
   card.dataset.labId = lab.id || labRef || "";
 
@@ -3778,7 +3783,11 @@ function formatSoundLabSequenceLabel(lab = {}) {
 function getSoundLabGuideToneText(lab = {}, chord = {}, block = {}) {
   const notes = getLabPlaybackNotes(lab, chord, block);
   if (!notes.length) return "";
-  return notes.join(" → ");
+  const baseText = notes.join(" → ");
+  if (lab.audioEngine?.model === "sound-lab-v2" && chord.guideToneLabel) {
+    return `${chord.guideToneLabel} - ${baseText}`;
+  }
+  return baseText;
 }
 
 function getSoundLabPrimaryName(chord = {}) {
@@ -3810,6 +3819,11 @@ function normalizeAuditionPitch(note) {
 }
 
 function getLabPlaybackNotes(lab = {}, chord = {}, block = {}, options = {}) {
+  if (lab.audioEngine?.model === "sound-lab-v2") {
+    const v2Note = chord.playbackNote || chord.auditionNote;
+    if (v2Note) return [v2Note];
+  }
+
   const notes = getChordNotes(chord);
   if (!notes.length) return [];
 
@@ -4248,7 +4262,7 @@ async function playSoftPiano(noteString, timeOffset = 0, duration = 1.2, peakGai
   osc1.type = "sine";
   osc2.type = "triangle";
   osc3.type = "sine";
-  
+
   osc1.frequency.setValueAtTime(frequency, startTime);
   osc2.frequency.setValueAtTime(frequency * 2, startTime); // Harmonic 2
   osc3.frequency.setValueAtTime(frequency * 3, startTime); // Harmonic 3
@@ -4264,7 +4278,7 @@ async function playSoftPiano(noteString, timeOffset = 0, duration = 1.2, peakGai
 
   // Softer peak overall than plucked string
   const boostedPeakGain = Math.min(peakGain * 0.85, 0.7);
-  
+
   envelopeGain.gain.setValueAtTime(0, startTime);
   envelopeGain.gain.linearRampToValueAtTime(boostedPeakGain, startTime + 0.012); // slightly slower attack
   envelopeGain.gain.exponentialRampToValueAtTime(boostedPeakGain * 0.3, startTime + 0.2); // quick decay
@@ -4420,13 +4434,19 @@ function clearActiveChord(card) {
 
 function updateLabStatus(card, chord = {}, audioPlayed, lab = {}, block = {}) {
   const guideTone = getSoundLabGuideToneText(lab, chord, block);
-  setLabStatus(card, "", {
+  const meta = {
     state: audioPlayed ? "PLAYED" : "TEXT PREVIEW",
     primary: getSoundLabPrimaryName(chord),
     guideTone,
     role: getSoundLabCompactRole(chord),
     sequence: formatSoundLabSequenceLabel(lab)
-  });
+  };
+
+  if (lab.audioEngine?.model === "sound-lab-v2" && chord.theoryNote && chord.playbackNote && chord.theoryNote !== chord.playbackNote) {
+    meta.helperLine = `โน้ตที่เรียน: ${chord.theoryNote} · เสียงที่เปิดให้ฟัง: ${chord.playbackNote}`;
+  }
+
+  setLabStatus(card, "", meta);
 }
 
 function setLabStatus(card, text = "", meta = {}) {
@@ -4471,6 +4491,10 @@ function setLabStatus(card, text = "", meta = {}) {
   );
 
   readout.append(primaryLine, roleLine, sequenceLine);
+  if (meta.helperLine) {
+    readout.append(month2CreateElement("div", "sound-lab-display-helper", meta.helperLine));
+  }
+
   status.append(header, readout);
 }
 
