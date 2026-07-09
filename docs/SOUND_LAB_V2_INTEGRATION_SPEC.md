@@ -68,7 +68,9 @@ Learner-facing Thai labels should be simple, encouraging, and non-technical:
 
 ## 8. Implementation Phases
 - **Phase A**: Docs/spec only (This document).
-- **Phase B**: Production data schema draft, no audio engine swap.
+- **Phase B0**: Schema fixture / mock data outside `outputs/*`. No production data edit yet.
+- **Phase B1**: Renderer compatibility review against the fixture/mock data.
+- **Phase B2**: Approved targeted production data patch only. Any `outputs/data.json` change requires separate explicit approval.
 - **Phase C**: Isolated production preview flag for engine testing.
 - **Phase D**: Manual mobile QA (speaker, headphone, clipping tests).
 - **Phase E**: Production integration only after explicit approval.

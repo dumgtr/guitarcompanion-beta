@@ -43,7 +43,7 @@ FINAL for current phase.
 - Sound Lab phase is frozen/stable.
 - Final real smoke QA passed.
 - The Next.js Dashboard spike (branch: `spike/next-dashboard-shell`) is currently parked and deprioritized.
-- Next preferred direction is Sound Lab V2 planning + Sound Engine / Tone.js Sampler spike.
+- Next preferred direction is Phase B0: Sound Lab V2 schema fixture / mock data outside `outputs/*`, no production data edit yet.
 - Production remains locked up to Month 6.
 - Known UX debt: month switcher horizontal scroll feels step-like.
 - Do not start Month 7/8 publicly yet.
@@ -91,7 +91,7 @@ FINAL for current phase.
 - Do not continue polishing the Reference Shelf, TAB Handbook, or Note Value Cheatsheet unless the user reports a real bug.
 - Future additions should be spec-first and should not expose new months or modules.
 - Rollback: revert `visibility` to `"hidden"` in data.json and restore the previous `getMiniCourses()` filter. See `docs/MINI_COURSE_PUBLIC_REVEAL_PLAN.md` Section 8.
-- Next recommended phase: Sound Lab V2 planning + Sound Engine / Tone.js Sampler spike.
+- Next recommended phase: Phase B0: Sound Lab V2 schema fixture / mock data outside `outputs/*`, no production data edit yet.
 
 ## Tone.js Sampler Spike (Phase 2 Closeout)
 - Tone.js Sampler Phase 2 PASS
@@ -100,6 +100,7 @@ FINAL for current phase.
 - Risk guardrail cleaned
 - Tone.js remains spike-only
 - Production Sound Lab untouched
-- Next: Sound Lab V2 integration spec, not production merge
+- Next: Phase B0: Sound Lab V2 schema fixture / mock data outside `outputs/*`, no production data edit yet.
+- Production `outputs/data.json` changes require a separate explicit approval.
 - **Spec Created:** `docs/SOUND_LAB_V2_INTEGRATION_SPEC.md`
 
