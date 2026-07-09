@@ -24,21 +24,23 @@ powershell -ExecutionPolicy Bypass -File scripts\gc-multi-agent.ps1
 ```
 
 ## Review-Only Mode
-If you wish to run the orchestrator in a strictly read-only mode (where agents cannot edit any files at all, even in the `experiments/` folder), you can modify the script's `codex exec` line to use the `workspace-read` sandbox:
+If you wish to run the orchestrator in a strictly read-only mode (where agents cannot edit any files at all, even in the `experiments/` folder), you can modify the script's `codex exec` line to use the `read-only` sandbox:
 ```powershell
-Get-Content $PromptFile -Raw | codex exec - --sandbox workspace-read --output-last-message > $ReportFile
+Get-Content $PromptFile -Raw | codex exec - --sandbox read-only --ask-for-approval never --output-last-message $ReportFile
 ```
 
 ## What Files It Creates
 The runner will generate timestamped log files in the `reports/` directory for every run:
 - `multi-agent-tone-phase2-YYYYMMDD-HHMMSS.md`: The final multi-agent markdown report.
+- `head-before-YYYYMMDD-HHMMSS.txt`: Commit SHA before execution.
+- `head-after-YYYYMMDD-HHMMSS.txt`: Commit SHA after execution.
 - `status-before-YYYYMMDD-HHMMSS.txt`: Output of `git status` before execution.
 - `status-after-YYYYMMDD-HHMMSS.txt`: Output of `git status` after execution.
-- `diff-after-YYYYMMDD-HHMMSS.txt`: Output of `git diff --check` and `git diff --name-only` after execution.
+- `diff-after-YYYYMMDD-HHMMSS.txt`: Output of `git diff --check`, working tree diff names, staged diff names, and committed diff names after execution.
 
 ## Guardrails Enforced
 - **Branch Enforcement**: Will not run unless on the specific spike branch.
-- **Production Safety**: Fails the script and alerts the user if `outputs/*` files are modified.
+- **Production Safety**: Fails the script and alerts the user if `outputs/*` files are modified in the working tree, staged changes, or commits created during the run.
 - **No Merging**: The script does not automatically merge changes to `main`.
 - **No Release Tags**: The script does not create or push release tags.
 - **Reporting**: All reports are safely isolated in the `reports/` folder (which contains a `.gitkeep` to track it).
