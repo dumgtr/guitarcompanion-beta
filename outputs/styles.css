@@ -5642,3 +5642,46 @@ body {
 .note-value-badge-warm { background: color-mix(in srgb, var(--warm) 20%, transparent); border: 1px solid var(--warm); color: var(--warm); }
 #noteValueShelfContent { display: none; margin-top: 25px; scroll-margin-top: 120px; }
 @media (max-width: 640px) { #noteValueShelfContent { scroll-margin-top: 150px; } }
+
+/* --- Light Mode Overrides for Sound Lab LED --- */
+:root[data-theme="light"] .month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign {
+  border-color: rgba(210, 160, 100, 0.4);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.6), transparent 40%),
+    linear-gradient(180deg, #fdfbf7 0%, #f4eee2 100%);
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.04),
+    inset 0 0 12px rgba(210, 160, 100, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.05);
+  color: #5c4326;
+}
+
+:root[data-theme="light"] .month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-state {
+  color: #9c6c31;
+  text-shadow: none;
+}
+
+:root[data-theme="light"] .month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-led {
+  color: #e56b25;
+  text-shadow: 0 0 6px rgba(229, 107, 37, 0.5);
+}
+
+:root[data-theme="light"] .month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-chord {
+  color: #4a341a;
+  text-shadow: none;
+}
+
+:root[data-theme="light"] .month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-guide {
+  border-color: rgba(210, 160, 100, 0.6);
+  background: rgba(210, 160, 100, 0.15);
+  color: #8c5c21;
+  box-shadow: none;
+}
+
+:root[data-theme="light"] .month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-role {
+  color: #7a5c3a;
+}
+
+:root[data-theme="light"] .month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-sequence {
+  color: #947b59;
+}
