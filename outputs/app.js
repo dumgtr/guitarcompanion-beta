@@ -2842,8 +2842,22 @@ function renderMonth2PracticeTaskCard(item = {}, weekNumber, fallbackId) {
 }
 
 function renderMonth2SelfCheckSection(weekItem = {}) {
-  const selfCheck = weekItem.selfCheck || {};
+  const selfCheck = weekItem.selfCheck;
+  if (!selfCheck) return document.createElement("div");
+
   const section = month2CreateElement("section", "month2-component month2-self-check-section");
+
+  if (Array.isArray(selfCheck)) {
+    section.append(
+      month2CreateElement("p", "eyebrow", "ประเมินตัวเอง"),
+      month2CreateElement("h3", "", "เช็กความเข้าใจ")
+    );
+    const criteriaList = month2CreateElement("div", "criteria-list");
+    selfCheck.forEach((item, index) => criteriaList.appendChild(renderMonth2PassItem(item, index)));
+    section.appendChild(criteriaList);
+    return section;
+  }
+
   section.append(
     month2CreateElement("p", "eyebrow", "ประเมินตัวเอง"),
     month2CreateElement("h3", "", selfCheck.title || "เช็กความเข้าใจ")
