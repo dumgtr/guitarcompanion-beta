@@ -25,7 +25,7 @@ The UI now provides real-time feedback on the state of the audio engine:
 ## Phase 1B: Audition Register Normalization
 **Observed Issue:** The Phase 1 test revealed that low-register notes (e.g., `A2`) produce very little audible output on standard laptop and mobile phone speakers. Since Sound Lab is an educational tool, if a student cannot hear the root note clearly, the learning value is lost. 
 
-**Solution:** The spike now tests separating the `theoryNote` (what the student sees) from the `auditionNote` (what the student hears). Current test rule: octave 2 notes are normalized to octave 3. Example: A2 -> A3. This is a first-pass mobile loudness test, not the final production rule. Future Sound Lab V2 may compare A3 vs A4 or C4–C5 audition ranges if A3 is still too quiet.
+**Solution:** The spike now tests separating the `theoryNote` (what the student sees) from the `playbackNote` (what the student hears). Current test rule: octave 2 notes are normalized to octave 3. Example: A2 -> A3. This is a first-pass mobile loudness test, not the final production rule. Future Sound Lab V2 may compare A3 vs A4 or C4–C5 audition ranges if A3 is still too quiet.
 
 ### Phase 1B QA Checklist
 - [ ] **A2 raw is quieter than A4**: Playing A2 raw is perceptibly quieter/muddier than A4 on laptop/phone speakers.
@@ -33,7 +33,7 @@ The UI now provides real-time feedback on the state of the audio engine:
 - [ ] **Sequential compare remains single-note only**: Triggering sequential playback ensures no stacked chords are played simultaneously.
 - [ ] **Mobile speaker loudness is acceptable**: The Phase 1B normalized notes are loud and clear on physical devices.
 
-**Production Implication:** Production Sound Lab V2 should explicitly separate `theoryNote` from `auditionNote` (or `playbackNote`) in the curriculum data schema to ensure both educational accuracy and audible clarity.
+**Production Implication:** Production Sound Lab V2 should explicitly separate `theoryNote` from `playbackNote` in the curriculum data schema to ensure both educational accuracy and audible clarity.
 
 **Experimental Audio Chain:** A Tone.Compressor and Tone.Limiter have been added to tame dynamics and boost presence. This is experimental and must be checked for clipping, fatigue, and mobile loudness.
 
