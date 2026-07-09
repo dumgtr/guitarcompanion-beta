@@ -4333,13 +4333,14 @@ footer p {
 
 .month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-chord {
   min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   color: #fff3d6;
   font-size: clamp(1.08rem, 2.4vw, 1.5rem);
   font-weight: 950;
   line-height: 1.15;
-  white-space: normal;
-  word-break: break-word;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   text-shadow: 0 0 12px rgba(255, 243, 214, 0.18);
 }
 
@@ -4359,22 +4360,20 @@ footer p {
 
 .month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-role {
   min-width: 0;
-  overflow: hidden;
   color: #e9c48d;
   font-size: 0.9rem;
   font-weight: 850;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .month2-chord-lab-card .chord-lab-status.sound-lab-digital-sign .sound-lab-display-sequence {
   min-width: 0;
-  overflow: hidden;
   color: #a99572;
   font-size: 0.86rem;
   font-weight: 800;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
 }
 
 @media (max-width: 560px) {

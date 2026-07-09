@@ -3756,21 +3756,38 @@ function getLabPlaybackItems(lab = {}) {
   }];
 }
 
-function getSoundLabShortLabel(item) {
+function getSoundLabShortLabel(item, maxLength = 18) {
   if (!item) return "";
-  if (item.shortLabel) return item.shortLabel;
-  if (item.guideToneLabel && item.guideToneLabel.length < 24) return item.guideToneLabel;
+  let label = "";
 
-  const rawText = item.chord || item.label || item.id || "";
-  const lowerText = rawText.toLowerCase();
+  if (item.shortLabel) {
+    label = item.shortLabel;
+  } else if (item.guideToneLabel && item.guideToneLabel.length < 24) {
+    label = item.guideToneLabel;
+  } else {
+    const rawText = item.chord || item.label || item.id || "";
+    const lowerText = rawText.toLowerCase();
 
-  if (lowerText.includes("root") && lowerText.includes("anchor")) return "Root A";
-  if (lowerText.includes("minor color") && lowerText.includes("c")) return "Minor b3";
-  if (lowerText.includes("major color") && lowerText.includes("c#")) return "Major 3";
-  if (lowerText.includes("compare") || lowerText.includes("c vs c#")) return "Compare";
+    if (lowerText.includes("response:") && lowerText.includes("minor pentatonic")) label = "Minor Response";
+    else if (lowerText.includes("call:") && lowerText.includes("major pentatonic")) label = "Major Call";
+    else if (lowerText.includes("a major pentatonic")) label = "Major";
+    else if (lowerText.includes("a minor pentatonic")) label = "Minor";
+    else if (lowerText.includes("major to minor")) label = "Major → Minor";
+    else if (lowerText.includes("minor to major")) label = "Minor → Major";
+    else if (lowerText.includes("pentatonic color switch")) label = "Color Switch";
+    else if (lowerText.includes("root") && lowerText.includes("anchor")) label = "Root A";
+    else if (lowerText.includes("minor color") && lowerText.includes("c")) label = "Minor b3";
+    else if (lowerText.includes("major color") && lowerText.includes("c#")) label = "Major 3";
+    else if (lowerText.includes("compare") || lowerText.includes("c vs c#")) label = "Compare";
+    else {
+      label = rawText.split(/[-—•\n]/)[0].trim();
+    }
+  }
 
-  let cleaned = rawText.split(/[-—•\n]/)[0].trim();
-  return cleaned.length > 24 ? cleaned.substring(0, 24).trim() + "..." : cleaned;
+  if (label.length > maxLength) {
+    return label.substring(0, maxLength).trim() + "...";
+  }
+  return label;
 }
 
 function getSoundLabDetailLabel(item) {
@@ -3799,10 +3816,17 @@ function getSoundLabSequenceItems(lab = {}) {
 
 function formatSoundLabSequenceLabel(lab = {}) {
   const sequenceItems = getSoundLabSequenceItems(lab);
+  if (sequenceItems.length > 3) return "ฟังชุดนี้ทีละเสียง";
+
   const names = sequenceItems
-    .map(getSoundLabShortLabel)
+    .map(item => getSoundLabShortLabel(item, 18))
     .filter(Boolean);
-  return names.length ? names.join(" → ") : "Progression";
+
+  if (!names.length) return "Progression";
+
+  const joined = names.join(" → ");
+  if (joined.length > 32) return "ฟังชุดนี้ทีละเสียง";
+  return joined;
 }
 
 function getSoundLabGuideToneText(lab = {}, chord = {}, block = {}) {
@@ -3816,7 +3840,7 @@ function getSoundLabGuideToneText(lab = {}, chord = {}, block = {}) {
 }
 
 function getSoundLabPrimaryName(chord = {}) {
-  return getSoundLabShortLabel(chord);
+  return getSoundLabShortLabel(chord, 24);
 }
 
 function getSoundLabCompactRole(chord = {}) {
