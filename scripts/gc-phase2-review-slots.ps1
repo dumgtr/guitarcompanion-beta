@@ -57,11 +57,14 @@ function Invoke-CodexFallback {
     ) | Out-File -FilePath $Role.LogFile -Encoding utf8
 
     $promptContent = Get-Content -Path $Role.PromptFile -Raw
+    $oldEap = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
     $promptContent | codex exec `
         --sandbox read-only `
         -c approval_policy=never `
         --output-last-message $Role.ReportFile `
         - 2>&1 | Tee-Object -FilePath $Role.LogFile -Append
+    $ErrorActionPreference = $oldEap
 
     if ($LASTEXITCODE -ne 0) {
         Write-Error "$($Role.Title) Codex fallback failed with exit code $LASTEXITCODE."
