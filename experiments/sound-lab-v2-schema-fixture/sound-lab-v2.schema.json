@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://guitar-companion.local/schemas/sound-lab-v2.schema.json",
+  "title": "Sound Lab V2 Phase B0 Fixture Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["fixtureMeta", "soundLabV2Items"],
+  "properties": {
+    "fixtureMeta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "phase",
+        "status",
+        "source",
+        "productionDataEdited",
+        "toneJsDependencyAdded",
+        "approvedPlaybackBaseline",
+        "notes"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "const": "sound-lab-v2-phase-b0-fixture"
+        },
+        "phase": {
+          "type": "string",
+          "const": "B0"
+        },
+        "status": {
+          "type": "string",
+          "const": "schema-fixture-only"
+        },
+        "source": {
+          "type": "string",
+          "const": "experiments/sound-lab-v2-schema-fixture"
+        },
+        "productionDataEdited": {
+          "type": "boolean",
+          "const": false
+        },
+        "toneJsDependencyAdded": {
+          "type": "boolean",
+          "const": false
+        },
+        "approvedPlaybackBaseline": {
+          "type": "string",
+          "const": "octave-2-to-octave-3"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "soundLabV2Items": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/$defs/soundLabV2Item"
+      }
+    }
+  },
+  "$defs": {
+    "soundLabV2Item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "month",
+        "week",
+        "lessonContext",
+        "chordLabel",
+        "functionLabel",
+        "guideToneLabel",
+        "theoryNote",
+        "playbackNote",
+        "playbackRule",
+        "functionText",
+        "learnerHint",
+        "qaTags"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^sl-v2-m(5|6)-w[0-9]+-[a-z0-9-]+$"
+        },
+        "month": {
+          "type": "integer",
+          "enum": [5, 6]
+        },
+        "week": {
+          "type": "integer",
+          "minimum": 17,
+          "maximum": 24
+        },
+        "lessonContext": {
+          "type": "string",
+          "minLength": 1
+        },
+        "chordLabel": {
+          "type": "string",
+          "minLength": 1
+        },
+        "functionLabel": {
+          "type": "string",
+          "minLength": 1
+        },
+        "guideToneLabel": {
+          "type": "string",
+          "minLength": 1
+        },
+        "theoryNote": {
+          "$ref": "#/$defs/scientificPitch"
+        },
+        "playbackNote": {
+          "$ref": "#/$defs/scientificPitch"
+        },
+        "playbackRule": {
+          "type": "string",
+          "enum": ["none", "octave-2-to-octave-3"]
+        },
+        "functionText": {
+          "type": "string",
+          "minLength": 1
+        },
+        "learnerHint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "qaTags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "minItems": 3,
+          "uniqueItems": true
+        }
+      }
+    },
+    "scientificPitch": {
+      "type": "string",
+      "pattern": "^[A-G](#|b)?[0-8]$"
+    }
+  }
+}
