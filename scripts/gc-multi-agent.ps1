@@ -45,7 +45,11 @@ Write-Host "Running Codex Multi-Agent Orchestrator..."
 # --ask-for-approval never to avoid interactive approval interruptions,
 # and --output-last-message with an explicit path to capture the final report.
 $PromptContent = Get-Content -Path $PromptFile -Raw
-$PromptContent | codex exec - --sandbox workspace-write --ask-for-approval never --output-last-message $ReportFile
+$PromptContent | codex exec `
+  --sandbox workspace-write `
+  -c approval_policy=never `
+  --output-last-message $ReportFile `
+  -
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Codex CLI failed with exit code $LASTEXITCODE."
 }

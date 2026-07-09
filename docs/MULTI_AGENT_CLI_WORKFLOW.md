@@ -26,7 +26,11 @@ powershell -ExecutionPolicy Bypass -File scripts\gc-multi-agent.ps1
 ## Review-Only Mode
 If you wish to run the orchestrator in a strictly read-only mode (where agents cannot edit any files at all, even in the `experiments/` folder), you can modify the script's `codex exec` line to use the `read-only` sandbox:
 ```powershell
-Get-Content $PromptFile -Raw | codex exec - --sandbox read-only --ask-for-approval never --output-last-message $ReportFile
+Get-Content $PromptFile -Raw | codex exec `
+  --sandbox read-only `
+  -c approval_policy=never `
+  --output-last-message $ReportFile `
+  -
 ```
 
 ## What Files It Creates
