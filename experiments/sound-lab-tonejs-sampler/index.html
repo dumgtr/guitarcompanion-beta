@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tone.js ทดสอบเสียง Sound Lab</title>
+    <title>ทดสอบเสียง Sound Lab</title>
     <!-- Load Tone.js from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
@@ -99,25 +99,25 @@
 <body>
 
     <h1>ทดสอบเสียง Sound Lab</h1>
-    <div class="warning">Spike Phase 2 - Approved A2 to A3 Audition Baseline</div>
+    <div class="warning">ฟังเทียบว่าโน้ตต่ำได้ยินชัดพอไหม โดยไม่เปลี่ยนบทเรียนจริง</div>
 
     <div class="info-box">
-        Low notes such as A2 may be too quiet on phone/laptop speakers. This spike keeps theoryNote/playbackNote separation and normalizes octave 2 teaching notes to octave 3 playback for the approved Phase 2 baseline.
+        โน้ตที่เรียนยังเป็นตัวเดิม เช่น A2 แต่เสียงที่เปิดให้ฟังอาจขยับเป็น A3 เพื่อให้ได้ยินชัดขึ้นบนมือถือหรือลำโพงเล็ก
     </div>
 
     <div class="panel">
         <div class="status-grid">
-            <span class="status-label">Tone.js Script:</span>
-            <span class="status-val" id="stat-script">Checking...</span>
+            <span class="status-label">ระบบเสียง:</span>
+            <span class="status-val" id="stat-script">กำลังตรวจ...</span>
 
-            <span class="status-label">AudioContext:</span>
-            <span class="status-val" id="stat-ctx">Locked</span>
+            <span class="status-label">สถานะการเปิดเสียง:</span>
+            <span class="status-val" id="stat-ctx">ยังไม่เริ่ม</span>
 
-            <span class="status-label">Synth (Fallback):</span>
-            <span class="status-val" id="stat-synth">No</span>
+            <span class="status-label">เสียงทดสอบพื้นฐาน:</span>
+            <span class="status-val" id="stat-synth">ยังไม่พร้อม</span>
 
-            <span class="status-label">Sampler Status:</span>
-            <span class="status-val" id="stat-sampler">Idle</span>
+            <span class="status-label">เสียงตัวอย่าง:</span>
+            <span class="status-val" id="stat-sampler">ยังไม่โหลด</span>
 
             <span class="status-label" style="margin-top:10px; border-top: 1px solid #333; padding-top: 10px;">โน้ตที่กำลังเรียน:</span>
             <span class="status-val" id="stat-theory" style="margin-top:10px; border-top: 1px solid #333; padding-top: 10px;">--</span>
@@ -125,53 +125,53 @@
             <span class="status-label">เสียงที่เปิดให้ฟัง:</span>
             <span class="status-val" id="stat-playback">--</span>
 
-            <span class="status-label">ปรับ octave ให้ฟังชัด:</span>
+            <span class="status-label">การปรับช่วงเสียง:</span>
             <span class="status-val" id="stat-norm">--</span>
 
-            <span class="status-label">ความชัดของเสียง:</span>
+            <span class="status-label">สังเกตความชัด:</span>
             <span class="status-val" id="stat-loudness" style="color:var(--warning)">--</span>
 
-            <span class="status-label" style="margin-top:10px;">Last Action:</span>
-            <span class="status-val" id="stat-action" style="margin-top:10px; color:var(--accent)">None</span>
+            <span class="status-label" style="margin-top:10px;">กำลังทำอะไร:</span>
+            <span class="status-val" id="stat-action" style="margin-top:10px; color:var(--accent)">รอเริ่ม</span>
 
-            <span class="status-label">Last Error:</span>
-            <span class="status-val" id="stat-error" style="color:var(--error)">None</span>
+            <span class="status-label">ปัญหาล่าสุด:</span>
+            <span class="status-val" id="stat-error" style="color:var(--error)">ไม่มี</span>
         </div>
     </div>
 
     <div class="controls">
         <div class="control-group" style="border-color: var(--accent)">
-            <h3>Step 1 & 2: Base Audio</h3>
+            <h3>เริ่มฟังเสียง</h3>
             <button id="btn-unlock" class="btn-primary" onclick="unlockAudio()">เริ่มระบบเสียง</button>
             <button id="btn-beep" disabled onclick="testBeep()">ลองเสียงสั้นๆ</button>
-            <button id="btn-load-sampler" disabled onclick="loadSampler()">Load Sampler</button>
+            <button id="btn-load-sampler" disabled onclick="loadSampler()">โหลดเสียงตัวอย่าง</button>
         </div>
 
         <div class="control-group">
-            <h3>ฟังโน้ตต่ำแบบเดิม</h3>
-            <button disabled class="play-btn" onclick="playRaw('A2')">Play A2 raw</button>
-            <button disabled class="play-btn" onclick="playRaw('A3')">Play A3 raw</button>
-            <button disabled class="play-btn" onclick="playRaw('A4')">Play A4 raw</button>
+            <h3>เสียงต้นฉบับ</h3>
+            <button disabled class="play-btn" onclick="playRaw('A2')">ฟัง A2 เดิม</button>
+            <button disabled class="play-btn" onclick="playRaw('A3')">ฟัง A3 เดิม</button>
+            <button disabled class="play-btn" onclick="playRaw('A4')">ฟัง A4 เดิม</button>
         </div>
 
         <div class="control-group">
-            <h3>ฟังโน้ตที่ปรับให้ชัดขึ้น (เสียงที่เปิดให้ฟัง)</h3>
-            <button disabled class="play-btn" onclick="playAudition('A2')">A2 -> A3</button>
-            <button disabled class="play-btn" onclick="playAuditionSeq(['A2', 'C4'], 'เทียบเสียงทีละโน้ต')">A2 -> C4 (เทียบเสียงทีละโน้ต)</button>
-            <button disabled class="play-btn" onclick="playAuditionSeq(['A2', 'C#4'], 'เทียบเสียงทีละโน้ต')">A2 -> C#4 (เทียบเสียงทีละโน้ต)</button>
+            <h3>เสียงที่ปรับให้ฟังชัดขึ้น</h3>
+            <button disabled class="play-btn" onclick="playAudition('A2')">ฟัง A2 เป็น A3</button>
+            <button disabled class="play-btn" onclick="playAuditionSeq(['A2', 'C4'], 'เทียบเสียงทีละโน้ต')">เทียบ A2 → C4 ทีละเสียง</button>
+            <button disabled class="play-btn" onclick="playAuditionSeq(['A2', 'C#4'], 'เทียบเสียงทีละโน้ต')">เทียบ A2 → C#4 ทีละเสียง</button>
         </div>
 
         <div class="panel">
-            <h3>3. Low-Register Audibility Test</h3>
-            <p style="font-size: 0.9em; color: #aaa; margin-bottom: 10px;">Testing extreme bass-register notes that may be hard to hear on mobile speakers. Compare the normalized version vs the raw bypassed version without changing production lessons.</p>
-            <button disabled class="play-btn" onclick="playNote('E2')">Play E2 (Normalized)</button>
-            <button disabled class="play-btn" onclick="playRawNote('E2')">Play E2 (เสียงเดิม ไม่ปรับ octave)</button>
-            <button disabled class="play-btn" onclick="playNote('G2')">Play G2 (Normalized)</button>
-            <button disabled class="play-btn" onclick="playNote('B2')">Play B2 (Normalized)</button>
+            <h3>ลองฟังโน้ตเบสต่ำ</h3>
+            <p style="font-size: 0.9em; color: #aaa; margin-bottom: 10px;">ลองเทียบว่าโน้ตเบสต่ำได้ยินชัดพอไหมบนลำโพงเล็ก เสียงนี้เป็นการทดลองแยกจากบทเรียนจริง</p>
+            <button disabled class="play-btn" onclick="playNote('E2')">ฟัง E2 แบบปรับให้ชัด</button>
+            <button disabled class="play-btn" onclick="playRawNote('E2')">ฟัง E2 เดิม ไม่ปรับ octave</button>
+            <button disabled class="play-btn" onclick="playNote('G2')">ฟัง G2 แบบปรับให้ชัด</button>
+            <button disabled class="play-btn" onclick="playNote('B2')">ฟัง B2 แบบปรับให้ชัด</button>
         </div>
         
         <div class="control-group" style="border-color: var(--error)">
-            <button disabled class="play-btn" onclick="stopAll()">Stop Audio</button>
+            <button disabled class="play-btn" onclick="stopAll()">หยุดเสียง</button>
         </div>
     </div>
 
@@ -195,12 +195,12 @@
         let sequenceTimer = null;
 
         if (typeof Tone !== 'undefined') {
-            elScript.textContent = "Loaded v" + Tone.version;
+            elScript.textContent = "พร้อมใช้งาน";
             elScript.style.color = "var(--success)";
         } else {
-            elScript.textContent = "Failed to load!";
+            elScript.textContent = "โหลดไม่สำเร็จ";
             elScript.style.color = "var(--error)";
-            logError("Tone.js global object is missing.");
+            logError("ระบบเสียงยังไม่พร้อม");
         }
 
         function logAction(msg) {
@@ -215,29 +215,29 @@
 
         async function unlockAudio() {
             try {
-                logAction("Unlocking audio...");
+                logAction("กำลังเริ่มระบบเสียง...");
                 await Tone.start();
-                elCtx.textContent = Tone.context.state;
+                elCtx.textContent = "เปิดแล้ว";
                 elCtx.style.color = "var(--success)";
                 
                 synth = new Tone.Synth().toDestination();
                 isSynthReady = true;
-                elSynth.textContent = "Yes";
+                elSynth.textContent = "พร้อม";
                 elSynth.style.color = "var(--success)";
                 
                 document.querySelectorAll('button').forEach(b => b.disabled = false);
                 document.getElementById('btn-unlock').disabled = true;
                 
-                logAction("Context Unlocked. Synth Ready.");
+                logAction("ระบบเสียงพร้อม ลองฟังได้แล้ว");
             } catch (err) {
-                logError("Failed to unlock audio: " + err.message);
-                elCtx.textContent = "Error";
+                logError("เปิดระบบเสียงไม่สำเร็จ: " + err.message);
+                elCtx.textContent = "มีปัญหา";
                 elCtx.style.color = "var(--error)";
             }
         }
 
         function testBeep() {
-            logAction("Testing beep...");
+            logAction("ลองเสียงสั้นๆ");
             releaseActiveVoices();
             if (synth) synth.triggerAttackRelease("C5", "8n");
         }
@@ -262,14 +262,14 @@
         function playRaw(note) {
             elTheory.textContent = note;
             elPlayback.textContent = note;
-            elNorm.textContent = "Off";
+            elNorm.textContent = "ไม่ปรับ";
             elNorm.style.color = "var(--text)";
             
             // Log observed loudness
             const oct = parseInt(note.match(/\d+/)[0], 10);
-            if (oct <= 2) elLoudness.textContent = "Likely very quiet on mobile";
-            else if (oct === 3) elLoudness.textContent = "Borderline";
-            else elLoudness.textContent = "Clear and audible";
+            if (oct <= 2) elLoudness.textContent = "อาจเบามากบนมือถือ";
+            else if (oct === 3) elLoudness.textContent = "พอฟังได้ แต่ยังต้องเช็ก";
+            else elLoudness.textContent = "ได้ยินชัด";
             
             triggerNote(note);
         }
@@ -278,11 +278,11 @@
             const auditionNote = getAuditionNote(note);
             elTheory.textContent = note;
             elPlayback.textContent = auditionNote;
-            elNorm.textContent = "On";
+            elNorm.textContent = "ปรับให้ฟังชัด";
             elNorm.style.color = "var(--success)";
-            elLoudness.textContent = "Clear and audible (Shifted up)";
+            elLoudness.textContent = "ได้ยินชัดขึ้น";
             
-            logAction(`Theory: ${note} -> Audition: ${auditionNote}`);
+            logAction(`โน้ตที่เรียน: ${note} → เสียงที่เปิดให้ฟัง: ${auditionNote}`);
             triggerNote(auditionNote);
         }
 
@@ -292,12 +292,12 @@
 
         function playRawNote(note) {
             elTheory.textContent = note;
-            elPlayback.textContent = note + " (RAW)";
-            elNorm.textContent = "BYPASSED";
+            elPlayback.textContent = note + " (เสียงเดิม)";
+            elNorm.textContent = "ไม่ปรับ";
             elNorm.style.color = "var(--error)";
-            elLoudness.textContent = "Likely Inaudible on Mobile";
+            elLoudness.textContent = "อาจเบามากบนมือถือ";
             
-            logAction(`Theory: ${note} -> Audition: ${note} (RAW)`);
+            logAction(`โน้ตที่เรียน: ${note} → เสียงเดิม: ${note}`);
             triggerNote(note);
         }
         
@@ -305,16 +305,15 @@
             const auditionNotes = notes.map(getAuditionNote);
             elTheory.textContent = notes.join(" -> ");
             elPlayback.textContent = auditionNotes.join(" -> ");
-            elNorm.textContent = "On";
+            elNorm.textContent = "ปรับให้ฟังชัด";
             elNorm.style.color = "var(--success)";
-            elLoudness.textContent = "Sequential diagnostic: one note at a time";
+            elLoudness.textContent = "เทียบทีละเสียง ไม่มีเสียงซ้อน";
             
             const engine = isSamplerReady ? sampler : synth;
-            const engineName = isSamplerReady ? "Sampler" : "Synth";
-            logAction(`Sequential diagnostic: ${label} via ${engineName} (Theory: ${notes.join(", ")} -> Audition: ${auditionNotes.join(", ")})`);
+            logAction(`กำลัง${label}: ${notes.join(", ")} → ${auditionNotes.join(", ")}`);
             
             if (!engine || auditionNotes.length === 0) {
-                logError("No audio engine available!");
+                logError("ระบบเสียงยังไม่พร้อม");
                 return;
             }
 
@@ -323,7 +322,7 @@
                 releaseActiveVoices();
                 const currentEngine = isSamplerReady ? sampler : synth;
                 if (!currentEngine) {
-                    logError("No audio engine available!");
+                    logError("ระบบเสียงยังไม่พร้อม");
                     return;
                 }
                 currentEngine.triggerAttackRelease(auditionNotes[index], "8n");
@@ -338,20 +337,19 @@
 
         function triggerNote(note) {
             const engine = isSamplerReady ? sampler : synth;
-            const engineName = isSamplerReady ? "Sampler" : "Synth";
-            logAction(`Playing ${note} via ${engineName}`);
+            logAction(`กำลังฟัง ${note}`);
             
             if (engine) {
                 releaseActiveVoices();
                 engine.triggerAttackRelease(note, "2n");
             } else {
-                logError("No audio engine available!");
+                logError("ระบบเสียงยังไม่พร้อม");
             }
         }
 
         function loadSampler() {
-            logAction("Loading Sampler...");
-            elSampler.textContent = "Loading...";
+            logAction("กำลังโหลดเสียงตัวอย่าง...");
+            elSampler.textContent = "กำลังโหลด...";
             elSampler.style.color = "#ffb74d";
             document.getElementById('btn-load-sampler').disabled = true;
 
@@ -364,9 +362,9 @@
                     onload: () => {
                         onloadFired = true;
                         isSamplerReady = true;
-                        elSampler.textContent = "Ready (Salamander)";
+                        elSampler.textContent = "พร้อม";
                         elSampler.style.color = "var(--success)";
-                        logAction("Sampler load complete");
+                        logAction("เสียงตัวอย่างพร้อมใช้งาน");
                     }
                 });
 
@@ -384,21 +382,21 @@
 
                 setTimeout(() => {
                     if (!onloadFired) {
-                        elSampler.textContent = "Failed (Timeout)";
+                        elSampler.textContent = "โหลดไม่สำเร็จ";
                         elSampler.style.color = "var(--error)";
                         isSamplerReady = false;
-                        logError("Sampler load timed out after 8 seconds. Using Synth fallback.");
+                        logError("โหลดเสียงตัวอย่างไม่ทันเวลา ใช้เสียงทดสอบพื้นฐานแทน");
                     }
                 }, 8000);
             } catch (err) {
-                logError("Sampler init error: " + err.message);
-                elSampler.textContent = "Failed";
+                logError("โหลดเสียงตัวอย่างไม่สำเร็จ: " + err.message);
+                elSampler.textContent = "โหลดไม่สำเร็จ";
                 elSampler.style.color = "var(--error)";
             }
         }
 
         function stopAll() {
-            logAction("Stop All");
+            logAction("หยุดเสียงแล้ว");
             releaseActiveVoices();
         }
     </script>

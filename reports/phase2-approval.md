@@ -1,29 +1,64 @@
-# Phase 2 Integration Approval
+# Phase 2 Approval
 
-## Audio Baseline Approval
-- **Approved Baseline:** Use `A2 -> A3` normalization.
-- **DENIED:** Do NOT use `A2 -> A4`.
-- **DENIED:** Do NOT use arpeggios.
-- **DENIED:** Do NOT use stacked chords.
-- **Approved Feature:** Keep sequential compare as currently implemented. Do NOT remove sequential comparison.
+Approved integration scope:
 
-## UX & Labeling Approval
-- Approved to change diagnostic terminology in UI to beginner-friendly Thai language, based on the UX Review recommendations:
-  - `Audio Diagnostics` -> `ทดสอบเสียง Sound Lab`
-  - `Theory Note` -> `โน้ตที่กำลังเรียน`
-  - `Playback Note` / `Audition Note` -> `เสียงที่เปิดให้ฟัง`
-  - `Normalization` -> `ปรับ octave ให้ฟังชัด`
-  - `Loudness Obs.` -> `ความชัดของเสียง`
-  - `Unlock Audio Context` -> `เริ่มระบบเสียง`
-  - `Test Beep (Synth)` -> `ลองเสียงสั้นๆ`
-  - `Group A: Raw Low-Register Test` -> `ฟังโน้ตต่ำแบบเดิม`
-  - `Group B: Normalized Sound Lab Test` -> `ฟังโน้ตที่ปรับให้ชัดขึ้น`
-  - `RAW - Bypassed` -> `เสียงเดิม ไม่ปรับ octave`
-  - `Min compare` / `Maj compare` -> `เทียบเสียงทีละโน้ต`
+## Audio behavior lock
 
-## Future Capability Guardrails
-- **DENIED:** Remove or rewrite any hints at future Sound Lab V2 capabilities (e.g., "Future Sound Lab V2 may compare...") from student-facing text or `README.md`.
-- **DENIED:** Do not expose Month 5 or Month 7-8 language.
+- Keep A2 → A3 as the approved teaching playback baseline.
+- Do not change A2 → A4.
+- Keep raw A2 / A3 / A4 diagnostics.
+- Keep sequential comparison only as one-note-at-a-time.
+- Do not remove sequential comparison.
+- Do not add stacked chords.
+- Do not add arpeggios.
+- Do not add autoplay.
+- Keep Tone.js spike-only.
+- Do not touch production files under `outputs/`.
 
-**Authorized By:** Product Owner (ผ่านระบบ Orchestrator)
-**Date:** 2026-07-09
+## Required Risk / Guardrail cleanup
+
+- Remove or reword any explicit reference to specific production files such as `outputs/app.js` from the experiment README.
+- Keep the isolation warning, but phrase it generically, for example:
+  - “This experiment is isolated from production.”
+  - “Do not merge this prototype into the production Sound Lab without a separate integration spec and approval.”
+- Do not name production file paths in student-facing or experiment README copy.
+
+## Required UX / label cleanup
+
+- Make the experiment page feel less like an engineering diagnostic panel and more like a beginner-safe Sound Lab listening test.
+- Prefer Thai, private-teacher-style labels where reasonable.
+- Approved label direction:
+  - “ทดสอบเสียง Sound Lab”
+  - “โน้ตที่กำลังเรียน”
+  - “เสียงที่เปิดให้ฟัง”
+  - “การปรับช่วงเสียง”
+  - “สังเกตความชัด”
+  - “เสียงต้นฉบับ”
+  - “เสียงที่ปรับให้ฟังชัดขึ้น”
+  - “เปรียบเทียบทีละเสียง”
+- Avoid student-facing labels such as:
+  - `AudioContext`
+  - `Synth (Fallback)`
+  - `Sampler Status`
+  - `Normalization`
+  - `RAW - Bypassed`
+  - `Loudness Obs.`
+  - `Min compare`
+  - `Maj compare`
+- Technical diagnostics may remain in comments or internal README sections if useful for QA, but should not dominate the visible UI.
+
+## README cleanup
+
+- Remove or rewrite future-facing wording that implies future Sound Lab V2 capabilities, especially wording like “Future Sound Lab V2 may compare...”
+- Keep the approved concept:
+  - “โน้ตที่เรียนยังเป็นตัวเดิม แต่เสียงที่เปิดให้ฟังอาจขยับ octave เพื่อให้ได้ยินชัดขึ้นบนมือถือ/ลำโพงเล็ก.”
+- Keep the README clear that this is a spike / isolated experiment / not production-approved.
+
+## Integrator task
+
+- Patch only:
+  - `experiments/sound-lab-tonejs-sampler/README.md`
+  - `experiments/sound-lab-tonejs-sampler/index.html`
+- Prefer copy/label/documentation changes over behavior changes.
+- Do not change audio logic unless required to preserve one-active-tone behavior.
+- Do not commit automatically.
