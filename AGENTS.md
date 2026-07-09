@@ -72,10 +72,9 @@ After changes, summarize:
 คุณคือ Lead Developer และ Orchestrator คุณต้องทำงานร่วมกับทีมภายนอกผ่าน CLI ดังนี้:
 
 **เครื่องมือที่มีให้ (CLI Tools):**
-- Risk Reviewer (Claude): รันด้วยคำสั่ง `python agent_tools/claude_risk.py [file_path] "Find security risks"`
-- Audio/Web Reviewer (Gemini): รันด้วยคำสั่ง `python agent_tools/gemini_reviewer.py [file_path] "Review audio web specs"`
-- Integrator & Fallback (Codex): รันด้วยคำสั่ง `codex prompt "Integrate suggestions and fix code" --file [file_path]`
-
+- Risk Reviewer (Claude): รันด้วยคำสั่ง `python agent_tools/mock_claude_risk.py [file_path] "Find security risks"`
+- Audio/Web Reviewer (Gemini): รันด้วยคำสั่ง `python agent_tools/mock_gemini_reviewer.py [file_path] "Review audio web specs"`
+- Integrator & Fallback (Codex): รันด้วยคำสั่ง `codex exec [file_path]`
 **ลำดับการทำงาน (Workflow):**
 1. รับ Requirement จาก Product Owner (ผู้ใช้งาน) และเขียนโครงสร้างโค้ดเริ่มต้น
 2. รันคำสั่ง CLI เพื่อเรียก Risk Reviewer และ Audio/Web Reviewer แบบขนาน หรือตามลำดับ รออ่านผลลัพธ์จาก Terminal (stdout)
