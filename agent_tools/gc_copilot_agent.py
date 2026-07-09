@@ -30,12 +30,6 @@ import logging
 import re
 from typing import Any, Dict, Optional
 
-try:
-    import requests
-except Exception as e:
-    print("ERROR: 'requests' library is required. Install via: pip install requests", file=sys.stderr)
-    raise
-
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 
@@ -62,6 +56,7 @@ def redact_sensitive(text: str) -> str:
     return redacted
 
 def call_llm(api_url: str, api_key: str, prompt_payload: Dict[str, Any], timeout: int, max_tokens: Optional[int]=None) -> Dict[str, Any]:
+    import requests
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
@@ -164,6 +159,12 @@ def main():
     parser.add_argument("--retries", type=int, default=int(os.environ.get("AGENT_RETRIES", "1")), help="Number of retries on transient failure")
     parser.add_argument("--max_tokens", type=int, default=None, help="Optional max tokens for API")
     args = parser.parse_args()
+
+    try:
+        import requests
+    except ImportError:
+        print("Missing dependency: requests. Install with: py -m pip install --user requests", file=sys.stderr)
+        sys.exit(2)
 
     api_url = os.environ.get("COPILOT_API_URL")
     api_key = os.environ.get("COPILOT_API_KEY")
