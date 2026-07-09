@@ -46,6 +46,10 @@
         {
           "type": "technique-drill",
           "drillRef": "m5-w17-drill-space"
+        },
+        {
+          "type": "chord-sound-lab",
+          "labRef": "sl-v2-m5-w17-c-major-third"
         }
       ],
       "month": 5,
@@ -104,6 +108,10 @@
         {
           "type": "technique-drill",
           "drillRef": "m5-w18-drill-call-response"
+        },
+        {
+          "type": "chord-sound-lab",
+          "labRef": "sl-v2-m5-w18-a-minor-root"
         }
       ],
       "month": 5,
@@ -165,6 +173,10 @@
         {
           "type": "technique-drill",
           "drillRef": "m5-w19-drill-pedal-anchor"
+        },
+        {
+          "type": "chord-sound-lab",
+          "labRef": "sl-v2-m5-w19-f-common-tone"
         }
       ],
       "month": 5,
@@ -741,6 +753,99 @@
         "gapMs": 160,
         "strumMs": 28
       }
+    },
+    {
+      "id": "sl-v2-m5-w17-c-major-third",
+      "type": "chord-sound-lab",
+      "title": "C Major",
+      "description": "Month 5: Diatonic Bridge & Melodic Freedom / C major family",
+      "listenFor": [
+        "ฟัง E เป็นเสียงที่ทำให้ C Major สว่างและมั่นคง",
+        "นี่คือ guide tone ตัวเดียว ไม่ใช่การเล่นคอร์ดเต็ม ให้หูจับสีของตัว 3 ก่อน"
+      ],
+      "audioEngine": {
+        "model": "sound-lab-v2",
+        "voice": "guide-tone",
+        "durationMs": 1200
+      },
+      "chords": [
+        {
+          "id": "sl-v2-m5-w17-c-major-third",
+          "chord": "C Major",
+          "degree": "I chord / home",
+          "role": "E (3rd)",
+          "theoryNote": "E3",
+          "playbackNote": "E3",
+          "playbackRule": "none",
+          "guideToneLabel": "E (3rd)",
+          "notes": [
+            "E3"
+          ],
+          "auditionNote": "E3"
+        }
+      ]
+    },
+    {
+      "id": "sl-v2-m5-w18-a-minor-root",
+      "type": "chord-sound-lab",
+      "title": "A minor",
+      "description": "Month 5: I-IV-V-vi emotional loop / C major family",
+      "listenFor": [
+        "โน้ตที่เรียนคือ A2 แต่เสียงที่เปิดให้ฟังคือ A3 เพื่อให้ได้ยินชัดขึ้น",
+        "อย่าเปลี่ยนความหมายทางทฤษฎีของ A2 เราแค่ยกเสียง playback ขึ้นหนึ่ง octave เพื่อความชัด"
+      ],
+      "audioEngine": {
+        "model": "sound-lab-v2",
+        "voice": "guide-tone",
+        "durationMs": 1200
+      },
+      "chords": [
+        {
+          "id": "sl-v2-m5-w18-a-minor-root",
+          "chord": "A minor",
+          "degree": "vi chord / relative minor color",
+          "role": "A (root)",
+          "theoryNote": "A2",
+          "playbackNote": "A3",
+          "playbackRule": "octave-2-to-octave-3",
+          "guideToneLabel": "A (root)",
+          "notes": [
+            "A2"
+          ],
+          "auditionNote": "A3"
+        }
+      ]
+    },
+    {
+      "id": "sl-v2-m5-w19-f-common-tone",
+      "type": "chord-sound-lab",
+      "title": "F Major",
+      "description": "Month 5: common tones inside C-F-G-Am",
+      "listenFor": [
+        "ฟัง C เป็น common tone ที่ช่วยให้ F Major เชื่อมกับคอร์ดอื่นในครอบครัว C ได้ลื่นขึ้น",
+        "เสียง C ตัวเดียวช่วยให้ผู้เรียนได้ยินสะพานระหว่างคอร์ดโดยไม่ต้องเล่นคอร์ดซ้อน"
+      ],
+      "audioEngine": {
+        "model": "sound-lab-v2",
+        "voice": "guide-tone",
+        "durationMs": 1200
+      },
+      "chords": [
+        {
+          "id": "sl-v2-m5-w19-f-common-tone",
+          "chord": "F Major",
+          "degree": "IV chord / lift away from home",
+          "role": "C (5th / common tone)",
+          "theoryNote": "C3",
+          "playbackNote": "C3",
+          "playbackRule": "none",
+          "guideToneLabel": "C (5th / common tone)",
+          "notes": [
+            "C3"
+          ],
+          "auditionNote": "C3"
+        }
+      ]
     }
   ],
   "modules": [

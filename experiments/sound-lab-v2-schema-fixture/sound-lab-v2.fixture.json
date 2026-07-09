@@ -1,0 +1,93 @@
+{
+  "fixtureMeta": {
+    "id": "sound-lab-v2-phase-b0-fixture",
+    "phase": "B0",
+    "status": "schema-fixture-only",
+    "source": "experiments/sound-lab-v2-schema-fixture",
+    "productionDataEdited": false,
+    "toneJsDependencyAdded": false,
+    "approvedPlaybackBaseline": "octave-2-to-octave-3",
+    "notes": [
+      "Fixture lives outside outputs/* and is not production data.",
+      "Every example is a single guide tone only.",
+      "No stacked chords, arpeggio patterns, or autoplay behavior are represented."
+    ]
+  },
+  "soundLabV2Items": [
+    {
+      "id": "sl-v2-m5-w17-c-major-third",
+      "month": 5,
+      "week": 17,
+      "lessonContext": "Month 5: Diatonic Bridge & Melodic Freedom / C major family",
+      "chordLabel": "C Major",
+      "functionLabel": "I chord / home",
+      "guideToneLabel": "E (3rd)",
+      "theoryNote": "E3",
+      "playbackNote": "E3",
+      "playbackRule": "none",
+      "functionText": "ฟัง E เป็นเสียงที่ทำให้ C Major สว่างและมั่นคง",
+      "learnerHint": "นี่คือ guide tone ตัวเดียว ไม่ใช่การเล่นคอร์ดเต็ม ให้หูจับสีของตัว 3 ก่อน",
+      "qaTags": ["month5", "diatonic", "major-third", "single-guide-tone"]
+    },
+    {
+      "id": "sl-v2-m5-w18-a-minor-root",
+      "month": 5,
+      "week": 18,
+      "lessonContext": "Month 5: I-IV-V-vi emotional loop / C major family",
+      "chordLabel": "A minor",
+      "functionLabel": "vi chord / relative minor color",
+      "guideToneLabel": "A (root)",
+      "theoryNote": "A2",
+      "playbackNote": "A3",
+      "playbackRule": "octave-2-to-octave-3",
+      "functionText": "โน้ตที่เรียนคือ A2 แต่เสียงที่เปิดให้ฟังคือ A3 เพื่อให้ได้ยินชัดขึ้น",
+      "learnerHint": "อย่าเปลี่ยนความหมายทางทฤษฎีของ A2 เราแค่ยกเสียง playback ขึ้นหนึ่ง octave เพื่อความชัด",
+      "qaTags": ["month5", "diatonic", "octave-adjusted", "single-guide-tone"]
+    },
+    {
+      "id": "sl-v2-m5-w19-f-common-tone",
+      "month": 5,
+      "week": 19,
+      "lessonContext": "Month 5: common tones inside C-F-G-Am",
+      "chordLabel": "F Major",
+      "functionLabel": "IV chord / lift away from home",
+      "guideToneLabel": "C (5th / common tone)",
+      "theoryNote": "C3",
+      "playbackNote": "C3",
+      "playbackRule": "none",
+      "functionText": "ฟัง C เป็น common tone ที่ช่วยให้ F Major เชื่อมกับคอร์ดอื่นในครอบครัว C ได้ลื่นขึ้น",
+      "learnerHint": "เสียง C ตัวเดียวช่วยให้ผู้เรียนได้ยินสะพานระหว่างคอร์ดโดยไม่ต้องเล่นคอร์ดซ้อน",
+      "qaTags": ["month5", "common-tone", "fifth", "single-guide-tone"]
+    },
+    {
+      "id": "sl-v2-m6-w21-a-mixolydian-flat-seven",
+      "month": 6,
+      "week": 21,
+      "lessonContext": "Month 6: Modes as Chord Colors / A Mixolydian color",
+      "chordLabel": "A7",
+      "functionLabel": "dominant color / Mixolydian",
+      "guideToneLabel": "G (b7)",
+      "theoryNote": "G3",
+      "playbackNote": "G3",
+      "playbackRule": "none",
+      "functionText": "ฟัง G เป็น b7 ที่ทำให้ A7 มีสี dominant และกลิ่น blues-rock",
+      "learnerHint": "ให้ผู้เรียนฟัง b7 เป็นสีของคอร์ด ไม่ใช่ท่อง mode เป็นตาราง",
+      "qaTags": ["month6", "mixolydian", "flat-seven", "single-guide-tone"]
+    },
+    {
+      "id": "sl-v2-m6-w22-a-dorian-natural-six",
+      "month": 6,
+      "week": 22,
+      "lessonContext": "Month 6: Dorian vs Mixolydian / A Dorian color",
+      "chordLabel": "Am7",
+      "functionLabel": "minor color with lift / Dorian",
+      "guideToneLabel": "F# (natural 6)",
+      "theoryNote": "F#3",
+      "playbackNote": "F#3",
+      "playbackRule": "none",
+      "functionText": "ฟัง F# เป็น natural 6 ที่ทำให้ A Dorian หม่นแต่ยังสว่างและเท่",
+      "learnerHint": "จุดสอนคือสีของ natural 6 ตัวเดียว ไม่ใช่การไล่สเกล Dorian ทั้งกล่อง",
+      "qaTags": ["month6", "dorian", "natural-six", "single-guide-tone"]
+    }
+  ]
+}

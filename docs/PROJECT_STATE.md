@@ -43,7 +43,7 @@ FINAL for current phase.
 - Sound Lab phase is frozen/stable.
 - Final real smoke QA passed.
 - The Next.js Dashboard spike (branch: `spike/next-dashboard-shell`) is currently parked and deprioritized.
-- Next preferred direction is Sound Lab V2 planning + Sound Engine / Tone.js Sampler spike.
+- Next preferred direction is Phase B0: Sound Lab V2 schema fixture / mock data outside `outputs/*`, no production data edit yet.
 - Production remains locked up to Month 6.
 - Known UX debt: month switcher horizontal scroll feels step-like.
 - Do not start Month 7/8 publicly yet.
@@ -91,4 +91,26 @@ FINAL for current phase.
 - Do not continue polishing the Reference Shelf, TAB Handbook, or Note Value Cheatsheet unless the user reports a real bug.
 - Future additions should be spec-first and should not expose new months or modules.
 - Rollback: revert `visibility` to `"hidden"` in data.json and restore the previous `getMiniCourses()` filter. See `docs/MINI_COURSE_PUBLIC_REVEAL_PLAN.md` Section 8.
-- Next recommended phase: Sound Lab V2 planning + Sound Engine / Tone.js Sampler spike.
+- Next recommended phase: Phase B0: Sound Lab V2 schema fixture / mock data outside `outputs/*`, no production data edit yet.
+
+## Tone.js Sampler Spike (Phase 2 Closeout)
+- Tone.js Sampler Phase 2 PASS
+- A2 → A3 approved baseline
+- UX copy cleaned
+- Risk guardrail cleaned
+- Tone.js remains spike-only
+- Production Sound Lab untouched
+- Next: Phase B0: Sound Lab V2 schema fixture / mock data outside `outputs/*`, no production data edit yet.
+- Production `outputs/data.json` changes require a separate explicit approval.
+- **Spec Created:** `docs/SOUND_LAB_V2_INTEGRATION_SPEC.md`
+- **Phase B0 Fixture Created:** `experiments/sound-lab-v2-schema-fixture/` contains schema + mock data outside `outputs/*`; no production data edit yet.
+- **Next:** Phase B1 renderer compatibility review against the fixture.
+
+## Sound Lab V2 C1.1 QA Note
+- Manual QA passed for the Sound Lab V2 preview integration.
+- Low-register audibility note: `E2 -> E3` remains quiet on small speakers.
+- This is not a blocker for the current V2 preview as long as no production V2 preview item uses `E2` as its `playbackNote`.
+- Future V2 data must choose `playbackNote` manually per item; do not rely on `E2`/`E3` as learner-facing playback notes without mobile speaker QA.
+- A2 -> A3 remains the approved baseline.
+- Do not change to A2 -> A4 unless separately approved.
+
