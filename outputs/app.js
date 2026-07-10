@@ -3696,7 +3696,7 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
   card.dataset.labId = lab.id || labRef || "";
 
   const head = month2CreateElement("header", "component-head");
-  
+
   const eyebrowRow = month2CreateElement("div", "sound-lab-eyebrow-row");
   eyebrowRow.appendChild(month2CreateElement("p", "eyebrow", "ห้องทดลองฟังเสียงคอร์ด"));
   if (isV2Preview && lab?.audioEngine?.model === "sound-lab-v2") {
@@ -4720,14 +4720,68 @@ function createPracticeStudioPreviewShell() {
   header.querySelector("h3")?.setAttribute("id", "practiceStudioPreviewTitle");
 
   const contentDiv = month2CreateElement("div", "practice-studio-preview-content");
-  const fslContainer = document.createElement("div");
-  fslContainer.className = "fsl-app-container";
-  contentDiv.appendChild(fslContainer);
+
+  const card = month2CreateElement("div", "practice-studio-preview-card");
+
+  const badge = month2CreateElement("span", "fsl-badge", "PREVIEW");
+  const title = month2CreateElement("h4", "fsl-card-title", "Fretboard Studio Lite");
+  const desc = month2CreateElement("p", "fsl-card-desc", "ฝึกจำคอ / interval / chord tones แบบโต้ตอบ");
+
+  const openBtn = month2CreateElement("button", "fsl-btn fsl-open-btn", "เปิด Studio");
+  openBtn.addEventListener("click", () => {
+    openFretboardStudioModal();
+  });
+
+  card.append(badge, title, desc, openBtn);
+  contentDiv.appendChild(card);
 
   shell.append(header, contentDiv);
-  mountFretboardStudioLite(fslContainer);
   return shell;
+}
 
+function openFretboardStudioModal() {
+  if (document.getElementById("fsl-studio-modal")) return;
+
+  const modalOverlay = document.createElement("div");
+  modalOverlay.id = "fsl-studio-modal";
+  modalOverlay.className = "fsl-studio-modal-overlay";
+
+  const modalContent = document.createElement("div");
+  modalContent.className = "fsl-studio-modal-content";
+
+  const headerDiv = document.createElement("div");
+  headerDiv.className = "fsl-studio-modal-header";
+
+  const titleDiv = document.createElement("div");
+  titleDiv.innerHTML = `<span class="fsl-badge">PREVIEW</span><h3 class="fsl-studio-modal-title">Fretboard Studio Lite</h3>`;
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "fsl-studio-close-btn";
+  closeBtn.textContent = "ปิด Studio";
+
+  headerDiv.append(titleDiv, closeBtn);
+
+  const closeModal = () => {
+    if (modalOverlay.parentNode) {
+      modalOverlay.parentNode.removeChild(modalOverlay);
+    }
+    document.removeEventListener("keydown", escapeListener);
+  };
+
+  closeBtn.addEventListener("click", closeModal);
+
+  const escapeListener = (e) => {
+    if (e.key === "Escape") closeModal();
+  };
+  document.addEventListener("keydown", escapeListener);
+
+  const placeholder = document.createElement("div");
+  placeholder.className = "fsl-studio-placeholder";
+  placeholder.textContent = "Studio panel ready. Fretboard engine will move here in F3C-B.";
+
+  modalContent.append(headerDiv, placeholder);
+  modalOverlay.append(modalContent);
+  document.body.appendChild(modalOverlay);
 }
 
 function mountFretboardStudioLite(containerElement) {
