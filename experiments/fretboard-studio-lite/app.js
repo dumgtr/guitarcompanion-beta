@@ -26,8 +26,8 @@ const INTERVAL_ROLES_TH = {
   '2': 'Passing tone / Color tone',
   '3': 'สี minor / blues sadness',
   '4': 'สี major / bright resolution',
-  '5': 'โครงคอร์ดที่มั่นคง (Power)',
-  '7': 'Passing tone / Color tone',
+  '5': 'Passing tone / Color tone',
+  '7': 'โครงคอร์ดที่มั่นคง',
   '9': 'Passing tone / Color tone',
   '10': 'blues / dominant tension',
   '11': 'Major 7th tension'
@@ -36,6 +36,7 @@ const INTERVAL_ROLES_TH = {
 function init() {
   document.getElementById('key-select').addEventListener('change', (e) => {
     STATE.key = e.target.value;
+    STATE.challengeFound = [];
     resetSelection();
     render();
   });
@@ -46,6 +47,7 @@ function init() {
   });
   document.getElementById('position-select').addEventListener('change', (e) => {
     STATE.position = e.target.value;
+    STATE.challengeFound = [];
     render();
   });
 
@@ -331,7 +333,7 @@ function render() {
 
   // Update UI components
   updateComparePanel();
-  if (!STATE.challenge) updateChallengeFeedback();
+  updateChallengeFeedback();
 }
 
 document.addEventListener('DOMContentLoaded', init);
