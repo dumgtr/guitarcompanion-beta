@@ -272,3 +272,36 @@ Rollback targets and fallback behavior must be strictly documented during each s
 - **Tone.js production dependency**: Not approved yet
 - **Sound Lab current behavior**: Remains until phased migration passes
 - **Integration approach**: Must use micro-commits and browser QA
+
+## 13. Definition of Done for This Documentation Task
+
+This documentation task is complete only when:
+
+- `docs/SHARED_AUDIO_CORE_PLAN.md` exists.
+- Sections 1 through 13 are present.
+- The architectural goal, scope, routing, profiles, API, phases, rollback strategy, validation matrix, risks, and decision log are documented.
+- No production or experiment files are changed.
+- `git diff --check` passes.
+- `git status --short` is clean after commit.
+- Phase A1 does not begin until this documentation closeout is committed.
+
+Approved register policy:
+
+- `fsl-note-preview`
+  - Default playback target: C4-C5.
+  - Optimized for phone-speaker clarity and rapid tapping.
+
+- `soundlab-guide-tone`
+  - Default playback target: C4-B4.
+  - Approved extension range: A3-C5 when musically appropriate.
+  - Optimized for hearing the harmonic color of a single 3rd or 7th.
+
+- A2, G2, C3, and similarly low notes remain diagnostic-only until explicit mobile listening QA passes.
+
+- The learner-facing theoretical label must remain independent from the playback octave.
+
+Approved next step:
+
+- Phase A1 may begin after this documentation closeout.
+- Phase A1 is core construction only.
+- Phase A1 must not integrate FSL or Sound Lab.
