@@ -4719,26 +4719,459 @@ function createPracticeStudioPreviewShell() {
   );
   header.querySelector("h3")?.setAttribute("id", "practiceStudioPreviewTitle");
 
-  const card = month2CreateElement("article", "practice-studio-preview-card");
-  const cardBody = month2CreateElement("div", "practice-studio-preview-card-body");
-  cardBody.append(
-    month2CreateElement("span", "practice-studio-preview-badge", "PREVIEW"),
-    month2CreateElement("h4", "practice-studio-preview-card-title", "Fretboard Studio Lite"),
-    month2CreateElement(
-      "p",
-      "practice-studio-preview-card-copy",
-      "กำลังเตรียม Preview เครื่องมือฝึกจำคอและ interval"
-    )
-  );
+  const contentDiv = month2CreateElement("div", "practice-studio-preview-content");
+  const fslContainer = document.createElement("div");
+  fslContainer.className = "fsl-app-container";
+  contentDiv.appendChild(fslContainer);
 
-  const button = month2CreateElement("button", "practice-studio-preview-card-button", "Coming in F3B");
-  button.type = "button";
-  button.disabled = true;
-  button.setAttribute("aria-disabled", "true");
-
-  card.append(cardBody, button);
-  shell.append(header, card);
+  shell.append(header, contentDiv);
+  mountFretboardStudioLite(fslContainer);
   return shell;
+
+}
+
+function mountFretboardStudioLite(containerElement) {
+  if (!containerElement || containerElement.dataset.fslMounted === "true") return;
+  containerElement.dataset.fslMounted = "true";
+
+  const fslSharpNotes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+  const fslFlatNotes = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
+  const fslStringBases = [4, 11, 7, 2, 9, 4];
+  const fslFlatKeys = ["F", "Bb", "Eb"];
+  const fslOverlayIntervals = {
+    notes: [0, 2, 4, 5, 7, 9, 11],
+    intervals: [0, 2, 4, 5, 7, 9, 11],
+    triad: [0, 4, 7],
+    "guide-tones": [4, 10],
+    "minor-pentatonic": [0, 3, 5, 7, 10],
+    "major-pentatonic": [0, 2, 4, 7, 9]
+  };
+  const fslIntervalRoles = {
+    0: "บ้านของคีย์ จุดพัก จุดเริ่ม และจุดจบ phrase",
+    2: "Passing tone / Color tone ที่ช่วยให้ phrase เดินต่อ",
+    3: "สี minor / blues sadness",
+    4: "สี major / bright resolution",
+    5: "เสียง 4 ที่ช่วยพาไปหา 3 หรือ 5",
+    7: "เสียง 5 โครงคอร์ดที่มั่นคง",
+    9: "Passing tone / Color tone",
+    10: "blues / dominant tension",
+    11: "Major 7th tension"
+  };
+  const fslIntervalNames = {
+    0: "1 (Root)",
+    1: "b2",
+    2: "2",
+    3: "b3",
+    4: "3",
+    5: "4",
+    6: "b5",
+    7: "5",
+    8: "#5",
+    9: "6",
+    10: "b7",
+    11: "7"
+  };
+  const fslState = {
+    key: "A",
+    overlay: "minor-pentatonic",
+    position: "0-12",
+    selectedNoteName: null,
+    focusInterval: "all",
+    challenge: "",
+    challengeFound: []
+  };
+
+  containerElement.innerHTML = `
+    <div class="fsl-app">
+      <div class="fsl-card fsl-hero-card">
+        <div class="fsl-hero-copy">
+          <span class="fsl-preview-badge">PREVIEW</span>
+          <h4 class="fsl-app-title">Fretboard Studio Lite</h4>
+          <p class="fsl-app-copy">เครื่องมือฝึกจำคอกีตาร์แบบโต้ตอบ: เริ่มจาก root แล้วค่อยเห็นสีของ b3, 3, 5 และ b7 ในพื้นที่เดียวกัน</p>
+        </div>
+        <p class="fsl-status-line">Preview-only · ไม่มีการบันทึก progress</p>
+      </div>
+
+      <div class="fsl-teaching-panel">
+        <p><strong>คำแนะนำ:</strong> วันนี้ให้หาเสียงบ้าน (Root) ก่อน จากนั้นหา b3/3 เพื่อฟังสี minor/major ส่วน b7 คือกลิ่น blues/dominant tension.</p>
+      </div>
+
+      <div class="fsl-dashboard-grid">
+        <div class="fsl-panel-card">
+          <h5 class="fsl-panel-title">ตั้งค่า Fretboard</h5>
+          <label class="fsl-control-group">
+            <span class="fsl-control-label">Key</span>
+            <select class="fsl-select" data-fsl-key-select>
+              <option value="C">C</option>
+              <option value="G">G</option>
+              <option value="D">D</option>
+              <option value="A" selected>A</option>
+              <option value="E">E</option>
+              <option value="F">F</option>
+              <option value="Bb">Bb</option>
+              <option value="Eb">Eb</option>
+            </select>
+          </label>
+          <label class="fsl-control-group">
+            <span class="fsl-control-label">Overlay</span>
+            <select class="fsl-select" data-fsl-overlay-select>
+              <option value="notes">Diatonic Notes</option>
+              <option value="intervals">Intervals</option>
+              <option value="triad">Triad (1-3-5)</option>
+              <option value="guide-tones">7th Guide Tones (3, b7)</option>
+              <option value="minor-pentatonic" selected>Minor Pentatonic</option>
+              <option value="major-pentatonic">Major Pentatonic</option>
+            </select>
+          </label>
+          <label class="fsl-control-group">
+            <span class="fsl-control-label">Position</span>
+            <select class="fsl-select" data-fsl-position-select>
+              <option value="0-12" selected>Full (0-12)</option>
+              <option value="0-4">Open (0-4)</option>
+              <option value="5-9">Mid (5-9)</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="fsl-panel-card">
+          <h5 class="fsl-panel-title">โน้ตที่เลือก (Inspector)</h5>
+          <div class="fsl-inspector-empty" data-fsl-inspector-content>จิ้มที่โน้ตบนคอกีตาร์เพื่อดูรายละเอียด</div>
+        </div>
+
+        <div class="fsl-panel-card">
+          <h5 class="fsl-panel-title">สี Major vs Minor</h5>
+          <div class="fsl-compare-content" data-fsl-compare-content></div>
+        </div>
+
+        <div class="fsl-panel-card">
+          <h5 class="fsl-panel-title">โหมดท้าทาย (Challenge)</h5>
+          <div class="fsl-challenge-controls">
+            <select class="fsl-select" data-fsl-challenge-select>
+              <option value="">เลือกบททดสอบ...</option>
+              <option value="0">หา Root ให้ครบ</option>
+              <option value="3">หา b3 ให้ครบ</option>
+              <option value="4">หา 3 ให้ครบ</option>
+              <option value="10">หา b7 ให้ครบ</option>
+            </select>
+            <button type="button" class="fsl-btn" data-fsl-challenge-reset>Reset</button>
+          </div>
+          <div class="fsl-challenge-feedback" data-fsl-challenge-feedback>เลือกบททดสอบเพื่อเริ่ม</div>
+        </div>
+      </div>
+
+      <div class="fsl-focus-bar">
+        <strong>Interval Focus:</strong>
+        <button type="button" class="fsl-focus-chip" data-fsl-interval="0">Root</button>
+        <button type="button" class="fsl-focus-chip" data-fsl-interval="3">b3</button>
+        <button type="button" class="fsl-focus-chip" data-fsl-interval="4">3</button>
+        <button type="button" class="fsl-focus-chip" data-fsl-interval="7">5</button>
+        <button type="button" class="fsl-focus-chip" data-fsl-interval="10">b7</button>
+        <button type="button" class="fsl-focus-chip fsl-active" data-fsl-interval="all">Show All</button>
+      </div>
+
+      <div class="fsl-fretboard-wrapper">
+        <div class="fsl-fretboard" data-fsl-fretboard></div>
+        <div class="fsl-fret-markers" data-fsl-fret-markers></div>
+      </div>
+
+      <div class="fsl-panel-card">
+        <h5 class="fsl-panel-title">สัญลักษณ์ (Legend)</h5>
+        <ul class="fsl-legend-list">
+          <li><span class="fsl-legend-dot fsl-root"></span> <strong>Root (1)</strong> = บ้าน (Home)</li>
+          <li><span class="fsl-legend-dot fsl-major-3"></span> <strong>3</strong> = สี Major</li>
+          <li><span class="fsl-legend-dot fsl-minor-3"></span> <strong>b3</strong> = สี Minor</li>
+          <li><span class="fsl-legend-dot fsl-fifth"></span> <strong>5</strong> = โครงคอร์ด (Power)</li>
+          <li><span class="fsl-legend-dot fsl-flat-7"></span> <strong>b7</strong> = Blues / Dominant Tension</li>
+          <li><span class="fsl-legend-dot fsl-pentatonic"></span> <strong>Pentatonic</strong> = Safe note</li>
+        </ul>
+      </div>
+    </div>
+  `;
+
+  const fslRefs = {
+    keySelect: containerElement.querySelector("[data-fsl-key-select]"),
+    overlaySelect: containerElement.querySelector("[data-fsl-overlay-select]"),
+    positionSelect: containerElement.querySelector("[data-fsl-position-select]"),
+    challengeSelect: containerElement.querySelector("[data-fsl-challenge-select]"),
+    challengeReset: containerElement.querySelector("[data-fsl-challenge-reset]"),
+    challengeFeedback: containerElement.querySelector("[data-fsl-challenge-feedback]"),
+    compareContent: containerElement.querySelector("[data-fsl-compare-content]"),
+    inspectorContent: containerElement.querySelector("[data-fsl-inspector-content]"),
+    fretboard: containerElement.querySelector("[data-fsl-fretboard]"),
+    fretMarkers: containerElement.querySelector("[data-fsl-fret-markers]")
+  };
+
+  fslRefs.keySelect?.addEventListener("change", (event) => {
+    fslState.key = event.target.value;
+    fslState.challengeFound = [];
+    fslResetSelection();
+    fslRender();
+  });
+
+  fslRefs.overlaySelect?.addEventListener("change", (event) => {
+    fslState.overlay = event.target.value;
+    fslResetSelection();
+    fslRender();
+  });
+
+  fslRefs.positionSelect?.addEventListener("change", (event) => {
+    fslState.position = event.target.value;
+    fslState.challengeFound = [];
+    fslRender();
+  });
+
+  containerElement.querySelectorAll(".fsl-focus-chip").forEach((chip) => {
+    chip.addEventListener("click", (event) => {
+      containerElement.querySelectorAll(".fsl-focus-chip").forEach((item) => item.classList.remove("fsl-active"));
+      event.currentTarget.classList.add("fsl-active");
+      fslState.focusInterval = event.currentTarget.dataset.fslInterval || "all";
+      fslRender();
+    });
+  });
+
+  fslRefs.challengeSelect?.addEventListener("change", (event) => {
+    fslState.challenge = event.target.value;
+    fslState.challengeFound = [];
+    fslResetSelection();
+    fslUpdateChallengeFeedback();
+    fslRender();
+  });
+
+  fslRefs.challengeReset?.addEventListener("click", () => {
+    fslState.challengeFound = [];
+    fslResetSelection();
+    fslUpdateChallengeFeedback();
+    fslRender();
+  });
+
+  function fslResetSelection() {
+    fslState.selectedNoteName = null;
+    fslRenderInspectorEmpty();
+  }
+
+  function fslGetNoteName(index) {
+    const notes = fslFlatKeys.includes(fslState.key) ? fslFlatNotes : fslSharpNotes;
+    return notes[index % 12];
+  }
+
+  function fslGetRootIndex() {
+    const notes = fslFlatKeys.includes(fslState.key) ? fslFlatNotes : fslSharpNotes;
+    return notes.indexOf(fslState.key);
+  }
+
+  function fslGetIntervalClass(interval) {
+    switch (interval) {
+      case 0: return "fsl-root";
+      case 4: return "fsl-major-3";
+      case 3: return "fsl-minor-3";
+      case 7: return "fsl-fifth";
+      case 10: return "fsl-flat-7";
+      case 2:
+      case 5:
+      case 9:
+        return "fsl-pentatonic";
+      default:
+        return "";
+    }
+  }
+
+  function fslGetIntervalName(interval) {
+    return fslIntervalNames[interval] || String(interval);
+  }
+
+  function fslUpdateComparePanel() {
+    if (!fslRefs.compareContent) return;
+    const rootIndex = fslGetRootIndex();
+    const minorThirdName = fslGetNoteName((rootIndex + 3) % 12);
+    const majorThirdName = fslGetNoteName((rootIndex + 4) % 12);
+
+    fslRefs.compareContent.innerHTML = `
+      <div class="fsl-compare-item">
+        <div class="fsl-compare-note fsl-minor">${minorThirdName}</div>
+        <div class="fsl-compare-label">b3 (Minor)</div>
+      </div>
+      <div class="fsl-compare-item">
+        <div class="fsl-compare-note fsl-major">${majorThirdName}</div>
+        <div class="fsl-compare-label">3 (Major)</div>
+      </div>
+    `;
+  }
+
+  function fslUpdateChallengeFeedback() {
+    if (!fslRefs.challengeFeedback) return;
+    if (!fslState.challenge) {
+      fslRefs.challengeFeedback.className = "fsl-challenge-feedback";
+      fslRefs.challengeFeedback.textContent = "เลือกบททดสอบเพื่อเริ่ม";
+      return;
+    }
+
+    const rootIndex = fslGetRootIndex();
+    let totalTargets = 0;
+    const startFret = fslState.position === "5-9" ? 5 : 0;
+    let endFret = 12;
+    if (fslState.position === "0-4") endFret = 4;
+    if (fslState.position === "5-9") endFret = 9;
+
+    for (let stringIndex = 0; stringIndex < 6; stringIndex += 1) {
+      for (let fret = startFret; fret <= endFret; fret += 1) {
+        const noteIndex = (fslStringBases[stringIndex] + fret) % 12;
+        const interval = (noteIndex - rootIndex + 12) % 12;
+        if (String(interval) === fslState.challenge) totalTargets += 1;
+      }
+    }
+
+    const found = fslState.challengeFound.length;
+    if (found >= totalTargets && totalTargets > 0) {
+      fslRefs.challengeFeedback.className = "fsl-challenge-feedback fsl-feedback-correct";
+      fslRefs.challengeFeedback.textContent = `ยอดเยี่ยม! หาครบทั้งหมด ${totalTargets} ตัวแล้ว`;
+    } else {
+      fslRefs.challengeFeedback.className = "fsl-challenge-feedback";
+      fslRefs.challengeFeedback.textContent = `พบแล้ว ${found} / ${totalTargets}`;
+    }
+  }
+
+  function fslHandleNoteClick(noteData, noteNode) {
+    if (fslState.challenge) {
+      fslHandleChallengeClick(noteData, noteNode);
+      return;
+    }
+
+    fslState.selectedNoteName = noteData.noteName;
+    fslUpdateInspector(noteData);
+    fslRender();
+  }
+
+  function fslHandleChallengeClick(noteData, noteNode) {
+    const isCorrect = String(noteData.interval) === fslState.challenge;
+    const noteId = `${noteData.stringIndex}-${noteData.fret}`;
+
+    if (isCorrect) {
+      if (!fslState.challengeFound.includes(noteId)) {
+        fslState.challengeFound.push(noteId);
+        noteNode.classList.add("fsl-anim-correct");
+        setTimeout(() => noteNode.classList.remove("fsl-anim-correct"), 300);
+        fslUpdateChallengeFeedback();
+        fslRender();
+      }
+      return;
+    }
+
+    noteNode.classList.add("fsl-anim-wrong");
+    setTimeout(() => noteNode.classList.remove("fsl-anim-wrong"), 300);
+  }
+
+  function fslRenderInspectorEmpty() {
+    if (!fslRefs.inspectorContent) return;
+    fslRefs.inspectorContent.innerHTML = "จิ้มที่โน้ตบนคอกีตาร์เพื่อดูรายละเอียด";
+    fslRefs.inspectorContent.className = "fsl-inspector-empty";
+  }
+
+  function fslUpdateInspector(noteData) {
+    if (!fslRefs.inspectorContent) return;
+    const roleText = fslIntervalRoles[noteData.interval] || "Passing tone";
+    fslRefs.inspectorContent.className = "fsl-inspector-data";
+    fslRefs.inspectorContent.innerHTML = `
+      <div class="fsl-ins-row">
+        <span class="fsl-ins-label">Note:</span>
+        <span class="fsl-ins-val">${noteData.noteName}</span>
+      </div>
+      <div class="fsl-ins-row">
+        <span class="fsl-ins-label">Position:</span>
+        <span class="fsl-ins-val">สาย ${noteData.stringNumber} เฟรต ${noteData.fret}</span>
+      </div>
+      <div class="fsl-ins-row">
+        <span class="fsl-ins-label">Interval:</span>
+        <span class="fsl-ins-val">${fslGetIntervalName(noteData.interval)}</span>
+      </div>
+      <div class="fsl-ins-desc">${roleText}</div>
+    `;
+  }
+
+  function fslRender() {
+    if (!fslRefs.fretboard || !fslRefs.fretMarkers) return;
+    const rootIndex = fslGetRootIndex();
+    const activeIntervals = fslOverlayIntervals[fslState.overlay] || [];
+    const startFret = fslState.position === "5-9" ? 5 : 0;
+    let endFret = 12;
+    if (fslState.position === "0-4") endFret = 4;
+    if (fslState.position === "5-9") endFret = 9;
+
+    fslRefs.fretboard.innerHTML = "";
+    fslRefs.fretMarkers.innerHTML = "";
+    fslRefs.fretboard.className = fslState.focusInterval !== "all" ? "fsl-fretboard fsl-focus-mode" : "fsl-fretboard";
+
+    fslStringBases.forEach((base, stringIndex) => {
+      const stringRow = document.createElement("div");
+      stringRow.className = "fsl-string-row";
+      const stringNumber = stringIndex + 1;
+
+      for (let fret = startFret; fret <= endFret; fret += 1) {
+        const fretCell = document.createElement("div");
+        fretCell.className = `fsl-fret-cell fsl-fret-${fret}`;
+
+        const noteIndex = (base + fret) % 12;
+        const interval = (noteIndex - rootIndex + 12) % 12;
+        const isActive = activeIntervals.includes(interval);
+        const noteName = fslGetNoteName(noteIndex);
+        const intervalClass = fslGetIntervalClass(interval);
+        const noteNode = document.createElement("button");
+        noteNode.type = "button";
+        noteNode.className = intervalClass ? `fsl-note-node ${intervalClass}` : "fsl-note-node";
+        noteNode.dataset.active = String(isActive);
+        noteNode.setAttribute("aria-label", `String ${stringNumber} fret ${fret} note ${noteName} interval ${fslGetIntervalName(interval)}`);
+
+        if (fslState.focusInterval !== "all") {
+          noteNode.dataset.focus = String(String(interval) === fslState.focusInterval);
+        }
+
+        if (fslState.challenge) {
+          const noteId = `${stringIndex}-${fret}`;
+          if (fslState.challengeFound.includes(noteId)) {
+            noteNode.dataset.active = "true";
+            noteNode.classList.add("fsl-is-selected");
+          } else {
+            noteNode.dataset.active = "false";
+          }
+        }
+
+        if (!fslState.challenge && fslState.selectedNoteName && noteName === fslState.selectedNoteName) {
+          noteNode.classList.add("fsl-is-family");
+        }
+
+        noteNode.textContent = fslState.overlay === "intervals" ? fslGetIntervalName(interval) : noteName;
+        const noteData = { noteName, stringIndex, stringNumber, fret, interval };
+        noteNode.addEventListener("click", () => {
+          containerElement.querySelectorAll(".fsl-note-node").forEach((node) => node.classList.remove("fsl-is-selected"));
+          if (!fslState.challenge) noteNode.classList.add("fsl-is-selected");
+          fslHandleNoteClick(noteData, noteNode);
+        });
+
+        fretCell.appendChild(noteNode);
+
+        if (stringIndex === 2 && [3, 5, 7, 9, 12].includes(fret)) {
+          const inlay = document.createElement("div");
+          inlay.className = "fsl-inlay-dot";
+          fretCell.appendChild(inlay);
+        }
+
+        stringRow.appendChild(fretCell);
+      }
+
+      fslRefs.fretboard.appendChild(stringRow);
+    });
+
+    for (let fret = startFret; fret <= endFret; fret += 1) {
+      const marker = document.createElement("div");
+      marker.className = `fsl-fret-marker-cell fsl-fret-${fret}`;
+      marker.textContent = fret === 0 ? "Nut" : String(fret);
+      fslRefs.fretMarkers.appendChild(marker);
+    }
+
+    fslUpdateComparePanel();
+    fslUpdateChallengeFeedback();
+  }
+
+  fslRender();
 }
 
 function getMiniCourses() {

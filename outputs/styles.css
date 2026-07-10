@@ -5816,3 +5816,544 @@ body {
   line-height: 1;
   letter-spacing: 0.05em;
 }
+
+/* Fretboard Studio Lite Preview */
+.fsl-app-container {
+  --fsl-bg-color: color-mix(in srgb, var(--ink) 8%, var(--surface));
+  --fsl-panel-bg: color-mix(in srgb, var(--surface) 88%, var(--ink) 12%);
+  --fsl-text-primary: var(--ink);
+  --fsl-text-muted: var(--muted);
+  --fsl-accent: var(--accent);
+  --fsl-fretboard-wood: #2c251e;
+  --fsl-fret-wire: rgba(255, 255, 255, 0.38);
+  --fsl-string-color: rgba(245, 245, 245, 0.72);
+  --fsl-root-color: #e56b25;
+  --fsl-major3-color: #4caf50;
+  --fsl-minor3-color: #9c5cc8;
+  --fsl-fifth-color: #03a9f4;
+  --fsl-flat7-color: #f15d52;
+  --fsl-penta-color: #ff9800;
+  --fsl-default-note-color: #666;
+  display: block;
+  min-width: 0;
+}
+
+.fsl-app {
+  display: grid;
+  gap: 1rem;
+  color: var(--fsl-text-primary);
+}
+
+.fsl-card,
+.fsl-panel-card {
+  background: var(--fsl-panel-bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.fsl-hero-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: start;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, transparent), transparent 56%),
+    var(--fsl-panel-bg);
+}
+
+.fsl-hero-copy {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.fsl-preview-badge {
+  width: fit-content;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.fsl-app-title {
+  margin: 0;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.fsl-app-copy,
+.fsl-status-line {
+  margin: 0;
+  color: var(--fsl-text-muted);
+  line-height: 1.55;
+}
+
+.fsl-status-line {
+  white-space: nowrap;
+  font-size: 0.82rem;
+}
+
+.fsl-teaching-panel {
+  border-left: 4px solid var(--fsl-accent);
+  border-radius: 0 8px 8px 0;
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  padding: 0.8rem 1rem;
+  font-size: 0.95rem;
+}
+
+.fsl-teaching-panel p {
+  margin: 0;
+}
+
+.fsl-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.fsl-panel-title {
+  margin: 0 0 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--line);
+  color: var(--fsl-text-primary);
+  font-size: 1rem;
+}
+
+.fsl-control-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.fsl-control-group:last-child {
+  margin-bottom: 0;
+}
+
+.fsl-control-label {
+  color: var(--fsl-text-muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.fsl-select {
+  width: min(160px, 100%);
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0.42rem 0.55rem;
+  font-size: 0.9rem;
+}
+
+.fsl-inspector-empty {
+  padding: 1rem 0;
+  color: var(--fsl-text-muted);
+  font-size: 0.92rem;
+  font-style: italic;
+  text-align: center;
+}
+
+.fsl-inspector-data {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.fsl-ins-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.92rem;
+}
+
+.fsl-ins-label {
+  color: var(--fsl-text-muted);
+}
+
+.fsl-ins-val {
+  font-weight: 900;
+}
+
+.fsl-ins-desc {
+  margin-top: 0.5rem;
+  padding-top: 0.55rem;
+  border-top: 1px dashed var(--line);
+  color: var(--fsl-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.fsl-compare-content {
+  display: flex;
+  justify-content: space-around;
+  gap: 1rem;
+  text-align: center;
+}
+
+.fsl-compare-item {
+  display: grid;
+  justify-items: center;
+  gap: 0.45rem;
+}
+
+.fsl-compare-note {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 1.08rem;
+  font-weight: 900;
+}
+
+.fsl-compare-note.fsl-minor {
+  background: var(--fsl-minor3-color);
+}
+
+.fsl-compare-note.fsl-major {
+  background: var(--fsl-major3-color);
+}
+
+.fsl-compare-label {
+  color: var(--fsl-text-muted);
+  font-size: 0.82rem;
+}
+
+.fsl-challenge-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.fsl-challenge-controls .fsl-select {
+  flex: 1;
+}
+
+.fsl-btn {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  padding: 0.45rem 0.8rem;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.fsl-btn:hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+}
+
+.fsl-challenge-feedback {
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--surface-soft) 75%, transparent);
+  color: var(--fsl-text-muted);
+  padding: 0.55rem;
+  font-size: 0.86rem;
+  text-align: center;
+}
+
+.fsl-feedback-correct {
+  background: color-mix(in srgb, #4caf50 14%, transparent);
+  color: #4caf50;
+}
+
+.fsl-focus-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--fsl-panel-bg);
+  font-size: 0.92rem;
+}
+
+.fsl-focus-chip {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0.34rem 0.65rem;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 800;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.fsl-focus-chip:hover {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--line));
+}
+
+.fsl-focus-chip.fsl-active {
+  border-color: var(--fsl-accent);
+  background: var(--fsl-accent);
+  color: #fff;
+}
+
+.fsl-fretboard-wrapper {
+  min-width: 0;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+}
+
+.fsl-fretboard {
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  min-width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: var(--fsl-fretboard-wood);
+  overflow: hidden;
+}
+
+.fsl-fret-markers {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  margin-top: 0.45rem;
+}
+
+.fsl-fret-marker-cell {
+  width: 60px;
+  color: var(--fsl-text-muted);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.fsl-fret-marker-cell.fsl-fret-0 {
+  width: 40px;
+}
+
+.fsl-string-row {
+  display: flex;
+  height: 44px;
+  position: relative;
+}
+
+.fsl-string-row::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--fsl-string-color);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.fsl-string-row:nth-child(1)::before { height: 1px; }
+.fsl-string-row:nth-child(2)::before { height: 1.5px; }
+.fsl-string-row:nth-child(3)::before { height: 2px; }
+.fsl-string-row:nth-child(4)::before { height: 2.5px; }
+.fsl-string-row:nth-child(5)::before { height: 3px; }
+.fsl-string-row:nth-child(6)::before { height: 4px; }
+
+.fsl-fret-cell {
+  position: relative;
+  width: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-right: 2px solid var(--fsl-fret-wire);
+}
+
+.fsl-fret-cell.fsl-fret-0 {
+  width: 40px;
+  border-right: 6px solid rgba(255, 255, 255, 0.78);
+  background: rgba(0, 0, 0, 0.38);
+}
+
+.fsl-fret-cell.fsl-fret-12 {
+  border-right: none;
+}
+
+.fsl-inlay-dot {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+}
+
+.fsl-note-node {
+  position: relative;
+  z-index: 2;
+  width: 28px;
+  height: 28px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  background: var(--fsl-default-note-color);
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.38);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 900;
+  opacity: 0.15;
+  transition: opacity 0.2s, background 0.2s, transform 0.1s, box-shadow 0.2s;
+}
+
+.fsl-note-node:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.fsl-note-node:hover {
+  transform: scale(1.1);
+}
+
+.fsl-note-node:active {
+  transform: scale(0.95);
+}
+
+.fsl-note-node[data-active="true"] {
+  opacity: 1;
+}
+
+.fsl-fretboard.fsl-focus-mode .fsl-note-node[data-active="true"] {
+  opacity: 0.15;
+}
+
+.fsl-fretboard.fsl-focus-mode .fsl-note-node[data-focus="true"] {
+  z-index: 3;
+  opacity: 1;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.62);
+  transform: scale(1.1);
+}
+
+.fsl-note-node.fsl-is-selected {
+  z-index: 4;
+  border-color: #fff;
+  box-shadow: 0 0 10px #fff;
+}
+
+.fsl-note-node.fsl-is-family {
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.42);
+}
+
+@keyframes fsl-shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-4px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes fsl-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.fsl-note-node.fsl-anim-wrong {
+  animation: fsl-shake 0.3s;
+  background: #f44336 !important;
+  opacity: 1 !important;
+}
+
+.fsl-note-node.fsl-anim-correct {
+  z-index: 5;
+  animation: fsl-pop 0.3s;
+  border-color: #4caf50;
+  box-shadow: 0 0 10px #4caf50;
+}
+
+.fsl-note-node.fsl-root,
+.fsl-legend-dot.fsl-root {
+  background: var(--fsl-root-color);
+}
+
+.fsl-note-node.fsl-major-3,
+.fsl-legend-dot.fsl-major-3 {
+  background: var(--fsl-major3-color);
+}
+
+.fsl-note-node.fsl-minor-3,
+.fsl-legend-dot.fsl-minor-3 {
+  background: var(--fsl-minor3-color);
+}
+
+.fsl-note-node.fsl-fifth,
+.fsl-legend-dot.fsl-fifth {
+  background: var(--fsl-fifth-color);
+}
+
+.fsl-note-node.fsl-flat-7,
+.fsl-legend-dot.fsl-flat-7 {
+  background: var(--fsl-flat7-color);
+}
+
+.fsl-note-node.fsl-pentatonic,
+.fsl-legend-dot.fsl-pentatonic {
+  background: var(--fsl-penta-color);
+}
+
+.fsl-legend-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 0.75rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.fsl-legend-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--fsl-text-muted);
+  font-size: 0.86rem;
+}
+
+.fsl-legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-block;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 640px) {
+  .fsl-hero-card,
+  .fsl-control-group,
+  .fsl-challenge-controls {
+    display: grid;
+  }
+
+  .fsl-status-line {
+    white-space: normal;
+  }
+
+  .fsl-select,
+  .fsl-btn {
+    width: 100%;
+  }
+
+  .fsl-fret-cell,
+  .fsl-fret-marker-cell {
+    width: 54px;
+  }
+
+  .fsl-fret-cell.fsl-fret-0,
+  .fsl-fret-marker-cell.fsl-fret-0 {
+    width: 40px;
+  }
+}
