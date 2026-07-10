@@ -211,10 +211,10 @@ const shardUrls = [
 async function loadJsonShard(url) {
   try {
     const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) throw new Error(`Status ${res.status}`);
+    if (!res.ok) throw new Error(`Status{res.status}`);
     return await res.json();
   } catch (e) {
-    console.warn(`Shard failed: ${url}`, e);
+    console.warn(`Shard failed:{url}`, e);
     return null;
   }
 }
@@ -313,8 +313,8 @@ async function loadFutureData() {
 
       const readyMonths = visibleMonths.filter(month => month > 1);
       const readyMonthLabel = readyMonths.length ? readyMonths.join(', ') : '1';
-      setDataStatus(`Data loaded: Month ${readyMonthLabel} ready.`, 'success');
-      showToast(`Extra lessons loaded. Month ${readyMonthLabel} ready.`, 'success');
+      setDataStatus(`Data loaded: Month{readyMonthLabel} ready.`, 'success');
+      showToast(`Extra lessons loaded. Month{readyMonthLabel} ready.`, 'success');
 
       renderMonthSwitcher();
       renderModules();
@@ -326,7 +326,7 @@ async function loadFutureData() {
       console.warn('Future course data could not be loaded.', error);
       const message = error?.message || String(error);
       updateDebugState({ dataJsonLoaded: false, lastError: message, lastAction: 'shards failed' });
-      setDataStatus(`Cannot load data shards. ${message}`, 'error');
+      setDataStatus(`Cannot load data shards.{message}`, 'error');
       showToast('Could not load data shards. Check file path or server.', 'error', 5000);
       courseData = { modules, weeks: [], tonePresets, quizItems };
       miniCourses = [];
@@ -513,10 +513,10 @@ function getMonthMeta(month) {
     }
   };
   return metadata[month] || {
-    shortLabel: `Month ${month}`,
+    shortLabel: `Month{month}`,
     moduleLabel: getModuleDisplayName(weeks.find((item) => item.month === month)?.module) || "Hidden Preview",
-    switcherLabel: `เดือน ${month}: Preview`,
-    brandSub: `Dev Preview: Month ${month}`
+    switcherLabel: `เดือน{month}: Preview`,
+    brandSub: `Dev Preview: Month{month}`
   };
 }
 
@@ -540,7 +540,7 @@ function setDataStatus(message, type = "info") {
   const status = document.getElementById("dataStatus");
   if (!status) return;
   status.textContent = message;
-  status.className = `data-status ${type}`;
+  status.className = `data-status{type}`;
 }
 
 function showToast(message, type = "info", timeout = 3500) {
@@ -553,7 +553,7 @@ function showToast(message, type = "info", timeout = 3500) {
   }
   const toast = document.createElement("div");
   toast.setAttribute("role", "status");
-  toast.className = `app-toast ${type}`;
+  toast.className = `app-toas{type}`;
   toast.textContent = message;
   stack.appendChild(toast);
   window.setTimeout(() => toast.remove(), timeout);
@@ -642,7 +642,7 @@ function fillKeySelects() {
 
 function fillMonthFilter() {
   const select = document.getElementById("monthFilter");
-  const options = ["ทั้งหมด", ...Array.from({ length: 8 }, (_, index) => `เดือน ${index + 1}`)];
+  const options = ["ทั้งหมด", ...Array.from({ length: 8 }, (_, index) => `เดือน{index + 1}`)];
   select.innerHTML = options.map((label, index) => `<option value="${index}">${label}</option>`).join("");
 }
 
@@ -676,9 +676,9 @@ function renderProgress() {
   document.getElementById("progressText").textContent = `${done}/${total} สัปดาห์`;
   const activeNumber = Math.min(done + 1, total);
   const activeWeek = weeks.find((item) => item.number === activeNumber) || weeks[weeks.length - 1];
-  document.getElementById("monthText").textContent = `Month ${activeWeek.month}`;
+  document.getElementById("monthText").textContent = `Month{activeWeek.month}`;
   document.getElementById("currentWeekCard").innerHTML = `
-    <span>Week ${activeWeek.number} / Month ${activeWeek.month}</span>
+    <span>Week{activeWeek.number} / Month{activeWeek.month}</span>
     <strong>${activeWeek.title}</strong>
     <p>${activeWeek.goal}</p>
   `;
@@ -695,9 +695,9 @@ async function renderWeeks() {
   const list = selectedMonth ? weeks.filter((item) => item.month === selectedMonth) : weeks;
   const grid = document.getElementById("weekGrid");
   grid.innerHTML = list.map((item) => `
-    <button class="week-card ${item.number === selectedWeek ? "active" : ""} ${completedWeeks.includes(item.number) ? "done" : ""}"
+    <button class="week-card{item.number === selectedWeek ? "active" : ""}{completedWeeks.includes(item.number) ? "done" : ""}"
       type="button" data-week="${item.number}">
-      <small>Week ${item.number} · Month ${item.month}</small>
+      <small>Week{item.number} · Month{item.month}</small>
       <strong>${item.title}</strong>
       <span>${getModuleDisplayName(item.module)}</span>
     </button>
@@ -720,23 +720,23 @@ function renderWeekDetail() {
   const checked = completedWeeks.includes(item.number);
   document.getElementById("weekDetail").innerHTML = `
     <div class="tag-row">
-      <span class="tag">Week ${item.number}</span>
-      <span class="tag">Month ${item.month}</span>
+      <span class="tag">Week{item.number}</span>
+      <span class="tag">Month{item.month}</span>
       <span class="tag">${getModuleDisplayName(item.module)}</span>
     </div>
     <h3>${item.title}</h3>
     <p>${item.goal}</p>
     <label class="check-item">
-      <input type="checkbox" id="weekDone" ${checked ? "checked" : ""} />
+      <input type="checkbox" id="weekDone"{checked ? "checked" : ""} />
       ทำสัปดาห์นี้ครบแล้ว
     </label>
     <div class="detail-grid">
       <div class="detail-block">
-        <h4>Practice Plan ${practiceTime} นาที</h4>
+        <h4>Practice Plan{practiceTime} นาที</h4>
         <ul>
-          <li>Warm-up และทบทวน: ${warmup} นาที</li>
-          <li>Core drill ของสัปดาห์: ${core} นาที</li>
-          <li>Apply กับเพลงหรือ backing track: ${apply} นาที</li>
+          <li>Warm-up และทบทวน:{warmup} นาที</li>
+          <li>Core drill ของสัปดาห์:{core} นาที</li>
+          <li>Apply กับเพลงหรือ backing track:{apply} นาที</li>
         </ul>
       </div>
       <div class="detail-block">
@@ -782,7 +782,7 @@ function renderModules() {
   if (detail) detail.hidden = false;
   tabs.innerHTML = modules.map((item, index) => `
     <button type="button" role="tab" aria-selected="${item.id === selectedModule}" class="${item.id === selectedModule ? "active" : ""}" data-module="${item.id}">
-      ${index + 1}. ${item.title}
+{index + 1}.{item.title}
     </button>
   `).join("");
   tabs.querySelectorAll("[data-module]").forEach((button) => {
@@ -802,7 +802,7 @@ function renderModuleDetail() {
   detail.innerHTML = `
     <div class="module-hero">
       <div>
-        <p class="eyebrow">Lesson ${index}</p>
+        <p class="eyebrow">Lesson{index}</p>
         <h3>${item.title}</h3>
         <p><strong>${item.subtitle}</strong></p>
         <p>${item.goal}</p>
@@ -832,7 +832,7 @@ function renderFretboard() {
   const scalePitches = majorScalePitches(key);
   const rootPitch = scalePitches[0];
   document.getElementById("scaleLegend").innerHTML = scale.map((note, index) => `
-    <span class="legend-pill ${index === 0 ? "root" : ""}">${index + 1}: ${note}</span>
+    <span class="legend-pill{index === 0 ? "root" : ""}">${index + 1}:{note}</span>
   `).join("");
   document.getElementById("fretboard").innerHTML = stringTunings.map((string) => {
     const start = noteIndex(string.note);
@@ -841,7 +841,7 @@ function renderFretboard() {
       const note = noteNameForKey(pitch, key);
       const inScale = scalePitches.includes(pitch);
       const isRoot = pitch === rootPitch;
-      return `<div class="fret-cell ${inScale ? "in-scale" : ""} ${isRoot ? "root" : ""}" title="${string.name} string fret ${fret}: ${note}">
+      return `<div class="fret-cell{inScale ? "in-scale" : ""}{isRoot ? "root" : ""}" title="${string.name} string fre{fret}:{note}">
         <span class="note">${inScale ? note : ""}</span>
       </div>`;
     }).join("");
@@ -858,7 +858,7 @@ function renderNashville() {
     <div class="chord-box">
       <span>${roman[degree]}</span>
       <strong>${chordForDegree(key, degree)}</strong>
-      <small>Degree ${degree}</small>
+      <small>Degree{degree}</small>
     </div>
   `).join("");
 }
@@ -903,7 +903,7 @@ function renderToneTabs() {
   if (!tabs || !tonePresets.length) return;
   tabs.innerHTML = tonePresets.map((tone) => `
     <button type="button" class="${tone.id === selectedTone ? "active" : ""}" data-tone="${tone.id}">
-      ${tone.title}
+{tone.title}
     </button>
   `).join("");
   tabs.querySelectorAll("[data-tone]").forEach((button) => {
@@ -921,16 +921,16 @@ function renderToneDetail() {
   const tone = tonePresets.find((item) => item.id === selectedTone) || tonePresets[0];
   detail.innerHTML = `
     <div class="tone-chain">${tone.chain.map((item) => `<span>${item}</span>`).join("")}</div>
-    <p><strong>Setting:</strong> ${tone.settings}</p>
-    <p><strong>ใช้เมื่อ:</strong> ${tone.use}</p>
+    <p><strong>Setting:</strong>{tone.settings}</p>
+    <p><strong>ใช้เมื่อ:</strong>{tone.use}</p>
   `;
 }
 
 function renderSetlist() {
   document.getElementById("setlistChecks").innerHTML = setlistItems.map((item, index) => `
     <label class="check-item">
-      <input type="checkbox" data-setlist="${index}" ${completedSetlist.includes(index) ? "checked" : ""} />
-      ${item}
+      <input type="checkbox" data-setlist="${index}"{completedSetlist.includes(index) ? "checked" : ""} />
+{item}
     </label>
   `).join("");
   document.querySelectorAll("[data-setlist]").forEach((input) => {
@@ -964,7 +964,7 @@ function setBpm(value) {
 function setQuickTempo(value) {
   setBpm(value);
   closeQuickTempoDrawer();
-  showToast(`ตั้ง Metronome เป็น ${bpm} BPM แล้ว`, "success", 1800);
+  showToast(`ตั้ง Metronome เป็น{bpm} BPM แล้ว`, "success", 1800);
 }
 
 function updateQuickTempoActive(value) {
@@ -1020,7 +1020,7 @@ function startMetronome() {
   renderBeatCounter(0);
   document.getElementById("metronomeToggle").textContent = "หยุด";
   const announcer = document.getElementById("metronomeAnnouncer");
-  if (announcer) announcer.textContent = `เริ่ม Metronome ที่ ${bpm} BPM`;
+  if (announcer) announcer.textContent = `เริ่ม Metronome ที่{bpm} BPM`;
   scheduleMetronome();
 }
 
@@ -2361,18 +2361,18 @@ function renderFocusedDashboard() {
   const monthPosition = getMonthPosition(weekItem.number, 1);
   const moduleLabel = "Rhythm Foundation";
 
-  document.getElementById("currentWeekTitle").textContent = `เดือน 1: ${weekItem.title}`;
+  document.getElementById("currentWeekTitle").textContent = `เดือน 1:{weekItem.title}`;
   document.getElementById("currentWeekSummary").textContent = weekItem.summary;
-  document.getElementById("monthProgressText").textContent = `สัปดาห์ที่ ${monthPosition} / 4 ของหมวด ${moduleLabel}`;
+  document.getElementById("monthProgressText").textContent = `สัปดาห์ที่{monthPosition} / 4 ของหมวด{moduleLabel}`;
   document.getElementById("monthProgressBar").style.width = `${(monthPosition / 4) * 100}%`;
-  document.getElementById("todayPracticeTitle").textContent = `สัปดาห์ที่ ${monthPosition} · วันที่ ${dayNumber}`;
+  document.getElementById("todayPracticeTitle").textContent = `สัปดาห์ที่{monthPosition} · วันที่{dayNumber}`;
   document.getElementById("todayMissionMeta").innerHTML = `<span>${missionMinutes} นาที</span><span>${moduleLabel}</span>`;
   document.querySelector(".journey-panel h2").textContent = "เส้นทาง Rhythm เดือนที่ 1";
   renderJourney();
   const previewDisabled = isDevPreviewActive() ? " disabled" : "";
   document.getElementById("todayChecklist").innerHTML = tasks.map((task, index) => `
     <label class="check-item">
-      <input type="checkbox" data-today-task="${index}" ${checkedItems.includes(index) ? "checked" : ""}${previewDisabled} />
+      <input type="checkbox" data-today-task="${index}"{checkedItems.includes(index) ? "checked" : ""}${previewDisabled} />
       <span>${task}</span>
     </label>
   `).join("");
@@ -2402,9 +2402,9 @@ function renderMonth2Dashboard() {
   }
 
   if (!weekItem) {
-    document.getElementById("currentWeekTitle").textContent = `เดือน ${month}: ${moduleLabel}`;
-    document.getElementById("currentWeekSummary").textContent = `กำลังเตรียมข้อมูลบทเรียน ${moduleLabel}`;
-    document.getElementById("monthProgressText").textContent = `รอโหลดข้อมูล Month ${month}`;
+    document.getElementById("currentWeekTitle").textContent = `เดือน{month}:{moduleLabel}`;
+    document.getElementById("currentWeekSummary").textContent = `กำลังเตรียมข้อมูลบทเรียน{moduleLabel}`;
+    document.getElementById("monthProgressText").textContent = `รอโหลดข้อมูล Month{month}`;
     document.getElementById("monthProgressBar").style.width = "0%";
     document.getElementById("todayPracticeTitle").textContent = "ยังไม่มีบทเรียน";
     document.getElementById("todayMissionMeta").innerHTML = "";
@@ -2421,13 +2421,13 @@ function renderMonth2Dashboard() {
     ? exercises.map((task) => `${task.duration ? `${task.duration} · ` : ""}${task.title || task.name || task.instruction}`)
     : ["อ่านภาพรวมบทเรียน", "ลองแบบฝึกหลักช้า ๆ กับ Metronome", "เช็กเกณฑ์ผ่านแบบใจเย็น"];
 
-  document.getElementById("currentWeekTitle").textContent = `เดือน ${month}: ${weekItem.title}`;
+  document.getElementById("currentWeekTitle").textContent = `เดือน{month}:{weekItem.title}`;
   document.getElementById("currentWeekSummary").textContent = weekItem.summary || weekItem.goal || moduleLabel;
-  document.getElementById("monthProgressText").textContent = `สัปดาห์ที่ ${monthPosition} / 4 ของหมวด ${moduleLabel}`;
+  document.getElementById("monthProgressText").textContent = `สัปดาห์ที่{monthPosition} / 4 ของหมวด{moduleLabel}`;
   document.getElementById("monthProgressBar").style.width = `${(monthPosition / 4) * 100}%`;
-  document.getElementById("todayPracticeTitle").textContent = `สัปดาห์ที่ ${monthPosition} · ${dayGroupLabel}`;
+  document.getElementById("todayPracticeTitle").textContent = `สัปดาห์ที่{monthPosition} ·{dayGroupLabel}`;
   document.getElementById("todayMissionMeta").innerHTML = `<span>${weekItem.estimatedMinutesPerDay || 20} นาที</span><span>${moduleLabel}</span>`;
-  document.querySelector(".journey-panel h2").textContent = `เส้นทาง ${monthMeta.shortLabel} เดือนที่ ${month}`;
+  document.querySelector(".journey-panel h2").textContent = `เส้นทาง{monthMeta.shortLabel} เดือนที่{month}`;
   document.getElementById("todayChecklist").innerHTML = dashboardTasks.map((task, index) => `
     <label class="check-item">
       <input type="checkbox" data-month2-dashboard-task="${index}" />
@@ -2444,11 +2444,11 @@ function renderJourney() {
   if (selectedFocusedMonth !== 1) {
     const month = selectedFocusedMonth;
     const monthWeeks = getFocusedMonthWeeks(month);
-    journeyList.setAttribute("aria-label", `ความคืบหน้า Month ${month}`);
+    journeyList.setAttribute("aria-label", `ความคืบหน้า Month{month}`);
     journeyList.innerHTML = monthWeeks.map((weekItem) => {
       const state = weekItem.number === focusedSelectedWeek ? ["กำลังฝึก", "current"] : weekItem.number < focusedSelectedWeek ? ["ผ่านแล้ว", "done"] : ["พร้อม", "pending"];
       const ariaCurrent = weekItem.number === focusedSelectedWeek ? ' aria-current="step"' : "";
-      return `<li class="journey-step ${state[1]}"${ariaCurrent} aria-label="Week ${weekItem.number}: ${state[0]}"><span class="journey-dot" aria-hidden="true"></span><span class="journey-week">Week ${weekItem.number}</span><span class="status ${state[1]}">${state[0]}</span></li>`;
+      return `<li class="journey-step{state[1]}"${ariaCurrent} aria-label="Week{weekItem.number}:{state[0]}"><span class="journey-dot" aria-hidden="true"></span><span class="journey-week">Week{weekItem.number}</span><span class="status{state[1]}">${state[0]}</span></li>`;
     }).join("");
     return;
   }
@@ -2460,7 +2460,7 @@ function renderJourney() {
   journeyList.innerHTML = foundationWeeks.map((weekItem) => {
     const state = completed.includes(weekItem.number) ? ["ผ่านแล้ว", "done"] : weekItem.number === selectedWeek ? ["กำลังฝึก", "current"] : weekItem.number === currentWeek ? ["เริ่มนิ่ง", "steady"] : ["ยังไม่เริ่ม", "pending"];
     const ariaCurrent = weekItem.number === selectedWeek ? ' aria-current="step"' : "";
-    return `<li class="journey-step ${state[1]}"${ariaCurrent} aria-label="Week ${weekItem.number}: ${state[0]}"><span class="journey-dot" aria-hidden="true"></span><span class="journey-week">Week ${weekItem.number}</span><span class="status ${state[1]}">${state[0]}</span></li>`;
+    return `<li class="journey-step{state[1]}"${ariaCurrent} aria-label="Week{weekItem.number}:{state[0]}"><span class="journey-dot" aria-hidden="true"></span><span class="journey-week">Week{weekItem.number}</span><span class="status{state[1]}">${state[0]}</span></li>`;
   }).join("");
 }
 
@@ -2476,18 +2476,18 @@ function renderMonthSwitcher(autoScroll = false) {
 
   if (tracker) {
     tracker.innerHTML = months.map((month, idx) => `
-      <div class="tracker-step ${month.number === selectedFocusedMonth ? "active" : ""}" ${month.number === selectedFocusedMonth ? 'aria-current="step"' : ''}>
+      <div class="tracker-step{month.number === selectedFocusedMonth ? "active" : ""}"{month.number === selectedFocusedMonth ? 'aria-current="step"' : ''}>
         <div class="tracker-dot"></div>
-        <span class="tracker-label">MONTH ${month.number}</span>
+        <span class="tracker-label">MONTH{month.number}</span>
       </div>
-      ${idx < months.length - 1 ? '<div class="tracker-line"></div>' : ''}
+{idx < months.length - 1 ? '<div class="tracker-line"></div>' : ''}
     `).join("");
   }
 
   if (switcher) {
     switcher.innerHTML = months.map((month) => `
-      <button type="button" class="month-btn ${month.number === selectedFocusedMonth ? "active" : ""}" aria-pressed="${month.number === selectedFocusedMonth}" data-month="${month.number}">
-        ${month.label}
+      <button type="button" class="month-btn{month.number === selectedFocusedMonth ? "active" : ""}" aria-pressed="${month.number === selectedFocusedMonth}" data-month="${month.number}">
+{month.label}
       </button>
     `).join("");
 
@@ -2529,7 +2529,7 @@ function openFocusedWeek(weekNumber, options = {}) {
 
   updateDebugState({
     currentMonth: selectedFocusedMonth,
-    lastAction: `Week ${targetWeek} opened via ${source}`
+    lastAction: `Week{targetWeek} opened via{source}`
   });
 
   renderFocusedDashboard();
@@ -2552,19 +2552,19 @@ async function openFocusedMonth(month) {
     setPreludeViewChrome(false);
   }
   if (month > 1 && !window.__GC_DEBUG__?.dataJsonLoaded) {
-    setDataStatus(`Opening Month ${month}...`, "info");
-    showToast(`Opening Month ${month}...`, "info", 1800);
+    setDataStatus(`Opening Month{month}...`, "info");
+    showToast(`Opening Month{month}...`, "info", 1800);
     await loadFutureData();
   }
   if (!canOpenMonth(month)) {
-    updateDebugState({ currentMonth: selectedFocusedMonth, lastAction: `Month ${month} blocked` });
+    updateDebugState({ currentMonth: selectedFocusedMonth, lastAction: `Month{month} blocked` });
     setDataStatus("Month นี้ยังไม่เปิดให้ใช้งานครับ", "error");
     return;
   }
-  updateDebugState({ currentMonth: month, lastAction: `opening Month ${month}` });
+  updateDebugState({ currentMonth: month, lastAction: `opening Month{month}` });
   const monthWeeks = getFocusedMonthWeeks(month);
   if (!monthWeeks.length) {
-    const message = `Month ${month} is unavailable.`;
+    const message = `Month{month} is unavailable.`;
     updateDebugState({ currentMonth: selectedFocusedMonth, lastAction: message });
     setDataStatus(message, "error");
     showToast(message, "error");
@@ -2577,8 +2577,8 @@ async function openFocusedMonth(month) {
   }
   focusedSelectedWeek = month === 1 ? getCurrentFoundationWeek() : monthWeeks[0].number;
   if (!isDevPreviewActive()) safeSetItem(selectedFocusedMonthStorageKey, String(month));
-  updateDebugState({ currentMonth: month, loadedMonths: getLoadedMonths(), visibleMonths: getVisibleMonths(), loadedWeeks: weeks.length, lastAction: `Month ${month} opened` });
-  setDataStatus(month === 1 ? "Month 1 ready." : `Month ${month} ready: ${monthWeeks.length} ${getMonthMeta(month).shortLabel} lessons.`, "success");
+  updateDebugState({ currentMonth: month, loadedMonths: getLoadedMonths(), visibleMonths: getVisibleMonths(), loadedWeeks: weeks.length, lastAction: `Month{month} opened` });
+  setDataStatus(month === 1 ? "Month 1 ready." : `Month{month} ready:{monthWeeks.length}{getMonthMeta(month).shortLabel} lessons.`, "success");
   renderMonthSwitcher(true);
   renderFocusedDashboard();
   renderFocusedWeekTabs();
@@ -2600,14 +2600,14 @@ function renderFocusedWeekTabs() {
   const lessonsTitle = document.getElementById("lessonsTitle");
   const monthWeeks = getFocusedMonthWeeks();
   const monthMeta = getMonthMeta(selectedFocusedMonth);
-  lessonsTitle.textContent = `เดือน ${selectedFocusedMonth}: ${monthMeta.moduleLabel}`;
-  tabs.setAttribute("aria-label", selectedFocusedMonth === 1 ? "บทเรียนพื้นฐาน 4 สัปดาห์" : `บทเรียน Month ${selectedFocusedMonth}`);
+  lessonsTitle.textContent = `เดือน{selectedFocusedMonth}:{monthMeta.moduleLabel}`;
+  tabs.setAttribute("aria-label", selectedFocusedMonth === 1 ? "บทเรียนพื้นฐาน 4 สัปดาห์" : `บทเรียน Month{selectedFocusedMonth}`);
   if (selectedFocusedMonth !== 1) {
     tabs.innerHTML = monthWeeks.map((weekItem) => `
-      <button type="button" role="tab" class="card-tab future ${weekItem.number === focusedSelectedWeek ? "active current" : "pending"}" aria-selected="${weekItem.number === focusedSelectedWeek}" data-course-week="${weekItem.number}">
-        <span class="tab-kicker"><span aria-hidden="true">🎯</span> ${monthMeta.shortLabel}</span>
-        <strong>สัปดาห์ที่ ${weekItem.number}: ${weekItem.title}</strong>
-        <span class="status ${weekItem.number === focusedSelectedWeek ? "current" : "pending"}">${weekItem.number === focusedSelectedWeek ? "current" : "loaded"}</span>
+      <button type="button" role="tab" class="card-tab future{weekItem.number === focusedSelectedWeek ? "active current" : "pending"}" aria-selected="${weekItem.number === focusedSelectedWeek}" data-course-week="${weekItem.number}">
+        <span class="tab-kicker"><span aria-hidden="true">🎯</span>{monthMeta.shortLabel}</span>
+        <strong>สัปดาห์ที่{weekItem.number}:{weekItem.title}</strong>
+        <span class="status{weekItem.number === focusedSelectedWeek ? "current" : "pending"}">${weekItem.number === focusedSelectedWeek ? "current" : "loaded"}</span>
       </button>
     `).join("");
     tabs.querySelectorAll("[data-course-week]").forEach((button) => {
@@ -2622,10 +2622,10 @@ function renderFocusedWeekTabs() {
   tabs.innerHTML = foundationWeeks.map((weekItem) => {
     const status = completed.includes(weekItem.number) ? "done" : weekItem.number === currentWeekNumber ? "current" : "pending";
     return `
-    <button type="button" role="tab" class="card-tab ${status} ${weekItem.number === focusedSelectedWeek ? "active" : ""}" aria-selected="${weekItem.number === focusedSelectedWeek}" data-foundation-week="${weekItem.number}">
+    <button type="button" role="tab" class="card-tab{status}{weekItem.number === focusedSelectedWeek ? "active" : ""}" aria-selected="${weekItem.number === focusedSelectedWeek}" data-foundation-week="${weekItem.number}">
       <span class="tab-kicker"><span aria-hidden="true">🎯</span> Foundation</span>
       <strong>${weekItem.title}</strong>
-      <span class="status ${status}">${status}</span>
+      <span class="status{status}">${status}</span>
     </button>
   `;
   }).join("");
@@ -2648,22 +2648,22 @@ function renderFocusedLesson() {
   const weekItem = foundationWeeks.find((week) => week.number === focusedSelectedWeek);
   document.getElementById("lessonPanel").innerHTML = `
     <div class="lesson-header">
-      <p class="eyebrow">สัปดาห์ที่ ${weekItem.number}</p>
+      <p class="eyebrow">สัปดาห์ที่{weekItem.number}</p>
       <h2>${weekItem.title}</h2>
       <p>${weekItem.summary}</p>
     </div>
-    ${renderLessonFlowOverview()}
-    ${renderLessonMedia(weekItem)}
-    ${renderLearnSection(weekItem)}
-    ${renderLessonSection("3. เล่น: แบบฝึกหัด", weekItem.practice, "play-block")}
-    ${renderLessonPracticeSupport(weekItem)}
+{renderLessonFlowOverview()}
+{renderLessonMedia(weekItem)}
+{renderLearnSection(weekItem)}
+{renderLessonSection("3. เล่น: แบบฝึกหัด", weekItem.practice, "play-block")}
+{renderLessonPracticeSupport(weekItem)}
     <section class="lesson-block quiz-block">
       <h3>4. เช็ก: แบบทดสอบ</h3>
       <div class="lesson-quiz" id="lessonQuiz">
-        ${weekItem.quiz.map((item, questionIndex) => `
+{weekItem.quiz.map((item, questionIndex) => `
           <fieldset>
-            <legend>${questionIndex + 1}. ${item.question}</legend>
-            ${item.options.map((option, optionIndex) => `
+            <legend>${questionIndex + 1}.{item.question}</legend>
+{item.options.map((option, optionIndex) => `
               <label>
                 <input type="radio" name="quiz-${weekItem.number}-${questionIndex}" value="${optionIndex}" />
                 <span>${option}</span>
@@ -2675,7 +2675,7 @@ function renderFocusedLesson() {
       <button class="secondary-action" id="checkLessonQuiz" type="button">ตรวจแบบทดสอบ</button>
       <p class="quiz-result" id="lessonQuizResult" aria-live="polite"></p>
     </section>
-    ${renderLessonSection("การบ้าน", weekItem.homework, "homework-block")}
+{renderLessonSection("การบ้าน", weekItem.homework, "homework-block")}
   `;
 
   document.getElementById("checkLessonQuiz").addEventListener("click", () => checkFocusedQuiz(weekItem));
@@ -2709,7 +2709,7 @@ function renderFutureWeekLesson() {
 
   panel.innerHTML = `
     <div class="lesson-header">
-      <p class="eyebrow">เดือน ${selectedFocusedMonth} · สัปดาห์ที่ ${weekItem.number}</p>
+      <p class="eyebrow">เดือน{selectedFocusedMonth} · สัปดาห์ที่{weekItem.number}</p>
       <h2>${weekItem.title}</h2>
       <p>${weekItem.summary || weekItem.goal || ""}</p>
     </div>
@@ -2779,12 +2779,12 @@ function renderMonth2DailyPracticeSection(weekItem = {}) {
   const sharedTasks = month2AsArray(items.tasks);
   if (days.length) {
     days.forEach((day, index) => {
-      const dayObject = typeof day === "object" ? { ...day } : { day, title: `Day ${day}` };
+      const dayObject = typeof day === "object" ? { ...day } : { day, title: `Day{day}` };
       const dayNumber = dayObject.day || dayObject.dayNumber || index + 1;
       const dayTasks = month2AsArray(dayObject.tasks).length
         ? month2AsArray(dayObject.tasks)
         : sharedTasks.filter((task) => (!task?.day && !task?.dayNumber) || Number(task.day || task.dayNumber) === Number(dayNumber));
-      grid.appendChild(renderMonth2PracticeGroup({ dayLabel: `Day ${dayNumber}`, focus: dayObject.focus || dayObject.title, exercises: dayTasks, isOpen: index === 0 }, weekItem.number, index));
+      grid.appendChild(renderMonth2PracticeGroup({ dayLabel: `Day{dayNumber}`, focus: dayObject.focus || dayObject.title, exercises: dayTasks, isOpen: index === 0 }, weekItem.number, index));
     });
   } else {
     sharedTasks.forEach((item, index) => grid.appendChild(renderMonth2PracticeTaskCard(item, weekItem.number, `task-${index}`)));
@@ -2805,7 +2805,7 @@ function renderMonth2PracticeGroup(group = {}, weekNumber, index = 0) {
   const header = month2CreateElement("summary", "practice-panel-header");
   const title = month2CreateElement("span", "practice-panel-title");
   title.append(
-    month2CreateElement("strong", "", group.dayLabel || `Day ${index + 1}`),
+    month2CreateElement("strong", "", group.dayLabel || `Day{index + 1}`),
     month2CreateElement("span", "practice-panel-focus", group.focus || "ซ้อมประจำวัน")
   );
   const toggle = month2CreateElement("span", "practice-panel-toggle", panel.open ? "−" : "+");
@@ -2922,7 +2922,7 @@ function renderMonth2SelfQuestion(item = {}, index = 0) {
 
 function renderMonth2ChoiceQuestion(item = {}, index = 0) {
   const card = month2CreateElement("article", "question-card");
-  card.appendChild(month2CreateElement("h4", "", month2FirstText(item.question, item.prompt, item.title, `คำถามที่ ${index + 1}`)));
+  card.appendChild(month2CreateElement("h4", "", month2FirstText(item.question, item.prompt, item.title, `คำถามที่{index + 1}`)));
   const choicesWrap = month2CreateElement("div", "choice-grid");
   const feedback = month2CreateElement("p", "choice-feedback");
 
@@ -2996,7 +2996,7 @@ function renderLessonFlowOverview() {
 
   return `
     <section class="lesson-flow" aria-label="ลำดับการเรียน Listen See Play Self-check">
-      ${steps.map(([number, title, copy]) => `
+{steps.map(([number, title, copy]) => `
         <article class="lesson-flow-card">
           <span>${number}</span>
           <strong>${title}</strong>
@@ -3023,7 +3023,7 @@ function renderLessonMedia(weekItem) {
         <strong>โจทย์ฟัง</strong>
         <p>ตั้ง tempo ตาม Target BPM ของบทนี้ เคาะเท้ากับ click 30 วินาที แล้วถามตัวเองว่าเสียงกีตาร์ของเราจะลงก่อน click, หลัง click หรือพอดีกับ click</p>
         <ul>
-          ${listenFor.map((line) => `<li>${line}</li>`).join("")}
+{listenFor.map((line) => `<li>${line}</li>`).join("")}
         </ul>
       </div>
     </section>
@@ -3038,39 +3038,39 @@ function renderLearnSection(weekItem) {
           <span>Target BPM</span>
           <strong>${weekItem.learn.targetBpm}</strong>
         </div>
-        ${renderLessonDiagram(weekItem.learn.diagram)}
-        ${weekItem.learn.paragraphs.map((paragraph) => `<p>${paragraph}</p>`).join("")}
+{renderLessonDiagram(weekItem.learn.diagram)}
+{weekItem.learn.paragraphs.map((paragraph) => `<p>${paragraph}</p>`).join("")}
         <div class="lesson-learn-grid">
           <div>
             <h4>ฟังอะไร</h4>
             <ul>
-              ${weekItem.learn.listenFor.map((line) => `<li>${line}</li>`).join("")}
+{weekItem.learn.listenFor.map((line) => `<li>${line}</li>`).join("")}
             </ul>
           </div>
           <div>
             <h4>รู้สึกอะไร</h4>
             <ul>
-              ${weekItem.learn.physicalFeel.map((line) => `<li>${line}</li>`).join("")}
+{weekItem.learn.physicalFeel.map((line) => `<li>${line}</li>`).join("")}
             </ul>
           </div>
         </div>
         <h4>เอาไปใช้กับกีตาร์</h4>
         <ul>
-          ${weekItem.learn.guitarApplication.map((line) => `<li>${line}</li>`).join("")}
+{weekItem.learn.guitarApplication.map((line) => `<li>${line}</li>`).join("")}
         </ul>
         <h4>ทำตามครูทีละรอบ</h4>
         <ol>
-          ${weekItem.learn.guidedSteps.map((line) => `<li>${line}</li>`).join("")}
+{weekItem.learn.guidedSteps.map((line) => `<li>${line}</li>`).join("")}
         </ol>
         <h4>ถ้าฟังแล้วไม่ตรง ให้แก้แบบนี้</h4>
         <ul>
-          ${weekItem.learn.correctionSteps.map((line) => `<li>${line}</li>`).join("")}
+{weekItem.learn.correctionSteps.map((line) => `<li>${line}</li>`).join("")}
         </ul>
-        <p><strong>ตัวอย่างสั้น ๆ:</strong> ${weekItem.learn.miniExample}</p>
+        <p><strong>ตัวอย่างสั้น ๆ:</strong>{weekItem.learn.miniExample}</p>
         <aside class="teacher-note"><strong>ครูแนะนำ</strong><p>${weekItem.learn.teacherNote}</p></aside>
-        ${renderLessonReferenceTriggers(weekItem.learn.referenceTriggers)}
-        ${renderTabReadingMicroSkill(weekItem.learn.tabMicroSkill)}
-        ${renderRhythmVisual(weekItem.visual, true)}
+{renderLessonReferenceTriggers(weekItem.learn.referenceTriggers)}
+{renderTabReadingMicroSkill(weekItem.learn.tabMicroSkill)}
+{renderRhythmVisual(weekItem.visual, true)}
       </section>
     `;
   }
@@ -3082,17 +3082,17 @@ function renderLearnSection(weekItem) {
         <div>
           <h4>ฟังอะไร</h4>
           <ul>
-            ${weekItem.hear.map((line) => `<li>${line}</li>`).join("")}
+{weekItem.hear.map((line) => `<li>${line}</li>`).join("")}
           </ul>
         </div>
         <div>
           <h4>รู้สึกอะไร</h4>
           <ul>
-            ${weekItem.feel.map((line) => `<li>${line}</li>`).join("")}
+{weekItem.feel.map((line) => `<li>${line}</li>`).join("")}
           </ul>
         </div>
       </div>
-      ${renderRhythmVisual(weekItem.visual, true)}
+{renderRhythmVisual(weekItem.visual, true)}
     </section>
   `;
 }
@@ -3115,17 +3115,17 @@ function renderTabReadingMicroSkill(skill) {
       </div>
       <h4>วิธีซ้อม</h4>
       <ul class="drill-steps">
-        ${skill.practice.map((line) => `<li>${line}</li>`).join("")}
+{skill.practice.map((line) => `<li>${line}</li>`).join("")}
       </ul>
       <h4>พลาดบ่อย</h4>
       <ul class="drill-steps">
-        ${skill.commonMistakes.map((line) => `<li>${line}</li>`).join("")}
+{skill.commonMistakes.map((line) => `<li>${line}</li>`).join("")}
       </ul>
       <aside class="teacher-note-box">
         <strong>ครูขอแนะนำ:</strong>
         <p>${skill.teacherNote}</p>
       </aside>
-      ${renderLessonReferenceTriggers(skill.referenceTriggers)}
+{renderLessonReferenceTriggers(skill.referenceTriggers)}
     </article>
   `;
 }
@@ -3136,12 +3136,12 @@ function renderLessonReferenceTriggers(triggers) {
 
   return `
     <div class="lesson-reference-triggers" aria-label="Reference Shelf shortcuts">
-      ${triggerItems.map((item) => `
+{triggerItems.map((item) => `
         <button class="small-button lesson-reference-trigger" type="button" data-scroll="${item.target}">
-          ${item.label}
+{item.label}
         </button>
       `).join("")}
-      ${triggerItems.some((item) => item.hint) ? `
+{triggerItems.some((item) => item.hint) ? `
         <p class="lesson-reference-hint">${triggerItems.map((item) => item.hint).filter(Boolean).join(" ")}</p>
       ` : ""}
     </div>
@@ -3157,9 +3157,9 @@ function renderLessonDiagram(diagram) {
         <h4>${diagram.title}</h4>
         <p>${diagram.caption}</p>
       </div>
-      <div class="lesson-diagram-grid" style="--diagram-count: ${diagram.cells.length}">
-        ${diagram.cells.map((cell) => `
-          <div class="diagram-cell ${cell.kind}">
+      <div class="lesson-diagram-grid" style="--diagram-count:{diagram.cells.length}">
+{diagram.cells.map((cell) => `
+          <div class="diagram-cell{cell.kind}">
             <strong>${cell.label}</strong>
             <span>${cell.note}</span>
           </div>
@@ -3192,7 +3192,7 @@ function renderDailySelfCheck(weekItem) {
         <span>${weekItem.learn.targetBpm}</span>
       </div>
       <ul>
-        ${weekItem.learn.dailySelfCheck.map((line) => `<li>${line}</li>`).join("")}
+{weekItem.learn.dailySelfCheck.map((line) => `<li>${line}</li>`).join("")}
       </ul>
     </section>
   `;
@@ -3207,7 +3207,7 @@ function renderCommonMistakes(weekItem) {
       <p class="eyebrow">Common Mistakes</p>
       <h3>พลาดบ่อยตรงนี้</h3>
       <ul>
-        ${mistakes.map((line) => `<li>${line}</li>`).join("")}
+{mistakes.map((line) => `<li>${line}</li>`).join("")}
       </ul>
     </section>
   `;
@@ -3218,10 +3218,10 @@ function renderTroubleshooting(weekItem) {
       <p class="eyebrow">Troubleshooting</p>
       <h3>ติดตรงไหน ให้แก้แบบครู</h3>
       <div class="troubleshooting-list">
-        ${weekItem.learn.troubleshooting.map((item) => `
+{weekItem.learn.troubleshooting.map((item) => `
           <article>
-            <h4>ปัญหา: ${item.problem}</h4>
-            <p><strong>ครูแนะนำ:</strong> ${item.advice}</p>
+            <h4>ปัญหา:{item.problem}</h4>
+            <p><strong>ครูแนะนำ:</strong>{item.advice}</p>
           </article>
         `).join("")}
       </div>
@@ -3238,15 +3238,15 @@ function renderEarTraining(earTraining) {
       <h3>${earTraining.title}</h3>
       <p>${earTraining.instruction}</p>
       <div class="ear-example-grid">
-        ${earTraining.examples.map((example) => `
+{earTraining.examples.map((example) => `
           <article>
             <span>${example.label}</span>
             <p>${example.description}</p>
           </article>
         `).join("")}
       </div>
-      <p><strong>คำถาม:</strong> ${earTraining.question}</p>
-      <p><strong>ครูใบ้ให้:</strong> ${earTraining.hint}</p>
+      <p><strong>คำถาม:</strong>{earTraining.question}</p>
+      <p><strong>ครูใบ้ให้:</strong>{earTraining.hint}</p>
     </section>
   `;
 }
@@ -3260,25 +3260,25 @@ function renderMiniSong(miniSong) {
       <h3>${miniSong.title}</h3>
       <p>${miniSong.purpose}</p>
       <div class="mini-song-grid">
-        ${miniSong.bars.map((bar) => `
+{miniSong.bars.map((bar) => `
           <article>
-            <span>ห้อง ${bar.bar}</span>
+            <span>ห้อง{bar.bar}</span>
             <strong>${bar.chord}</strong>
             <p>${bar.direction}</p>
           </article>
         `).join("")}
       </div>
-      <p><strong>ให้รู้สึกว่า:</strong> ${miniSong.feel}</p>
+      <p><strong>ให้รู้สึกว่า:</strong>{miniSong.feel}</p>
     </section>
   `;
 }
 
 function renderLessonSection(title, lines, extraClass = "") {
   return `
-    <section class="lesson-block ${extraClass}">
+    <section class="lesson-block{extraClass}">
       <h3>${title}</h3>
       <ul>
-        ${lines.map((line) => `<li>${line}</li>`).join("")}
+{lines.map((line) => `<li>${line}</li>`).join("")}
       </ul>
     </section>
   `;
@@ -3370,7 +3370,7 @@ function renderLessonBlocks(blocks, visualsById = {}, tabsById = {}, labsById = 
       return;
     }
 
-    flow.appendChild(renderMonth2MissingCard(`ยังไม่รองรับ lesson block type: ${block.type || "unknown"}`));
+    flow.appendChild(renderMonth2MissingCard(`ยังไม่รองรับ lesson block type:{block.type || "unknown"}`));
   });
 
   return flow;
@@ -3586,7 +3586,7 @@ function renderFretboardVisual(visual, block = {}, visualRef = "") {
     const visualColumn = isOpenString ? 1 : fretValue - start + 1;
     marker.style.gridRow = String(visualRow);
     marker.style.gridColumn = String(visualColumn);
-    marker.setAttribute("aria-label", dot.ariaLabel || dot.label || `${displayStr} สาย ${dot.string} เฟรต ${dot.fret}`);
+    marker.setAttribute("aria-label", dot.ariaLabel || dot.label || `${displayStr} สาย{dot.string} เฟรต{dot.fret}`);
     grid.appendChild(marker);
   });
 
@@ -3736,7 +3736,7 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
   let playSeqText = lab.uiCopy?.playSequence;
   if (!playSeqText) {
     const seqLabel = formatSoundLabSequenceLabel(lab);
-    playSeqText = seqLabel.length < 30 ? `ฟัง ${seqLabel}` : "ฟังชุดนี้ทีละเสียง";
+    playSeqText = seqLabel.length < 30 ? `ฟัง{seqLabel}` : "ฟังชุดนี้ทีละเสียง";
   }
   const progressionButton = month2CreateElement("button", "progression-button", playSeqText);
   progressionButton.type = "button";
@@ -3837,7 +3837,7 @@ function getSoundLabDetailLabel(item) {
 }
 
 function formatSoundLabLabel(chord = {}) {
-  return `ฟัง ${getSoundLabShortLabel(chord)}`;
+  return `ฟัง{getSoundLabShortLabel(chord)}`;
 }
 
 function getSoundLabSequenceItems(lab = {}) {
@@ -3870,7 +3870,7 @@ function getSoundLabGuideToneText(lab = {}, chord = {}, block = {}) {
   if (!notes.length) return "";
   const baseText = notes.join(" → ");
   if (lab.audioEngine?.model === "sound-lab-v2" && chord.guideToneLabel) {
-    return `${chord.guideToneLabel} - ${baseText}`;
+    return `${chord.guideToneLabel} -{baseText}`;
   }
   return baseText;
 }
@@ -4526,7 +4526,7 @@ function updateLabStatus(card, chord = {}, audioPlayed, lab = {}, block = {}) {
   };
 
   if (lab.audioEngine?.model === "sound-lab-v2" && chord.theoryNote && chord.playbackNote && chord.theoryNote !== chord.playbackNote) {
-    meta.helperLine = `โน้ตที่เรียน: ${chord.theoryNote} · เสียงที่เปิดให้ฟัง: ${chord.playbackNote}`;
+    meta.helperLine = `โน้ตที่เรียน:{chord.theoryNote} · เสียงที่เปิดให้ฟัง:{chord.playbackNote}`;
   }
 
   setLabStatus(card, "", meta);
@@ -4560,7 +4560,7 @@ function setLabStatus(card, text = "", meta = {}) {
   const guideBadge = month2CreateElement(
     "span",
     `sound-lab-display-guide${guide ? "" : " is-placeholder"}`,
-    guide ? `GUIDE ${guide}` : "GUIDE --"
+    guide ? `GUIDE{guide}` : "GUIDE --"
   );
   if (!guide) guideBadge.setAttribute("aria-hidden", "true");
   primaryLine.appendChild(guideBadge);
@@ -4608,11 +4608,11 @@ function renderRhythmVisual(visual, isNested = false) {
         <span>${visual.steps.length} ช่อง</span>
       </div>
       <p class="rhythm-instruction">${visual.instruction}</p>
-      <div class="rhythm-visual" style="--step-count: ${visual.steps.length}; --bar-duration: ${visual.duration}s">
+      <div class="rhythm-visual" style="--step-count:{visual.steps.length}; --bar-duration:{visual.duration}s">
         <div class="rhythm-playhead" aria-hidden="true"></div>
         <div class="rhythm-steps">
-          ${visual.steps.map((step) => `
-            <div class="rhythm-step ${step.kind}">
+{visual.steps.map((step) => `
+            <div class="rhythm-step{step.kind}">
               <strong>${step.count}</strong>
               <span>${step.action}</span>
             </div>
@@ -4635,7 +4635,7 @@ function checkFocusedQuiz(weekItem) {
     const selected = document.querySelector(`input[name="quiz-${weekItem.number}-${questionIndex}"]:checked`);
     if (selected && Number(selected.value) === item.answer) score += 1;
   });
-  document.getElementById("lessonQuizResult").textContent = `ตอบถูก ${score} / ${weekItem.quiz.length} ข้อ`;
+  document.getElementById("lessonQuizResult").textContent = `ตอบถูก{score} /{weekItem.quiz.length} ข้อ`;
 }
 
 function renderFocusedProgressTracking() {
@@ -4655,10 +4655,10 @@ function renderFocusedProgressTracking() {
   }
   list.innerHTML = foundationWeeks.map((weekItem) => `
     <label class="progress-item">
-      <input type="checkbox" data-complete-week="${weekItem.number}" ${completed.includes(weekItem.number) ? "checked" : ""} />
+      <input type="checkbox" data-complete-week="${weekItem.number}"{completed.includes(weekItem.number) ? "checked" : ""} />
       <span>
-        <strong>สัปดาห์ที่ ${weekItem.number}</strong>
-        ${weekItem.title}
+        <strong>สัปดาห์ที่{weekItem.number}</strong>
+{weekItem.title}
       </span>
     </label>
   `).join("");
@@ -4714,25 +4714,115 @@ function createPracticeStudioPreviewShell() {
     month2CreateElement(
       "p",
       "practice-studio-preview-copy",
-      "พื้นที่เครื่องมือซ้อมแบบโต้ตอบ สำหรับฝึกคอกีตาร์ เสียงคอร์ด และ groove"
+      "เปลี่ยนการเรียนรู้ออนไลน์ให้เป็นการฝึกซ้อมส่วนตัวที่วัดผลได้ พร้อมระบบติดตามความคืบหน้าและการตั้งสาย"
     )
   );
   header.querySelector("h3")?.setAttribute("id", "practiceStudioPreviewTitle");
 
   const contentDiv = month2CreateElement("div", "practice-studio-preview-content");
-  const fslContainer = document.createElement("div");
-  fslContainer.className = "fsl-app-container";
-  contentDiv.appendChild(fslContainer);
+  
+  // Create featured card
+  const card = month2CreateElement("div", "practice-studio-preview-card");
+  
+  const badge = month2CreateElement("span", "fsl-badge", "PREVIEW");
+  const title = month2CreateElement("h4", "fsl-card-title", "Fretboard Studio Lite");
+  const desc = month2CreateElement("p", "fsl-card-desc", "ฝึกจำคอ / interval / chord tones แบบโต้ตอบ");
+  
+  const openBtn = month2CreateElement("button", "fsl-btn fsl-open-btn", "เปิด Studio");
+  openBtn.addEventListener("click", () => {
+    openFretboardStudioModal();
+  });
+  
+  card.append(badge, title, desc, openBtn);
+  contentDiv.appendChild(card);
 
   shell.append(header, contentDiv);
-  mountFretboardStudioLite(fslContainer);
   return shell;
+}
 
+function openFretboardStudioModal() {
+  if (document.getElementById("fsl-studio-modal")) return;
+
+  const modalOverlay = document.createElement("div");
+  modalOverlay.id = "fsl-studio-modal";
+  modalOverlay.className = "fsl-studio-modal-overlay";
+
+  const modalContent = document.createElement("div");
+  modalContent.className = "fsl-studio-modal-content";
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "fsl-studio-close-btn";
+  closeBtn.textContent = "ปิด Studio";
+  
+  const closeModal = () => {
+    if (modalOverlay.parentNode) {
+      modalOverlay.parentNode.removeChild(modalOverlay);
+    }
+    document.removeEventListener("keydown", escapeListener);
+  };
+
+  closeBtn.addEventListener("click", closeModal);
+  
+  const escapeListener = (e) => {
+    if (e.key === "Escape") closeModal();
+  };
+  document.addEventListener("keydown", escapeListener);
+  
+  modalOverlay.addEventListener("click", (e) => {
+    if (e.target === modalOverlay) closeModal();
+  });
+
+  const fslContainer = document.createElement("div");
+  fslContainer.className = "fsl-app-container";
+
+  modalContent.append(closeBtn, fslContainer);
+  modalOverlay.append(modalContent);
+  document.body.appendChild(modalOverlay);
+
+  mountFretboardStudioLite(fslContainer);
 }
 
 function mountFretboardStudioLite(containerElement) {
   if (!containerElement || containerElement.dataset.fslMounted === "true") return;
   containerElement.dataset.fslMounted = "true";
+
+  let audioCtx = null;
+  let isSoundEnabled = false;
+
+  function initAudio() {
+    if (!audioCtx) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      } catch(e) {}
+    }
+  }
+
+  function playNoteFrequency(stringIdx, fret) {
+    if (!isSoundEnabled || !audioCtx) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    
+    // strings: 0=e(1), 1=B(2), 2=G(3), 3=D(4), 4=A(5), 5=E(6)
+    const baseMidi = [64, 59, 55, 50, 45, 40][stringIdx];
+    const midi = baseMidi + fret;
+    const freq = 440 * Math.pow(2, (midi - 69) / 12);
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    
+    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.4, audioCtx.currentTime + 0.05);
+    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.35);
+    
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + 0.4);
+  }
+
 
   const fslSharpNotes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
   const fslFlatNotes = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
@@ -4758,19 +4848,19 @@ function mountFretboardStudioLite(containerElement) {
     11: "Major 7th tension"
   };
   const fslIntervalNames = {
-    0: "1 (Root)",
-    1: "b2",
-    2: "2",
-    3: "b3",
-    4: "3",
-    5: "4",
-    6: "b5",
-    7: "5",
-    8: "#5",
-    9: "6",
-    10: "b7",
-    11: "7"
-  };
+      0: "Root",
+      1: "b2",
+      2: "2",
+      3: "b3",
+      4: "3",
+      5: "4",
+      6: "b5",
+      7: "5",
+      8: "b6",
+      9: "6",
+      10: "b7",
+      11: "7"
+    };
   const fslState = {
     key: "A",
     overlay: "minor-pentatonic",
@@ -4869,7 +4959,14 @@ function mountFretboardStudioLite(containerElement) {
         <button type="button" class="fsl-focus-chip fsl-active" data-fsl-interval="all">Show All</button>
       </div>
 
-      <div class="fsl-fretboard-wrapper">
+      
+        <div class="fsl-sound-toggle-bar">
+          <label class="fsl-sound-toggle">
+            <input type="checkbox" data-fsl-sound-toggle />
+            <span>Sound: <span data-fsl-sound-status>Off</span></span>
+          </label>
+        </div>
+        <div class="fsl-fretboard-wrapper">
         <div class="fsl-fretboard" data-fsl-fretboard></div>
         <div class="fsl-fret-markers" data-fsl-fret-markers></div>
       </div>
@@ -4898,10 +4995,18 @@ function mountFretboardStudioLite(containerElement) {
     compareContent: containerElement.querySelector("[data-fsl-compare-content]"),
     inspectorContent: containerElement.querySelector("[data-fsl-inspector-content]"),
     fretboard: containerElement.querySelector("[data-fsl-fretboard]"),
-    fretMarkers: containerElement.querySelector("[data-fsl-fret-markers]")
+    fretMarkers: containerElement.querySelector("[data-fsl-fret-markers]"),
+      soundToggle: containerElement.querySelector("[data-fsl-sound-toggle]"),
+      soundStatus: containerElement.querySelector("[data-fsl-sound-status]")
   };
 
-  fslRefs.keySelect?.addEventListener("change", (event) => {
+  
+    fslRefs.soundToggle?.addEventListener("change", (e) => {
+      isSoundEnabled = e.target.checked;
+      fslRefs.soundStatus.textContent = isSoundEnabled ? "On" : "Off";
+      if (isSoundEnabled) initAudio();
+    });
+fslRefs.keySelect?.addEventListener("change", (event) => {
     fslState.key = event.target.value;
     fslState.challengeFound = [];
     fslResetSelection();
@@ -5023,10 +5128,10 @@ function mountFretboardStudioLite(containerElement) {
     const found = fslState.challengeFound.length;
     if (found >= totalTargets && totalTargets > 0) {
       fslRefs.challengeFeedback.className = "fsl-challenge-feedback fsl-feedback-correct";
-      fslRefs.challengeFeedback.textContent = `ยอดเยี่ยม! หาครบทั้งหมด ${totalTargets} ตัวแล้ว`;
+      fslRefs.challengeFeedback.textContent = `ยอดเยี่ยม! หาครบทั้งหมด{totalTargets} ตัวแล้ว`;
     } else {
       fslRefs.challengeFeedback.className = "fsl-challenge-feedback";
-      fslRefs.challengeFeedback.textContent = `พบแล้ว ${found} / ${totalTargets}`;
+      fslRefs.challengeFeedback.textContent = `พบแล้ว{found} /{totalTargets}`;
     }
   }
 
@@ -5077,7 +5182,7 @@ function mountFretboardStudioLite(containerElement) {
       </div>
       <div class="fsl-ins-row">
         <span class="fsl-ins-label">Position:</span>
-        <span class="fsl-ins-val">สาย ${noteData.stringNumber} เฟรต ${noteData.fret}</span>
+        <span class="fsl-ins-val">สาย{noteData.stringNumber} เฟรต{noteData.fret}</span>
       </div>
       <div class="fsl-ins-row">
         <span class="fsl-ins-label">Interval:</span>
@@ -5116,9 +5221,9 @@ function mountFretboardStudioLite(containerElement) {
         const intervalClass = fslGetIntervalClass(interval);
         const noteNode = document.createElement("button");
         noteNode.type = "button";
-        noteNode.className = intervalClass ? `fsl-note-node ${intervalClass}` : "fsl-note-node";
+        noteNode.className = intervalClass ? `fsl-note-node{intervalClass}` : "fsl-note-node";
         noteNode.dataset.active = String(isActive);
-        noteNode.setAttribute("aria-label", `String ${stringNumber} fret ${fret} note ${noteName} interval ${fslGetIntervalName(interval)}`);
+        noteNode.setAttribute("aria-label", `String{stringNumber} fre{fret} note{noteName} interval{fslGetIntervalName(interval)}`);
 
         if (fslState.focusInterval !== "all") {
           noteNode.dataset.focus = String(String(interval) === fslState.focusInterval);
@@ -5266,7 +5371,7 @@ function renderMiniCourseCard(course) {
     month2CreateElement("p", "panel-label", chipLabel),
     month2CreateElement("h3", "", meta.title || "Rhythm Notation Starter"),
     month2CreateElement("p", "mini-course-thai-title", meta.thaiTitle || "อ่านค่าจังหวะ: ตัวดำ ตัวหยุด และจังหวะตก-ยก"),
-    month2CreateElement("p", "", `${totalDays} วัน · วันละประมาณ ${meta.estimatedMinutesPerDay || 10} นาที · ทำแล้ว ${completedCount}/${totalDays} วัน`)
+    month2CreateElement("p", "", `${totalDays} วัน · วันละประมาณ{meta.estimatedMinutesPerDay || 10} นาที · ทำแล้ว{completedCount}/${totalDays} วัน`)
   );
 
   const ctaLabel = meta.visibility === "public" ? "เปิดคอร์สเสริม" : "เปิด Mini Course";
@@ -5301,7 +5406,7 @@ function renderMiniCourseDetail(course) {
     month2CreateElement("p", "eyebrow", "Hidden Mini Course Preview"),
     month2CreateElement("h3", "", meta.title || "Rhythm Notation Starter"),
     month2CreateElement("p", "", meta.thaiTitle || "อ่านค่าจังหวะ: ตัวดำ ตัวหยุด และจังหวะตก-ยก"),
-    month2CreateElement("p", "mini-course-progress-copy", progress.completedDays.length ? `ทำแล้ว ${progress.completedDays.length}/${totalDays} วัน` : "เริ่มจาก Day 1 แบบช้า ๆ ก่อนครับ")
+    month2CreateElement("p", "mini-course-progress-copy", progress.completedDays.length ? `ทำแล้ว{progress.completedDays.length}/${totalDays} วัน` : "เริ่มจาก Day 1 แบบช้า ๆ ก่อนครับ")
   );
 
   const resetButton = month2CreateElement("button", "small-button mini-course-reset-button", "ล้าง Mini Course");
@@ -5354,7 +5459,7 @@ function renderMiniCourseDaySelector(course, progress) {
     if (isCurrent) button.setAttribute("aria-current", "step");
     button.dataset.miniCourseDay = String(day);
     button.append(
-      month2CreateElement("strong", "", `Day ${day}`),
+      month2CreateElement("strong", "", `Day{day}`),
       month2CreateElement("span", "", isComplete ? "ทำแล้ว" : isCurrent ? "กำลังฝึก" : "เปิดได้")
     );
     button.addEventListener("click", () => {
@@ -5372,7 +5477,7 @@ function renderMiniCourseDaySelector(course, progress) {
 function renderMiniCourseModule(module, progress) {
   const section = month2CreateElement("section", "mini-course-module");
   section.append(
-    month2CreateElement("p", "eyebrow", `Day ${module.day || ""}`.trim()),
+    month2CreateElement("p", "eyebrow", `Day{module.day || ""}`.trim()),
     month2CreateElement("h4", "", module.thaiTitle || module.title || "Mini Course Day"),
     month2CreateElement("p", "", module.summary || "")
   );
@@ -5640,7 +5745,7 @@ function renderMiniCourseTypeConfirm(courseId, phrase = "RESET MINI COURSE") {
 
   card.append(
     month2CreateElement("strong", "", "ยืนยันการล้าง Mini Course"),
-    month2CreateElement("p", "", `คุณทำ Mini Course นี้ไปเกินครึ่งแล้ว ถ้าต้องการล้างจริง ให้พิมพ์ ${phrase}`),
+    month2CreateElement("p", "", `คุณทำ Mini Course นี้ไปเกินครึ่งแล้ว ถ้าต้องการล้างจริง ให้พิมพ์{phrase}`),
     month2CreateElement("label", "", "พิมพ์ข้อความยืนยัน"),
     input,
     hint,
