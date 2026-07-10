@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sound Lab Engine Spike 2</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <header class="header">
+      <h1>Sound Lab V2 Engine Spike</h1>
+      <div id="audioStatus" class="status-badge status-locked">Audio Locked</div>
+    </header>
+
+    <main class="main-content">
+      <!-- LED Display -->
+      <section class="led-display">
+        <div class="led-chord" id="displayChord">--</div>
+        <div class="led-info">
+          <div class="led-guide-tone" id="displayGuideTone">--</div>
+          <div class="led-desc" id="displayDesc">Select a chord to see its guide tone</div>
+        </div>
+      </section>
+
+      <!-- Controls -->
+      <section class="controls-panel">
+        <div class="control-group">
+          <label>Test Chord</label>
+          <select id="chordSelect">
+            <option value="A7">A7 (C# / G)</option>
+            <option value="Am7">Am7 (C / G)</option>
+            <option value="D7">D7 (F# / C)</option>
+            <option value="E7">E7 (G# / D)</option>
+            <option value="Cmaj7">Cmaj7 (E / B)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label>Engine Option</label>
+          <select id="engineSelect">
+            <option value="native-simple">1. Native Simple (Oscillator)</option>
+            <option value="native-plucked">2. Native Plucked Guide Tone</option>
+            <option value="tonejs-pluck">3. Tone.js PluckSynth</option>
+            <option value="diagnostic-low">4. Diagnostic Low Register</option>
+          </select>
+        </div>
+
+        <div class="control-group row-group">
+          <label>Volume Trim</label>
+          <input type="range" id="volumeTrim" min="0" max="100" value="70">
+        </div>
+
+        <button id="playBtn" class="play-btn">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+          Play Guide Tone
+        </button>
+      </section>
+
+      <!-- Debug Panel -->
+      <section class="debug-panel">
+        <h3>Debug Info</h3>
+        <ul id="debugList">
+          <li><strong>Chord:</strong> <span id="dbgChord">none</span></li>
+          <li><strong>Active Guide Tone:</strong> <span id="dbgTone">none</span></li>
+          <li><strong>Playback Frequency:</strong> <span id="dbgFreq">0 Hz</span></li>
+          <li><strong>Engine:</strong> <span id="dbgEngine">none</span></li>
+        </ul>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
