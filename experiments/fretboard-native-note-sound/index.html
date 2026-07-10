@@ -38,8 +38,8 @@
     <section class="controls-grid" aria-label="Sound controls">
       <label class="control-card">
         <span>Volume</span>
-        <input id="volumeControl" type="range" min="0.05" max="0.45" step="0.01" value="0.22">
-        <strong id="volumeReadout">22%</strong>
+        <input id="volumeControl" type="range" min="0.05" max="0.9" step="0.01" value="0.45">
+        <strong id="volumeReadout">45%</strong>
       </label>
 
       <label class="control-card">
@@ -55,7 +55,32 @@
           <option value="triangle" selected>triangle</option>
         </select>
       </label>
+
+      <label class="control-card">
+        <span>Sound Engine</span>
+        <select id="engineSelect">
+          <option value="clean">Clean Oscillator</option>
+          <option value="boosted">Boosted Oscillator</option>
+          <option value="plucked" selected>Sound Lab Plucked</option>
+          <option value="diagnostic-low">Diagnostic Low Register</option>
+        </select>
+      </label>
+
+      <label class="control-card">
+        <span>Output Trim</span>
+        <input id="outputTrimControl" type="range" min="0.7" max="1.8" step="0.05" value="1.15">
+        <strong id="outputTrimReadout">1.15x</strong>
+      </label>
+
+      <div class="control-card action-card">
+        <span>Compare</span>
+        <button id="replayLastNote" class="ghost-button" type="button">Replay Last Note</button>
+      </div>
     </section>
+
+    <p id="loudnessNote" class="loudness-note">
+      If this engine is too quiet on mobile, reject it for production.
+    </p>
 
     <section class="note-section" aria-labelledby="gridTitle">
       <div class="section-heading">
@@ -85,6 +110,10 @@
         <div>
           <dt>Frequency</dt>
           <dd id="frequencyReadout">-</dd>
+        </div>
+        <div>
+          <dt>Engine</dt>
+          <dd id="engineReadout">-</dd>
         </div>
       </dl>
       <button id="lowRegisterTest" class="ghost-button" type="button">Diagnostic only: test A2</button>

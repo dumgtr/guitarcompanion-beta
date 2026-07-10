@@ -2,7 +2,7 @@
 
 Phase: isolated experiment only.
 
-This sandbox tests a native Web Audio note-preview model for future Fretboard Studio Lite work. It is intentionally separate from production and must not be merged into the production Fretboard Studio modal without a later integration spec and approval.
+This sandbox tests native Web Audio note-preview models for future Fretboard Studio Lite work. It is now a small Sound Engine Shootout so the user can compare engines before any production integration. It is intentionally separate from production and must not be merged into the production Fretboard Studio modal without a later integration spec and approval.
 
 ## Guardrails
 
@@ -20,12 +20,32 @@ This sandbox tests a native Web Audio note-preview model for future Fretboard St
 
 - Audio unlock happens only after the user presses `เปิดเสียง`.
 - Notes use native `AudioContext` / `webkitAudioContext`.
-- Each note uses one sine or triangle oscillator.
 - A short gain envelope avoids harsh clicks:
   - fast attack
   - short decay/release
   - duration around 250-450ms
 - Active notes are stopped before a new note plays.
+- The original double-attenuation issue is fixed: user volume is applied at the per-note envelope, while master gain stays stable and output trim is separate.
+
+## Engine Options
+
+1. Clean Oscillator
+   - Native oscillator only.
+   - Uses the selected sine / triangle waveform.
+   - Clean gain staging: master gain is stable, per-note envelope peak follows user volume.
+
+2. Boosted Oscillator
+   - Native oscillator plus gentle lowpass filter, compressor, and output trim.
+   - Intended to be louder than Clean Oscillator without harsh clipping.
+
+3. Sound Lab Plucked
+   - Native Web Audio voice modeled after the production Sound Lab guide-tone character.
+   - Uses a small blend of triangle / sine oscillators, filter envelope, gain envelope, compressor, and output trim.
+   - Still plays one note at a time. No stacked chords and no arpeggios.
+
+4. Diagnostic Low Register
+   - Plays actual low-register notes such as A2 for comparison only.
+   - Not recommended as the learner-facing default unless mobile speaker QA passes.
 
 ## Register Decision
 
@@ -79,16 +99,21 @@ Desktop Chrome:
 - A / C / C# / D / E / G all play.
 - Sound On/Off works.
 - Volume slider changes loudness.
+- Output Trim changes final loudness.
 - Duration slider changes note length.
 - sine / triangle selector changes tone.
+- Engine selector changes sound.
+- Replay Last Note replays the most recent note with the current selected engine.
 - Debug display shows label note, playback note, and frequency.
+- Debug display shows the active engine.
 
 Mobile browser:
 
 - First tap unlock works.
 - Note buttons are large enough to tap.
 - No horizontal overflow at 390px / 430px.
-- Default register is audible enough on small speakers.
+- At least one engine is loud enough on small speakers.
+- Diagnostic Low Register is clearly marked as diagnostic only.
 
 ## Production Recommendation
 
@@ -100,3 +125,4 @@ For F3C-C, keep the same principle:
 - label note and playback note stay separate
 - default learner playback should stay in a clear register
 - low-register playback requires explicit QA before becoming learner-facing
+- reject any engine that is too quiet on mobile speakers

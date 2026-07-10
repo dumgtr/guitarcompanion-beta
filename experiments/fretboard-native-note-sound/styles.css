@@ -191,6 +191,10 @@ select {
   color: var(--warm);
 }
 
+.action-card {
+  align-content: start;
+}
+
 .control-card input,
 .control-card select {
   width: 100%;
@@ -200,6 +204,16 @@ select {
   background: var(--surface-soft);
   color: var(--ink);
   padding: 8px 10px;
+}
+
+.loudness-note {
+  margin: -4px 0 0;
+  border: 1px solid color-mix(in srgb, var(--warm) 36%, var(--line));
+  border-radius: 12px;
+  background: rgba(229, 162, 74, 0.08);
+  color: var(--warm);
+  padding: 12px 14px;
+  font-weight: 800;
 }
 
 .note-section {
