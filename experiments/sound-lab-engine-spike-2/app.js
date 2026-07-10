@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let audioCtx = null;
   let toneSynth = null;
   let audioUnlocked = false;
+  let activeVoice = null;
 
   function updateDisplay() {
     const chord = chordSelect.value;
@@ -40,30 +41,111 @@ document.addEventListener("DOMContentLoaded", () => {
     dbgEngine.textContent = engineSelect.value;
   }
 
-  function unlockAudio() {
-    if (audioUnlocked) return;
-    
+  async function unlockAudio() {
+    audioStatus.textContent = "Unlocking Audio...";
+    audioStatus.className = "status-badge";
+
     const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (AudioContext) {
+    if (!audioCtx && AudioContext) {
       audioCtx = new AudioContext();
     }
-    
-    // Tone.js
-    if (window.Tone) {
-      Tone.start();
-      toneSynth = new Tone.PluckSynth().toDestination();
+
+    try {
+      if (audioCtx && audioCtx.state === "suspended") {
+        await audioCtx.resume();
+      }
+
+      if (window.Tone) {
+        await Tone.start();
+      }
+
+      if (window.Tone && !toneSynth) {
+        toneSynth = new Tone.PluckSynth().toDestination();
+      }
+    } catch (error) {
+      console.error("Audio unlock failed", error);
+      audioUnlocked = false;
+      audioStatus.textContent = "Audio Failed";
+      audioStatus.className = "status-badge status-failed";
+      return false;
     }
 
-    if (audioCtx || window.Tone) {
+    const nativeReady = Boolean(audioCtx && audioCtx.state === "running");
+    const toneReady = Boolean(window.Tone && toneSynth);
+    if (nativeReady || toneReady) {
       audioUnlocked = true;
       audioStatus.textContent = "Audio Ready";
       audioStatus.className = "status-badge status-ready";
+      return true;
+    }
+
+    audioUnlocked = false;
+    audioStatus.textContent = "Audio Locked";
+    audioStatus.className = "status-badge";
+    return false;
+  }
+
+  function stopActiveVoice() {
+    if (!activeVoice) return;
+
+    if (activeVoice.timer) {
+      clearTimeout(activeVoice.timer);
+    }
+
+    if (activeVoice.stop) {
+      try { activeVoice.stop(); } catch {}
+    }
+
+    (activeVoice.sources || []).forEach((source) => {
+      try { source.stop(); } catch {}
+    });
+
+    (activeVoice.nodes || []).forEach((node) => {
+      try { node.disconnect(); } catch {}
+    });
+
+    activeVoice = null;
+  }
+
+  function trackNativeVoice(sources, nodes, cleanupSource) {
+    const voice = { sources, nodes };
+    activeVoice = voice;
+
+    cleanupSource.addEventListener("ended", () => {
+      if (activeVoice !== voice) return;
+      nodes.forEach((node) => {
+        try { node.disconnect(); } catch {}
+      });
+      activeVoice = null;
+    }, { once: true });
+  }
+
+  function trackToneVoice(durationMs = 900) {
+    const voice = {
+      stop() {
+        if (!toneSynth) return;
+        try {
+          if (typeof toneSynth.triggerRelease === "function") {
+            toneSynth.triggerRelease();
+          }
+        } catch {}
+      },
+      timer: window.setTimeout(() => {
+        if (activeVoice === voice) activeVoice = null;
+      }, durationMs)
+    };
+    activeVoice = voice;
+  }
+
+  function ensureToneSynth() {
+    if (window.Tone && !toneSynth) {
+      toneSynth = new Tone.PluckSynth().toDestination();
     }
   }
 
   function playNativeSimple(freq, volume) {
     if (!audioCtx) return;
-    if (audioCtx.state === 'suspended') audioCtx.resume();
+    if (audioCtx.state !== "running") return;
 
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -81,11 +163,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     osc.start(audioCtx.currentTime);
     osc.stop(audioCtx.currentTime + 1.1);
+    trackNativeVoice([osc], [osc, gain], osc);
   }
 
   function playNativePlucked(freq, volume) {
     if (!audioCtx) return;
-    if (audioCtx.state === 'suspended') audioCtx.resume();
+    if (audioCtx.state !== "running") return;
 
     const osc = audioCtx.createOscillator();
     const filter = audioCtx.createBiquadFilter();
@@ -110,13 +193,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     osc.start(audioCtx.currentTime);
     osc.stop(audioCtx.currentTime + 1.6);
+    trackNativeVoice([osc], [osc, filter, gain, compressor], osc);
   }
 
   function playToneJs(freq, volume) {
+    ensureToneSynth();
     if (toneSynth) {
       const vol = (volume / 100) * 20 - 20; // Convert 0-100 to roughly -20 to 0 dB
       toneSynth.volume.value = vol === -20 ? -Infinity : vol;
-      toneSynth.triggerAttackRelease(freq, "1n");
+      try {
+        if (typeof toneSynth.triggerRelease === "function") {
+          toneSynth.triggerRelease();
+        }
+      } catch {}
+      toneSynth.triggerAttackRelease(freq, "8n");
+      trackToneVoice(900);
     } else {
       console.warn("Tone.js not loaded, falling back to Native Plucked");
       playNativePlucked(freq, volume);
@@ -129,7 +220,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   playBtn.addEventListener("click", async () => {
-    if (!audioUnlocked) unlockAudio();
+    const ready = await unlockAudio();
+    if (!ready) return;
+    stopActiveVoice();
     
     const chord = chordSelect.value;
     const engine = engineSelect.value;

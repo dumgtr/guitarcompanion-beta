@@ -16,3 +16,16 @@ This isolated experiment compares different audio synthesis engines for the upco
 - It avoids autoplay; all audio requires a user gesture (clicking "Play Guide Tone").
 - No external dependencies are added to the main project (Tone.js is loaded via CDN specifically in this sandbox HTML).
 - It strictly plays one guide tone at a time, avoiding arpeggios or full stacked chords to maintain the Sound Lab teaching focus.
+
+## Voice Handling Polish
+
+- Audio unlock is async and only marks `Audio Ready` after native Web Audio resume and/or `Tone.start()` succeeds.
+- The sandbox tracks one active guide-tone voice at a time.
+- Starting a new guide tone stops and disconnects the previous native oscillator/filter/gain/compressor chain.
+- Tone.js repeated notes are also guarded by reusing a single synth and attempting release before retriggering.
+- One chord item still maps to one guide tone only; there are no stacked chords, no arpeggios, and no autoplay.
+
+## Listening QA Notes
+
+- Rapid Play button presses should not create obvious overlapping guide tones.
+- If Tone.js still rings slightly on repeated clicks, treat that as a sandbox limitation and prefer native behavior for the next production review.
