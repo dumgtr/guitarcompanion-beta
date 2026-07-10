@@ -5227,6 +5227,14 @@ initFocusedApp();
 /* ========================================= */
 
 function mountFretboardStudioLite(containerId) {
+  const rootEl = document.getElementById(containerId);
+  if (!rootEl) return;
+  if (rootEl.dataset.fslMounted === "true") return;
+  rootEl.dataset.fslMounted = "true";
+
+  const $ = (selector) => rootEl.querySelector(selector);
+  const $$ = (selector) => Array.from(rootEl.querySelectorAll(selector));
+
 const SHARP_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const FLAT_NOTES = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 const STRING_BASES = [4, 11, 7, 2, 9, 4]; // E, B, G, D, A, E
@@ -5253,8 +5261,8 @@ const OVERLAYS = {
 const INTERVAL_ROLES_TH = {
   '0': 'บ้าน จุดพัก จุดเริ่มและจุดจบของ phrase',
   '2': 'Passing tone / Color tone',
-  '3': 'สี fsl-minor / blues sadness',
-  '4': 'สี fsl-major / bright resolution',
+  '3': 'สี minor / blues sadness',
+  '4': 'สี major / bright resolution',
   '5': 'Passing tone / Color tone',
   '7': 'โครงคอร์ดที่มั่นคง',
   '9': 'Passing tone / Color tone',
@@ -5263,27 +5271,27 @@ const INTERVAL_ROLES_TH = {
 };
 
 function init() {
-  document.getElementById('key-select').addEventListener('change', (e) => {
+  $('#fsl-key-select').addEventListener('change', (e) => {
     STATE.key = e.target.value;
     STATE.challengeFound = [];
     resetSelection();
     render();
   });
-  document.getElementById('overlay-select').addEventListener('change', (e) => {
+  $('#fsl-overlay-select').addEventListener('change', (e) => {
     STATE.overlay = e.target.value;
     resetSelection();
     render();
   });
-  document.getElementById('position-select').addEventListener('change', (e) => {
+  $('#fsl-position-select').addEventListener('change', (e) => {
     STATE.position = e.target.value;
     STATE.challengeFound = [];
     render();
   });
 
   // Focus chips
-  document.querySelectorAll('.focus-chip').forEach(chip => {
+  $$('.focus-chip').forEach(chip => {
     chip.addEventListener('click', (e) => {
-      document.querySelectorAll('.focus-chip').forEach(c => c.classList.remove('active'));
+      $$('.focus-chip').forEach(c => c.classList.remove('active'));
       e.target.classList.add('active');
       STATE.focusInterval = e.target.dataset.interval;
       render();
@@ -5291,14 +5299,14 @@ function init() {
   });
 
   // Challenge
-  document.getElementById('challenge-select').addEventListener('change', (e) => {
+  $('#fsl-challenge-select').addEventListener('change', (e) => {
     STATE.challenge = e.target.value;
     STATE.challengeFound = [];
     resetSelection();
     updateChallengeFeedback();
     render();
   });
-  document.getElementById('challenge-reset-btn').addEventListener('click', () => {
+  $('#fsl-challenge-reset-btn').addEventListener('click', () => {
     STATE.challengeFound = [];
     resetSelection();
     updateChallengeFeedback();
@@ -5352,7 +5360,7 @@ function updateComparePanel() {
   const b3Name = getNoteName((rootIdx + 3) % 12);
   const major3Name = getNoteName((rootIdx + 4) % 12);
 
-  const content = document.getElementById('fsl-compare-content');
+  const content = $('#fsl-compare-content');
   content.innerHTML = `
     <div class="fsl-compare-item">
       <div class="fsl-compare-note minor">${b3Name}</div>
@@ -5366,7 +5374,7 @@ function updateComparePanel() {
 }
 
 function updateChallengeFeedback() {
-  const fb = document.getElementById('fsl-challenge-feedback');
+  const fb = $('#fsl-challenge-feedback');
   if (!STATE.challenge) {
     fb.className = 'fsl-challenge-feedback';
     fb.textContent = 'เลือกบททดสอบเพื่อเริ่ม';
@@ -5428,13 +5436,13 @@ function handleChallengeClick(noteData, domNode) {
 }
 
 function renderInspectorEmpty() {
-  const content = document.getElementById('inspector-content');
+  const content = $('#fsl-inspector-content');
   content.innerHTML = 'จิ้มที่โน้ตบนคอกีตาร์เพื่อดูรายละเอียด';
   content.className = 'fsl-inspector-empty';
 }
 
 function updateInspector(noteData) {
-  const content = document.getElementById('inspector-content');
+  const content = $('#fsl-inspector-content');
   content.className = 'fsl-inspector-data';
 
   const roleTh = INTERVAL_ROLES_TH[noteData.interval] || 'Passing tone';
@@ -5459,8 +5467,8 @@ function updateInspector(noteData) {
 }
 
 function render() {
-  const fsl-fretboard = document.getElementById('fsl-fretboard');
-  const markers = document.getElementById('fsl-fret-markers');
+  const fretboard = $('#fsl-fretboard');
+  const markers = $('#fsl-fret-markers');
   const rootIdx = getRootIndex();
   const activeIntervals = OVERLAYS[STATE.overlay] || [];
 
@@ -5531,7 +5539,7 @@ function render() {
       const noteData = { noteName, stringIdx, stringNum, fret, interval };
       noteNode.addEventListener('click', (e) => {
         // Clear old selection styling
-        document.querySelectorAll('.note-node').forEach(n => n.classList.remove('fsl-is-selected'));
+        $$('.note-node').forEach(n => n.classList.remove('fsl-is-selected'));
         if (!STATE.challenge) {
           noteNode.classList.add('fsl-is-selected');
         }

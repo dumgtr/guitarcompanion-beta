@@ -195,7 +195,7 @@
           <div id="fsl-container" class="fsl-app-container">
             <header>
               <h1>Fretboard Studio Lite <span>V1 Prototype</span></h1>
-              <div id="debug-status" class="fsl-status-line">Ready</div>
+              <div id="fsl-debug-status" class="fsl-status-line">Ready</div>
             </header>
 
             <div class="fsl-teaching-panel">
@@ -206,8 +206,8 @@
               <div class="fsl-controls-panel fsl-panel-card">
                 <h3>ตั้งค่า Fretboard</h3>
                 <div class="fsl-control-group">
-                  <label for="key-select">Key</label>
-                  <select id="key-select">
+                  <label for="fsl-key-select">Key</label>
+                  <select id="fsl-key-select">
                     <option value="C">C</option>
                     <option value="G">G</option>
                     <option value="D">D</option>
@@ -219,8 +219,8 @@
                   </select>
                 </div>
                 <div class="fsl-control-group">
-                  <label for="overlay-select">Overlay</label>
-                  <select id="overlay-select">
+                  <label for="fsl-overlay-select">Overlay</label>
+                  <select id="fsl-overlay-select">
                     <option value="notes">Diatonic Notes</option>
                     <option value="intervals">Intervals</option>
                     <option value="triad">Triad (1-3-5)</option>
@@ -230,8 +230,8 @@
                   </select>
                 </div>
                 <div class="fsl-control-group">
-                  <label for="position-select">Position</label>
-                  <select id="position-select">
+                  <label for="fsl-position-select">Position</label>
+                  <select id="fsl-position-select">
                     <option value="0-12" selected>Full (0-12)</option>
                     <option value="0-4">Open (0-4)</option>
                     <option value="5-9">Mid (5-9)</option>
@@ -241,14 +241,14 @@
 
               <div class="fsl-inspector-panel fsl-panel-card">
                 <h3>โน้ตที่เลือก (Inspector)</h3>
-                <div id="inspector-content" class="fsl-inspector-empty">
+                <div id="fsl-inspector-content" class="fsl-inspector-empty">
                   จิ้มที่โน้ตบนคอกีตาร์เพื่อดูรายละเอียด
                 </div>
               </div>
 
               <div class="fsl-compare-panel fsl-panel-card">
                 <h3>สี Major vs Minor</h3>
-                <div class="fsl-compare-content" id="compare-content">
+                <div class="fsl-compare-content" id="fsl-compare-content">
                   <!-- Populated by JS -->
                 </div>
               </div>
@@ -256,16 +256,16 @@
               <div class="fsl-challenge-panel fsl-panel-card">
                 <h3>โหมดท้าทาย (Challenge)</h3>
                 <div class="fsl-challenge-controls">
-                  <select id="challenge-select">
+                  <select id="fsl-challenge-select">
                     <option value="">เลือกบททดสอบ...</option>
                     <option value="0">หา Root ให้ครบ</option>
                     <option value="3">หา b3 ให้ครบ</option>
                     <option value="4">หา 3 ให้ครบ</option>
                     <option value="10">หา b7 ให้ครบ</option>
                   </select>
-                  <button id="challenge-reset-btn" class="fsl-btn">Reset</button>
+                  <button id="fsl-challenge-reset-btn" class="fsl-btn">Reset</button>
                 </div>
-                <div id="challenge-feedback" class="fsl-challenge-feedback">
+                <div id="fsl-challenge-feedback" class="fsl-challenge-feedback">
                   เลือกบททดสอบเพื่อเริ่ม
                 </div>
               </div>
@@ -282,10 +282,10 @@
             </div>
 
             <div class="fsl-fretboard-wrapper">
-              <div class="fsl-fretboard" id="fretboard">
+              <div class="fsl-fretboard" id="fsl-fretboard">
                 <!-- Rendered via JS -->
               </div>
-              <div class="fsl-fret-markers" id="fret-markers">
+              <div class="fsl-fret-markers" id="fsl-fret-markers">
                 <!-- Rendered via JS -->
               </div>
             </div>
