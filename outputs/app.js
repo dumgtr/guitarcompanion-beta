@@ -4775,13 +4775,14 @@ function openFretboardStudioModal() {
   };
   document.addEventListener("keydown", escapeListener);
 
-  const placeholder = document.createElement("div");
-  placeholder.className = "fsl-studio-placeholder";
-  placeholder.textContent = "Studio panel ready. Fretboard engine will move here in F3C-B.";
+  const toolRoot = document.createElement("div");
+  toolRoot.className = "fsl-studio-tool-root fsl-app-container";
 
-  modalContent.append(headerDiv, placeholder);
+  modalContent.append(headerDiv, toolRoot);
   modalOverlay.append(modalContent);
   document.body.appendChild(modalOverlay);
+
+  mountFretboardStudioLite(toolRoot);
 }
 
 function mountFretboardStudioLite(containerElement) {
