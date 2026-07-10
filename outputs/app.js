@@ -4761,7 +4761,10 @@ function openFretboardStudioModal() {
 
   headerDiv.append(titleDiv, closeBtn);
 
+  let cleanupFslMount = () => {};
+
   const closeModal = () => {
+    cleanupFslMount();
     if (modalOverlay.parentNode) {
       modalOverlay.parentNode.removeChild(modalOverlay);
     }
@@ -4775,6 +4778,10 @@ function openFretboardStudioModal() {
   };
   document.addEventListener("keydown", escapeListener);
 
+  modalOverlay.addEventListener("click", (event) => {
+    if (event.target === modalOverlay) closeModal();
+  });
+
   const toolRoot = document.createElement("div");
   toolRoot.className = "fsl-studio-tool-root fsl-app-container";
 
@@ -4782,12 +4789,54 @@ function openFretboardStudioModal() {
   modalOverlay.append(modalContent);
   document.body.appendChild(modalOverlay);
 
-  mountFretboardStudioLite(toolRoot);
+  cleanupFslMount = mountFretboardStudioLite(toolRoot) || (() => {});
 }
 
 function mountFretboardStudioLite(containerElement) {
   if (!containerElement || containerElement.dataset.fslMounted === "true") return;
   containerElement.dataset.fslMounted = "true";
+
+  let fslSoundEnabled = false;
+  let fslSoundSession = 0;
+
+  function getFslAudioEngine() {
+    const engine = window.AudioEngine;
+    if (
+      !engine ||
+      typeof engine.unlock !== "function" ||
+      typeof engine.playNote !== "function" ||
+      typeof engine.stopChannel !== "function"
+    ) {
+      return null;
+    }
+    return engine;
+  }
+
+  const FSL_PLAYBACK_PITCH = Object.freeze({
+    C: "C4", "C#": "C#4", Db: "Db4",
+    D: "D4", "D#": "D#4", Eb: "Eb4",
+    E: "E4", F: "F4", "F#": "F#4", Gb: "Gb4",
+    G: "G4", "G#": "G#4", Ab: "Ab4",
+    A: "A4", "A#": "A#4", Bb: "Bb4", B: "B4"
+  });
+
+  function fslPlayNotePreview(noteName) {
+    if (!fslSoundEnabled) return;
+
+    const engine = getFslAudioEngine();
+    const playbackNote = FSL_PLAYBACK_PITCH[noteName];
+
+    if (!engine || !playbackNote) return;
+
+    void engine.playNote({
+      channel: "fsl",
+      profile: "fsl-note-preview",
+      note: playbackNote,
+      velocity: 0.7
+    }).catch(() => {
+      // Audio failure must never break FSL interaction.
+    });
+  }
 
   const fslSharpNotes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
   const fslFlatNotes = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
@@ -4886,6 +4935,13 @@ function mountFretboardStudioLite(containerElement) {
               <option value="5-9">Mid (5-9)</option>
             </select>
           </label>
+          <label class="fsl-control-group">
+            <span class="fsl-control-label">Sound Preview</span>
+            <label class="fsl-sound-toggle-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" data-fsl-sound-toggle>
+              <span data-fsl-sound-status>Sound: Off</span>
+            </label>
+          </label>
         </div>
 
         <div class="fsl-panel-card">
@@ -4953,8 +5009,72 @@ function mountFretboardStudioLite(containerElement) {
     compareContent: containerElement.querySelector("[data-fsl-compare-content]"),
     inspectorContent: containerElement.querySelector("[data-fsl-inspector-content]"),
     fretboard: containerElement.querySelector("[data-fsl-fretboard]"),
-    fretMarkers: containerElement.querySelector("[data-fsl-fret-markers]")
+    fretMarkers: containerElement.querySelector("[data-fsl-fret-markers]"),
+    soundToggle: containerElement.querySelector("[data-fsl-sound-toggle]"),
+    soundStatus: containerElement.querySelector("[data-fsl-sound-status]")
   };
+
+  if (fslRefs.soundToggle) {
+    fslRefs.soundToggle.checked = false;
+    fslSoundEnabled = false;
+    fslRefs.soundStatus.textContent = "Sound: Off";
+
+    fslRefs.soundToggle.addEventListener("change", async (e) => {
+      if (e.target.checked) {
+        const engine = getFslAudioEngine();
+        if (engine) {
+          const session = ++fslSoundSession;
+          fslRefs.soundStatus.textContent = "Unlocking...";
+
+          try {
+            const unlocked = await engine.unlock();
+            if (
+              session !== fslSoundSession ||
+              !containerElement.isConnected ||
+              !e.target.isConnected ||
+              !e.target.checked
+            ) {
+              return;
+            }
+
+            if (unlocked) {
+              fslSoundEnabled = true;
+              fslRefs.soundStatus.textContent = "Sound: On";
+            } else {
+              fslSoundEnabled = false;
+              e.target.checked = false;
+              fslRefs.soundStatus.textContent = "Sound: Unavailable";
+            }
+          } catch (err) {
+            if (
+              session !== fslSoundSession ||
+              !containerElement.isConnected ||
+              !e.target.isConnected ||
+              !e.target.checked
+            ) {
+              return;
+            }
+            console.warn("[FSL] Engine unlock error", err);
+            fslSoundEnabled = false;
+            e.target.checked = false;
+            fslRefs.soundStatus.textContent = "Sound: Unavailable";
+          }
+        } else {
+          fslSoundEnabled = false;
+          e.target.checked = false;
+          fslRefs.soundStatus.textContent = "Sound: Unavailable";
+        }
+      } else {
+        fslSoundSession++;
+        fslSoundEnabled = false;
+        fslRefs.soundStatus.textContent = "Sound: Off";
+        const engine = getFslAudioEngine();
+        if (engine) {
+          engine.stopChannel("fsl");
+        }
+      }
+    });
+  }
 
   fslRefs.keySelect?.addEventListener("change", (event) => {
     fslState.key = event.target.value;
@@ -5086,6 +5206,8 @@ function mountFretboardStudioLite(containerElement) {
   }
 
   function fslHandleNoteClick(noteData, noteNode) {
+    fslPlayNotePreview(noteData.noteName);
+
     if (fslState.challenge) {
       fslHandleChallengeClick(noteData, noteNode);
       return;
@@ -5227,6 +5349,18 @@ function mountFretboardStudioLite(containerElement) {
   }
 
   fslRender();
+
+  return () => {
+    fslSoundSession++;
+    fslSoundEnabled = false;
+    if (fslRefs && fslRefs.soundToggle) {
+      fslRefs.soundToggle.checked = false;
+    }
+    const engine = getFslAudioEngine();
+    if (engine) {
+      engine.stopChannel("fsl");
+    }
+  };
 }
 
 function getMiniCourses() {
