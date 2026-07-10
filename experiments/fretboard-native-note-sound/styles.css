@@ -1,0 +1,325 @@
+:root {
+  color-scheme: dark;
+  --bg: #11100f;
+  --surface: #1d1a17;
+  --surface-soft: #28231e;
+  --line: rgba(255, 255, 255, 0.12);
+  --ink: #f7f0e6;
+  --muted: #b9ab99;
+  --warm: #e5a24a;
+  --accent: #e56b25;
+  --danger: #f06b5d;
+  --ok: #80d39b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: var(--bg);
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at top left, rgba(229, 107, 37, 0.15), transparent 36rem),
+    linear-gradient(180deg, #15120f 0%, #0f0e0d 100%);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.55;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.sandbox-shell {
+  width: min(980px, 100%);
+  margin: 0 auto;
+  padding: 24px;
+  display: grid;
+  gap: 18px;
+}
+
+.hero,
+.status-card,
+.debug-card,
+.note-section,
+.control-card {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+}
+
+.hero {
+  padding: 26px;
+}
+
+.hero h1,
+.status-card h2,
+.debug-card h2,
+.note-section h2 {
+  margin: 0;
+  line-height: 1.2;
+}
+
+.hero p,
+.section-heading p,
+.debug-card p {
+  max-width: 70ch;
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.eyebrow,
+.section-label {
+  margin: 0 0 8px;
+  color: var(--warm);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.status-card {
+  padding: 18px;
+  display: grid;
+  gap: 16px;
+}
+
+.status-row,
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.status-pill,
+.status-muted {
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.status-pill {
+  border: 1px solid var(--line);
+}
+
+.status-locked {
+  color: var(--warm);
+  background: rgba(229, 162, 74, 0.1);
+}
+
+.status-ready {
+  color: var(--ok);
+  background: rgba(128, 211, 155, 0.1);
+}
+
+.status-failed {
+  color: var(--danger);
+  background: rgba(240, 107, 93, 0.1);
+}
+
+.status-muted {
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.primary-button,
+.ghost-button {
+  min-height: 44px;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.primary-button {
+  border: 1px solid color-mix(in srgb, var(--accent) 68%, var(--line));
+  background: linear-gradient(180deg, #f08535, #d95f20);
+  color: white;
+}
+
+.ghost-button {
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+  color: var(--ink);
+}
+
+.switch-control {
+  min-height: 44px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.switch-control input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.control-card {
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.control-card span {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.control-card strong {
+  color: var(--warm);
+}
+
+.control-card input,
+.control-card select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  padding: 8px 10px;
+}
+
+.note-section {
+  padding: 18px;
+}
+
+.section-heading {
+  margin-bottom: 16px;
+}
+
+.note-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.note-button {
+  min-height: 112px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 10px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 6px;
+  background:
+    linear-gradient(145deg, rgba(229, 107, 37, 0.12), transparent 56%),
+    var(--surface-soft);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.note-button:hover,
+.note-button:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--warm) 70%, var(--line));
+  transform: translateY(-1px);
+}
+
+.note-name {
+  font-size: clamp(1.5rem, 5vw, 2.2rem);
+  font-weight: 950;
+  line-height: 1;
+}
+
+.note-role {
+  color: var(--warm);
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.note-scale {
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.debug-card {
+  padding: 18px;
+  display: grid;
+  gap: 16px;
+}
+
+.debug-list {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.debug-list div {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.debug-list dt {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.debug-list dd {
+  margin: 4px 0 0;
+  color: var(--ink);
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+@media (max-width: 760px) {
+  .controls-grid,
+  .debug-list {
+    grid-template-columns: 1fr;
+  }
+
+  .note-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 430px) {
+  .sandbox-shell {
+    padding: 14px;
+  }
+
+  .hero,
+  .status-card,
+  .debug-card,
+  .note-section,
+  .control-card {
+    border-radius: 12px;
+  }
+
+  .note-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .note-button {
+    min-height: 104px;
+  }
+}

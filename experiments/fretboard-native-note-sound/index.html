@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fretboard Native Note Sound Sandbox</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="sandbox-shell">
+    <header class="hero">
+      <p class="eyebrow">Fretboard Studio Lite · Native Sound Sandbox</p>
+      <h1>ทดสอบเสียงโน้ตแบบ Native Web Audio</h1>
+      <p>
+        Sandbox นี้แยกจาก production ทั้งหมด ใช้เพื่อพิสูจน์ว่า note preview ของ Fretboard Studio Lite
+        สามารถเล่นเสียงสั้น ๆ ที่ชัดบนลำโพงทั่วไปได้ โดยยังแยก label note ออกจาก playback register
+      </p>
+    </header>
+
+    <section class="status-card" aria-labelledby="audioTitle">
+      <div>
+        <p class="section-label">Audio Unlock</p>
+        <h2 id="audioTitle">เปิดเสียงก่อนทดสอบ</h2>
+      </div>
+      <div class="status-row" aria-live="polite">
+        <span id="audioState" class="status-pill status-locked">Audio: locked</span>
+        <span id="lastPlayed" class="status-muted">Last played: -</span>
+      </div>
+      <div class="control-row">
+        <button id="enableSound" class="primary-button" type="button">เปิดเสียง</button>
+        <label class="switch-control">
+          <input id="soundToggle" type="checkbox" checked>
+          <span>Sound On</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="controls-grid" aria-label="Sound controls">
+      <label class="control-card">
+        <span>Volume</span>
+        <input id="volumeControl" type="range" min="0.05" max="0.45" step="0.01" value="0.22">
+        <strong id="volumeReadout">22%</strong>
+      </label>
+
+      <label class="control-card">
+        <span>Duration</span>
+        <input id="durationControl" type="range" min="250" max="450" step="25" value="350">
+        <strong id="durationReadout">350 ms</strong>
+      </label>
+
+      <label class="control-card">
+        <span>Waveform</span>
+        <select id="waveformSelect">
+          <option value="sine">sine</option>
+          <option value="triangle" selected>triangle</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="note-section" aria-labelledby="gridTitle">
+      <div class="section-heading">
+        <p class="section-label">Key A · Pentatonic Colors</p>
+        <h2 id="gridTitle">แตะโน้ตเพื่อฟังเสียง</h2>
+        <p>A minor pentatonic: A C D E G · A major pentatonic: A B C# E F#</p>
+      </div>
+
+      <div id="noteGrid" class="note-grid" aria-label="Clickable note preview grid"></div>
+    </section>
+
+    <section class="debug-card" aria-labelledby="debugTitle">
+      <div>
+        <p class="section-label">Register Guardrail</p>
+        <h2 id="debugTitle">Debug Display</h2>
+        <p>Label note คือสิ่งที่ผู้เรียนเห็น ส่วน Playback note ถูกย้ายขึ้นไปใน register ที่ได้ยินง่ายกว่า</p>
+      </div>
+      <dl class="debug-list">
+        <div>
+          <dt>Label note</dt>
+          <dd id="labelNote">-</dd>
+        </div>
+        <div>
+          <dt>Playback note</dt>
+          <dd id="playbackNote">-</dd>
+        </div>
+        <div>
+          <dt>Frequency</dt>
+          <dd id="frequencyReadout">-</dd>
+        </div>
+      </dl>
+      <button id="lowRegisterTest" class="ghost-button" type="button">Diagnostic only: test A2</button>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
