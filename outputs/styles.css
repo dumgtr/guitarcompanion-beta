@@ -2256,6 +2256,112 @@ fieldset input {
   padding-top: 14px;
 }
 
+.practice-studio-preview-shell {
+  display: grid;
+  gap: 16px;
+  margin: 18px 0 14px;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line));
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 6%, transparent), transparent 62%),
+    var(--surface);
+}
+
+.practice-studio-preview-head {
+  display: grid;
+  gap: 6px;
+}
+
+.practice-studio-preview-eyebrow {
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.practice-studio-preview-title {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.18rem, 2vw, 1.5rem);
+  letter-spacing: 0;
+}
+
+.practice-studio-preview-copy,
+.practice-studio-preview-card-copy {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.practice-studio-preview-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--warm) 28%, var(--line));
+  border-radius: 12px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--warm) 7%, transparent), transparent 58%),
+    color-mix(in srgb, var(--surface-soft) 74%, var(--surface));
+}
+
+.practice-studio-preview-card-body {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.practice-studio-preview-badge {
+  width: fit-content;
+  padding: 4px 9px;
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--line));
+  border-radius: 999px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.practice-studio-preview-card-title {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.02rem;
+}
+
+.practice-studio-preview-card-button {
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--surface);
+  font-weight: 800;
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+@media (max-width: 640px) {
+  .practice-studio-preview-shell {
+    gap: 14px;
+    margin-top: 16px;
+    padding: 14px;
+  }
+
+  .practice-studio-preview-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .practice-studio-preview-card-button {
+    width: 100%;
+  }
+}
+
 .reference-shelf-card {
   grid-column: 1 / -1;
   display: grid;

@@ -204,6 +204,13 @@ FINAL for current phase.
 - Rollback: revert `visibility` to `"hidden"` in data.json and restore the previous `getMiniCourses()` filter. See `docs/MINI_COURSE_PUBLIC_REVEAL_PLAN.md` Section 8.
 - Next recommended phase: Phase B0: Sound Lab V2 schema fixture / mock data outside `outputs/*`, no production data edit yet.
 
+## Practice Studio Preview Shell
+- Practice Room IA spec is documented in `docs/PRACTICE_ROOM_IA_REDESIGN_SPEC.md`.
+- A small Practice Studio preview shell exists only behind `?fretboardStudioPreview=1`.
+- The shell is a placeholder for future Fretboard Studio Lite work and does not mount Fretboard Studio yet.
+- Normal Practice Room behavior remains unchanged without the preview parameter.
+- Fretboard Studio V1 guardrails remain: no audio, no Tone.js, no dependencies, no localStorage challenge state, and no Month 7/8 exposure.
+
 ## Tone.js Sampler Spike (Phase 2 Closeout)
 - Tone.js Sampler Phase 2 PASS
 - A2 → A3 approved baseline

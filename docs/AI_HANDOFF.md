@@ -103,6 +103,13 @@ The Reference Shelf / Rhythm Notation work is FINAL for the current phase.
 - Next recommended phase: Phase B0: Sound Lab V2 schema fixture / mock data outside `outputs/*`, no production data edit yet.
 - Production `outputs/data.json` changes require a separate explicit approval.
 
+## Practice Studio Preview Shell
+- Practice Room IA spec exists at `docs/PRACTICE_ROOM_IA_REDESIGN_SPEC.md`.
+- `?fretboardStudioPreview=1` shows a small Practice Studio preview shell above the existing Practice Room content.
+- Fretboard Studio Lite is not mounted yet; the shell is a placeholder only.
+- Normal URLs must not show the shell.
+- Do not add audio, Tone.js, dependencies, localStorage challenge state, or Month 7/8 exposure for this shell.
+
 ## Month 5 & 6 Realignment (July 2026)
 - Month 5 has been pivoted from "Improvisation Foundation" to **"Diatonic Bridge & Melodic Freedom"** (Diatonic Triads, I-IV-V-vi, common-tone chord colors, and melodic phrasing).
 - Month 6 focuses on **"Modes as Chord Colors"** (understanding modes not just as shapes, but as sonic colors over specific chords).

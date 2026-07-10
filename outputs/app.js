@@ -194,6 +194,7 @@ const devPreviewMode = parseDevPreviewMode();
 const preludePreviewMode = parsePreludePreviewMode();
 const FEATURE_MINI_COURSE_SHELF = false;
 const miniCoursePreviewMode = parseMiniCoursePreviewMode();
+const fretboardStudioPreviewMode = parseFretboardStudioPreviewMode();
 let courseData = null;
 let activeMiniCourseId = "";
 
@@ -319,6 +320,7 @@ async function loadFutureData() {
       renderModules();
       renderModuleDetail();
       renderMiniCourseShelf();
+      renderPracticeStudioPreviewShell();
       return merged;
     } catch (error) {
       console.warn('Future course data could not be loaded.', error);
@@ -329,6 +331,7 @@ async function loadFutureData() {
       courseData = { modules, weeks: [], tonePresets, quizItems };
       miniCourses = [];
       renderMiniCourseShelf();
+      renderPracticeStudioPreviewShell();
       return courseData;
     }
   })();
@@ -370,6 +373,7 @@ function updateDebugState(patch) {
     devPreviewMode,
     preludePreviewMode,
     miniCoursePreviewMode: isMiniCoursePreviewActive(),
+    fretboardStudioPreviewMode: isFretboardStudioPreviewActive(),
     loadedWeeks: weeks.length,
     lastError: null,
     currentMonth: 1,
@@ -399,6 +403,12 @@ function parseMiniCoursePreviewMode() {
     ["minicourse", "mini-course", "mini", "rhythm-notation-starter"].includes(previewValue);
 }
 
+function parseFretboardStudioPreviewMode() {
+  const params = new URLSearchParams(window.location.search);
+  const value = String(params.get("fretboardStudioPreview") || "").trim().toLowerCase();
+  return ["1", "true", "yes"].includes(value);
+}
+
 function getDevPreviewMode() {
   return devPreviewMode;
 }
@@ -411,6 +421,10 @@ function isMiniCoursePreviewActive() {
   if (FEATURE_MINI_COURSE_SHELF || Boolean(miniCoursePreviewMode)) return true;
   const loaded = month2AsArray(courseData?.miniCourses || miniCourses);
   return loaded.some((c) => c?.miniCourse?.visibility === "public");
+}
+
+function isFretboardStudioPreviewActive() {
+  return Boolean(fretboardStudioPreviewMode);
 }
 
 function isPreludePreviewActive() {
@@ -2118,6 +2132,7 @@ function renderFocusedApp() {
   renderFocusedLesson();
   renderFocusedProgressTracking();
   renderPracticeNotes();
+  renderPracticeStudioPreviewShell();
   renderPreludeEntry();
   renderMiniCourseShelf();
 }
@@ -4670,6 +4685,60 @@ function renderPracticeNotes() {
   const noteInput = document.getElementById("practiceNotes");
   if (!noteInput) return;
   noteInput.value = localStorage.getItem(foundationStorage.notes) || "";
+}
+
+function renderPracticeStudioPreviewShell() {
+  const existing = document.getElementById("practiceStudioPreviewShell");
+  if (!isFretboardStudioPreviewActive()) {
+    existing?.remove();
+    return;
+  }
+
+  if (existing) return;
+
+  const practiceGrid = document.querySelector("#practice .practice-grid");
+  if (!practiceGrid?.parentNode) return;
+
+  practiceGrid.parentNode.insertBefore(createPracticeStudioPreviewShell(), practiceGrid);
+}
+
+function createPracticeStudioPreviewShell() {
+  const shell = month2CreateElement("section", "practice-studio-preview-shell");
+  shell.id = "practiceStudioPreviewShell";
+  shell.setAttribute("aria-labelledby", "practiceStudioPreviewTitle");
+
+  const header = month2CreateElement("div", "practice-studio-preview-head");
+  header.append(
+    month2CreateElement("p", "practice-studio-preview-eyebrow", "PRACTICE STUDIO"),
+    month2CreateElement("h3", "practice-studio-preview-title", "Interactive Practice Hub"),
+    month2CreateElement(
+      "p",
+      "practice-studio-preview-copy",
+      "พื้นที่เครื่องมือซ้อมแบบโต้ตอบ สำหรับฝึกคอกีตาร์ เสียงคอร์ด และ groove"
+    )
+  );
+  header.querySelector("h3")?.setAttribute("id", "practiceStudioPreviewTitle");
+
+  const card = month2CreateElement("article", "practice-studio-preview-card");
+  const cardBody = month2CreateElement("div", "practice-studio-preview-card-body");
+  cardBody.append(
+    month2CreateElement("span", "practice-studio-preview-badge", "PREVIEW"),
+    month2CreateElement("h4", "practice-studio-preview-card-title", "Fretboard Studio Lite"),
+    month2CreateElement(
+      "p",
+      "practice-studio-preview-card-copy",
+      "กำลังเตรียม Preview เครื่องมือฝึกจำคอและ interval"
+    )
+  );
+
+  const button = month2CreateElement("button", "practice-studio-preview-card-button", "Coming in F3B");
+  button.type = "button";
+  button.disabled = true;
+  button.setAttribute("aria-disabled", "true");
+
+  card.append(cardBody, button);
+  shell.append(header, card);
+  return shell;
 }
 
 function getMiniCourses() {
