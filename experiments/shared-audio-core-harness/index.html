@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shared Audio Core Harness</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="harness-shell">
+    <header class="hero">
+      <p class="eyebrow">Phase A1-2 Validation Harness</p>
+      <h1>Shared Audio Core Browser Harness</h1>
+      <p>
+        This isolated experiment loads the real shared core from
+        <code>../../outputs/audio-engine.js</code>. It does not copy the engine,
+        integrate Fretboard Studio Lite, or integrate Sound Lab.
+      </p>
+    </header>
+
+    <section class="panel status-panel" aria-labelledby="statusTitle">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">Audio Status</p>
+          <h2 id="statusTitle">Unlock and Inspect</h2>
+        </div>
+        <span id="audioStateBadge" class="state-badge state-locked">locked</span>
+      </div>
+
+      <div class="control-row">
+        <button id="unlockAudioBtn" type="button" class="primary-action">Unlock Audio</button>
+        <button id="refreshStatusBtn" type="button">Refresh Status</button>
+      </div>
+
+      <pre id="statusJson" class="status-json" aria-live="polite">{}</pre>
+    </section>
+
+    <section class="test-grid" aria-label="Shared audio profile tests">
+      <article class="panel" aria-labelledby="fslTitle">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Channel: fsl</p>
+            <h2 id="fslTitle">FSL Profile Test</h2>
+          </div>
+          <code>fsl-note-preview</code>
+        </div>
+
+        <label class="range-control" for="fslVelocity">
+          <span>Velocity</span>
+          <output id="fslVelocityValue">0.70</output>
+          <input id="fslVelocity" type="range" min="0" max="1" step="0.05" value="0.7">
+        </label>
+
+        <div class="button-grid" aria-label="FSL valid notes">
+          <button type="button" data-play="fsl" data-note="C4">C4</button>
+          <button type="button" data-play="fsl" data-note="E4">E4</button>
+          <button type="button" data-play="fsl" data-note="A4">A4</button>
+          <button type="button" data-play="fsl" data-note="C5">C5</button>
+        </div>
+
+        <div class="control-row">
+          <button type="button" data-play="fsl" data-note="A3" data-expected="false">A3 expected false</button>
+          <button id="stopFslBtn" type="button">Stop FSL</button>
+        </div>
+      </article>
+
+      <article class="panel" aria-labelledby="soundLabTitle">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Channel: soundlab</p>
+            <h2 id="soundLabTitle">Sound Lab Profile Test</h2>
+          </div>
+          <code>soundlab-guide-tone</code>
+        </div>
+
+        <label class="range-control" for="soundLabVelocity">
+          <span>Velocity</span>
+          <output id="soundLabVelocityValue">0.70</output>
+          <input id="soundLabVelocity" type="range" min="0" max="1" step="0.05" value="0.7">
+        </label>
+
+        <div class="button-grid" aria-label="Sound Lab valid notes">
+          <button type="button" data-play="soundlab" data-note="A3">A3</button>
+          <button type="button" data-play="soundlab" data-note="C4">C4</button>
+          <button type="button" data-play="soundlab" data-note="C#4">C#4</button>
+          <button type="button" data-play="soundlab" data-note="B4">B4</button>
+          <button type="button" data-play="soundlab" data-note="C5">C5</button>
+        </div>
+
+        <div class="control-row">
+          <button type="button" data-play="soundlab" data-note="G2" data-expected="false">G2 expected false</button>
+          <button id="stopSoundLabBtn" type="button">Stop Sound Lab</button>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel" aria-labelledby="isolationTitle">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">Lifecycle</p>
+          <h2 id="isolationTitle">Channel Isolation Tests</h2>
+        </div>
+      </div>
+
+      <p class="muted">
+        Use these buttons to verify that FSL and Sound Lab can hold independent active voices,
+        and that stopping one channel does not stop the other.
+      </p>
+
+      <div class="control-row wrapped">
+        <button id="playFslA4Btn" type="button">Play FSL A4</button>
+        <button id="playSoundLabCSharpBtn" type="button">Play Sound Lab C#4</button>
+        <button id="runIsolationBtn" type="button">Run Isolation Sequence</button>
+        <button id="stopAllBtn" type="button">Stop All Tonal</button>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="rapidTitle">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">Replacement</p>
+          <h2 id="rapidTitle">Rapid-Tap Test</h2>
+        </div>
+      </div>
+
+      <p class="muted">
+        Triggered only by this user click. It sends several FSL notes in quick succession and
+        should leave one active FSL voice without uncontrolled overlap.
+      </p>
+
+      <button id="rapidTapBtn" type="button">Run Rapid FSL Taps</button>
+    </section>
+
+    <section class="panel" aria-labelledby="logTitle">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">Result Log</p>
+          <h2 id="logTitle">Operations</h2>
+        </div>
+        <button id="clearLogBtn" type="button">Clear Log</button>
+      </div>
+      <div id="resultLog" class="result-log" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script src="../../outputs/audio-engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

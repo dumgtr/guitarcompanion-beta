@@ -1,0 +1,253 @@
+:root {
+  color-scheme: dark;
+  --bg: #12100d;
+  --panel: #1f1a14;
+  --panel-soft: #2a231a;
+  --line: rgba(255, 227, 180, 0.18);
+  --ink: #fff7e8;
+  --muted: #cdbb9f;
+  --warm: #f0a94a;
+  --green: #58d68d;
+  --red: #ff7d6e;
+  --shadow: rgba(0, 0, 0, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(240, 169, 74, 0.16), transparent 34rem),
+    linear-gradient(135deg, #100f0d, #17120e 48%, #0f1011);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  background: var(--panel-soft);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: rgba(240, 169, 74, 0.58);
+  background: #302719;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(240, 169, 74, 0.5);
+  outline-offset: 2px;
+}
+
+code {
+  color: #ffd08a;
+}
+
+.harness-shell {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.hero {
+  padding: 20px 0 26px;
+}
+
+.hero h1,
+.panel h2 {
+  margin: 0;
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 6vw, 4.25rem);
+  line-height: 1;
+  max-width: 11ch;
+}
+
+.hero p {
+  max-width: 72ch;
+  color: var(--muted);
+}
+
+.eyebrow {
+  margin: 0 0 0.4rem;
+  color: var(--warm);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.panel {
+  margin-bottom: 18px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(31, 26, 20, 0.9);
+  box-shadow: 0 16px 42px var(--shadow);
+}
+
+.panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.test-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.control-row.wrapped {
+  flex-wrap: wrap;
+}
+
+.primary-action {
+  background: linear-gradient(135deg, #f0a94a, #c97f23);
+  color: #1b1207;
+  border-color: rgba(255, 232, 190, 0.5);
+  font-weight: 800;
+}
+
+.range-control {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 12px;
+  align-items: center;
+  color: var(--muted);
+}
+
+.range-control input {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.state-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.state-ready {
+  color: var(--green);
+  border-color: rgba(88, 214, 141, 0.45);
+}
+
+.state-failed {
+  color: var(--red);
+  border-color: rgba(255, 125, 110, 0.45);
+}
+
+.state-locked {
+  color: var(--warm);
+}
+
+.status-json {
+  max-height: 280px;
+  overflow: auto;
+  margin: 0;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #0d0c0b;
+  color: #f8ead0;
+  font-size: 0.85rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.result-log {
+  display: grid;
+  gap: 10px;
+  max-height: 420px;
+  overflow: auto;
+}
+
+.log-entry {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid rgba(255, 227, 180, 0.12);
+  border-radius: 10px;
+  background: rgba(15, 13, 11, 0.72);
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.log-entry strong {
+  color: var(--ink);
+}
+
+.log-entry time {
+  color: rgba(255, 247, 232, 0.56);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 720px) {
+  .harness-shell {
+    padding: 16px;
+  }
+
+  .test-grid,
+  .panel-heading,
+  .control-row {
+    grid-template-columns: 1fr;
+  }
+
+  .test-grid {
+    display: block;
+  }
+
+  .panel-heading,
+  .control-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero h1 {
+    max-width: 100%;
+  }
+}
