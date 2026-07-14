@@ -1,0 +1,91 @@
+param(
+    [Parameter(Mandatory)]
+    [ValidateSet('success','turn-failed','missing-terminal','event-after-terminal','malformed','exit-nonzero','quota','rate-limit','rate-then-success','timeout','timeout-then-success','cancel','flood','child-timeout')]
+    [string]$Scenario,
+    [AllowNull()][string]$CounterPath,
+    [AllowNull()][string]$ObservationPath,
+    [AllowNull()][string]$ChildPidPath,
+    [AllowNull()][string]$CancellationPath
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+$prompt = [Console]::In.ReadToEnd()
+if ($ObservationPath) {
+    $bytes = [Text.UTF8Encoding]::new($false).GetBytes($prompt)
+    $hash = ([Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($bytes))).ToLowerInvariant()
+    [IO.File]::WriteAllText($ObservationPath, ('{0}|{1}' -f $bytes.Length, $hash), [Text.UTF8Encoding]::new($false))
+}
+
+$count = 1
+if ($CounterPath) {
+    if ([IO.File]::Exists($CounterPath)) { $count = [int]([IO.File]::ReadAllText($CounterPath)) + 1 }
+    [IO.File]::WriteAllText($CounterPath, [string]$count, [Text.UTF8Encoding]::new($false))
+}
+
+function Write-MockSuccess {
+    [Console]::Out.WriteLine('{"type":"thread.started","thread_id":"mock"}')
+    [Console]::Out.WriteLine('{"type":"turn.started"}')
+    [Console]::Out.WriteLine('{"type":"item.completed","item":{"type":"agent_message","text":"mock complete"}}')
+    [Console]::Out.WriteLine('{"type":"turn.completed","usage":{"input_tokens":1,"output_tokens":1}}')
+}
+
+switch ($Scenario) {
+    'success' { Write-MockSuccess; exit 0 }
+    'turn-failed' {
+        [Console]::Out.WriteLine('{"type":"turn.started"}')
+        [Console]::Out.WriteLine('{"type":"turn.failed","error":{"message":"mock provider failure"}}')
+        exit 0
+    }
+    'missing-terminal' { [Console]::Out.WriteLine('{"type":"turn.started"}'); exit 0 }
+    'event-after-terminal' {
+        Write-MockSuccess
+        [Console]::Out.WriteLine('{"type":"item.completed","item":{"type":"agent_message","text":"late event"}}')
+        exit 0
+    }
+    'malformed' { [Console]::Out.WriteLine('{not-json'); exit 0 }
+    'exit-nonzero' { [Console]::Error.WriteLine('mock provider failed'); exit 7 }
+    'quota' { [Console]::Error.WriteLine('You have exceeded your monthly quota.'); exit 2 }
+    'rate-limit' { [Console]::Error.WriteLine('429 too many requests: rate limit reached'); exit 2 }
+    'rate-then-success' {
+        if ($count -eq 1) { [Console]::Error.WriteLine('429 too many requests: rate limit reached'); exit 2 }
+        Write-MockSuccess
+        exit 0
+    }
+    'timeout' { Start-Sleep -Seconds 30; Write-MockSuccess; exit 0 }
+    'timeout-then-success' {
+        if ($count -eq 1) { Start-Sleep -Seconds 30 }
+        Write-MockSuccess
+        exit 0
+    }
+    'cancel' {
+        if ($CancellationPath) { [IO.File]::WriteAllText($CancellationPath, 'cancel', [Text.UTF8Encoding]::new($false)) }
+        Start-Sleep -Seconds 30
+        Write-MockSuccess
+        exit 0
+    }
+    'flood' {
+        $payload = 'x' * 4000
+        for ($i = 0; $i -lt 256; $i++) {
+            [Console]::Out.WriteLine('{"type":"item.completed","item":{"type":"agent_message","text":"' + $payload + '"}}')
+            [Console]::Error.WriteLine(('mock stderr {0} {1}' -f $i, $payload))
+        }
+        [Console]::Out.WriteLine('{"type":"turn.completed"}')
+        exit 0
+    }
+    'child-timeout' {
+        $pwsh = (Get-Command pwsh.exe -CommandType Application | Select-Object -First 1).Source
+        $start = [Diagnostics.ProcessStartInfo]::new()
+        $start.FileName = $pwsh
+        $start.UseShellExecute = $false
+        $start.CreateNoWindow = $true
+        [void]$start.ArgumentList.Add('-NoProfile')
+        [void]$start.ArgumentList.Add('-Command')
+        [void]$start.ArgumentList.Add('Start-Sleep -Seconds 30')
+        $child = [Diagnostics.Process]::Start($start)
+        if ($ChildPidPath) { [IO.File]::WriteAllText($ChildPidPath, [string]$child.Id, [Text.UTF8Encoding]::new($false)) }
+        Start-Sleep -Seconds 30
+        exit 0
+    }
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gc-provider-process-runner-v1.authorization/1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "authorizationId",
+    "authorizedBy",
+    "authorizedAtUtc",
+    "expiresAtUtc",
+    "requestSha256",
+    "providerProfileId",
+    "providerInvocation",
+    "maxAttempts",
+    "allowRetryOn"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "gc-provider-process-runner-v1.authorization/1" },
+    "authorizationId": { "type": "string", "pattern": "^GC_AUTH_[0-9a-f]{32}$" },
+    "authorizedBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "authorizedAtUtc": { "type": "string", "format": "date-time" },
+    "expiresAtUtc": { "type": "string", "format": "date-time" },
+    "requestSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "providerProfileId": { "enum": ["codex-readonly", "gemini-plan-review", "github-copilot-readonly"] },
+    "providerInvocation": { "const": true },
+    "maxAttempts": { "type": "integer", "minimum": 1, "maximum": 2 },
+    "allowRetryOn": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["RATE_LIMITED", "TIMEOUT"] },
+      "maxItems": 2
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gc-provider-process-runner-v1.lifecycle/1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifactType", "schemaVersion", "authorizationId", "requestId", "requestSha256",
+    "taskId", "providerProfileId", "state", "failureCategory", "diagnosticSummary", "stateTransitions",
+    "attempts", "checkpointWritten", "worktreePreserved", "createdAtUtc", "completedAtUtc",
+    "executionPermittedByRouter", "autoRepairAllowed", "gitMutationPerformed"
+  ],
+  "properties": {
+    "artifactType": { "const": "provider-process-lifecycle" },
+    "schemaVersion": { "const": "gc-provider-process-runner-v1.lifecycle/1" },
+    "authorizationId": { "type": "string", "pattern": "^GC_AUTH_[0-9a-f]{32}$" },
+    "requestId": { "type": "string", "pattern": "^GC_RUN_[0-9a-f]{32}$" },
+    "requestSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "taskId": { "type": "string" },
+    "providerProfileId": { "type": "string" },
+    "state": { "enum": ["NOT_STARTED", "STARTED", "RUNNING", "COMPLETED", "FAILED", "TIMED_OUT", "CANCELLED"] },
+    "failureCategory": { "type": ["string", "null"], "enum": [null, "AUTH_FAILED", "RATE_LIMITED", "QUOTA_EXCEEDED", "PROVIDER_FAILURE", "PROTOCOL_FAILURE", "RUNNER_FAILURE", "TIMEOUT", "CANCELLED"] },
+    "diagnosticSummary": { "type": ["string", "null"] },
+    "stateTransitions": { "type": "array", "items": { "type": "object" } },
+    "attempts": { "type": "array", "minItems": 0, "maxItems": 2, "items": { "type": "object" } },
+    "checkpointWritten": { "type": "boolean" },
+    "worktreePreserved": { "type": "boolean" },
+    "createdAtUtc": { "type": "string", "format": "date-time" },
+    "completedAtUtc": { "type": "string", "format": "date-time" },
+    "executionPermittedByRouter": { "const": false },
+    "autoRepairAllowed": { "const": false },
+    "gitMutationPerformed": { "const": false }
+  }
+}

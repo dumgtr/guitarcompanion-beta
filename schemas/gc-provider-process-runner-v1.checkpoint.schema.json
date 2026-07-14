@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gc-provider-process-runner-v1.checkpoint/1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifactType", "schemaVersion", "checkpointId", "originalAuthorizationId", "requestId",
+    "requestSha256", "taskId", "providerProfileId", "state", "failureCategory", "attemptCount",
+    "expectedBranch", "expectedHead", "worktreeStatusSha256", "worktreePreserved", "createdAtUtc",
+    "resumeRequiresNewHumanAuthorization"
+  ],
+  "properties": {
+    "artifactType": { "const": "provider-process-checkpoint" },
+    "schemaVersion": { "const": "gc-provider-process-runner-v1.checkpoint/1" },
+    "checkpointId": { "type": "string", "pattern": "^GC_CHECKPOINT_[0-9a-f]{32}$" },
+    "originalAuthorizationId": { "type": "string", "pattern": "^GC_AUTH_[0-9a-f]{32}$" },
+    "requestId": { "type": "string", "pattern": "^GC_RUN_[0-9a-f]{32}$" },
+    "requestSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "taskId": { "type": "string" },
+    "providerProfileId": { "type": "string" },
+    "state": { "enum": ["FAILED", "TIMED_OUT"] },
+    "failureCategory": { "enum": ["QUOTA_EXCEEDED", "TIMEOUT"] },
+    "attemptCount": { "type": "integer", "minimum": 1, "maximum": 2 },
+    "expectedBranch": { "type": "string" },
+    "expectedHead": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "worktreeStatusSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "worktreePreserved": { "type": "boolean" },
+    "createdAtUtc": { "type": "string", "format": "date-time" },
+    "resumeRequiresNewHumanAuthorization": { "const": true }
+  }
+}

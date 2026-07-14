@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "gc-provider-process-runner-v1.policy/1",
+  "defaultTimeoutMilliseconds": 120000,
+  "minimumTimeoutMilliseconds": 1000,
+  "maximumTimeoutMilliseconds": 300000,
+  "maximumAttempts": 2,
+  "retryDelayMilliseconds": 1000,
+  "maximumCapturedBytesPerStream": 1048576,
+  "maximumPromptBytes": 262144,
+  "retryableCategories": ["RATE_LIMITED", "TIMEOUT"],
+  "checkpointCategories": ["QUOTA_EXCEEDED", "TIMEOUT"],
+  "profiles": [
+    {
+      "id": "codex-readonly",
+      "enabled": true,
+      "executableNames": ["codex.exe"],
+      "arguments": ["exec", "--ephemeral", "--json", "--sandbox", "read-only", "-"],
+      "promptTransport": "stdin",
+      "protocol": "codex-jsonl"
+    },
+    {
+      "id": "gemini-plan-review",
+      "enabled": true,
+      "executableNames": ["gemini.cmd"],
+      "arguments": ["--prompt", "Perform the authorized read-only review using the stdin context.", "--approval-mode", "plan", "--output-format", "stream-json", "--skip-trust"],
+      "promptTransport": "stdin",
+      "protocol": "json-stream-exit"
+    },
+    {
+      "id": "github-copilot-readonly",
+      "enabled": false,
+      "executableNames": ["gh.exe"],
+      "arguments": [],
+      "promptTransport": "closed",
+      "protocol": "disabled"
+    }
+  ]
+}
