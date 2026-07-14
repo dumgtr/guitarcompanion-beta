@@ -164,6 +164,27 @@ try {
     Assert-GcTestEqualV1 $missingExecutable.Public['failureCategory'] 'RUNNER_FAILURE' 'process start failure category stable'
     Write-Output 'PASS STDIN JSONL TERMINAL EVENTS AND EXIT CODES'
 
+    $geminiSuccess = Invoke-GcMockProviderV1 -Context $context -Scenario 'gemini-success-result' -Protocol 'json-stream-exit'
+    Assert-GcTestEqualV1 $geminiSuccess.State 'COMPLETED' 'gemini success reaches completed'
+    Assert-GcTestEqualV1 $geminiSuccess.Attempts[0]['terminalEvent'] 'result' 'Gemini terminal result event extracted'
+
+    $geminiFailedResult = Invoke-GcMockProviderV1 -Context $context -Scenario 'gemini-result-failed' -Protocol 'json-stream-exit'
+    Assert-GcTestEqualV1 $geminiFailedResult.State 'FAILED' 'gemini result=failure fails lifecycle'
+    Assert-GcTestEqualV1 $geminiFailedResult.FailureCategory 'PROTOCOL_FAILURE' 'gemini result=failure is protocol failure'
+
+    foreach ($scenario in @('gemini-missing-result','gemini-event-after-result','gemini-malformed','gemini-duplicate-result','gemini-missing-status')) {
+        $geminiFailure = Invoke-GcMockProviderV1 -Context $context -Scenario $scenario -Protocol 'json-stream-exit'
+        Assert-GcTestEqualV1 $geminiFailure.State 'FAILED' "gemini $scenario fails lifecycle"
+        Assert-GcTestEqualV1 $geminiFailure.FailureCategory 'PROTOCOL_FAILURE' "gemini $scenario is protocol failure"
+    }
+
+    $geminiTruncatedContext = New-GcTestContextV1 -Directory $temporaryRoot
+    $geminiTruncatedResult = Invoke-GcProviderAttemptV1 -FilePath (Get-Command pwsh.exe -CommandType Application | Select-Object -First 1).Source -Arguments @('-NoProfile', '-Command', '[Console]::Out.WriteLine(''{"type":"init"}''); [Console]::Out.WriteLine(''{"type":"result","status":"success"}''); exit 0') -Prompt 'probe' -PromptTransport closed -Protocol 'json-stream-exit' -WorkingDirectory $repositoryRoot -TimeoutMilliseconds 5000 -MaximumCapturedBytes 10 -AttemptNumber 1
+    Assert-GcTestEqualV1 $geminiTruncatedResult.Public['state'] 'FAILED' 'gemini truncated buffer fails lifecycle'
+    Assert-GcTestEqualV1 $geminiTruncatedResult.Public['failureCategory'] 'PROTOCOL_FAILURE' 'gemini truncated buffer is protocol failure'
+
+    Write-Output 'PASS GEMINI JSON STREAM EXIT TERMINAL EVENTS'
+
     $quotaContext = New-GcTestContextV1 -Directory $temporaryRoot
     $quotaContext.Request['retryIntent'] = $true
     $quotaContext.Authorization['maxAttempts'] = [long]2
@@ -228,8 +249,12 @@ try {
     $artifactContext = New-GcTestContextV1 -Directory $temporaryRoot
     $artifactContext.Authorization['authorizationId'] = 'GC_AUTH_' + [Guid]::NewGuid().ToString('N')
     $artifactRoot = [IO.Path]::Combine($temporaryRoot, 'artifacts')
+    Claim-GcRunnerAuthorizationV1 -AuthorizationId $artifactContext.Authorization['authorizationId']
     $runDirectory = New-GcRunnerRunDirectoryV1 -ArtifactRoot $artifactRoot -AuthorizationId $artifactContext.Authorization['authorizationId']
-    Assert-GcTestThrowsCategoryV1 { New-GcRunnerRunDirectoryV1 -ArtifactRoot $artifactRoot -AuthorizationId $artifactContext.Authorization['authorizationId'] } 'AUTH_FAILED' 'authorization id is one use'
+    Assert-GcTestThrowsCategoryV1 { Claim-GcRunnerAuthorizationV1 -AuthorizationId $artifactContext.Authorization['authorizationId'] } 'AUTH_FAILED' 'authorization id is globally one use'
+
+    $artifactRootB = [IO.Path]::Combine($temporaryRoot, 'artifacts-b')
+    Assert-GcTestThrowsCategoryV1 { Claim-GcRunnerAuthorizationV1 -AuthorizationId $artifactContext.Authorization['authorizationId'] } 'AUTH_FAILED' 'authorization id is one use even with different artifact root'
     $checkpoint = New-GcCheckpointArtifactV1 -Request $artifactContext.Request -Authorization $artifactContext.Authorization -RequestSha256 $artifactContext.RequestSha256 -State 'FAILED' -FailureCategory 'QUOTA_EXCEEDED' -AttemptCount 1 -RepositorySnapshot $artifactContext.Snapshot -WorktreePreserved $true
     $checkpointResult = Write-GcRunnerArtifactAtomicV1 -Artifact $checkpoint -DestinationPath ([IO.Path]::Combine($runDirectory, 'checkpoint.json'))
     $lifecycle = New-GcLifecycleArtifactV1 -Request $artifactContext.Request -Authorization $artifactContext.Authorization -RequestSha256 $artifactContext.RequestSha256 -CreatedAtUtc ([DateTimeOffset]::UtcNow.AddSeconds(-1)) -State 'FAILED' -FailureCategory 'QUOTA_EXCEEDED' -Attempts @($quota.Attempts) -CheckpointWritten $true -WorktreePreserved $true

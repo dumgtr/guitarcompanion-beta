@@ -256,7 +256,7 @@ function Assert-GcRunnerPolicyV1 {
 
     $expectedProfiles = [ordered]@{
         'codex-readonly' = [ordered]@{ enabled = $true; executableNames = @('codex.exe'); arguments = @('exec','--ephemeral','--json','--sandbox','read-only','-'); promptTransport = 'stdin'; protocol = 'codex-jsonl' }
-        'gemini-plan-review' = [ordered]@{ enabled = $true; executableNames = @('gemini.cmd'); arguments = @('--prompt','Perform the authorized read-only review using the stdin context.','--approval-mode','plan','--output-format','stream-json','--skip-trust'); promptTransport = 'stdin'; protocol = 'json-stream-exit' }
+        'gemini-plan-review' = [ordered]@{ enabled = $true; executableNames = @('gemini.cmd'); arguments = @('--prompt',"Review only the supplied context.`nDo not inspect the repository.`nDo not invoke tools.",'--approval-mode','plan','--output-format','stream-json','--skip-trust'); promptTransport = 'stdin'; protocol = 'json-stream-exit' }
         'github-copilot-readonly' = [ordered]@{ enabled = $false; executableNames = @('gh.exe'); arguments = @(); promptTransport = 'closed'; protocol = 'disabled' }
     }
     $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
@@ -449,17 +449,55 @@ function Read-GcCodexJsonlEventV1 {
     return [pscustomobject]@{ Valid = $true; TerminalEvent = $terminal[0]; Reason = $null }
 }
 
-function Test-GcJsonStreamExitProtocolV1 {
+function Read-GcJsonStreamExitProtocolV1 {
     param([Parameter(Mandatory)][string]$Text, [Parameter(Mandatory)][bool]$Truncated)
-    if ($Truncated) { return $false }
-    $count = 0
+    if ($Truncated) { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'TRUNCATED' } }
+
+    $events = [Collections.Generic.List[object]]::new()
     foreach ($line in ($Text -split "`r?`n")) {
         if ([string]::IsNullOrWhiteSpace($line)) { continue }
-        $count++
-        try { $document = [Text.Json.JsonDocument]::Parse($line); $document.Dispose() }
-        catch { return $false }
+        try {
+            $doc = [Text.Json.JsonDocument]::Parse($line)
+            $hasType = $false
+            $typeProp = $null
+            try { $typeProp = $doc.RootElement.GetProperty("type"); $hasType = $true } catch { }
+            if ($hasType -and $typeProp.ValueKind -eq [Text.Json.JsonValueKind]::String) {
+                $typeStr = $typeProp.GetString()
+                if ($typeStr -eq 'result') {
+                    $hasStatus = $false
+                    $statusProp = $null
+                    try { $statusProp = $doc.RootElement.GetProperty("status"); $hasStatus = $true } catch { }
+                    if ($hasStatus -and $statusProp.ValueKind -eq [Text.Json.JsonValueKind]::String) {
+                        $events.Add([pscustomobject]@{ Type = $typeStr; Status = $statusProp.GetString() })
+                    } else {
+                        $events.Add([pscustomobject]@{ Type = $typeStr; Status = $null })
+                    }
+                } else {
+                    $events.Add([pscustomobject]@{ Type = $typeStr })
+                }
+            } else {
+                $events.Add([pscustomobject]@{ Type = $null })
+            }
+            $doc.Dispose()
+        }
+        catch { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'JSON_INVALID' } }
     }
-    return $count -gt 0
+
+    if ($events.Count -eq 0) { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'EMPTY_STREAM' } }
+
+    $resultIndex = -1
+    for ($i = 0; $i -lt $events.Count; $i++) {
+        if ($events[$i].Type -eq 'result') {
+            if ($resultIndex -ne -1) { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'MULTIPLE_RESULT_EVENTS' } }
+            $resultIndex = $i
+        }
+    }
+
+    if ($resultIndex -eq -1) { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'MISSING_RESULT_EVENT' } }
+    if ($resultIndex -ne ($events.Count - 1)) { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'EVENT_AFTER_RESULT' } }
+    if ($events[$resultIndex].Status -ne 'success') { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'STATUS_FAILED' } }
+
+    return [pscustomobject]@{ Valid = $true; TerminalEvent = 'result'; Reason = $null }
 }
 
 function Resolve-GcProviderFailureCategoryV1 {
@@ -558,7 +596,12 @@ function Invoke-GcProviderAttemptV1 {
             elseif ($terminalEvent -eq 'turn.failed') { $failureCategory = Resolve-GcProviderFailureCategoryV1 -Stdout $stdoutText -Stderr $stderrText }
             else { $state = 'COMPLETED'; $failureCategory = $null }
         }
-        elseif (Test-GcJsonStreamExitProtocolV1 -Text $stdoutText -Truncated $stdoutCapture.Truncated) { $state = 'COMPLETED'; $failureCategory = $null }
+        elseif ($Protocol -eq 'json-stream-exit') {
+            $protocolResult = Read-GcJsonStreamExitProtocolV1 -Text $stdoutText -Truncated $stdoutCapture.Truncated
+            $terminalEvent = $protocolResult.TerminalEvent
+            if (-not $protocolResult.Valid) { $failureCategory = 'PROTOCOL_FAILURE' }
+            else { $state = 'COMPLETED'; $failureCategory = $null }
+        }
         else { $failureCategory = 'PROTOCOL_FAILURE' }
 
         $endedAt = [DateTimeOffset]::UtcNow

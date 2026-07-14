@@ -45,6 +45,8 @@ Authorizations are separate strict UTF-8 JSON documents. They contain a unique a
 
 Resume requires a new request bound to the exact checkpoint SHA-256 and a new Human Dispatch Authorization. Reusing the authorization identifier of the checkpoint is rejected.
 
+The runner claims the authorization ID atomically before spawning the provider process. The claim is permanently consumed at that moment. If the provider process fails to spawn or crashes immediately, the authorization ID remains consumed and cannot be reused.
+
 ## 4. Fixed provider profiles
 
 V1 enables only profiles whose installed CLI contract was verified:
@@ -52,7 +54,7 @@ V1 enables only profiles whose installed CLI contract was verified:
 - `codex-readonly`: `codex exec --ephemeral --json --sandbox read-only -`; completion requires one `turn.completed` event and exit code 0. `turn.failed`, malformed JSONL, missing terminal event, truncation, or nonzero exit fails closed.
 - `gemini-plan-review`: Gemini headless plan mode with `stream-json`; completion requires valid JSON lines, non-empty output, and exit code 0.
 
-`github-copilot-readonly` remains disabled in the V1 runner policy because Dispatcher integration has not started. This is a fail-closed integration state, not a permanent provider disable. The current live status is `TEMPORARILY_UNAVAILABLE` with `reasonCode: PROVIDER_QUOTA_EXCEEDED`, `retryAllowedNow: false`, `reviewAccepted: false`, `permanentlyDisabled: false`, and `recheckRequired: true`. Gemini is the fallback reviewer with a warning while the external quota is unavailable. After quota returns, one short successful smoke test may restore Copilot availability without rebuilding the runner.
+`github-copilot-readonly` remains disabled in the V1 runner policy because Dispatcher integration has not started. This is a fail-closed integration state, not a permanent provider disable. Its availability in the external `gh` CLI does not override this hard-coded policy. The current live status is `TEMPORARILY_UNAVAILABLE` with `reasonCode: PROVIDER_QUOTA_EXCEEDED`, `retryAllowedNow: false`, `reviewAccepted: false`, `permanentlyDisabled: false`, and `recheckRequired: true`. Gemini is the fallback reviewer with a warning while the external quota is unavailable. When the external quota is restored, a code and policy change is still required to fully enable the Copilot profile with proper arguments, protocols, and tests before it can be invoked by the Runner.
 
 Prompt content is written to redirected stdin and stdin is closed immediately afterward. When a profile does not use stdin, the stream is closed immediately after process start.
 

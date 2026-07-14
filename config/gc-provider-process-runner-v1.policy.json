@@ -22,7 +22,7 @@
       "id": "gemini-plan-review",
       "enabled": true,
       "executableNames": ["gemini.cmd"],
-      "arguments": ["--prompt", "Perform the authorized read-only review using the stdin context.", "--approval-mode", "plan", "--output-format", "stream-json", "--skip-trust"],
+      "arguments": ["--prompt", "Review only the supplied context.\nDo not inspect the repository.\nDo not invoke tools.", "--approval-mode", "plan", "--output-format", "stream-json", "--skip-trust"],
       "promptTransport": "stdin",
       "protocol": "json-stream-exit"
     },

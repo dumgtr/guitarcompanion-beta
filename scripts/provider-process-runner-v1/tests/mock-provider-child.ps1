@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory)]
-    [ValidateSet('success','turn-failed','missing-terminal','event-after-terminal','malformed','exit-nonzero','quota','rate-limit','rate-then-success','timeout','timeout-then-success','cancel','flood','child-timeout')]
+    [ValidateSet('success','turn-failed','missing-terminal','event-after-terminal','malformed','exit-nonzero','quota','rate-limit','rate-then-success','timeout','timeout-then-success','cancel','flood','child-timeout','gemini-success-result','gemini-missing-result','gemini-result-failed','gemini-event-after-result','gemini-malformed','gemini-duplicate-result','gemini-missing-status')]
     [string]$Scenario,
     [AllowNull()][string]$CounterPath,
     [AllowNull()][string]$ObservationPath,
@@ -42,6 +42,42 @@ switch ($Scenario) {
     'event-after-terminal' {
         Write-MockSuccess
         [Console]::Out.WriteLine('{"type":"item.completed","item":{"type":"agent_message","text":"late event"}}')
+        exit 0
+    }
+    'gemini-success-result' {
+        [Console]::Out.WriteLine('{"type":"init"}')
+        [Console]::Out.WriteLine('{"type":"result","status":"success"}')
+        exit 0
+    }
+    'gemini-missing-result' {
+        [Console]::Out.WriteLine('{"type":"init"}')
+        exit 0
+    }
+    'gemini-result-failed' {
+        [Console]::Out.WriteLine('{"type":"init"}')
+        [Console]::Out.WriteLine('{"type":"result","status":"failure"}')
+        exit 0
+    }
+    'gemini-duplicate-result' {
+        [Console]::Out.WriteLine('{"type":"init"}')
+        [Console]::Out.WriteLine('{"type":"result","status":"success"}')
+        [Console]::Out.WriteLine('{"type":"result","status":"success"}')
+        exit 0
+    }
+    'gemini-missing-status' {
+        [Console]::Out.WriteLine('{"type":"init"}')
+        [Console]::Out.WriteLine('{"type":"result"}')
+        exit 0
+    }
+    'gemini-event-after-result' {
+        [Console]::Out.WriteLine('{"type":"init"}')
+        [Console]::Out.WriteLine('{"type":"result","status":"success"}')
+        [Console]::Out.WriteLine('{"type":"init"}')
+        exit 0
+    }
+    'gemini-malformed' {
+        [Console]::Out.WriteLine('{"type":"init"}')
+        [Console]::Out.WriteLine('{not-json')
         exit 0
     }
     'malformed' { [Console]::Out.WriteLine('{not-json'); exit 0 }

@@ -39,6 +39,7 @@ try {
     Assert-GcHumanDispatchAuthorizationV1 -Authorization $authorization -Request $request -RequestSha256 $requestSha256 -Policy $policy
     $resumeCheckpoint = Read-GcResumeCheckpointV1 -Request $request -NewAuthorizationId ([string]$authorization['authorizationId'])
 
+    Claim-GcRunnerAuthorizationV1 -AuthorizationId ([string]$authorization['authorizationId'])
     $resolvedArtifactRoot = Resolve-GcRunnerArtifactRootV1 -RepositoryRoot $requestContext.RepositoryRoot -ArtifactRoot $ArtifactRoot
     $runDirectory = New-GcRunnerRunDirectoryV1 -ArtifactRoot $resolvedArtifactRoot -AuthorizationId ([string]$authorization['authorizationId'])
 

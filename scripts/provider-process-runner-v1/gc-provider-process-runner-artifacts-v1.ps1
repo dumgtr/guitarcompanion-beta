@@ -40,6 +40,25 @@ function Resolve-GcRunnerArtifactRootV1 {
     return $full
 }
 
+function Claim-GcRunnerAuthorizationV1 {
+    param([Parameter(Mandatory)][string]$AuthorizationId)
+    if ([string]::IsNullOrEmpty($env:LOCALAPPDATA)) { Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_LOCALAPPDATA_MISSING' }
+    if ($AuthorizationId -cnotmatch '^GC_AUTH_[0-9a-f]{32}$') { Throw-GcRunnerFailureV1 -Category 'AUTH_FAILED' -Message 'RUNNER_AUTHORIZATION_ID_INVALID' }
+    $claimDir = [IO.Path]::Combine($env:LOCALAPPDATA, 'GuitarCompanion', 'ProviderProcessRunnerV1', 'authorization-claims')
+    try { [void][IO.Directory]::CreateDirectory($claimDir) }
+    catch { Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_CLAIM_DIRECTORY_CREATE_FAILED' }
+    Assert-GcNoArtifactReparseV1 -Path $claimDir
+
+    $claimFile = [IO.Path]::Combine($claimDir, $AuthorizationId + '.claim')
+    try {
+        $fs = [IO.FileStream]::new($claimFile, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
+        $fs.Close()
+    }
+    catch [IO.IOException] {
+        Throw-GcRunnerFailureV1 -Category 'AUTH_FAILED' -Message 'RUNNER_AUTHORIZATION_ALREADY_USED'
+    }
+}
+
 function New-GcRunnerRunDirectoryV1 {
     param(
         [Parameter(Mandatory)][string]$ArtifactRoot,
