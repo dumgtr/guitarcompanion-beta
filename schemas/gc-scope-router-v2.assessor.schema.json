@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gc-scope-router-v2.assessor/1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "classification", "uncertainty", "flags"],
+  "properties": {
+    "schemaVersion": { "const": "gc-scope-router-v2.assessor/1" },
+    "classification": { "enum": ["simple", "moderate", "complex", "critical", "blocked"] },
+    "uncertainty": { "enum": ["low", "medium", "high"] },
+    "flags": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["broad_impact", "security_sensitive", "irreversible"] }
+    }
+  }
+}

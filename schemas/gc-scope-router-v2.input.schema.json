@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gc-scope-router-v2.input/1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "taskId",
+    "repositoryRoot",
+    "expectedBranch",
+    "expectedHead",
+    "requestedOperations",
+    "requestedReadPaths",
+    "requestedWritePaths"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "gc-scope-router-v2.input/1" },
+    "policyVersion": { "const": "gc-scope-router-v2.policy/1" },
+    "taskId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$" },
+    "repositoryRoot": { "type": "string", "minLength": 3, "maxLength": 1024 },
+    "expectedBranch": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,254}$" },
+    "expectedHead": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "requestedOperations": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "documentation_edit",
+          "isolated_experiment",
+          "cross_subsystem_change",
+          "credential_or_authorization",
+          "provider_adapter",
+          "process_or_ipc",
+          "strict_parser_trust_boundary",
+          "production_runtime_or_audio",
+          "deployment_or_release",
+          "destructive_git_recovery",
+          "dependency_supply_chain",
+          "force_push",
+          "trust_or_test_bypass",
+          "credential_logging",
+          "multiple_writers",
+          "reviewer_edit"
+        ]
+      }
+    },
+    "requestedReadPaths": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 1024 }
+    },
+    "requestedWritePaths": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 1024 }
+    },
+    "assessorResult": { "$ref": "gc-scope-router-v2.assessor/1" }
+  }
+}

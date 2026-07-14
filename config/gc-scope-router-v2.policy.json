@@ -1,0 +1,60 @@
+{
+  "policyVersion": "gc-scope-router-v2.policy/1",
+  "inputSchemaVersion": "gc-scope-router-v2.input/1",
+  "outputSchemaVersion": "gc-scope-router-v2.output/1",
+  "assessorSchemaVersion": "gc-scope-router-v2.assessor/1",
+  "shadowMode": true,
+  "executionPermitted": false,
+  "autoRepairAllowed": false,
+  "recommendedWriter": "Codex Implementer",
+  "reviewers": [
+    "Security Reviewer",
+    "Test-Integrity Reviewer",
+    "Final External Reviewer"
+  ],
+  "classifications": [
+    { "id": "simple", "rank": 1, "route": "fast-path" },
+    { "id": "moderate", "rank": 2, "route": "planned-path" },
+    { "id": "complex", "rank": 3, "route": "architecture-path" },
+    { "id": "critical", "rank": 4, "route": "critical-controlled-path" },
+    { "id": "blocked", "rank": 5, "route": "blocked-path" }
+  ],
+  "operations": [
+    { "id": "documentation_edit", "classification": "simple", "reasonCode": "OP_DOCUMENTATION" },
+    { "id": "isolated_experiment", "classification": "moderate", "reasonCode": "OP_ISOLATED_EXPERIMENT" },
+    { "id": "cross_subsystem_change", "classification": "complex", "reasonCode": "OP_CROSS_SUBSYSTEM" },
+    { "id": "credential_or_authorization", "classification": "critical", "reasonCode": "OP_CREDENTIAL_AUTH" },
+    { "id": "provider_adapter", "classification": "critical", "reasonCode": "OP_PROVIDER_ADAPTER" },
+    { "id": "process_or_ipc", "classification": "critical", "reasonCode": "OP_PROCESS_IPC" },
+    { "id": "strict_parser_trust_boundary", "classification": "critical", "reasonCode": "OP_STRICT_PARSER" },
+    { "id": "production_runtime_or_audio", "classification": "critical", "reasonCode": "OP_PRODUCTION_RUNTIME_AUDIO" },
+    { "id": "deployment_or_release", "classification": "critical", "reasonCode": "OP_DEPLOYMENT_RELEASE" },
+    { "id": "destructive_git_recovery", "classification": "critical", "reasonCode": "OP_DESTRUCTIVE_GIT" },
+    { "id": "dependency_supply_chain", "classification": "critical", "reasonCode": "OP_DEPENDENCY_SUPPLY_CHAIN" },
+    { "id": "force_push", "classification": "blocked", "reasonCode": "OP_FORCE_PUSH" },
+    { "id": "trust_or_test_bypass", "classification": "blocked", "reasonCode": "OP_TRUST_TEST_BYPASS" },
+    { "id": "credential_logging", "classification": "blocked", "reasonCode": "OP_CREDENTIAL_LOGGING" },
+    { "id": "multiple_writers", "classification": "blocked", "reasonCode": "OP_MULTIPLE_WRITERS" },
+    { "id": "reviewer_edit", "classification": "blocked", "reasonCode": "OP_REVIEWER_EDIT" }
+  ],
+  "assessorUncertaintyMinimums": [
+    { "id": "low", "classification": "simple" },
+    { "id": "medium", "classification": "moderate" },
+    { "id": "high", "classification": "complex" }
+  ],
+  "assessorFlags": [
+    { "id": "broad_impact", "classification": "complex" },
+    { "id": "security_sensitive", "classification": "critical" },
+    { "id": "irreversible", "classification": "critical" }
+  ],
+  "forbiddenPaths": [
+    ".git/**"
+  ],
+  "protectedNamespaces": [
+    "outputs/**",
+    "scripts/gc-orchestrator-client.ps1",
+    "scripts/gc-orchestrator-host-broker.ps1",
+    "scripts/gc-gemini-provider-helper.ps1",
+    "scripts/gc-workflow-common.ps1"
+  ]
+}
