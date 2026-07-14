@@ -6462,3 +6462,84 @@ body {
   border: 2px dashed #444;
   border-radius: 8px;
 }
+
+/* Practice Room IA V2 Preview */
+.practice-room-ia-preview-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  margin-top: 1rem;
+}
+
+.ia-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-top: 2px solid var(--border-light);
+  padding-top: 2rem;
+}
+.ia-zone:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.ia-zone-title {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  margin: 0;
+}
+.ia-zone-subtitle {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.ia-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.ia-tool-card {
+  background: var(--surface-light);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.ia-tool-card h4 {
+  font-size: 1.1rem;
+  margin: 0;
+  color: var(--text-main);
+}
+.ia-tool-card p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.ia-practice-studio .ia-zone-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--accent-color, #d35400);
+}
+.ia-practice-studio .ia-tool-card {
+  border-color: var(--accent-color, #d35400);
+  background: var(--surface-main);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.ia-reference-library .ia-zone-title {
+  color: var(--text-muted);
+}
+.ia-reference-library .reference-shelf,
+.ia-reference-library .reference-panel {
+  margin-top: 1rem;
+}

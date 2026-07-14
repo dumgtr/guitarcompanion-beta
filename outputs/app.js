@@ -194,6 +194,7 @@ const devPreviewMode = parseDevPreviewMode();
 const preludePreviewMode = parsePreludePreviewMode();
 const FEATURE_MINI_COURSE_SHELF = false;
 const miniCoursePreviewMode = parseMiniCoursePreviewMode();
+const practiceRoomIaPreviewMode = parsePracticeRoomIaPreviewMode();
 const fretboardStudioPreviewMode = parseFretboardStudioPreviewMode();
 let courseData = null;
 let activeMiniCourseId = "";
@@ -321,6 +322,7 @@ async function loadFutureData() {
       renderModuleDetail();
       renderMiniCourseShelf();
       renderPracticeStudioPreviewShell();
+      renderPracticeRoomIaPreview();
       return merged;
     } catch (error) {
       console.warn('Future course data could not be loaded.', error);
@@ -332,6 +334,7 @@ async function loadFutureData() {
       miniCourses = [];
       renderMiniCourseShelf();
       renderPracticeStudioPreviewShell();
+      renderPracticeRoomIaPreview();
       return courseData;
     }
   })();
@@ -373,7 +376,8 @@ function updateDebugState(patch) {
     devPreviewMode,
     preludePreviewMode,
     miniCoursePreviewMode: isMiniCoursePreviewActive(),
-    fretboardStudioPreviewMode: isFretboardStudioPreviewActive(),
+    practiceRoomIaPreviewMode: isPracticeRoomIaPreviewActive(),
+      fretboardStudioPreviewMode: isFretboardStudioPreviewActive(),
     loadedWeeks: weeks.length,
     lastError: null,
     currentMonth: 1,
@@ -395,18 +399,55 @@ function parsePreludePreviewMode() {
   return ["w0", "prelude"].includes(value) ? value : "";
 }
 
-function parseMiniCoursePreviewMode() {
+function parsePracticeRoomIaPreviewMode() {
   const params = new URLSearchParams(window.location.search);
-  const directValue = String(params.get("miniCoursePreview") || "").trim().toLowerCase();
-  const previewValue = String(params.get("devPreview") || params.get("preview") || "").trim().toLowerCase();
-  return ["1", "true", "yes", "mini", "minicourse", "mini-course", "rhythm-notation-starter"].includes(directValue) ||
-    ["minicourse", "mini-course", "mini", "rhythm-notation-starter"].includes(previewValue);
+  const value = String(params.get("practiceRoomIaPreview") || "").trim().toLowerCase();
+  return ["1", "true", "yes"].includes(value);
+}
+
+function isPracticeRoomIaPreviewActive() {
+  return Boolean(practiceRoomIaPreviewMode);
 }
 
 function parseFretboardStudioPreviewMode() {
   const params = new URLSearchParams(window.location.search);
   const value = String(params.get("fretboardStudioPreview") || "").trim().toLowerCase();
   return ["1", "true", "yes"].includes(value);
+}
+
+function isFretboardStudioPreviewActive() {
+  return Boolean(fretboardStudioPreviewMode);
+}
+
+function parseMiniCoursePreviewMode() {
+  const params = new URLSearchParams(window.location.search);
+  const directValue = String(params.get("miniCoursePreview") || "")
+    .trim()
+    .toLowerCase();
+
+  const previewValue = String(
+    params.get("devPreview") || params.get("preview") || ""
+  )
+    .trim()
+    .toLowerCase();
+
+  return (
+    [
+      "1",
+      "true",
+      "yes",
+      "mini",
+      "minicourse",
+      "mini-course",
+      "rhythm-notation-starter"
+    ].includes(directValue) ||
+    [
+      "minicourse",
+      "mini-course",
+      "mini",
+      "rhythm-notation-starter"
+    ].includes(previewValue)
+  );
 }
 
 function getDevPreviewMode() {
@@ -418,13 +459,15 @@ function isDevPreviewActive() {
 }
 
 function isMiniCoursePreviewActive() {
-  if (FEATURE_MINI_COURSE_SHELF || Boolean(miniCoursePreviewMode)) return true;
-  const loaded = month2AsArray(courseData?.miniCourses || miniCourses);
-  return loaded.some((c) => c?.miniCourse?.visibility === "public");
-}
+  if (FEATURE_MINI_COURSE_SHELF || Boolean(miniCoursePreviewMode)) {
+    return true;
+  }
 
-function isFretboardStudioPreviewActive() {
-  return Boolean(fretboardStudioPreviewMode);
+  const loaded = month2AsArray(courseData?.miniCourses || miniCourses);
+
+  return loaded.some(
+    (course) => course?.miniCourse?.visibility === "public"
+  );
 }
 
 function isPreludePreviewActive() {
@@ -2133,6 +2176,7 @@ function renderFocusedApp() {
   renderFocusedProgressTracking();
   renderPracticeNotes();
   renderPracticeStudioPreviewShell();
+      renderPracticeRoomIaPreview();
   renderPreludeEntry();
   renderMiniCourseShelf();
 }
@@ -4689,6 +4733,11 @@ function renderPracticeNotes() {
 
 function renderPracticeStudioPreviewShell() {
   const existing = document.getElementById("practiceStudioPreviewShell");
+  if (isPracticeRoomIaPreviewActive()) {
+    existing?.remove();
+    return;
+  }
+  
   if (!isFretboardStudioPreviewActive()) {
     existing?.remove();
     return;
@@ -4737,6 +4786,119 @@ function createPracticeStudioPreviewShell() {
 
   shell.append(header, contentDiv);
   return shell;
+}
+
+function renderPracticeRoomIaPreview() {
+  const practiceGrid = document.querySelector("#practice .practice-grid");
+  const rhythmLayer = document.querySelector("#practice .rhythm-practice-layer");
+  const originalHeading = document.querySelector("#practice .section-heading");
+  const existingShell = document.getElementById("practiceRoomIaPreviewShell");
+  
+  if (!isPracticeRoomIaPreviewActive()) {
+    existingShell?.remove();
+    if (practiceGrid) practiceGrid.hidden = false;
+    if (rhythmLayer) rhythmLayer.hidden = false;
+    if (originalHeading) originalHeading.hidden = false;
+    return;
+  }
+
+  if (existingShell) return;
+  if (practiceGrid) practiceGrid.hidden = true;
+  if (rhythmLayer) rhythmLayer.hidden = true;
+  if (originalHeading) originalHeading.hidden = true;
+
+  const shell = month2CreateElement("div", "practice-room-ia-preview-shell");
+  shell.id = "practiceRoomIaPreviewShell";
+
+  const head = month2CreateElement("div", "section-heading");
+  head.append(
+    month2CreateElement("p", "eyebrow", "ห้องซ้อม"),
+    month2CreateElement("h2", "", "Practice Room"),
+    month2CreateElement("p", "practice-room-ia-desc", "เลือกเครื่องมือฝึกซ้อม คอร์สเสริมระยะสั้น หรือเปิดคลังอ้างอิง")
+  );
+  
+  const studioSection = month2CreateElement("section", "ia-zone ia-practice-studio");
+  studioSection.append(
+    month2CreateElement("h3", "ia-zone-title", "Practice Studio"),
+    month2CreateElement("p", "ia-zone-subtitle", "เครื่องมือฝึกซ้อมแบบโต้ตอบ")
+  );
+  
+  const studioGrid = month2CreateElement("div", "ia-card-grid");
+  
+  const fslCard = month2CreateElement("div", "ia-tool-card");
+  fslCard.append(
+    month2CreateElement("span", "fsl-badge", "PREVIEW"),
+    month2CreateElement("h4", "", "Fretboard Studio Lite"),
+    month2CreateElement("p", "", "ฝึกจำคอ / interval / chord tones แบบโต้ตอบ")
+  );
+  const fslBtn = month2CreateElement("button", "small-button", "เปิด Studio");
+  fslBtn.addEventListener("click", () => openFretboardStudioModal());
+  fslCard.appendChild(fslBtn);
+
+  const slCard = month2CreateElement("div", "ia-tool-card");
+  slCard.append(
+    month2CreateElement("h4", "", "Sound Lab"),
+    month2CreateElement("p", "", "ทดลองฟังเสียงคอร์ด (อ้างอิงตามบทเรียนหลัก)")
+  );
+  const slBtn = month2CreateElement("button", "small-button", "เลื่อนไปดูบทเรียน");
+  slBtn.addEventListener("click", () => {
+    document.querySelector("#lessons")?.scrollIntoView({ behavior: 'smooth' });
+  });
+  slCard.appendChild(slBtn);
+
+  const metroCard = month2CreateElement("div", "ia-tool-card");
+  metroCard.append(
+    month2CreateElement("h4", "", "Metronome & Groove"),
+    month2CreateElement("p", "", "เครื่องให้จังหวะ")
+  );
+  const metroBtn = month2CreateElement("button", "small-button", "เปิด Metronome");
+  metroBtn.addEventListener("click", () => {
+    const headerMetro = document.querySelector(".topbar-metronome-button");
+    if (headerMetro) headerMetro.click();
+  });
+  metroCard.appendChild(metroBtn);
+
+  studioGrid.append(fslCard, slCard, metroCard);
+  studioSection.appendChild(studioGrid);
+
+  const guidedSection = month2CreateElement("section", "ia-zone ia-guided-learning");
+  guidedSection.append(
+    month2CreateElement("h3", "ia-zone-title", "Guided Learning"),
+    month2CreateElement("p", "ia-zone-subtitle", "คอร์สเสริมและตารางซ้อมเฉพาะกิจ")
+  );
+
+  const programsGrid = month2CreateElement("div", "ia-card-grid");
+  const rhProgramCard = month2CreateElement("div", "ia-tool-card");
+  rhProgramCard.append(
+    month2CreateElement("span", "fsl-badge", "SPEC PREVIEW"),
+    month2CreateElement("h4", "", "Right-Hand Control \u2014 8 Weeks"),
+    month2CreateElement("p", "", "โปรแกรมเจาะลึกการควบคุมมือขวาสำหรับมือใหม่")
+  );
+  const rhBtn = month2CreateElement("button", "small-button", "กำลังพัฒนา");
+  rhBtn.disabled = true;
+  rhProgramCard.appendChild(rhBtn);
+  programsGrid.appendChild(rhProgramCard);
+  
+  guidedSection.appendChild(programsGrid);
+
+  const refSection = month2CreateElement("section", "ia-zone ia-reference-library");
+  refSection.append(
+    month2CreateElement("h3", "ia-zone-title", "Reference Library"),
+    month2CreateElement("p", "ia-zone-subtitle", "คู่มือและคลังอ้างอิง")
+  );
+  
+  shell.append(head, studioSection, guidedSection, refSection);
+  
+  const practiceSection = document.getElementById("practice");
+  practiceSection.prepend(shell);
+  
+  const miniCourseShelf = document.getElementById("miniCourseShelf");
+  if (miniCourseShelf) {
+    guidedSection.insertBefore(miniCourseShelf, programsGrid);
+  }
+  
+  const refPanels = practiceSection.querySelectorAll(".reference-shelf, .reference-panel");
+  refPanels.forEach(el => refSection.appendChild(el));
 }
 
 function openFretboardStudioModal() {

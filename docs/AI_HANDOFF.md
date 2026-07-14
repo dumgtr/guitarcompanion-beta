@@ -103,12 +103,15 @@ The Reference Shelf / Rhythm Notation work is FINAL for the current phase.
 - Next recommended phase: Phase B0: Sound Lab V2 schema fixture / mock data outside `outputs/*`, no production data edit yet.
 - Production `outputs/data.json` changes require a separate explicit approval.
 
-## Practice Studio Preview Shell
-- Practice Room IA spec exists at `docs/PRACTICE_ROOM_IA_REDESIGN_SPEC.md`.
-- `?fretboardStudioPreview=1` shows a small Practice Studio preview shell above the existing Practice Room content.
-- Fretboard Studio Lite is not mounted yet; the shell is a placeholder only.
-- Normal URLs must not show the shell.
-- Do not add audio, Tone.js, dependencies, localStorage challenge state, or Month 7/8 exposure for this shell.
+## Practice Room IA V2 & Right-Hand Control Program Spec
+- Practice Room IA V2 is implemented as preview-only behind ?practiceRoomIaPreview=1.
+- Normal Practice Room behavior remains unchanged without the preview parameter.
+- Right-Hand Control 8-Week Program is specified in \docs/RIGHT_HAND_CONTROL_8_WEEK_PROGRAM_SPEC.md\ but not implemented publicly.
+- FSL remains in its current preview status.
+- Sound Lab production engine remains unchanged.
+- Month 7-8 remain hidden.
+- Reference Shelf content remains frozen.
+- Mini Course behavior remains unchanged.
 
 ## Month 5 & 6 Realignment (July 2026)
 - Month 5 has been pivoted from "Improvisation Foundation" to **"Diatonic Bridge & Melodic Freedom"** (Diatonic Triads, I-IV-V-vi, common-tone chord colors, and melodic phrasing).
