@@ -35,85 +35,103 @@ index 0000000..e69de29
 +    "workingTreeClean"
 +  ]
 +}
-
-
----- APPENDED DIFFS FROM PR #1 (selected files) ----
-
-*** config/gc-scope-router-v2.policy.json ***
-@@ -0,0 +1,60 @@
-+{
-+  "policyVersion": "gc-scope-router-v2.policy/1",
-+  "inputSchemaVersion": "gc-scope-router-v2.input/1",
-+  "outputSchemaVersion": "gc-scope-router-v2.output/1",
-+  "assessorSchemaVersion": "gc-scope-router-v2.assessor/1",
-+  "shadowMode": true,
-+  "executionPermitted": false,
-+  "autoRepairAllowed": false,
-+  "recommendedWriter": "Codex Implementer",
-+  "reviewers": [
-+    "Security Reviewer",
-+    "Test-Integrity Reviewer",
-+    "Final External Reviewer"
-+  ],
-+  "classifications": [
-+    { "id": "simple", "rank": 1, "route": "fast-path" },
-+    { "id": "moderate", "rank": 2, "route": "planned-path" },
-+    { "id": "complex", "rank": 3, "route": "architecture-path" },
-+    { "id": "critical", "rank": 4, "route": "critical-controlled-path" },
-+    { "id": "blocked", "rank": 5, "route": "blocked-path" }
-+  ],
-+  "operations": [
-+    { "id": "documentation_edit", "classification": "simple", "reasonCode": "OP_DOCUMENTATION" },
-+    { "id": "isolated_experiment", "classification": "moderate", "reasonCode": "OP_ISOLATED_EXPERIMENT" },
-+    { "id": "cross_subsystem_change", "classification": "complex", "reasonCode": "OP_CROSS_SUBSYSTEM" },
-+    { "id": "credential_or_authorization", "classification": "critical", "reasonCode": "OP_CREDENTIAL_AUTH" },
-+    { "id": "provider_adapter", "classification": "critical", "reasonCode": "OP_PROVIDER_ADAPTER" },
-+    { "id": "process_or_ipc", "classification": "critical", "reasonCode": "OP_PROCESS_IPC" },
-+    { "id": "strict_parser_trust_boundary", "classification": "critical", "reasonCode": "OP_STRICT_PARSER" },
-+    { "id": "production_runtime_or_audio", "classification": "critical", "reasonCode": "OP_PRODUCTION_RUNTIME_AUDIO" },
-+    { "id": "deployment_or_release", "classification": "critical", "reasonCode": "OP_DEPLOYMENT_RELEASE" },
-+    { "id": "destructive_git_recovery", "classification": "critical", "reasonCode": "OP_DESTRUCTIVE_GIT" },
-+    { "id": "dependency_supply_chain", "classification": "critical", "reasonCode": "OP_DEPENDENCY_SUPPLY_CHAIN" },
-+    { "id": "force_push", "classification": "blocked", "reasonCode": "OP_FORCE_PUSH" },
-+    { "id": "trust_or_test_bypass", "classification": "blocked", "reasonCode": "OP_TRUST_TEST_BYPASS" },
-+    { "id": "credential_logging", "classification": "blocked", "reasonCode": "OP_CREDENTIAL_LOGGING" },
-+    { "id": "multiple_writers", "classification": "blocked", "reasonCode": "OP_MULTIPLE_WRITERS" },
-+    { "id": "reviewer_edit", "classification": "blocked", "reasonCode": "OP_REVIEWER_EDIT" }
-+  ],
-+  "assessorUncertaintyMinimums": [
-+    { "id": "low", "classification": "simple" },
-+    { "id": "medium", "classification": "moderate" },
-+    { "id": "high", "classification": "complex" }
-+  ],
-+  "assessorFlags": [
-+    { "id": "broad_impact", "classification": "complex" },
-+    { "id": "security_sensitive", "classification": "critical" },
-+    { "id": "irreversible", "classification": "critical" }
-+  ],
-+  "forbiddenPaths": [
-+    ".git/**"
-+  ],
-+  "protectedNamespaces": [
-+    "outputs/**",
-+    "scripts/gc-orchestrator-client.ps1",
-+    "scripts/gc-orchestrator-host-broker.ps1",
-+    "scripts/gc-gemini-provider-helper.ps1",
-+    "scripts/gc-workflow-common.ps1"
-+  ]
-+}
-
-*** scripts/scope-router-v2/gc-strict-json-v2.ps1 ***
-@@ -0,0 +1,399 @@
-+<full script content elided for brevity in this review file; full content captured in PR #1>
-
-*** scripts/scope-router-v2/gc-git-state-v2.ps1 ***
-@@ -0,0 +1,142 @@
-+<full script content elided for brevity in this review file; full content captured in PR #1>
-
-*** scripts/scope-router-v2/gc-evidence-v2.ps1 ***
-@@ -0,0 +1,211 @@
-+<full script content elided for brevity in this review file; full content captured in PR #1>
-
-*** scripts/scope-router-v2/gc-scope-router-v2.ps1 ***
-@@ -0,0 +1,88 @@
-+<full script content elided for brevity in this review file; full content captured in PR #1>
++
++
++---- APPENDED PATCH: gc-scope-router-v2.ps1 ----
++
++diff --git a/scripts/scope-router-v2/gc-scope-router-v2.ps1 b/scripts/scope-router-v2/gc-scope-router-v2.ps1
++new file mode 100644
++index 0000000..e69de29
++--- /dev/null
+++++ b/scripts/scope-router-v2/gc-scope-router-v2.ps1
++@@ -0,0 +1,88 @@
+++param(
+++    [ValidateSet('Route','ValidateEvidence')][string]$Mode = 'Route',
+++    [AllowNull()][string]$InputPath,
+++    [AllowNull()][string]$EvidencePath,
+++    [AllowNull()][AllowEmptyString()][string]$ExpectedTaskId
+++)
+++
+++Set-StrictMode -Version Latest
+++$ErrorActionPreference = 'Stop'
+++
+++$moduleFiles = @(
+++    'gc-strict-json-v2.ps1',
+++    'gc-identity-v2.ps1',
+++    'gc-path-policy-v2.ps1',
+++    'gc-git-state-v2.ps1',
+++    'gc-policy-v2.ps1',
+++    'gc-semantic-v2.ps1',
+++    'gc-evidence-v2.ps1'
+++)
+++foreach ($moduleFile in $moduleFiles) { . ([IO.Path]::Combine($PSScriptRoot, $moduleFile)) }
+++
+++$repositoryRoot = [IO.Path]::GetFullPath([IO.Path]::Combine($PSScriptRoot, '..', '..'))
+++$routerScriptPath = [IO.Path]::GetFullPath($PSCommandPath)
+++
+++try { $policyBundle = Get-GcPolicyV2 -RepositoryRoot $repositoryRoot }
+++catch {
+++    [Console]::Error.WriteLine('GC_SCOPE_ROUTER_V2_CONTRACT_FAILURE')
+++    exit 3
+++}
+++$policy = $policyBundle['policy']
+++
+++if (Test-GcOrdinalEqualsV2 $Mode 'ValidateEvidence') {
+++    if ([string]::IsNullOrEmpty($EvidencePath)) {
+++        [Console]::Error.WriteLine('GC_SCOPE_ROUTER_V2_VALIDATION_ARGUMENT_FAILURE')
+++        exit 4
+++    }
+++    try {
+++        Read-GcEvidenceFileV2 -LiteralPath $EvidencePath -Policy $policy -ExpectedTaskId $ExpectedTaskId | Out-Null
+++        [Console]::Out.WriteLine('GC_SCOPE_ROUTER_V2_EVIDENCE_VALID')
+++        exit 0
+++    }
+++    catch {
+++        [Console]::Error.WriteLine('GC_SCOPE_ROUTER_V2_EVIDENCE_INVALID')
+++        exit 5
+++    }
+++}
+++
+++if ([string]::IsNullOrEmpty($InputPath) -or [string]::IsNullOrEmpty($EvidencePath)) {
+++    [Console]::Error.WriteLine('GC_SCOPE_ROUTER_V2_ROUTE_ARGUMENT_FAILURE')
+++    exit 4
+++}
+++
+++$inputBytes = [byte[]]::new(0)
+++try {
+++    $inputBytes = Read-GcStrictUtf8V2 -LiteralPath $InputPath
+++    $inputObject = ConvertFrom-GcStrictJsonV2 -Bytes $inputBytes
+++    Assert-GcInputSchemaV2 -InputObject $inputObject -Policy $policy | Out-Null
+++
+++    $identity = Get-GcRepositoryIdentityV2 -RepositoryRoot ([string]$inputObject['repositoryRoot'])
+++    Assert-GcOrdinalIdentityV2 -InputObject $inputObject -ActualIdentity $identity | Out-Null
+++
+++    $pathPolicy = Resolve-GcPathPolicyV2 -InputObject $inputObject -Policy $policy -RepositoryRoot ([string]$identity['repositoryRoot'])
+++    $gitState = Get-GcGitStateV2 -RepositoryRoot ([string]$identity['repositoryRoot'])
+++    $dirtyConflicts = @(Get-GcDirtyScopeConflictsV2 -WriteScopes $pathPolicy['writeScopes'] -GitState $gitState)
+++    $deterministicRisk = Get-GcDeterministicRiskV2 -InputObject $inputObject -Policy $policy -DirtyConflicts $dirtyConflicts -PathPolicyBlockReasons @($pathPolicy['blockedReasonCodes'])
+++    $assessor = if (Test-GcObjectHasKeyV2 -Object $inputObject -Key 'assessorResult') { $inputObject['assessorResult'] } else { $null }
+++    $risk = Merge-GcAssessorRiskV2 -DeterministicRisk $deterministicRisk -Assessor $assessor -Policy $policy
+++
+++    $evidence = New-GcDecisionEvidenceV2 -InputObject $inputObject -InputBytes $inputBytes -Identity $identity -PathPolicy $pathPolicy -GitState $gitState -Risk $risk -PolicyBundle $policyBundle
+++    Assert-GcEvidenceV2 -Evidence $evidence -Policy $policy -ExpectedTaskId ([string]$inputObject['taskId']) | Out-Null
+++    Write-GcEvidenceAtomicV2 -Evidence $evidence -DestinationPath $EvidencePath -Policy $policy -RouterScriptPath $routerScriptPath -ExpectedTaskId ([string]$inputObject['taskId']) | Out-Null
+++    [Console]::Out.WriteLine('GC_SCOPE_ROUTER_V2_DECISION_WRITTEN')
+++    exit 0
+++}
+++catch {
+++    $failureRecord = ConvertFrom-GcFailureRecordV2 -Exception $_.Exception
+++    try {
+++        $rejection = New-GcSanitizedFailureV2 -InputBytes $inputBytes -FailureRecord $failureRecord -Policy $policy
+++        Assert-GcEvidenceV2 -Evidence $rejection -Policy $policy -ExpectedTaskId $null | Out-Null
+++        Write-GcEvidenceAtomicV2 -Evidence $rejection -DestinationPath $EvidencePath -Policy $policy -RouterScriptPath $routerScriptPath -ExpectedTaskId $null | Out-Null
+++        [Console]::Error.WriteLine([string]$failureRecord['reasonCode'])
+++        exit 2
+++    }
+++    catch {
+++        [Console]::Error.WriteLine('GC_SCOPE_ROUTER_V2_EVIDENCE_FAILURE')
+++        exit 6
+++    }
+++}
++
++---- END OF APPENDED PATCH ----
