@@ -1,0 +1,37 @@
+diff --git a/dev/null b/config/gc-scope-router-v2.input-consumption.json
+new file mode 100644
+index 0000000..e69de29
+--- /dev/null
++++ b/config/gc-scope-router-v2.input-consumption.json
+@@ -0,0 +1,31 @@
++{
++  "contractVersion": "gc-scope-router-v2.consumption/1",
++  "schemaVersion": "gc-scope-router-v2.input/1",
++  "entries": [
++    { "pointer": "/schemaVersion", "disposition": "CONSUMED_IN_IDENTITY", "consumer": "Assert-GcInputSchemaV2" },
++    { "pointer": "/policyVersion", "disposition": "CONSUMED_IN_IDENTITY", "consumer": "Assert-GcInputSchemaV2" },
++    { "pointer": "/taskId", "disposition": "CONSUMED_IN_IDENTITY", "consumer": "Assert-GcOrdinalIdentityV2" },
++    { "pointer": "/repositoryRoot", "disposition": "CONSUMED_IN_IDENTITY", "consumer": "Assert-GcOrdinalIdentityV2" },
++    { "pointer": "/expectedBranch", "disposition": "CONSUMED_IN_IDENTITY", "consumer": "Assert-GcOrdinalIdentityV2" },
++    { "pointer": "/expectedHead", "disposition": "CONSUMED_IN_IDENTITY", "consumer": "Assert-GcOrdinalIdentityV2" },
++    { "pointer": "/requestedOperations", "disposition": "CONSUMED_IN_CLASSIFICATION", "consumer": "Get-GcDeterministicRiskV2" },
++    { "pointer": "/requestedReadPaths", "disposition": "CONSUMED_IN_PATH_POLICY", "consumer": "Resolve-GcPathPolicyV2" },
++    { "pointer": "/requestedWritePaths", "disposition": "CONSUMED_IN_PATH_POLICY", "consumer": "Resolve-GcPathPolicyV2" },
++    { "pointer": "/assessorResult", "disposition": "CONSUMED_IN_CLASSIFICATION", "consumer": "Merge-GcAssessorRiskV2" },
++    { "pointer": "/assessorResult/schemaVersion", "disposition": "CONSUMED_IN_CLASSIFICATION", "consumer": "Merge-GcAssessorRiskV2" },
++    { "pointer": "/assessorResult/classification", "disposition": "CONSUMED_IN_CLASSIFICATION", "consumer": "Merge-GcAssessorRiskV2" },
++    { "pointer": "/assessorResult/uncertainty", "disposition": "CONSUMED_IN_CLASSIFICATION", "consumer": "Merge-GcAssessorRiskV2" },
++    { "pointer": "/assessorResult/flags", "disposition": "CONSUMED_IN_CLASSIFICATION", "consumer": "Merge-GcAssessorRiskV2" }
++  ],
++  "knownRejectedProperties": [
++    "description",
++    "dirtyPaths",
++    "knownRisks",
++    "priorIncidentIds",
++    "requestedAgents",
++    "requestedTests",
++    "taskProse",
++    "userPriority",
++    "workingTreeClean"
++  ]
++}
