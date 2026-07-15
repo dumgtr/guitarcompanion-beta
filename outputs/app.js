@@ -4738,7 +4738,7 @@ function renderPracticeStudioPreviewShell() {
     existing?.remove();
     return;
   }
-  
+
   if (!isFretboardStudioPreviewActive()) {
     existing?.remove();
     return;
@@ -4832,7 +4832,7 @@ function renderPracticeRoomIaPreview() {
   const practiceGrid = document.querySelector("#practice .practice-grid");
   const originalHeading = document.querySelector("#practice > .section-heading");
   const existingShell = document.getElementById("practiceRoomIaPreviewShell");
-  
+
   if (!isPracticeRoomIaPreviewActive()) {
     restorePracticeRoomIaPreview();
     return;
@@ -4864,15 +4864,15 @@ function renderPracticeRoomIaPreview() {
     iaTitle,
     month2CreateElement("p", "practice-room-ia-desc", "เลือกเครื่องมือฝึกซ้อม คอร์สเสริมระยะสั้น หรือเปิดคลังอ้างอิง")
   );
-  
+
   const studioSection = month2CreateElement("section", "ia-zone ia-practice-studio practice-studio-container");
   studioSection.append(
     month2CreateElement("h3", "ia-zone-title", "Practice Studio"),
     month2CreateElement("p", "ia-zone-subtitle", "เครื่องมือฝึกซ้อมแบบโต้ตอบ")
   );
-  
+
   const studioGrid = month2CreateElement("div", "ia-card-grid practice-studio-hero-grid");
-  
+
   const fslCard = month2CreateElement("article", "ia-tool-card practice-studio-hero-card");
   fslCard.append(
     month2CreateElement("span", "fsl-badge", "PREVIEW"),
@@ -4951,7 +4951,7 @@ function renderPracticeRoomIaPreview() {
 
   guidedSection.append(quickMiniCourses, practicePrograms);
   shell.append(continuePractice, head, studioSection, guidedSection, refSection);
-  
+
   const practiceSection = document.getElementById("practice");
   if (!practiceSection) return;
   const miniCourseShelf = document.getElementById("miniCourseShelf");
@@ -5005,7 +5005,7 @@ function openRhcProgramModal() {
   closeBtn.className = "fsl-studio-close-btn";
   closeBtn.textContent = "ปิดโปรแกรม";
   closeBtn.onclick = () => overlay.remove();
-  
+
   headerDiv.append(titleDiv, closeBtn);
 
   const bodyDiv = document.createElement("div");
