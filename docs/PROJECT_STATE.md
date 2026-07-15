@@ -11,6 +11,9 @@ FINAL for current phase.
 - Week 0 Prelude / Foundation Reset is public.
 - Month 1-6 are visible in normal production.
 - Month 7-8 remain hidden.
+- Practice Room IA V2 is live on normal production URLs.
+- `?legacyPracticeRoom=1` is the temporary rollback to the Legacy Practice Room and wins over other Practice Room preview flags.
+- Right-Hand Control — 16 Weeks is live as a read-only program shell with no new progress persistence.
 - Preview parameters such as `?preview=m7`, `?preview=m8`, `?devPreview=all` are legacy QA shortcuts / auto-open helpers only.
 - Month 5 and Month 6 content shards are loaded dynamically and are fully public.
 - Reference Shelf content lives in Practice Room, not in the main lesson flow.
@@ -204,12 +207,13 @@ FINAL for current phase.
 - Rollback: revert `visibility` to `"hidden"` in data.json and restore the previous `getMiniCourses()` filter. See `docs/MINI_COURSE_PUBLIC_REVEAL_PLAN.md` Section 8.
 - Next recommended phase: Phase B0: Sound Lab V2 schema fixture / mock data outside `outputs/*`, no production data edit yet.
 
-## Practice Studio Preview Shell
-- Practice Room IA spec is documented in `docs/PRACTICE_ROOM_IA_REDESIGN_SPEC.md`.
-- A small Practice Studio preview shell exists only behind `?fretboardStudioPreview=1`.
-- The shell is a placeholder for future Fretboard Studio Lite work and does not mount Fretboard Studio yet.
-- Normal Practice Room behavior remains unchanged without the preview parameter.
-- Fretboard Studio V1 guardrails remain: no audio, no Tone.js, no dependencies, no localStorage challenge state, and no Month 7/8 exposure.
+## Practice Room IA V2 Production Activation
+- Practice Room IA V2 is the normal production layout.
+- `?legacyPracticeRoom=1` restores the Legacy Practice Room and takes precedence over every other Practice Room flag.
+- `?practiceRoomIaPreview=1` remains a compatibility alias for IA V2.
+- Standalone `?fretboardStudioPreview=1` retains the earlier Legacy FSL preview shell.
+- Right-Hand Control — 16 Weeks is available as a read-only V1 shell; Week 13 Day 4 remains locked.
+- No new Practice Room progress tracking, localStorage keys, recording, audio analysis, Original Study TAB, Sound Lab migration, or Month 7/8 exposure is authorized.
 
 ## Tone.js Sampler Spike (Phase 2 Closeout)
 - Tone.js Sampler Phase 2 PASS

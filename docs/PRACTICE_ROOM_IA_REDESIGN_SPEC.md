@@ -1,8 +1,8 @@
 # Practice Room IA Redesign Spec
 
-Status: Documentation Only / Pre-Implementation IA Spec
+Status: Production Active / Product Owner Approved
 
-This document defines the information architecture direction for the Practice Room before integrating Fretboard Studio Lite. It does not authorize production UI changes, data changes, Fretboard Studio implementation, or any public reveal.
+This document defines the production information architecture for the Practice Room. The IA V2 layout and the read-only Right-Hand Control 16 Weeks shell are approved for normal production URLs. This approval does not authorize new progress persistence, recording, audio analysis, Original Study TAB, Sound Lab engine migration, curriculum expansion, or Month 7/8 exposure.
 
 ## 1. Problem Statement
 
@@ -74,22 +74,17 @@ Reasoning:
 
 Fretboard Studio Lite is an interactive practice tool. Its purpose is active exploration of fretboard shapes and note geography, not passive lookup and not a day-by-day Mini Course. Placing it first inside Practice Studio gives it the product weight it needs while preserving the existing Mini Course and Reference Library mental models.
 
-## 4. Preview Behavior
+## 4. Production and Rollback Behavior
 
-Fretboard Studio Lite remains hidden on normal production URLs.
+Production rules:
 
-Preview rules for F3:
-
-- Normal Practice Room remains unchanged until a separate public decision.
-- Fretboard Studio Lite appears only behind:
-
-```text
-?fretboardStudioPreview=1
-```
-
-- Preview mode must be session-only and must not persist as a real unlock.
-- Removing the preview parameter must return the Practice Room to the normal public state.
-- Preview mode must not expose Month 7 or Month 8.
+- Normal URLs render Practice Room IA V2.
+- `?legacyPracticeRoom=1` restores the Legacy Practice Room as a temporary rollback and wins over every other Practice Room preview parameter.
+- `?practiceRoomIaPreview=1` remains a compatibility alias for IA V2.
+- Standalone `?fretboardStudioPreview=1` retains the Legacy Practice Room with the earlier Fretboard Studio preview shell.
+- When `practiceRoomIaPreview` and `fretboardStudioPreview` are both present without the rollback flag, IA V2 wins.
+- Removing all parameters returns to the production IA V2 layout.
+- No mode may expose Month 7 or Month 8.
 
 ## 5. Guardrails
 
@@ -154,33 +149,28 @@ Reference Library:
 - stable content;
 - should remain visually calmer than Practice Studio.
 
-## 7. F3 Recommendation
+## 7. Production Activation Decision
 
-After this IA spec is accepted, the next step should be:
+The earlier F3 preview recommendation is complete and historical. Product Owner visual QA passed, and Practice Room IA V2 is approved as the normal production layout with these locked boundaries:
 
-```text
-F3: Integrate Fretboard Studio Lite into the new Practice Studio area as preview-only.
-```
+- Keep Fretboard Studio Lite as the existing preview-capability surface; do not expand its feature scope.
+- Keep Guided Mini Courses and their existing progress/reset behavior unchanged.
+- Keep Reference Library content unchanged.
+- Keep Right-Hand Control — 16 Weeks read-only with Week 13 Day 4 locked.
+- Keep Month 7/8 hidden.
+- Use `?legacyPracticeRoom=1` for temporary operational rollback.
 
-Recommended F3 scope:
-
-- Add the Practice Studio section structure.
-- Add Fretboard Studio Lite as the first featured Practice Studio tool.
-- Gate Fretboard Studio Lite behind `?fretboardStudioPreview=1`.
-- Keep Guided Mini Courses and Reference Library visible in their current production-safe states.
-- Do not alter Reference Shelf content.
-- Do not alter Mini Course progress/reset behavior.
-- Do not expose Month 7/8.
-
-F3 should be treated as a targeted preview integration, not a full Practice Room redesign rollout. Public reveal should remain a separate decision after preview QA.
+Progress persistence for the new IA, Original Study implementation, recording, audio analysis, and Sound Lab engine migration remain separate Product Owner decisions.
 
 ## Acceptance Checklist
 
 - [ ] Fretboard Studio Lite is placed under Practice Studio.
 - [ ] Fretboard Studio Lite is not inside Mini Courses.
 - [ ] Fretboard Studio Lite is not inside Reference Library.
-- [ ] Normal Practice Room remains unchanged without preview.
-- [ ] Preview appears only with `?fretboardStudioPreview=1`.
+- [ ] Normal Practice Room renders IA V2.
+- [ ] `?legacyPracticeRoom=1` restores the Legacy Practice Room and wins every flag combination.
+- [ ] `?practiceRoomIaPreview=1` remains an IA V2 compatibility alias.
+- [ ] Standalone `?fretboardStudioPreview=1` shows the Legacy FSL preview shell.
 - [ ] Month 7/8 remain hidden.
 - [ ] Reference Shelf content remains untouched.
 - [ ] Mini Course progress/reset behavior remains untouched.
