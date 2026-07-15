@@ -2,8 +2,11 @@
 
 ## Current State
 - Phase 1 (Shard Infrastructure) and Phase 2 (Content Drafting for M5/M6) are officially CLOSED.
-- Main is stable at merge commit `7a5456c` following the v2.9.5 fretboard restore and hidden audio QA hotfix.
-- Current mode: Post-hotfix monitoring / bugfix-only.
+- Main contains the preview-gated Practice Room IA V2 merge at `113b8c7d0b9e777c7daa59ac2a404654b886c545`.
+- Current mode: Practice Room IA V2 production activation QA.
+- Practice Room IA V2 is approved for normal production URLs on the `release/practice-room-ia-v2-live` activation branch.
+- `?legacyPracticeRoom=1` is the temporary rollback and wins over every other Practice Room flag.
+- Right-Hand Control — 16 Weeks is a read-only V1 shell; no new progress persistence is active.
 - M5/M6 shards are structurally complete, loaded in memory, and LIVE in production.
 - Month 1-6 are visible in normal production.
 - Do not describe Month 5/6 as hidden preview anymore.
@@ -103,12 +106,13 @@ The Reference Shelf / Rhythm Notation work is FINAL for the current phase.
 - Next recommended phase: Phase B0: Sound Lab V2 schema fixture / mock data outside `outputs/*`, no production data edit yet.
 - Production `outputs/data.json` changes require a separate explicit approval.
 
-## Practice Studio Preview Shell
-- Practice Room IA spec exists at `docs/PRACTICE_ROOM_IA_REDESIGN_SPEC.md`.
-- `?fretboardStudioPreview=1` shows a small Practice Studio preview shell above the existing Practice Room content.
-- Fretboard Studio Lite is not mounted yet; the shell is a placeholder only.
-- Normal URLs must not show the shell.
-- Do not add audio, Tone.js, dependencies, localStorage challenge state, or Month 7/8 exposure for this shell.
+## Practice Room IA V2 Production Contract
+- The canonical IA spec is `docs/PRACTICE_ROOM_IA_REDESIGN_SPEC.md`.
+- Normal URLs render Practice Room IA V2.
+- `?legacyPracticeRoom=1` restores the Legacy Practice Room and wins over every other Practice Room flag.
+- `?practiceRoomIaPreview=1` remains a compatibility alias; standalone `?fretboardStudioPreview=1` retains the Legacy FSL preview shell.
+- Right-Hand Control — 16 Weeks remains read-only, and Week 13 Day 4 remains locked.
+- Do not add new progress tracking, localStorage keys, recording, audio analysis, Original Study TAB, Sound Lab engine migration, curriculum expansion, or Month 7/8 exposure under this activation.
 
 ## Month 5 & 6 Realignment (July 2026)
 - Month 5 has been pivoted from "Improvisation Foundation" to **"Diatonic Bridge & Melodic Freedom"** (Diatonic Triads, I-IV-V-vi, common-tone chord colors, and melodic phrasing).

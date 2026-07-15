@@ -196,6 +196,8 @@ const FEATURE_MINI_COURSE_SHELF = false;
 const miniCoursePreviewMode = parseMiniCoursePreviewMode();
 const practiceRoomIaPreviewMode = parsePracticeRoomIaPreviewMode();
 const fretboardStudioPreviewMode = parseFretboardStudioPreviewMode();
+const legacyPracticeRoomMode = parseLegacyPracticeRoomMode();
+const practiceRoomMode = resolvePracticeRoomMode();
 let courseData = null;
 let activeMiniCourseId = "";
 let practiceRoomIaPreviewPlacement = null;
@@ -377,8 +379,10 @@ function updateDebugState(patch) {
     devPreviewMode,
     preludePreviewMode,
     miniCoursePreviewMode: isMiniCoursePreviewActive(),
-    practiceRoomIaPreviewMode: isPracticeRoomIaPreviewActive(),
-      fretboardStudioPreviewMode: isFretboardStudioPreviewActive(),
+    practiceRoomMode,
+    legacyPracticeRoomMode,
+    practiceRoomIaPreviewMode,
+    fretboardStudioPreviewMode,
     loadedWeeks: weeks.length,
     lastError: null,
     currentMonth: 1,
@@ -406,8 +410,21 @@ function parsePracticeRoomIaPreviewMode() {
   return ["1", "true", "yes"].includes(value);
 }
 
+function parseLegacyPracticeRoomMode() {
+  const params = new URLSearchParams(window.location.search);
+  const value = String(params.get("legacyPracticeRoom") || "").trim().toLowerCase();
+  return ["1", "true", "yes"].includes(value);
+}
+
+function resolvePracticeRoomMode() {
+  if (legacyPracticeRoomMode) return "legacy";
+  if (practiceRoomIaPreviewMode) return "ia-v2";
+  if (fretboardStudioPreviewMode) return "fsl-legacy-preview";
+  return "ia-v2";
+}
+
 function isPracticeRoomIaPreviewActive() {
-  return Boolean(practiceRoomIaPreviewMode);
+  return practiceRoomMode === "ia-v2";
 }
 
 function parseFretboardStudioPreviewMode() {
@@ -417,7 +434,7 @@ function parseFretboardStudioPreviewMode() {
 }
 
 function isFretboardStudioPreviewActive() {
-  return Boolean(fretboardStudioPreviewMode);
+  return practiceRoomMode === "fsl-legacy-preview";
 }
 
 function parseMiniCoursePreviewMode() {
@@ -4853,7 +4870,7 @@ function renderPracticeRoomIaPreview() {
   continuePractice.disabled = true;
   continuePractice.append(
     month2CreateElement("span", "continue-practice-title", "Continue Practice"),
-    month2CreateElement("span", "continue-practice-copy", "Preview — ระบบกลับไปซ้อมต่อจะเปิดในเฟสถัดไป")
+    month2CreateElement("span", "continue-practice-copy", "ระบบกลับไปซ้อมต่อจะเปิดในเฟสถัดไป")
   );
 
   const head = month2CreateElement("div", "section-heading");
@@ -4923,14 +4940,14 @@ function renderPracticeRoomIaPreview() {
   const practicePrograms = month2CreateElement("section", "practice-programs");
   practicePrograms.append(
     month2CreateElement("h4", "guided-learning-subtitle", "Practice Programs"),
-    month2CreateElement("p", "guided-learning-copy", "โปรแกรมซ้อมแบบมีโครงสร้าง — แสดงเฉพาะ specification preview")
+    month2CreateElement("p", "guided-learning-copy", "โปรแกรมซ้อมแบบมีโครงสร้าง — เปิดอ่านได้โดยยังไม่บันทึก progress")
   );
 
   const programsGrid = month2CreateElement("div", "ia-card-grid practice-program-grid");
   const rhProgramCard = month2CreateElement("article", "ia-tool-card");
   rhProgramCard.style.cursor = "pointer";
   rhProgramCard.append(
-    month2CreateElement("span", "fsl-badge", "SPEC PREVIEW"),
+    month2CreateElement("span", "fsl-badge", "READ-ONLY"),
     month2CreateElement("h4", "", window.rhcProgramData?.title || "Right-Hand Control \u2014 16 Weeks"),
     month2CreateElement("p", "", window.rhcProgramData?.description || "โปรแกรมเจาะลึกการควบคุมมือขวาสำหรับมือใหม่")
   );
@@ -4999,7 +5016,7 @@ function openRhcProgramModal() {
   headerDiv.className = "fsl-studio-modal-header";
 
   const titleDiv = document.createElement("div");
-  titleDiv.innerHTML = `<span class="fsl-badge">PREVIEW</span><h3 class="fsl-studio-modal-title">${data.title}</h3>`;
+  titleDiv.innerHTML = `<span class="fsl-badge">READ-ONLY</span><h3 class="fsl-studio-modal-title">${data.title}</h3>`;
 
   const closeBtn = document.createElement("button");
   closeBtn.className = "fsl-studio-close-btn";
