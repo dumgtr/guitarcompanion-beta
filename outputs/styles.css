@@ -6465,81 +6465,415 @@ body {
 
 /* Practice Room IA V2 Preview */
 .practice-room-ia-preview-shell {
-  display: flex;
-  flex-direction: column;
-  gap: 3rem;
-  margin-top: 1rem;
+  display: grid;
+  gap: 32px;
+  min-width: 0;
+  margin-top: 16px;
+}
+
+.practice-section.practice-room-ia-active {
+  scroll-margin-top: 138px;
+}
+
+.practice-room-ia-source-hidden {
+  display: none !important;
+}
+
+.continue-practice-banner {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  padding: 18px 20px;
+  border: 1px solid color-mix(in srgb, var(--accent) 48%, var(--line));
+  border-radius: 14px;
+  background:
+    linear-gradient(125deg, color-mix(in srgb, var(--accent) 14%, transparent), transparent 62%),
+    var(--surface);
+  color: var(--ink);
+  text-align: left;
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+.continue-practice-title {
+  font-size: clamp(1.15rem, 2.6vw, 1.45rem);
+  font-weight: 900;
+}
+
+.continue-practice-copy {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .ia-zone {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  border-top: 2px solid var(--border-light);
-  padding-top: 2rem;
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  border-top: 1px solid var(--line);
+  padding-top: 28px;
 }
+
 .ia-zone:first-of-type {
   border-top: none;
   padding-top: 0;
 }
 
 .ia-zone-title {
-  font-size: 1.5rem;
-  color: var(--primary-color);
   margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.25rem, 2.5vw, 1.55rem);
 }
+
 .ia-zone-subtitle {
-  color: var(--text-muted);
-  font-size: 0.95rem;
   margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
 }
 
 .ia-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  min-width: 0;
 }
 
 .ia-tool-card {
-  background: var(--surface-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  display: grid;
+  gap: 10px;
   align-items: flex-start;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
 }
 
 .ia-tool-card h4 {
-  font-size: 1.1rem;
   margin: 0;
-  color: var(--text-main);
+  color: var(--ink);
+  font-size: 1.08rem;
 }
+
 .ia-tool-card p {
-  font-size: 0.9rem;
-  color: var(--text-muted);
   margin: 0;
-  line-height: 1.4;
-  flex: 1;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
 }
 
-.ia-practice-studio .ia-zone-title {
-  font-size: 1.75rem;
+.practice-studio-container {
+  gap: 16px;
+  padding: 24px;
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--line));
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 9%, transparent), transparent 58%),
+    var(--surface);
+}
+
+.practice-studio-container .ia-zone-title {
+  color: var(--accent);
+  font-size: clamp(1.5rem, 3vw, 1.9rem);
+  font-weight: 900;
+}
+
+.practice-studio-hero-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.practice-studio-hero-card {
+  min-height: 220px;
+  align-content: start;
+  padding: 22px;
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--line));
+  background: color-mix(in srgb, var(--surface-soft) 72%, var(--surface));
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+.practice-studio-hero-card .small-button {
+  align-self: end;
+  margin-top: auto;
+}
+
+.guided-learning-container {
+  gap: 20px;
+}
+
+.quick-mini-courses,
+.practice-programs {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.guided-learning-subtitle {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.08rem;
+}
+
+.guided-learning-copy {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.quick-mini-courses .mini-course-shelf,
+.practice-program-grid {
+  margin-top: 0;
+}
+
+.reference-library-compact {
+  gap: 10px;
+  color: var(--muted);
+}
+
+.reference-library-compact .ia-zone-title {
+  color: var(--muted);
+  font-size: 1.15rem;
+}
+
+.reference-library-compact-list {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.reference-library-compact-item {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-soft) 66%, var(--surface));
+  overflow: hidden;
+}
+
+.reference-library-compact-item .toggle-shelf-button {
+  min-height: 44px;
+  padding: 11px 14px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.reference-library-compact-item .toggle-shelf-button.active {
+  background: color-mix(in srgb, var(--line) 52%, transparent);
+}
+
+.reference-library-compact-item > [id$="ShelfContent"] {
+  padding: 0 14px 14px;
+}
+
+@media (max-width: 760px) {
+  .practice-room-ia-preview-shell {
+    gap: 24px;
+  }
+
+  .practice-studio-container {
+    padding: 18px;
+  }
+
+  .practice-studio-hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .practice-studio-hero-card {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 430px) {
+  .continue-practice-banner,
+  .practice-studio-container,
+  .ia-tool-card {
+    padding: 14px;
+  }
+
+  .ia-card-grid,
+  .practice-studio-hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .practice-studio-hero-card .small-button,
+  .practice-programs .small-button {
+    width: 100%;
+  }
+
+  .reference-library-compact-item .toggle-shelf-button {
+    gap: 10px;
+    padding: 10px 12px;
+  }
+}
+
+/* RHC Program Shell Styles */
+.rhc-program-content {
+  max-width: 800px;
+}
+
+.rhc-program-desc {
+  color: var(--muted);
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+}
+
+.rhc-chapter-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.rhc-chapter-header {
+  background: color-mix(in srgb, var(--surface-soft) 80%, transparent);
+  padding: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.rhc-chapter-header h4 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.1rem;
+}
+
+.rhc-week-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.rhc-week-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  padding: 1rem;
+  text-align: left;
+  font-size: 1rem;
   font-weight: 700;
-  color: var(--accent-color, #d35400);
-}
-.ia-practice-studio .ia-tool-card {
-  border-color: var(--accent-color, #d35400);
-  background: var(--surface-main);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
 }
 
-.ia-reference-library .ia-zone-title {
-  color: var(--text-muted);
+.rhc-week-btn:last-of-type {
+  border-bottom: none;
 }
-.ia-reference-library .reference-shelf,
-.ia-reference-library .reference-panel {
-  margin-top: 1rem;
+
+.rhc-week-btn:hover {
+  background: color-mix(in srgb, var(--surface-soft) 50%, transparent);
+}
+
+.rhc-week-btn.active {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+}
+
+.rhc-week-detail {
+  padding: 1rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  animation: rhcSlideDown 0.3s ease-out;
+}
+
+@keyframes rhcSlideDown {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.rhc-days-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.rhc-days-list li {
+  padding: 0.8rem;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.rhc-days-list li strong {
+  color: var(--accent);
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.rhc-persistent-blocks {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.rhc-block {
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--warm) 30%, var(--line));
+  background: color-mix(in srgb, var(--warm) 5%, transparent);
+}
+
+.rhc-block h5 {
+  margin: 0 0 0.5rem 0;
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
+.rhc-block p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.rhc-study-lock {
+  padding: 2rem;
+  text-align: center;
+  background: color-mix(in srgb, var(--surface-soft) 50%, transparent);
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+}
+
+.rhc-study-lock h5 {
+  color: var(--ink);
+  font-size: 1.2rem;
+  margin: 0 0 1rem 0;
+}
+
+.rhc-study-lock p {
+  color: var(--muted);
+  margin: 0.5rem 0;
+}
+
+.rhc-study-lock strong {
+  color: var(--accent);
+}
+
+.rhc-weekly-goal {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px dashed var(--line);
+  color: var(--accent);
+}
+
+.rhc-dynamic-list {
+  padding-left: 1.25rem;
+  margin: 0;
+}
+.rhc-dynamic-list li {
+  margin-bottom: 0.25rem;
 }

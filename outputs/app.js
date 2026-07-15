@@ -198,6 +198,7 @@ const practiceRoomIaPreviewMode = parsePracticeRoomIaPreviewMode();
 const fretboardStudioPreviewMode = parseFretboardStudioPreviewMode();
 let courseData = null;
 let activeMiniCourseId = "";
+let practiceRoomIaPreviewPlacement = null;
 
 function week(number, month, title, module, goal, practice, checks) {
   return { number, month, title, module, goal, practice, checks };
@@ -4788,44 +4789,91 @@ function createPracticeStudioPreviewShell() {
   return shell;
 }
 
-function renderPracticeRoomIaPreview() {
+function createPracticeRoomIaPreviewAnchor(node, label) {
+  if (!node?.parentNode) return null;
+  const anchor = document.createComment(`practice-room-ia:${label}`);
+  node.parentNode.insertBefore(anchor, node);
+  return anchor;
+}
+
+function restorePracticeRoomIaPreview() {
+  const practiceSection = document.getElementById("practice");
   const practiceGrid = document.querySelector("#practice .practice-grid");
   const rhythmLayer = document.querySelector("#practice .rhythm-practice-layer");
-  const originalHeading = document.querySelector("#practice .section-heading");
+  const originalHeading = document.querySelector("#practice > .section-heading");
+  const existingShell = document.getElementById("practiceRoomIaPreviewShell");
+  const placement = practiceRoomIaPreviewPlacement;
+
+  if (placement) {
+    [placement.miniCourse, ...placement.referenceShelves].forEach((item) => {
+      if (item?.anchor?.parentNode && item.node) {
+        item.anchor.parentNode.insertBefore(item.node, item.anchor);
+        item.anchor.remove();
+      }
+    });
+    placement.referenceShelves.forEach((item) => item.node?.classList.remove("reference-library-compact-item"));
+  }
+
+  existingShell?.remove();
+  if (practiceGrid) {
+    practiceGrid.hidden = false;
+    practiceGrid.classList.remove("practice-room-ia-source-hidden");
+  }
+  if (rhythmLayer) rhythmLayer.hidden = false;
+  if (originalHeading) originalHeading.hidden = false;
+  if (practiceSection) {
+    practiceSection.classList.remove("practice-room-ia-active");
+    practiceSection.setAttribute("aria-labelledby", placement?.originalLabelledBy || "practiceTitle");
+  }
+  practiceRoomIaPreviewPlacement = null;
+}
+
+function renderPracticeRoomIaPreview() {
+  const practiceGrid = document.querySelector("#practice .practice-grid");
+  const originalHeading = document.querySelector("#practice > .section-heading");
   const existingShell = document.getElementById("practiceRoomIaPreviewShell");
   
   if (!isPracticeRoomIaPreviewActive()) {
-    existingShell?.remove();
-    if (practiceGrid) practiceGrid.hidden = false;
-    if (rhythmLayer) rhythmLayer.hidden = false;
-    if (originalHeading) originalHeading.hidden = false;
+    restorePracticeRoomIaPreview();
     return;
   }
 
   if (existingShell) return;
-  if (practiceGrid) practiceGrid.hidden = true;
-  if (rhythmLayer) rhythmLayer.hidden = true;
+  if (practiceGrid) {
+    practiceGrid.hidden = true;
+    practiceGrid.classList.add("practice-room-ia-source-hidden");
+  }
   if (originalHeading) originalHeading.hidden = true;
 
   const shell = month2CreateElement("div", "practice-room-ia-preview-shell");
   shell.id = "practiceRoomIaPreviewShell";
 
+  const continuePractice = month2CreateElement("button", "continue-practice-banner");
+  continuePractice.type = "button";
+  continuePractice.disabled = true;
+  continuePractice.append(
+    month2CreateElement("span", "continue-practice-title", "Continue Practice"),
+    month2CreateElement("span", "continue-practice-copy", "Preview — ระบบกลับไปซ้อมต่อจะเปิดในเฟสถัดไป")
+  );
+
   const head = month2CreateElement("div", "section-heading");
+  const iaTitle = month2CreateElement("h2", "", "Practice Room");
+  iaTitle.id = "practiceRoomIaTitle";
   head.append(
     month2CreateElement("p", "eyebrow", "ห้องซ้อม"),
-    month2CreateElement("h2", "", "Practice Room"),
+    iaTitle,
     month2CreateElement("p", "practice-room-ia-desc", "เลือกเครื่องมือฝึกซ้อม คอร์สเสริมระยะสั้น หรือเปิดคลังอ้างอิง")
   );
   
-  const studioSection = month2CreateElement("section", "ia-zone ia-practice-studio");
+  const studioSection = month2CreateElement("section", "ia-zone ia-practice-studio practice-studio-container");
   studioSection.append(
     month2CreateElement("h3", "ia-zone-title", "Practice Studio"),
     month2CreateElement("p", "ia-zone-subtitle", "เครื่องมือฝึกซ้อมแบบโต้ตอบ")
   );
   
-  const studioGrid = month2CreateElement("div", "ia-card-grid");
+  const studioGrid = month2CreateElement("div", "ia-card-grid practice-studio-hero-grid");
   
-  const fslCard = month2CreateElement("div", "ia-tool-card");
+  const fslCard = month2CreateElement("article", "ia-tool-card practice-studio-hero-card");
   fslCard.append(
     month2CreateElement("span", "fsl-badge", "PREVIEW"),
     month2CreateElement("h4", "", "Fretboard Studio Lite"),
@@ -4835,7 +4883,7 @@ function renderPracticeRoomIaPreview() {
   fslBtn.addEventListener("click", () => openFretboardStudioModal());
   fslCard.appendChild(fslBtn);
 
-  const slCard = month2CreateElement("div", "ia-tool-card");
+  const slCard = month2CreateElement("article", "ia-tool-card practice-studio-hero-card");
   slCard.append(
     month2CreateElement("h4", "", "Sound Lab"),
     month2CreateElement("p", "", "ทดลองฟังเสียงคอร์ด (อ้างอิงตามบทเรียนหลัก)")
@@ -4846,59 +4894,219 @@ function renderPracticeRoomIaPreview() {
   });
   slCard.appendChild(slBtn);
 
-  const metroCard = month2CreateElement("div", "ia-tool-card");
+  const metroCard = month2CreateElement("article", "ia-tool-card practice-studio-hero-card");
   metroCard.append(
-    month2CreateElement("h4", "", "Metronome & Groove"),
-    month2CreateElement("p", "", "เครื่องให้จังหวะ")
+    month2CreateElement("h4", "", "Metronome / Groove Trainer"),
+    month2CreateElement("p", "", "ฝึก pulse, tempo และ groove ด้วย Metronome เดิมของแอป")
   );
   const metroBtn = month2CreateElement("button", "small-button", "เปิด Metronome");
   metroBtn.addEventListener("click", () => {
-    const headerMetro = document.querySelector(".topbar-metronome-button");
-    if (headerMetro) headerMetro.click();
+    document.getElementById("metronomeToggle")?.click();
   });
   metroCard.appendChild(metroBtn);
 
   studioGrid.append(fslCard, slCard, metroCard);
   studioSection.appendChild(studioGrid);
 
-  const guidedSection = month2CreateElement("section", "ia-zone ia-guided-learning");
+  const guidedSection = month2CreateElement("section", "ia-zone ia-guided-learning guided-learning-container");
   guidedSection.append(
     month2CreateElement("h3", "ia-zone-title", "Guided Learning"),
     month2CreateElement("p", "ia-zone-subtitle", "คอร์สเสริมและตารางซ้อมเฉพาะกิจ")
   );
 
-  const programsGrid = month2CreateElement("div", "ia-card-grid");
-  const rhProgramCard = month2CreateElement("div", "ia-tool-card");
+  const quickMiniCourses = month2CreateElement("section", "quick-mini-courses");
+  quickMiniCourses.append(
+    month2CreateElement("h4", "guided-learning-subtitle", "Quick Mini Courses"),
+    month2CreateElement("p", "guided-learning-copy", "คอร์สสั้นที่ใช้ progress และการเปิดบทเรียนเดิม")
+  );
+
+  const practicePrograms = month2CreateElement("section", "practice-programs");
+  practicePrograms.append(
+    month2CreateElement("h4", "guided-learning-subtitle", "Practice Programs"),
+    month2CreateElement("p", "guided-learning-copy", "โปรแกรมซ้อมแบบมีโครงสร้าง — แสดงเฉพาะ specification preview")
+  );
+
+  const programsGrid = month2CreateElement("div", "ia-card-grid practice-program-grid");
+  const rhProgramCard = month2CreateElement("article", "ia-tool-card");
+  rhProgramCard.style.cursor = "pointer";
   rhProgramCard.append(
     month2CreateElement("span", "fsl-badge", "SPEC PREVIEW"),
-    month2CreateElement("h4", "", "Right-Hand Control \u2014 8 Weeks"),
-    month2CreateElement("p", "", "โปรแกรมเจาะลึกการควบคุมมือขวาสำหรับมือใหม่")
+    month2CreateElement("h4", "", window.rhcProgramData?.title || "Right-Hand Control \u2014 16 Weeks"),
+    month2CreateElement("p", "", window.rhcProgramData?.description || "โปรแกรมเจาะลึกการควบคุมมือขวาสำหรับมือใหม่")
   );
-  const rhBtn = month2CreateElement("button", "small-button", "กำลังพัฒนา");
-  rhBtn.disabled = true;
-  rhProgramCard.appendChild(rhBtn);
+  rhProgramCard.addEventListener("click", () => {
+    openRhcProgramModal();
+  });
   programsGrid.appendChild(rhProgramCard);
-  
-  guidedSection.appendChild(programsGrid);
+  practicePrograms.appendChild(programsGrid);
 
-  const refSection = month2CreateElement("section", "ia-zone ia-reference-library");
+  const refSection = month2CreateElement("section", "ia-zone ia-reference-library reference-library-compact");
   refSection.append(
     month2CreateElement("h3", "ia-zone-title", "Reference Library"),
-    month2CreateElement("p", "ia-zone-subtitle", "คู่มือและคลังอ้างอิง")
+    month2CreateElement("p", "ia-zone-subtitle", "เปิดดูเฉพาะเมื่อต้องการทบทวน TAB หรือค่าจังหวะ")
   );
-  
-  shell.append(head, studioSection, guidedSection, refSection);
+
+  const referenceList = month2CreateElement("div", "reference-library-compact-list");
+  refSection.appendChild(referenceList);
+
+  guidedSection.append(quickMiniCourses, practicePrograms);
+  shell.append(continuePractice, head, studioSection, guidedSection, refSection);
   
   const practiceSection = document.getElementById("practice");
-  practiceSection.prepend(shell);
-  
+  if (!practiceSection) return;
   const miniCourseShelf = document.getElementById("miniCourseShelf");
-  if (miniCourseShelf) {
-    guidedSection.insertBefore(miniCourseShelf, programsGrid);
+  const referenceShelves = Array.from(practiceSection.children).filter((element) => element.classList?.contains("reference-shelf"));
+
+  practiceRoomIaPreviewPlacement = {
+    originalLabelledBy: practiceSection.getAttribute("aria-labelledby") || "practiceTitle",
+    miniCourse: miniCourseShelf ? {
+      node: miniCourseShelf,
+      anchor: createPracticeRoomIaPreviewAnchor(miniCourseShelf, "mini-course-shelf")
+    } : null,
+    referenceShelves: referenceShelves.map((node, index) => ({
+      node,
+      anchor: createPracticeRoomIaPreviewAnchor(node, `reference-shelf-${index}`)
+    }))
+  };
+
+  practiceSection.setAttribute("aria-labelledby", "practiceRoomIaTitle");
+  practiceSection.classList.add("practice-room-ia-active");
+  practiceSection.prepend(shell);
+
+  if (miniCourseShelf) quickMiniCourses.appendChild(miniCourseShelf);
+  referenceShelves.forEach((element) => {
+    element.classList.add("reference-library-compact-item");
+    referenceList.appendChild(element);
+  });
+}
+
+function openRhcProgramModal() {
+  if (document.getElementById("rhc-program-modal")) return;
+  const data = window.rhcProgramData;
+  if (!data) {
+    alert("Program data not loaded");
+    return;
   }
+
+  const overlay = document.createElement("div");
+  overlay.id = "rhc-program-modal";
+  overlay.className = "fsl-studio-modal-overlay";
+
+  const modalContent = document.createElement("div");
+  modalContent.className = "fsl-studio-modal-content rhc-program-content";
+
+  const headerDiv = document.createElement("div");
+  headerDiv.className = "fsl-studio-modal-header";
+
+  const titleDiv = document.createElement("div");
+  titleDiv.innerHTML = `<span class="fsl-badge">PREVIEW</span><h3 class="fsl-studio-modal-title">${data.title}</h3>`;
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "fsl-studio-close-btn";
+  closeBtn.textContent = "ปิดโปรแกรม";
+  closeBtn.onclick = () => overlay.remove();
   
-  const refPanels = practiceSection.querySelectorAll(".reference-shelf, .reference-panel");
-  refPanels.forEach(el => refSection.appendChild(el));
+  headerDiv.append(titleDiv, closeBtn);
+
+  const bodyDiv = document.createElement("div");
+  bodyDiv.className = "rhc-program-body";
+
+  const desc = document.createElement("p");
+  desc.className = "rhc-program-desc";
+  desc.textContent = data.description;
+  bodyDiv.appendChild(desc);
+
+  data.chapters.forEach(ch => {
+    const chSection = document.createElement("section");
+    chSection.className = "rhc-chapter-card";
+
+    const chHeader = document.createElement("div");
+    chHeader.className = "rhc-chapter-header";
+    chHeader.innerHTML = `<h4>${ch.title}</h4>`;
+
+    const weekList = document.createElement("div");
+    weekList.className = "rhc-week-list";
+
+    ch.weeks.forEach(week => {
+      const wBtn = document.createElement("button");
+      wBtn.className = "rhc-week-btn";
+      wBtn.textContent = week.title;
+
+      const wDetail = document.createElement("div");
+      wDetail.className = "rhc-week-detail";
+      wDetail.hidden = true;
+
+      if (week.weeklyGoal) {
+        const wGoal = document.createElement("p");
+        wGoal.className = "rhc-weekly-goal";
+        wGoal.innerHTML = `<strong>เป้าหมายประจำสัปดาห์:</strong> ${week.weeklyGoal}`;
+        wDetail.appendChild(wGoal);
+      }
+
+      const daysUl = document.createElement("ul");
+      daysUl.className = "rhc-days-list";
+      week.days.forEach(d => {
+        const li = document.createElement("li");
+        if (week.title.includes("Week 13") && d.dayStr.includes("Day 4")) {
+          li.innerHTML = `
+            <div class="rhc-study-lock">
+              <h5>Original Study 1 &mdash; Easy</h5>
+              <p><strong>DRAFT COMPLETE</strong></p>
+              <p>HUMAN PLAYABILITY REVIEW: DEFERRED</p>
+              <p>App implementation not started</p>
+            </div>
+          `;
+        } else {
+          if (d.dayStr) {
+            li.innerHTML = `<strong>${d.dayStr}</strong>: ${d.desc}`;
+          } else {
+            li.textContent = d.desc;
+          }
+        }
+        daysUl.appendChild(li);
+      });
+      wDetail.appendChild(daysUl);
+
+      const persistentBlocks = document.createElement("div");
+      persistentBlocks.className = "rhc-persistent-blocks";
+
+      const comfortHtml = data.comfortTempo.map(item => `<li>${item}</li>`).join('');
+      const rubricHtml = data.rubric.map(item => `<li>${item}</li>`).join('');
+      const safetyHtml = data.safety.map(item => `<li>${item}</li>`).join('');
+
+      persistentBlocks.innerHTML = `
+        <div class="rhc-block">
+          <h5>Comfort Tempo</h5>
+          <ul class="rhc-dynamic-list">${comfortHtml}</ul>
+        </div>
+        <div class="rhc-block">
+          <h5>Self-Check Rubric</h5>
+          <ul class="rhc-dynamic-list">${rubricHtml}</ul>
+        </div>
+        <div class="rhc-block">
+          <h5>Safety</h5>
+          <ul class="rhc-dynamic-list">${safetyHtml}</ul>
+        </div>
+      `;
+      wDetail.appendChild(persistentBlocks);
+
+      wBtn.onclick = () => {
+        const isHidden = wDetail.hidden;
+        wDetail.hidden = !isHidden;
+        wBtn.classList.toggle("active", !isHidden);
+      };
+
+      weekList.appendChild(wBtn);
+      weekList.appendChild(wDetail);
+    });
+
+    chSection.append(chHeader, weekList);
+    bodyDiv.appendChild(chSection);
+  });
+
+  modalContent.append(headerDiv, bodyDiv);
+  overlay.appendChild(modalContent);
+  document.body.appendChild(overlay);
 }
 
 function openFretboardStudioModal() {
