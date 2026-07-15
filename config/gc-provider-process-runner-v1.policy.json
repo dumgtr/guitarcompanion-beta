@@ -22,9 +22,17 @@
       "id": "gemini-plan-review",
       "enabled": true,
       "executableNames": ["gemini.cmd"],
-      "arguments": ["--prompt", "Review only the supplied context.\nDo not inspect the repository.\nDo not invoke tools.", "--approval-mode", "plan", "--output-format", "stream-json", "--skip-trust"],
+      "arguments": ["--prompt", "Inspect the assigned repository context read-only.\nDo not modify files or invoke nested providers.\nReturn only the review.", "--approval-mode", "plan", "--output-format", "stream-json", "--skip-trust"],
       "promptTransport": "stdin",
       "protocol": "json-stream-exit"
+    },
+    {
+      "id": "claude-readonly",
+      "enabled": true,
+      "executableNames": ["claude.cmd"],
+      "arguments": ["--system-prompt", "Inspect the assigned repository context read-only. Do not modify files or invoke nested providers. Return only the review.", "-p", "--output-format", "json", "--permission-mode", "plan", "--safe-mode", "--tools", "Read,Glob,Grep", "--disallowedTools", "Edit,Write,Bash,NotebookEdit,WebFetch,WebSearch,mcp__*", "--strict-mcp-config", "--disable-slash-commands", "--no-session-persistence"],
+      "promptTransport": "stdin",
+      "protocol": "claude-json-exit"
     },
     {
       "id": "github-copilot-readonly",

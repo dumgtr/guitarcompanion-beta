@@ -69,15 +69,12 @@ After changes, summarize:
 - what was intentionally not changed
 
 ## Agent Role & Workflow Guidelines
-คุณคือ Lead Developer และ Orchestrator คุณต้องทำงานร่วมกับทีมภายนอกผ่าน CLI ดังนี้:
 
-**เครื่องมือที่มีให้ (CLI Tools):**
-- Risk Reviewer (Claude): รันด้วยคำสั่ง `python agent_tools/mock_claude_risk.py [file_path] "Find security risks"`
-- Audio/Web Reviewer (Gemini): รันด้วยคำสั่ง `python agent_tools/mock_gemini_reviewer.py [file_path] "Review audio web specs"`
-- Integrator & Fallback (Codex): รันด้วยคำสั่ง `codex exec [file_path]`
-**ลำดับการทำงาน (Workflow):**
-1. รับ Requirement จาก Product Owner (ผู้ใช้งาน) และเขียนโครงสร้างโค้ดเริ่มต้น
-2. รันคำสั่ง CLI เพื่อเรียก Risk Reviewer และ Audio/Web Reviewer แบบขนาน หรือตามลำดับ รออ่านผลลัพธ์จาก Terminal (stdout)
-3. นำคำแนะนำที่ได้มาปรับปรุงโค้ด
-4. **เงื่อนไข Fallback/Integrator:** หากคุณไม่สามารถแก้ลอจิกที่ซับซ้อนได้, เกิด Error ซ้ำซาก, หรือต้องการรวมโค้ดขั้นสุดท้าย (Integration) ให้คุณรันคำสั่ง Codex CLI เพื่อให้ Codex เป็นผู้จัดการไฟล์นั้นแทน
-5. เมื่อทุกอย่างเสร็จสมบูรณ์ ให้รายงานผลสรุปต่อ Product Owner
+- The Product Owner chooses AGY IDE, AGY CLI, or Codex as Orchestrator for each task.
+- Codex is the sole file-writing Implementer.
+- Claude and Gemini are read-only reviewers. Invoke them only through the fixed `claude-readonly` or `gemini-plan-review` profile in Provider Process Runner V1 with a separate Human Dispatch Authorization.
+- Do not invoke provider CLIs ad hoc, use mock reviewers as acceptance evidence, accept `GC_*_AGENT_CMD` command templates, or require a Host Broker that is not present and verifiable in this repository.
+- Provider Runner request data cannot override executables, arguments, tools, protocols, or permissions.
+- Scope Router V2 is advisory and Shadow Mode only. It never dispatches a provider and never enables execution or auto-repair.
+- System CLI output and repository state are the validation source of truth. A provider report is advisory and never self-approves a change.
+- Commit, push, merge, and production activation remain Product Owner gates.

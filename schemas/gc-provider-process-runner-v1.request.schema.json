@@ -23,7 +23,7 @@
     "schemaVersion": { "const": "gc-provider-process-runner-v1.request/1" },
     "requestId": { "type": "string", "pattern": "^GC_RUN_[0-9a-f]{32}$" },
     "taskId": { "type": "string", "minLength": 1, "maxLength": 128 },
-    "providerProfileId": { "enum": ["codex-readonly", "gemini-plan-review", "github-copilot-readonly"] },
+    "providerProfileId": { "enum": ["codex-readonly", "gemini-plan-review", "claude-readonly", "github-copilot-readonly"] },
     "repositoryRoot": { "type": "string", "minLength": 3 },
     "expectedBranch": { "type": "string", "minLength": 1, "maxLength": 255 },
     "expectedHead": { "type": "string", "pattern": "^[0-9a-f]{40}$" },

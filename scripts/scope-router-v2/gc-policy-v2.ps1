@@ -8,6 +8,7 @@ function Get-GcFixedContractPathsV2 {
         inputSchema = [IO.Path]::Combine($RepositoryRoot, 'schemas', 'gc-scope-router-v2.input.schema.json')
         outputSchema = [IO.Path]::Combine($RepositoryRoot, 'schemas', 'gc-scope-router-v2.output.schema.json')
         assessorSchema = [IO.Path]::Combine($RepositoryRoot, 'schemas', 'gc-scope-router-v2.assessor.schema.json')
+        protectedWriteAuthorizationSchema = [IO.Path]::Combine($RepositoryRoot, 'schemas', 'gc-scope-router-v2.protected-write-authorization.schema.json')
     }
 }
 
@@ -38,13 +39,14 @@ function Get-GcContractHashV2 {
 function Assert-GcPolicyContractV2 {
     param([Parameter(Mandatory)]$Policy)
 
-    $allowed = @('policyVersion','inputSchemaVersion','outputSchemaVersion','assessorSchemaVersion','shadowMode','executionPermitted','autoRepairAllowed','recommendedWriter','reviewers','classifications','operations','assessorUncertaintyMinimums','assessorFlags','forbiddenPaths','protectedNamespaces')
+    $allowed = @('policyVersion','inputSchemaVersion','outputSchemaVersion','assessorSchemaVersion','protectedWriteAuthorizationSchemaVersion','shadowMode','executionPermitted','autoRepairAllowed','recommendedWriter','reviewers','reviewerProfileBindings','classifications','operations','assessorUncertaintyMinimums','assessorFlags','forbiddenPaths','protectedNamespaces')
     Assert-GcClosedObjectV2 -Object $Policy -Allowed $allowed -Required $allowed -FieldId 'policy'
     $constants = [ordered]@{
         policyVersion = 'gc-scope-router-v2.policy/1'
         inputSchemaVersion = 'gc-scope-router-v2.input/1'
         outputSchemaVersion = 'gc-scope-router-v2.output/1'
         assessorSchemaVersion = 'gc-scope-router-v2.assessor/1'
+        protectedWriteAuthorizationSchemaVersion = 'gc-scope-router-v2.protected-write-authorization/1'
         recommendedWriter = 'Codex Implementer'
     }
     foreach ($name in $constants.Keys) {
@@ -89,6 +91,22 @@ function Assert-GcPolicyContractV2 {
         }
     }
     Assert-GcStringArrayV2 -Value $Policy['reviewers'] -FieldId 'policy.reviewers' -MinimumCount 1
+    if ($Policy['reviewerProfileBindings'] -isnot [Collections.IList] -or $Policy['reviewerProfileBindings'].Count -ne $Policy['reviewers'].Count) {
+        Throw-GcFailureV2 -ReasonCode 'CONSUMPTION_CONTRACT_INVALID' -FieldId 'policy.reviewerProfileBindings' -PolicyRuleId 'V2-POLICY-REVIEWER-BINDINGS' -FailureCategory 'contract'
+    }
+    $expectedBindings = [ordered]@{
+        'Security Reviewer' = 'claude-readonly'
+        'Test-Integrity Reviewer' = 'claude-readonly'
+        'Final External Reviewer' = 'gemini-plan-review'
+    }
+    $bindingRoles = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($binding in $Policy['reviewerProfileBindings']) {
+        Assert-GcClosedObjectV2 -Object $binding -Allowed @('role','providerProfileId') -Required @('role','providerProfileId') -FieldId 'policy.reviewerProfileBinding'
+        $role = [string]$binding['role']
+        if (-not (Test-GcObjectHasKeyV2 -Object $expectedBindings -Key $role) -or -not $bindingRoles.Add($role) -or -not (Test-GcOrdinalEqualsV2 ([string]$binding['providerProfileId']) ([string]$expectedBindings[$role]))) {
+            Throw-GcFailureV2 -ReasonCode 'CONSUMPTION_CONTRACT_INVALID' -FieldId 'policy.reviewerProfileBindings' -PolicyRuleId 'V2-POLICY-REVIEWER-BINDINGS' -FailureCategory 'contract'
+        }
+    }
     Assert-GcStringArrayV2 -Value $Policy['forbiddenPaths'] -FieldId 'policy.forbiddenPaths' -MinimumCount 1
     Assert-GcStringArrayV2 -Value $Policy['protectedNamespaces'] -FieldId 'policy.protectedNamespaces' -MinimumCount 1
     return $true
@@ -176,6 +194,7 @@ function Get-GcPolicyV2 {
         inputSchema = $objects['inputSchema']
         outputSchema = $objects['outputSchema']
         assessorSchema = $objects['assessorSchema']
+        protectedWriteAuthorizationSchema = $objects['protectedWriteAuthorizationSchema']
         consumption = $objects['consumption']
         policySha256 = Get-GcSha256HexV2 -Bytes $policyBytes
         contractsSha256 = Get-GcContractHashV2 -PathMap $paths
@@ -195,7 +214,8 @@ function Get-GcDeterministicRiskV2 {
         [Parameter(Mandatory)]$InputObject,
         [Parameter(Mandatory)]$Policy,
         [Parameter(Mandatory)][AllowEmptyCollection()][string[]]$DirtyConflicts,
-        [AllowEmptyCollection()][string[]]$PathPolicyBlockReasons = @()
+        [AllowEmptyCollection()][string[]]$PathPolicyBlockReasons = @(),
+        [AllowEmptyCollection()][string[]]$PathPolicyRoutingReasons = @()
     )
 
     $maximum = Get-GcClassificationEntryV2 -Policy $Policy -Classification 'simple'
@@ -220,6 +240,7 @@ function Get-GcDeterministicRiskV2 {
         $maximum = Get-GcClassificationEntryV2 -Policy $Policy -Classification 'blocked'
         foreach ($reason in $PathPolicyBlockReasons) { [void]$reasons.Add([string]$reason) }
     }
+    foreach ($reason in $PathPolicyRoutingReasons) { [void]$reasons.Add([string]$reason) }
     $reasonList = [Collections.Generic.List[string]]::new(); foreach ($reason in $reasons) { $reasonList.Add($reason) }; $reasonList.Sort([StringComparer]::Ordinal)
     return [ordered]@{ classification = [string]$maximum['id']; rank = [int64]$maximum['rank']; route = [string]$maximum['route']; reasonCodes = @($reasonList) }
 }

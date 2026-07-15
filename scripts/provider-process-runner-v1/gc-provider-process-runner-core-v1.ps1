@@ -252,11 +252,12 @@ function Assert-GcRunnerPolicyV1 {
         (@($Policy['checkpointCategories']) -join '|') -cne 'QUOTA_EXCEEDED|TIMEOUT') {
         Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_POLICY_CATEGORY_INVALID'
     }
-    if ($Policy['profiles'] -isnot [object[]] -or $Policy['profiles'].Count -ne 3) { Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_POLICY_PROFILES_INVALID' }
+    if ($Policy['profiles'] -isnot [object[]] -or $Policy['profiles'].Count -ne 4) { Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_POLICY_PROFILES_INVALID' }
 
     $expectedProfiles = [ordered]@{
         'codex-readonly' = [ordered]@{ enabled = $true; executableNames = @('codex.exe'); arguments = @('exec','--ephemeral','--json','--sandbox','read-only','-'); promptTransport = 'stdin'; protocol = 'codex-jsonl' }
-        'gemini-plan-review' = [ordered]@{ enabled = $true; executableNames = @('gemini.cmd'); arguments = @('--prompt',"Review only the supplied context.`nDo not inspect the repository.`nDo not invoke tools.",'--approval-mode','plan','--output-format','stream-json','--skip-trust'); promptTransport = 'stdin'; protocol = 'json-stream-exit' }
+        'gemini-plan-review' = [ordered]@{ enabled = $true; executableNames = @('gemini.cmd'); arguments = @('--prompt',"Inspect the assigned repository context read-only.`nDo not modify files or invoke nested providers.`nReturn only the review.",'--approval-mode','plan','--output-format','stream-json','--skip-trust'); promptTransport = 'stdin'; protocol = 'json-stream-exit' }
+        'claude-readonly' = [ordered]@{ enabled = $true; executableNames = @('claude.cmd'); arguments = @('--system-prompt','Inspect the assigned repository context read-only. Do not modify files or invoke nested providers. Return only the review.','-p','--output-format','json','--permission-mode','plan','--safe-mode','--tools','Read,Glob,Grep','--disallowedTools','Edit,Write,Bash,NotebookEdit,WebFetch,WebSearch,mcp__*','--strict-mcp-config','--disable-slash-commands','--no-session-persistence'); promptTransport = 'stdin'; protocol = 'claude-json-exit' }
         'github-copilot-readonly' = [ordered]@{ enabled = $false; executableNames = @('gh.exe'); arguments = @(); promptTransport = 'closed'; protocol = 'disabled' }
     }
     $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
@@ -500,6 +501,33 @@ function Read-GcJsonStreamExitProtocolV1 {
     return [pscustomobject]@{ Valid = $true; TerminalEvent = 'result'; Reason = $null }
 }
 
+function Read-GcClaudeJsonExitProtocolV1 {
+    param([Parameter(Mandatory)][string]$Text, [Parameter(Mandatory)][bool]$Truncated)
+    if ($Truncated -or [string]::IsNullOrWhiteSpace($Text)) { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'TRUNCATED_OR_EMPTY' } }
+
+    try {
+        $document = [Text.Json.JsonDocument]::Parse($Text)
+        try {
+            if ($document.RootElement.ValueKind -ne [Text.Json.JsonValueKind]::Object) { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'RESULT_NOT_OBJECT' } }
+            $propertyNames = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+            foreach ($property in $document.RootElement.EnumerateObject()) {
+                if (-not $propertyNames.Add($property.Name)) { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'DUPLICATE_PROPERTY' } }
+            }
+            $type = [Text.Json.JsonElement]::new()
+            $subtype = [Text.Json.JsonElement]::new()
+            $result = [Text.Json.JsonElement]::new()
+            if (-not $document.RootElement.TryGetProperty('type', [ref]$type) -or $type.ValueKind -ne [Text.Json.JsonValueKind]::String -or $type.GetString() -cne 'result') { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'TYPE_INVALID' } }
+            if (-not $document.RootElement.TryGetProperty('subtype', [ref]$subtype) -or $subtype.ValueKind -ne [Text.Json.JsonValueKind]::String -or $subtype.GetString() -cne 'success') { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'SUBTYPE_INVALID' } }
+            if (-not $document.RootElement.TryGetProperty('result', [ref]$result) -or $result.ValueKind -ne [Text.Json.JsonValueKind]::String -or [string]::IsNullOrWhiteSpace($result.GetString())) { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'RESULT_INVALID' } }
+            $isError = [Text.Json.JsonElement]::new()
+            if ($document.RootElement.TryGetProperty('is_error', [ref]$isError) -and ($isError.ValueKind -ne [Text.Json.JsonValueKind]::False)) { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'IS_ERROR_INVALID' } }
+        }
+        finally { $document.Dispose() }
+    }
+    catch { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'JSON_INVALID' } }
+    return [pscustomobject]@{ Valid = $true; TerminalEvent = 'result'; Reason = $null }
+}
+
 function Resolve-GcProviderFailureCategoryV1 {
     param([AllowEmptyString()][string]$Stdout, [AllowEmptyString()][string]$Stderr)
     $combined = $Stdout + "`n" + $Stderr
@@ -515,7 +543,7 @@ function Invoke-GcProviderAttemptV1 {
         [Parameter(Mandatory)][object[]]$Arguments,
         [Parameter(Mandatory)][string]$Prompt,
         [Parameter(Mandatory)][ValidateSet('stdin','closed')][string]$PromptTransport,
-        [Parameter(Mandatory)][ValidateSet('codex-jsonl','json-stream-exit')][string]$Protocol,
+        [Parameter(Mandatory)][ValidateSet('codex-jsonl','json-stream-exit','claude-json-exit')][string]$Protocol,
         [Parameter(Mandatory)][string]$WorkingDirectory,
         [Parameter(Mandatory)][int]$TimeoutMilliseconds,
         [Parameter(Mandatory)][int]$MaximumCapturedBytes,
@@ -598,6 +626,12 @@ function Invoke-GcProviderAttemptV1 {
         }
         elseif ($Protocol -eq 'json-stream-exit') {
             $protocolResult = Read-GcJsonStreamExitProtocolV1 -Text $stdoutText -Truncated $stdoutCapture.Truncated
+            $terminalEvent = $protocolResult.TerminalEvent
+            if (-not $protocolResult.Valid) { $failureCategory = 'PROTOCOL_FAILURE' }
+            else { $state = 'COMPLETED'; $failureCategory = $null }
+        }
+        elseif ($Protocol -eq 'claude-json-exit') {
+            $protocolResult = Read-GcClaudeJsonExitProtocolV1 -Text $stdoutText -Truncated $stdoutCapture.Truncated
             $terminalEvent = $protocolResult.TerminalEvent
             if (-not $protocolResult.Valid) { $failureCategory = 'PROTOCOL_FAILURE' }
             else { $state = 'COMPLETED'; $failureCategory = $null }

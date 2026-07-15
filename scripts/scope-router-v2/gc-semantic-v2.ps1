@@ -39,7 +39,7 @@ function Assert-GcOutputSchemaV2 {
     }
     $common = @('artifactType','schemaVersion','policyVersion','executionPermitted','autoRepairAllowed','inputByteLength','inputSha256','decisionContentSha256')
     if (Test-GcOrdinalEqualsV2 ([string]$Evidence['artifactType']) 'decision') {
-        $specific = @('taskId','repositoryIdentity','classification','route','rank','reasonCodes','recommendedWriter','reviewers','allowedReadPaths','allowedWritePaths','forbiddenPaths','protectedNamespaces','dirtyState','policySha256','contractsSha256')
+        $specific = @('taskId','repositoryIdentity','classification','route','rank','reasonCodes','recommendedWriter','reviewers','allowedReadPaths','allowedWritePaths','authorizedProtectedWritePaths','protectedWriteAuthorization','forbiddenPaths','protectedNamespaces','dirtyState','policySha256','contractsSha256')
     }
     elseif (Test-GcOrdinalEqualsV2 ([string]$Evidence['artifactType']) 'rejection') {
         $specific = @('reasonCode','fieldId','arrayIndex','policyRuleId','failureCategory')
@@ -119,7 +119,7 @@ function Assert-GcDecisionSemanticV2 {
     }
     $actualReviewers = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     foreach ($reviewer in $Evidence['reviewers']) {
-        Assert-GcOutputClosedObjectV2 -Object $reviewer -Allowed @('role','readOnly') -Required @('role','readOnly') -FieldId 'output.reviewer'
+        Assert-GcOutputClosedObjectV2 -Object $reviewer -Allowed @('role','providerProfileId','readOnly') -Required @('role','providerProfileId','readOnly') -FieldId 'output.reviewer'
         if ($reviewer['role'] -isnot [string] -or $reviewer['readOnly'] -isnot [bool] -or -not $reviewer['readOnly'] -or -not $actualReviewers.Add([string]$reviewer['role'])) {
             Throw-GcFailureV2 -ReasonCode 'OUTPUT_SEMANTIC_INVALID' -FieldId 'output.reviewers' -PolicyRuleId 'V2-SEMANTIC-REVIEWERS' -FailureCategory 'output-semantic'
         }
@@ -129,8 +129,14 @@ function Assert-GcDecisionSemanticV2 {
     if (-not $actualReviewers.SetEquals($expectedReviewers)) {
         Throw-GcFailureV2 -ReasonCode 'OUTPUT_SEMANTIC_INVALID' -FieldId 'output.reviewers' -PolicyRuleId 'V2-SEMANTIC-REVIEWERS' -FailureCategory 'output-semantic'
     }
+    foreach ($binding in $Policy['reviewerProfileBindings']) {
+        $matching = @($Evidence['reviewers'] | Where-Object { Test-GcOrdinalEqualsV2 ([string]$_['role']) ([string]$binding['role']) })
+        if ($matching.Count -ne 1 -or -not (Test-GcOrdinalEqualsV2 ([string]$matching[0]['providerProfileId']) ([string]$binding['providerProfileId']))) {
+            Throw-GcFailureV2 -ReasonCode 'OUTPUT_SEMANTIC_INVALID' -FieldId 'output.reviewers' -PolicyRuleId 'V2-SEMANTIC-REVIEWER-PROFILES' -FailureCategory 'output-semantic'
+        }
+    }
 
-    foreach ($field in @('reasonCodes','allowedReadPaths','allowedWritePaths','forbiddenPaths','protectedNamespaces')) {
+    foreach ($field in @('reasonCodes','allowedReadPaths','allowedWritePaths','authorizedProtectedWritePaths','forbiddenPaths','protectedNamespaces')) {
         Assert-GcOutputStringArrayV2 -Value $Evidence[$field] -FieldId "output.$field"
     }
     $readScopes = @(ConvertTo-GcPathScopeListV2 -Values $Evidence['allowedReadPaths'] -FieldId 'output.allowedReadPaths' -RepositoryRoot $null)
@@ -138,6 +144,31 @@ function Assert-GcDecisionSemanticV2 {
     $forbiddenScopes = @(ConvertTo-GcPathScopeListV2 -Values $Evidence['forbiddenPaths'] -FieldId 'output.forbiddenPaths' -RepositoryRoot $null)
     $protectedScopes = @(ConvertTo-GcPathScopeListV2 -Values $Evidence['protectedNamespaces'] -FieldId 'output.protectedNamespaces' -RepositoryRoot $null)
     Assert-GcPathPartitionsV2 -AllowedReadScopes $readScopes -AllowedWriteScopes $writeScopes -ForbiddenScopes $forbiddenScopes -ProtectedScopes $protectedScopes | Out-Null
+
+    $authorizedScopes = @(ConvertTo-GcPathScopeListV2 -Values $Evidence['authorizedProtectedWritePaths'] -FieldId 'output.authorizedProtectedWritePaths' -RepositoryRoot $null)
+    if ($authorizedScopes.Count -eq 0) {
+        if ($null -ne $Evidence['protectedWriteAuthorization']) {
+            Throw-GcFailureV2 -ReasonCode 'OUTPUT_SEMANTIC_INVALID' -FieldId 'output.protectedWriteAuthorization' -PolicyRuleId 'V2-SEMANTIC-PROTECTED-WRITE-AUTH' -FailureCategory 'output-semantic'
+        }
+    }
+    else {
+        if ([int64]$Evidence['rank'] -lt 4 -or
+            -not (@($Evidence['reasonCodes']) -ccontains 'PATH_HUMAN_AUTHORIZED_PROTECTED_WRITE') -or
+            $null -eq $Evidence['protectedWriteAuthorization']) {
+            Throw-GcFailureV2 -ReasonCode 'OUTPUT_SEMANTIC_INVALID' -FieldId 'output.authorizedProtectedWritePaths' -PolicyRuleId 'V2-SEMANTIC-PROTECTED-WRITE-AUTH' -FailureCategory 'output-semantic'
+        }
+        Assert-GcOutputClosedObjectV2 -Object $Evidence['protectedWriteAuthorization'] -Allowed @('authorizationId','authorizationSha256','reviewRequired') -Required @('authorizationId','authorizationSha256','reviewRequired') -FieldId 'output.protectedWriteAuthorization'
+        if ($Evidence['protectedWriteAuthorization']['authorizationId'] -isnot [string] -or ([string]$Evidence['protectedWriteAuthorization']['authorizationId']) -cnotmatch '^GC_PWA_[0-9a-f]{32}$' -or
+            $Evidence['protectedWriteAuthorization']['authorizationSha256'] -isnot [string] -or ([string]$Evidence['protectedWriteAuthorization']['authorizationSha256']) -cnotmatch '^[0-9a-f]{64}$' -or
+            $Evidence['protectedWriteAuthorization']['reviewRequired'] -isnot [bool] -or -not $Evidence['protectedWriteAuthorization']['reviewRequired']) {
+            Throw-GcFailureV2 -ReasonCode 'OUTPUT_SEMANTIC_INVALID' -FieldId 'output.protectedWriteAuthorization' -PolicyRuleId 'V2-SEMANTIC-PROTECTED-WRITE-AUTH' -FailureCategory 'output-semantic'
+        }
+        foreach ($scope in $authorizedScopes) {
+            if ([bool]$scope['isSubtree']) { Throw-GcFailureV2 -ReasonCode 'OUTPUT_SEMANTIC_INVALID' -FieldId 'output.authorizedProtectedWritePaths' -PolicyRuleId 'V2-SEMANTIC-PROTECTED-WRITE-EXACT' -FailureCategory 'output-semantic' }
+            if (-not (Test-GcAuthorizableProtectedFileV2 -Candidate $scope -ProtectedScopes $protectedScopes)) { Throw-GcFailureV2 -ReasonCode 'OUTPUT_SEMANTIC_INVALID' -FieldId 'output.authorizedProtectedWritePaths' -PolicyRuleId 'V2-SEMANTIC-PROTECTED-WRITE-BOUNDARY' -FailureCategory 'output-semantic' }
+            foreach ($boundary in $forbiddenScopes) { if (Test-GcPathScopeOverlapV2 -Left $scope -Right $boundary) { Throw-GcFailureV2 -ReasonCode 'OUTPUT_SEMANTIC_INVALID' -FieldId 'output.authorizedProtectedWritePaths' -PolicyRuleId 'V2-SEMANTIC-PROTECTED-WRITE-FORBIDDEN' -FailureCategory 'output-semantic' } }
+        }
+    }
 
     Assert-GcOutputClosedObjectV2 -Object $Evidence['repositoryIdentity'] -Allowed @('repositoryRoot','branch','head') -Required @('repositoryRoot','branch','head') -FieldId 'output.repositoryIdentity'
     if ($Evidence['taskId'] -isnot [string] -or ([string]$Evidence['taskId']) -cnotmatch '^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$' -or
@@ -158,9 +189,9 @@ function Assert-GcRejectionSemanticV2 {
     param([Parameter(Mandatory)]$Evidence)
 
     $reasonCodes = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
-    foreach ($reason in @('JSON_DOCUMENT_INVALID','INPUT_SCHEMA_INVALID','INPUT_UNKNOWN_PROPERTY','INPUT_REQUIRED_PROPERTY_MISSING','INPUT_VALUE_INVALID','INPUT_DUPLICATE_ITEM','CONSUMPTION_CONTRACT_INVALID','IDENTITY_INVALID','IDENTITY_MISMATCH','PATH_SCOPE_INVALID','PATH_ROOT_SCOPE_BLOCKED','PATH_POLICY_OVERLAP','PATH_REPARSE_ESCAPE','GIT_INVOCATION_FAILED','GIT_STATUS_INVALID','GIT_DIRTY_OVERLAP','OUTPUT_SCHEMA_INVALID','OUTPUT_SEMANTIC_INVALID','EVIDENCE_HASH_INVALID','EVIDENCE_WRITE_FAILED','EVIDENCE_CHILD_INVALID')) { [void]$reasonCodes.Add($reason) }
+    foreach ($reason in @('JSON_DOCUMENT_INVALID','INPUT_SCHEMA_INVALID','INPUT_UNKNOWN_PROPERTY','INPUT_REQUIRED_PROPERTY_MISSING','INPUT_VALUE_INVALID','INPUT_DUPLICATE_ITEM','CONSUMPTION_CONTRACT_INVALID','IDENTITY_INVALID','IDENTITY_MISMATCH','PATH_SCOPE_INVALID','PATH_ROOT_SCOPE_BLOCKED','PATH_POLICY_OVERLAP','PATH_REPARSE_ESCAPE','GIT_INVOCATION_FAILED','GIT_STATUS_INVALID','GIT_DIRTY_OVERLAP','OUTPUT_SCHEMA_INVALID','OUTPUT_SEMANTIC_INVALID','EVIDENCE_HASH_INVALID','EVIDENCE_WRITE_FAILED','EVIDENCE_CHILD_INVALID','PROTECTED_WRITE_AUTHORIZATION_INVALID')) { [void]$reasonCodes.Add($reason) }
     $fieldIds = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
-    foreach ($field in @('input.document','input.object','input.unknownProperty','input.requiredProperty','schemaVersion','policyVersion','taskId','repositoryRoot','expectedBranch','expectedHead','requestedOperations','requestedReadPaths','requestedWritePaths','assessorResult','assessorResult.unknownProperty','assessorResult.requiredProperty','assessorResult.schemaVersion','assessorResult.classification','assessorResult.uncertainty','assessorResult.flags','git.application','git.exitCode','git.status','git.statusRecord','git.statusCode','git.statusPath','git.renameSource','actual.repositoryRoot','actual.branch','actual.head','requestedPath','path.scope','pathPartitions','child.start','child.timeout','child.stream','child.failure','contracts.files','consumptionManifest','consumptionManifest.version','consumptionManifest.entry','consumptionManifest.pointer','consumptionManifest.entries','consumptionManifest.disposition','inputSchema.properties','assessorSchema.properties','policy','policy.shadowFlags','policy.classifications','policy.operations','policy.reviewers','policy.forbiddenPaths','policy.protectedNamespaces','policy.classification','internal.failure','output.artifactType','output.decisionContentSha256')) { [void]$fieldIds.Add($field) }
+    foreach ($field in @('input.document','input.object','input.unknownProperty','input.requiredProperty','schemaVersion','policyVersion','taskId','repositoryRoot','expectedBranch','expectedHead','requestedOperations','requestedReadPaths','requestedWritePaths','assessorResult','assessorResult.unknownProperty','assessorResult.requiredProperty','assessorResult.schemaVersion','assessorResult.classification','assessorResult.uncertainty','assessorResult.flags','protectedWriteAuthorization','protectedWriteAuthorization.unknownProperty','protectedWriteAuthorization.requiredProperty','protectedWriteAuthorization.time','protectedWriteAuthorization.taskId','protectedWriteAuthorization.inputSha256','protectedWriteAuthorization.repositoryRoot','protectedWriteAuthorization.expectedBranch','protectedWriteAuthorization.expectedHead','protectedWriteAuthorization.approvedWritePaths','git.application','git.exitCode','git.status','git.statusRecord','git.statusCode','git.statusPath','git.renameSource','actual.repositoryRoot','actual.branch','actual.head','requestedPath','path.scope','pathPartitions','child.start','child.timeout','child.stream','child.failure','contracts.files','consumptionManifest','consumptionManifest.version','consumptionManifest.entry','consumptionManifest.pointer','consumptionManifest.entries','consumptionManifest.disposition','inputSchema.properties','assessorSchema.properties','policy','policy.shadowFlags','policy.classifications','policy.operations','policy.reviewers','policy.reviewerProfileBindings','policy.forbiddenPaths','policy.protectedNamespaces','policy.classification','internal.failure','output.artifactType','output.decisionContentSha256')) { [void]$fieldIds.Add($field) }
     if ($Evidence['reasonCode'] -isnot [string] -or -not $reasonCodes.Contains([string]$Evidence['reasonCode']) -or
         $Evidence['fieldId'] -isnot [string] -or -not $fieldIds.Contains([string]$Evidence['fieldId']) -or
         $Evidence['policyRuleId'] -isnot [string] -or ([string]$Evidence['policyRuleId']) -cnotmatch '^[A-Z0-9-]+$' -or

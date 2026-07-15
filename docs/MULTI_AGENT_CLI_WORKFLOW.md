@@ -47,75 +47,21 @@ powershell -ExecutionPolicy Bypass -File scripts\gc-phase2-integrate-approved.ps
 - **No Release Tags**: The script does not create or push release tags.
 - **Reporting**: All reports are safely isolated in the `reports/` folder.
 
-## Runner V3: External Agent Slots
+## Controlled external reviewers
 
-Runner V3 adds explicit external-agent slots for the Phase 2 review roles. It can still run safely with Codex fallback, but each role can now be delegated to a real external command if that command is installed and configured locally.
+External reviewer commands are not accepted from environment variables, task input, or report files. Claude and Gemini may be invoked only through Provider Process Runner V1 using a fixed checked-in profile and a separate Human Dispatch Authorization:
 
-```powershell
-# fallback Codex for all roles
-powershell -ExecutionPolicy Bypass -File scripts\gc-phase2-review-slots.ps1
-```
+- `claude-readonly`: read-only repository inspection with a strict one-document JSON terminal contract;
+- `gemini-plan-review`: read-only plan mode with a strict stream-JSON terminal contract.
 
-Optional external command slots:
+The runner fixes the executable, arguments, permission mode, tool policy, prompt transport, and protocol. A request cannot override them. Ad-hoc direct provider invocation and nested provider calls are prohibited. A Host Broker is not required and is not invoked when no verified Broker exists in the repository.
 
-```powershell
-$env:GC_AUDIO_AGENT_CMD = "your-audio-agent-command"
-$env:GC_RISK_AGENT_CMD = "your-risk-agent-command"
-$env:GC_UX_AGENT_CMD = "your-ux-agent-command"
-powershell -ExecutionPolicy Bypass -File scripts\gc-phase2-review-slots.ps1
-```
+Provider preflight is performed once per task. Quota, authentication, and protocol failures mark that reviewer unavailable for the task without retry. A mandatory missing review blocks acceptance; an optional missing review continues only with a warning and the applicable Product Owner gate.
 
-The environment variables are command templates. Replace the placeholder values with real local commands only after verifying those CLIs are installed and can run non-interactively.
+Scope Router V2 only recommends fixed read-only reviewer roles and profiles. It never invokes Provider Process Runner V1. Every actual invocation requires Human Dispatch Authorization after the Router decision.
 
-Supported template placeholders:
+### Current acceptance limitations
 
-- `{PromptFile}`: role-specific prompt file path.
-- `{ReportFile}`: markdown report path the external agent may write.
-- `{LogFile}`: raw log path.
-- `{Role}`: human-readable role name.
-- `{Timestamp}`: run timestamp.
-
-Example template shape:
-
-```powershell
-$env:GC_AUDIO_AGENT_CMD = "your-audio-agent-command --input {PromptFile} --output {ReportFile}"
-```
-
-Do not invent working Gemini, Claude, Antigravity, or other agent commands in this repo. If those tools are not actually installed and verified in the current environment, leave the env vars unset and use Codex fallback.
-
-### V3 Behavior
-
-- Prints a visible banner for each slot:
-  - `=== REAL AGENT SLOT: AUDIO ===`
-  - `=== REAL AGENT SLOT: RISK ===`
-  - `=== REAL AGENT SLOT: UX ===`
-- Prints whether each slot uses an external command or Codex fallback.
-- Runs reviewers sequentially by default for safety.
-- Writes separate markdown reports and raw logs under `reports/`.
-- Creates a timestamped index report: `reports/phase2-review-slots-index-YYYYMMDD-HHMMSS.md`.
-- Does not merge to `main`.
-- Does not create release tags.
-- Blocks production file changes under `outputs/*` from working tree, staged changes, or commits created during the run.
-- Fails review-only mode if tracked, staged, or committed files change.
-
-### Codex Fallback
-
-When a slot env var is not set, Runner V3 falls back to Codex CLI:
-
-```powershell
-codex exec --sandbox read-only -c approval_policy=never --output-last-message <report-path> -
-```
-
-This fallback is still a Codex-backed reviewer role, not a separate model. It is useful as a safe default but should not be described as true multi-model review.
-
-### True External Agents
-
-True cross-agent or cross-model review from PowerShell requires real external commands or installed CLIs. PowerShell alone cannot summon Gemini, Claude, Antigravity, or other agents unless a callable local command, connector, or wrapper already exists.
-
-Use V3 as the slot architecture:
-
-1. Install or configure the external CLI outside this workflow.
-2. Verify it can run non-interactively.
-3. Set the matching `GC_*_AGENT_CMD` env var.
-4. Run `scripts\gc-phase2-review-slots.ps1`.
-5. Inspect all generated reports before any integration work.
+- Protected-write and provider dispatch authorizations are local audit artifacts, not cryptographic signatures; their safety depends on file custody and exact hash/identity binding.
+- Workflow repair extends the existing closed `/1` schema contracts. Consumers pinned to earlier `/1` shapes must be updated together or will reject the new evidence/profile values.
+- Mock and contract validation does not prove live provider availability. Each enabled reviewer profile requires one controlled live smoke before merge; auth, quota, timeout, or protocol failure records that reviewer as unavailable without weakening the fixed profile.

@@ -8,6 +8,8 @@ The assets are exact repository identity, the protected namespace lattice, actua
 
 Trusted inputs are limited to fixed V2 contract files loaded from the current repository and facts returned by an application-resolved System Git process. The task document and optional assessor are untrusted data. File names and status bytes returned by Git are also validated before use.
 
+An optional protected-write authorization is a separate Product Owner audit artifact, not a Router-input flag and not dispatch permission. It is accepted only when bound to the exact input SHA-256, repository identity, task, UTC validity window, and exact requested protected files. Unauthorized protected access remains blocked; forbidden paths and wildcard grants are never authorizable. The decision remains review-required and Shadow Mode only.
+
 ## Threats and controls
 
 | Threat | Control | Failure behavior |
@@ -17,6 +19,7 @@ Trusted inputs are limited to fixed V2 contract files loaded from the current re
 | Case-insensitive or normalized identity confusion | explicit ordinal comparison; canonical-form precondition; System Git facts | sanitized block |
 | Git alias/function interception | resolve `git.exe`/`git` as an Application and start it without a shell | block |
 | Root, ancestor, wildcard, traversal, ADS, UNC/device, or symlink/reparse write escape | small relative path grammar; symmetric lattice; existing-ancestor reparse checks | block |
+| Task input self-asserts permission for protected writes | separate closed authorization bound to exact input hash, identity, time, and file paths | sanitized rejection or block |
 | Task prose lies about cleanliness | no dirty-state input; NUL-delimited porcelain-v1 query and structural parser | block |
 | Rename hides one dirty side | destination and following source record both retained | block |
 | Assessor lowers risk or injects commands | closed data-only assessor; rank-only most-restrictive merge | ignore lowering; reject unknown data |

@@ -13,7 +13,7 @@ function New-GcDecisionEvidenceV2 {
 
     $policy = $PolicyBundle['policy']
     $reviewers = [Collections.Generic.List[object]]::new()
-    foreach ($role in $policy['reviewers']) { $reviewers.Add([ordered]@{ role = [string]$role; readOnly = $true }) }
+    foreach ($binding in $policy['reviewerProfileBindings']) { $reviewers.Add([ordered]@{ role = [string]$binding['role']; providerProfileId = [string]$binding['providerProfileId']; readOnly = $true }) }
     $writer = if (Test-GcOrdinalEqualsV2 ([string]$Risk['classification']) 'blocked') { $null } else { [string]$policy['recommendedWriter'] }
     $dirtyEvidence = [ordered]@{}
     foreach ($name in @('modified','staged','untracked','deleted','conflicted','renameSource','renameDestination')) { $dirtyEvidence[$name] = @($GitState[$name]) }
@@ -36,6 +36,12 @@ function New-GcDecisionEvidenceV2 {
         reviewers = @($reviewers)
         allowedReadPaths = @($PathPolicy['allowedReadPaths'])
         allowedWritePaths = @($PathPolicy['allowedWritePaths'])
+        authorizedProtectedWritePaths = @($PathPolicy['authorizedProtectedWritePaths'])
+        protectedWriteAuthorization = $(if ($null -eq $PathPolicy['protectedWriteAuthorization']) { $null } else { [ordered]@{
+            authorizationId = [string]$PathPolicy['protectedWriteAuthorization']['authorizationId']
+            authorizationSha256 = [string]$PathPolicy['protectedWriteAuthorization']['authorizationSha256']
+            reviewRequired = $true
+        } })
         forbiddenPaths = @($PathPolicy['forbiddenPaths'])
         protectedNamespaces = @($PathPolicy['protectedNamespaces'])
         dirtyState = $dirtyEvidence

@@ -137,6 +137,11 @@ try {
     $codexPolicyProfile['arguments'] = [object[]]@('exec','--ephemeral','--json','--sandbox','danger-full-access','-')
     Assert-GcTestThrowsCategoryV1 { Assert-GcRunnerPolicyV1 -Policy $context.Policy } 'RUNNER_FAILURE' 'policy cannot widen fixed provider arguments'
     $codexPolicyProfile['arguments'] = $originalArguments
+    $claudeProfile = Get-GcProviderProfileV1 -Policy $context.Policy -ProfileId 'claude-readonly'
+    Assert-GcTestEqualV1 $claudeProfile['protocol'] 'claude-json-exit' 'Claude uses isolated protocol'
+    Assert-GcTestTrueV1 ((@($claudeProfile['arguments']) -join "`n") -cmatch '--permission-mode\nplan' -and (@($claudeProfile['arguments']) -join "`n") -cmatch '--tools\nRead,Glob,Grep') 'Claude fixed contract is read-only'
+    $geminiProfile = Get-GcProviderProfileV1 -Policy $context.Policy -ProfileId 'gemini-plan-review'
+    Assert-GcTestTrueV1 ((@($geminiProfile['arguments']) -join "`n") -cmatch '--approval-mode\nplan') 'Gemini fixed contract uses controlled plan mode'
     Write-Output 'PASS CONTRACT AND HUMAN AUTHORIZATION'
 
     $observation = [IO.Path]::Combine($temporaryRoot, 'stdin-observation.txt')
@@ -184,6 +189,21 @@ try {
     Assert-GcTestEqualV1 $geminiTruncatedResult.Public['failureCategory'] 'PROTOCOL_FAILURE' 'gemini truncated buffer is protocol failure'
 
     Write-Output 'PASS GEMINI JSON STREAM EXIT TERMINAL EVENTS'
+
+    foreach ($scenario in @('claude-success','claude-success-is-error-false')) {
+        $claudeSuccess = Invoke-GcMockProviderV1 -Context $context -Scenario $scenario -Protocol 'claude-json-exit'
+        Assert-GcTestEqualV1 $claudeSuccess.State 'COMPLETED' "Claude $scenario reaches completed"
+        Assert-GcTestEqualV1 $claudeSuccess.Attempts[0]['terminalEvent'] 'result' "Claude $scenario terminal result required"
+    }
+    foreach ($scenario in @('claude-missing-result','claude-result-number','claude-failed','claude-is-error','claude-malformed','claude-concatenated','claude-duplicate-key')) {
+        $claudeFailure = Invoke-GcMockProviderV1 -Context $context -Scenario $scenario -Protocol 'claude-json-exit'
+        Assert-GcTestEqualV1 $claudeFailure.State 'FAILED' "Claude $scenario fails lifecycle"
+        Assert-GcTestEqualV1 $claudeFailure.FailureCategory 'PROTOCOL_FAILURE' "Claude $scenario is protocol failure"
+    }
+    $claudeNonzero = Invoke-GcProviderAttemptV1 -FilePath (Get-Command pwsh.exe -CommandType Application | Select-Object -First 1).Source -Arguments @('-NoProfile','-Command','[Console]::Out.Write(''{"type":"result","subtype":"success","result":"not accepted"}''); exit 9') -Prompt 'probe' -PromptTransport closed -Protocol 'claude-json-exit' -WorkingDirectory $repositoryRoot -TimeoutMilliseconds 5000 -MaximumCapturedBytes 4096 -AttemptNumber 1
+    Assert-GcTestEqualV1 $claudeNonzero.Public['state'] 'FAILED' 'Claude nonzero exit fails despite valid JSON'
+    Assert-GcTestEqualV1 $claudeNonzero.Public['exitCode'] 9 'Claude nonzero exit code preserved'
+    Write-Output 'PASS CLAUDE JSON EXIT TERMINAL CONTRACT'
 
     $quotaContext = New-GcTestContextV1 -Directory $temporaryRoot
     $quotaContext.Request['retryIntent'] = $true

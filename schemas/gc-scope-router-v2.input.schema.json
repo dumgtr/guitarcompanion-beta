@@ -35,6 +35,7 @@
           "process_or_ipc",
           "strict_parser_trust_boundary",
           "production_runtime_or_audio",
+          "human_authorized_protected_write",
           "deployment_or_release",
           "destructive_git_recovery",
           "dependency_supply_chain",
