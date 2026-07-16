@@ -256,14 +256,14 @@ function Assert-GcRunnerPolicyV1 {
 
     $expectedProfiles = [ordered]@{
         'codex-readonly' = [ordered]@{ enabled = $true; executableNames = @('codex.exe'); arguments = @('exec','--ephemeral','--json','--sandbox','read-only','-'); promptTransport = 'stdin'; protocol = 'codex-jsonl' }
-        'gemini-plan-review' = [ordered]@{ enabled = $true; executableNames = @('gemini.cmd'); arguments = @('--prompt',"Inspect the assigned repository context read-only.`nDo not modify files or invoke nested providers.`nReturn only the review.",'--approval-mode','plan','--output-format','stream-json','--skip-trust'); promptTransport = 'stdin'; protocol = 'json-stream-exit' }
+        'gemini-plan-review' = [ordered]@{ enabled = $true; executableNames = @('gemini.cmd'); arguments = @('--prompt','Inspect the assigned repository context read-only. Do not modify files or invoke nested providers. Return only the review.','--approval-mode','plan','--output-format','stream-json','--skip-trust'); promptTransport = 'stdin'; protocol = 'json-stream-exit' }
         'claude-readonly' = [ordered]@{ enabled = $true; executableNames = @('claude.cmd'); arguments = @('--system-prompt','Inspect the assigned repository context read-only. Do not modify files or invoke nested providers. Return only the review.','-p','--output-format','json','--permission-mode','plan','--safe-mode','--tools','Read,Glob,Grep','--disallowedTools','Edit,Write,Bash,NotebookEdit,WebFetch,WebSearch,mcp__*','--strict-mcp-config','--disable-slash-commands','--no-session-persistence'); promptTransport = 'stdin'; protocol = 'claude-json-exit' }
         'github-copilot-readonly' = [ordered]@{ enabled = $false; executableNames = @('gh.exe'); arguments = @(); promptTransport = 'closed'; protocol = 'disabled' }
     }
     $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     foreach ($profile in $Policy['profiles']) {
         if ($profile -isnot [Collections.IDictionary]) { Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_POLICY_PROFILE_INVALID' }
-        Assert-GcClosedObjectV1 -Object $profile -Keys @('id','enabled','executableNames','arguments','promptTransport','protocol') -ContractName 'RUNNER_POLICY_PROFILE'
+        Assert-GcClosedObjectV1 -Object $profile -Keys @('id','enabled','executableNames','arguments','promptTransport','protocol','environment') -ContractName 'RUNNER_POLICY_PROFILE'
         $id = [string]$profile['id']
         if (-not $expectedProfiles.Contains($id) -or -not $seen.Add($id)) { Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_POLICY_PROFILE_ID_INVALID' }
         $expected = $expectedProfiles[$id]
@@ -285,10 +285,16 @@ function Get-GcProviderProfileV1 {
 
     foreach ($profile in $Policy['profiles']) {
         if ($profile -isnot [Collections.IDictionary]) { Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_PROFILE_INVALID' }
-        Assert-GcClosedObjectV1 -Object $profile -Keys @('id','enabled','executableNames','arguments','promptTransport','protocol') -ContractName 'RUNNER_PROFILE'
+        Assert-GcClosedObjectV1 -Object $profile -Keys @('id','enabled','executableNames','arguments','promptTransport','protocol','environment') -ContractName 'RUNNER_PROFILE'
         if ([string]::Equals([string]$profile['id'], $ProfileId, [StringComparison]::Ordinal)) {
             if ($profile['enabled'] -isnot [bool] -or -not $profile['enabled']) { Throw-GcRunnerFailureV1 -Category 'AUTH_FAILED' -Message 'RUNNER_PROFILE_DISABLED' }
             if ($profile['executableNames'] -isnot [object[]] -or $profile['arguments'] -isnot [object[]]) { Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_PROFILE_CONTRACT_INVALID' }
+            if ($null -ne $profile['environment']) {
+                if ($profile['environment'] -isnot [Collections.IDictionary]) { Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_PROFILE_CONTRACT_INVALID' }
+                foreach ($k in $profile['environment'].Keys) {
+                    if ($profile['environment'][$k] -isnot [string]) { Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_PROFILE_CONTRACT_INVALID' }
+                }
+            }
             return $profile
         }
     }
@@ -341,11 +347,17 @@ namespace GcProviderRunnerV1 {
         public bool Truncated { get; set; }
     }
 
+    public sealed class DetectionState {
+        public string FatalCategory { get; set; }
+        public string DiagnosticCode { get; set; }
+    }
+
     public static class StreamDrain {
-        public static Task<CaptureResult> DrainAsync(Stream stream, int maximumCapturedBytes) {
+        public static Task<CaptureResult> DrainAsync(Stream stream, int maximumCapturedBytes, DetectionState state = null) {
             return Task.Run(async () => {
                 var buffer = new byte[8192];
                 long total = 0;
+                string window = "";
                 using (var captured = new MemoryStream())
                 using (var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256)) {
                     while (true) {
@@ -355,6 +367,22 @@ namespace GcProviderRunnerV1 {
                         total += read;
                         int remaining = maximumCapturedBytes - (int)captured.Length;
                         if (remaining > 0) captured.Write(buffer, 0, Math.Min(remaining, read));
+
+                        if (state != null && state.FatalCategory == null) {
+                            string chunk = System.Text.Encoding.UTF8.GetString(buffer, 0, read);
+                            window += chunk;
+                            if (window.Length > 512) {
+                                window = window.Substring(window.Length - 512);
+                            }
+                            if (System.Text.RegularExpressions.Regex.IsMatch(window, "(?i)(monthly quota|quota exceeded|exceeded your .*quota|insufficient[_ -]?quota|credits? exceeded)")) {
+                                state.FatalCategory = "QUOTA_EXCEEDED";
+                                state.DiagnosticCode = "PROVIDER_QUOTA_EXHAUSTED_DETECTED";
+                            }
+                            else if (System.Text.RegularExpressions.Regex.IsMatch(window, "(?i)(rate[ -]?limit|too many requests|\\b429\\b)")) {
+                                state.FatalCategory = "RATE_LIMITED";
+                                state.DiagnosticCode = "PROVIDER_RATE_LIMIT_DETECTED";
+                            }
+                        }
                     }
                     var hashText = BitConverter.ToString(hash.GetHashAndReset()).Replace("-", "").ToLowerInvariant();
                     return new CaptureResult {
@@ -383,11 +411,30 @@ function Resolve-GcRunnerExecutableV1 {
     Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_EXECUTABLE_NOT_FOUND'
 }
 
+function Add-GcProcessArgumentListV1 {
+    param(
+        [Parameter(Mandatory)][Diagnostics.ProcessStartInfo]$StartInfo,
+        [Parameter(Mandatory)][object[]]$Arguments
+    )
+
+    if ($StartInfo.ArgumentList.Count -ne 0 -or -not [string]::IsNullOrEmpty($StartInfo.Arguments)) {
+        Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_ARGUMENT_TARGET_NOT_EMPTY'
+    }
+    foreach ($argument in $Arguments) {
+        if ($argument -isnot [string]) { Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_ARGUMENT_INVALID' }
+        [void]$StartInfo.ArgumentList.Add($argument)
+    }
+    if (-not [string]::IsNullOrEmpty($StartInfo.Arguments)) {
+        Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_COMBINED_ARGUMENTS_FORBIDDEN'
+    }
+}
+
 function New-GcProcessStartInfoV1 {
     param(
         [Parameter(Mandatory)][string]$FilePath,
         [Parameter(Mandatory)][object[]]$Arguments,
-        [Parameter(Mandatory)][string]$WorkingDirectory
+        [Parameter(Mandatory)][string]$WorkingDirectory,
+        [Collections.IDictionary]$EnvironmentOverrides = [ordered]@{}
     )
 
     $start = [Diagnostics.ProcessStartInfo]::new()
@@ -399,9 +446,9 @@ function New-GcProcessStartInfoV1 {
     $start.RedirectStandardOutput = $true
     $start.RedirectStandardError = $true
     $start.StandardInputEncoding = [Text.UTF8Encoding]::new($false)
-    foreach ($argument in $Arguments) {
-        if ($argument -isnot [string]) { Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_ARGUMENT_INVALID' }
-        [void]$start.ArgumentList.Add($argument)
+    Add-GcProcessArgumentListV1 -StartInfo $start -Arguments $Arguments
+    foreach ($k in $EnvironmentOverrides.Keys) {
+        $start.Environment[[string]$k] = [string]$EnvironmentOverrides[$k]
     }
     return $start
 }
@@ -420,6 +467,77 @@ function ConvertFrom-GcCapturedUtf8V1 {
     catch { Throw-GcRunnerFailureV1 -Category 'PROTOCOL_FAILURE' -Message 'RUNNER_PROVIDER_OUTPUT_UTF8_INVALID' }
 }
 
+function Test-GcJsonDocumentV1 {
+    param([Parameter(Mandatory)][AllowEmptyString()][string]$Text)
+
+    $document = $null
+    try {
+        $document = [Text.Json.JsonDocument]::Parse($Text)
+        return $true
+    }
+    catch { return $false }
+    finally { if ($null -ne $document) { $document.Dispose() } }
+}
+
+function Get-GcStdoutProtocolDiagnosticsV1 {
+    param([Parameter(Mandatory)][AllowEmptyString()][string]$Text)
+
+    $ansiPattern = '\x1B(?:\[[0-?]*[ -/]*[@-~])'
+    $nonEmptyLines = [Collections.Generic.List[string]]::new()
+    $ansiDetected = $false
+    $markdownFenceDetected = $false
+    $validJsonLineCount = 0
+    $malformedJsonLineCount = 0
+    $firstInvalidLine = $null
+
+    foreach ($rawLine in ($Text -split "`r?`n")) {
+        $line = $rawLine.Trim()
+        if ([string]::IsNullOrWhiteSpace($line)) { continue }
+        $nonEmptyLines.Add($line)
+        if ($line -match $ansiPattern) { $ansiDetected = $true }
+        if ($line.StartsWith('```', [StringComparison]::Ordinal)) { $markdownFenceDetected = $true }
+        if (Test-GcJsonDocumentV1 -Text $line) { $validJsonLineCount++ }
+        else {
+            $malformedJsonLineCount++
+            if ($null -eq $firstInvalidLine) { $firstInvalidLine = $line }
+        }
+    }
+
+    $normalizedDocument = (@($nonEmptyLines | ForEach-Object { ($_ -replace $ansiPattern, '').Trim() }) -join "`n").Trim()
+    $multilineJsonLikely = $nonEmptyLines.Count -gt 1 -and (Test-GcJsonDocumentV1 -Text $normalizedDocument)
+    $firstInvalidLineKind = $null
+    $firstInvalidLineLength = $null
+    $firstInvalidLineSha256 = $null
+
+    if ($null -ne $firstInvalidLine) {
+        $withoutAnsi = ($firstInvalidLine -replace $ansiPattern, '').Trim()
+        $withoutAnsiIsJson = Test-GcJsonDocumentV1 -Text $withoutAnsi
+        $startsJson = $withoutAnsi.StartsWith('{', [StringComparison]::Ordinal) -or $withoutAnsi.StartsWith('[', [StringComparison]::Ordinal)
+        $endsJson = $withoutAnsi.EndsWith('}', [StringComparison]::Ordinal) -or $withoutAnsi.EndsWith(']', [StringComparison]::Ordinal)
+        if (($firstInvalidLine -match $ansiPattern) -and $withoutAnsiIsJson) { $firstInvalidLineKind = 'ANSI_WRAPPED_JSON' }
+        elseif ($firstInvalidLine.StartsWith('```', [StringComparison]::Ordinal)) { $firstInvalidLineKind = 'MARKDOWN_FENCE' }
+        elseif ($startsJson -and ($multilineJsonLikely -or -not $endsJson)) { $firstInvalidLineKind = 'JSON_FRAGMENT'; $multilineJsonLikely = $true }
+        elseif ($startsJson) { $firstInvalidLineKind = 'MALFORMED_JSON' }
+        elseif ($validJsonLineCount -gt 0 -or $withoutAnsi -match '[\{\[]') { $firstInvalidLineKind = 'MIXED_OUTPUT' }
+        else { $firstInvalidLineKind = 'PLAIN_TEXT' }
+
+        $firstInvalidLineLength = [long]$firstInvalidLine.Length
+        $firstInvalidLineSha256 = Get-GcSha256HexV1 -Bytes ([Text.UTF8Encoding]::new($false).GetBytes($firstInvalidLine))
+    }
+
+    return [ordered]@{
+        ansiDetected = [bool]$ansiDetected
+        markdownFenceDetected = [bool]$markdownFenceDetected
+        nonEmptyLineCount = [long]$nonEmptyLines.Count
+        validJsonLineCount = [long]$validJsonLineCount
+        malformedJsonLineCount = [long]$malformedJsonLineCount
+        firstInvalidLineKind = $firstInvalidLineKind
+        firstInvalidLineLength = $firstInvalidLineLength
+        firstInvalidLineSha256 = $firstInvalidLineSha256
+        multilineJsonLikely = [bool]$multilineJsonLikely
+    }
+}
+
 function Read-GcCodexJsonlEventV1 {
     param(
         [Parameter(Mandatory)][string]$Text,
@@ -431,6 +549,8 @@ function Read-GcCodexJsonlEventV1 {
     $eventCount = 0
     $lastType = $null
     foreach ($line in ($Text -split "`r?`n")) {
+        $line = $line -replace '\x1B(?:\[[0-?]*[ -/]*[@-~])', ''
+        $line = $line.Trim()
         if ([string]::IsNullOrWhiteSpace($line)) { continue }
         $eventCount++
         try {
@@ -444,7 +564,7 @@ function Read-GcCodexJsonlEventV1 {
             }
             finally { $document.Dispose() }
         }
-        catch { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'JSONL_INVALID' } }
+        catch { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'PROVIDER_STDOUT_NON_JSON_CONTAMINATION'; Diagnostics = Get-GcStdoutProtocolDiagnosticsV1 -Text $Text } }
     }
     if ($eventCount -eq 0 -or $terminal.Count -ne 1 -or -not [string]::Equals($lastType, $terminal[0], [StringComparison]::Ordinal)) { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'TERMINAL_EVENT_INVALID' } }
     return [pscustomobject]@{ Valid = $true; TerminalEvent = $terminal[0]; Reason = $null }
@@ -456,6 +576,8 @@ function Read-GcJsonStreamExitProtocolV1 {
 
     $events = [Collections.Generic.List[object]]::new()
     foreach ($line in ($Text -split "`r?`n")) {
+        $line = $line -replace '\x1B(?:\[[0-?]*[ -/]*[@-~])', ''
+        $line = $line.Trim()
         if ([string]::IsNullOrWhiteSpace($line)) { continue }
         try {
             $doc = [Text.Json.JsonDocument]::Parse($line)
@@ -481,7 +603,7 @@ function Read-GcJsonStreamExitProtocolV1 {
             }
             $doc.Dispose()
         }
-        catch { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'JSON_INVALID' } }
+        catch { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'PROVIDER_STDOUT_NON_JSON_CONTAMINATION'; Diagnostics = Get-GcStdoutProtocolDiagnosticsV1 -Text $Text } }
     }
 
     if ($events.Count -eq 0) { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'EMPTY_STREAM' } }
@@ -504,6 +626,10 @@ function Read-GcJsonStreamExitProtocolV1 {
 function Read-GcClaudeJsonExitProtocolV1 {
     param([Parameter(Mandatory)][string]$Text, [Parameter(Mandatory)][bool]$Truncated)
     if ($Truncated -or [string]::IsNullOrWhiteSpace($Text)) { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'TRUNCATED_OR_EMPTY' } }
+
+    $Text = $Text -replace '\x1B(?:\[[0-?]*[ -/]*[@-~])', ''
+    $Text = $Text.Trim()
+    if ([string]::IsNullOrWhiteSpace($Text)) { return [pscustomobject]@{ Valid = $false; TerminalEvent = $null; Reason = 'TRUNCATED_OR_EMPTY' } }
 
     try {
         $document = [Text.Json.JsonDocument]::Parse($Text)
@@ -548,24 +674,25 @@ function Invoke-GcProviderAttemptV1 {
         [Parameter(Mandatory)][int]$TimeoutMilliseconds,
         [Parameter(Mandatory)][int]$MaximumCapturedBytes,
         [AllowNull()][string]$CancellationPath,
-        [Parameter(Mandatory)][int]$AttemptNumber
+        [Parameter(Mandatory)][int]$AttemptNumber,
+        [Collections.IDictionary]$ProfileEnvironment = [ordered]@{}
     )
 
     $startedAt = [DateTimeOffset]::UtcNow
     $transitions = [Collections.Generic.List[object]]::new()
-    $transitions.Add([ordered]@{ state = 'NOT_STARTED'; atUtc = $startedAt.ToString('o') })
+    $transitions.Add([ordered]@{ state = 'STARTING'; atUtc = $startedAt.ToString('o') })
     if ($CancellationPath -and [IO.File]::Exists($CancellationPath)) {
         $ended = [DateTimeOffset]::UtcNow
         $transitions.Add([ordered]@{ state = 'CANCELLED'; atUtc = $ended.ToString('o') })
         return [pscustomobject]@{
-            Public = [ordered]@{ attempt = $AttemptNumber; state = 'CANCELLED'; failureCategory = 'CANCELLED'; startedAtUtc = $startedAt.ToString('o'); completedAtUtc = $ended.ToString('o'); durationMilliseconds = 0; exitCode = $null; terminalEvent = $null; stdoutByteLength = 0; stdoutSha256 = Get-GcSha256HexV1 -Bytes ([byte[]]::new(0)); stdoutTruncated = $false; stderrByteLength = 0; stderrSha256 = Get-GcSha256HexV1 -Bytes ([byte[]]::new(0)); stderrTruncated = $false; stateTransitions = $transitions.ToArray() }
+                Public = [ordered]@{ attempt = $AttemptNumber; state = 'CANCELLED'; failureCategory = 'CANCELLED'; diagnosticCode = $null; startedAtUtc = $startedAt.ToString('o'); completedAtUtc = $ended.ToString('o'); durationMilliseconds = 0; exitCode = $null; terminalEvent = $null; stdoutByteLength = 0; stdoutSha256 = Get-GcSha256HexV1 -Bytes ([byte[]]::new(0)); stdoutTruncated = $false; stderrByteLength = 0; stderrSha256 = Get-GcSha256HexV1 -Bytes ([byte[]]::new(0)); stderrTruncated = $false; stateTransitions = $transitions.ToArray() }
             Stdout = ''; Stderr = ''
         }
     }
 
     Initialize-GcBoundedStreamDrainV1
     $process = [Diagnostics.Process]::new()
-    $process.StartInfo = New-GcProcessStartInfoV1 -FilePath $FilePath -Arguments $Arguments -WorkingDirectory $WorkingDirectory
+    $process.StartInfo = New-GcProcessStartInfoV1 -FilePath $FilePath -Arguments $Arguments -WorkingDirectory $WorkingDirectory -EnvironmentOverrides $ProfileEnvironment
     $processStarted = $false
     $stopwatch = [Diagnostics.Stopwatch]::StartNew()
     try {
@@ -577,14 +704,15 @@ function Invoke-GcProviderAttemptV1 {
             $ended = [DateTimeOffset]::UtcNow
             $transitions.Add([ordered]@{ state = 'FAILED'; atUtc = $ended.ToString('o') })
             return [pscustomobject]@{
-                Public = [ordered]@{ attempt = $AttemptNumber; state = 'FAILED'; failureCategory = 'RUNNER_FAILURE'; startedAtUtc = $startedAt.ToString('o'); completedAtUtc = $ended.ToString('o'); durationMilliseconds = [long]$stopwatch.ElapsedMilliseconds; exitCode = $null; terminalEvent = $null; stdoutByteLength = 0; stdoutSha256 = Get-GcSha256HexV1 -Bytes ([byte[]]::new(0)); stdoutTruncated = $false; stderrByteLength = 0; stderrSha256 = Get-GcSha256HexV1 -Bytes ([byte[]]::new(0)); stderrTruncated = $false; stateTransitions = $transitions.ToArray() }
+                Public = [ordered]@{ attempt = $AttemptNumber; state = 'FAILED'; failureCategory = 'RUNNER_FAILURE'; diagnosticCode = $null; startedAtUtc = $startedAt.ToString('o'); completedAtUtc = $ended.ToString('o'); durationMilliseconds = [long]$stopwatch.ElapsedMilliseconds; exitCode = $null; terminalEvent = $null; stdoutByteLength = 0; stdoutSha256 = Get-GcSha256HexV1 -Bytes ([byte[]]::new(0)); stdoutTruncated = $false; stderrByteLength = 0; stderrSha256 = Get-GcSha256HexV1 -Bytes ([byte[]]::new(0)); stderrTruncated = $false; stateTransitions = $transitions.ToArray() }
                 Stdout = ''; Stderr = ''
             }
         }
 
         $transitions.Add([ordered]@{ state = 'STARTED'; atUtc = ([DateTimeOffset]::UtcNow).ToString('o') })
-        $stdoutTask = [GcProviderRunnerV1.StreamDrain]::DrainAsync($process.StandardOutput.BaseStream, $MaximumCapturedBytes)
-        $stderrTask = [GcProviderRunnerV1.StreamDrain]::DrainAsync($process.StandardError.BaseStream, $MaximumCapturedBytes)
+        $detectionState = [GcProviderRunnerV1.DetectionState]::new()
+        $stdoutTask = [GcProviderRunnerV1.StreamDrain]::DrainAsync($process.StandardOutput.BaseStream, $MaximumCapturedBytes, $null)
+        $stderrTask = [GcProviderRunnerV1.StreamDrain]::DrainAsync($process.StandardError.BaseStream, $MaximumCapturedBytes, $detectionState)
         $stdinClosed = $false
         $stdinTask = $null
         if ($PromptTransport -eq 'stdin') { $stdinTask = $process.StandardInput.WriteAsync($Prompt) }
@@ -593,6 +721,7 @@ function Invoke-GcProviderAttemptV1 {
 
         $timedOut = $false
         $cancelled = $false
+        $fatalDetected = $false
         while (-not $process.WaitForExit(50)) {
             if (-not $stdinClosed -and $stdinTask.IsCompleted) {
                 try { [void]$stdinTask.GetAwaiter().GetResult() }
@@ -600,6 +729,7 @@ function Invoke-GcProviderAttemptV1 {
                 $process.StandardInput.Close()
                 $stdinClosed = $true
             }
+            if ($detectionState.FatalCategory) { $fatalDetected = $true; Stop-GcProcessTreeV1 -Process $process; break }
             if ($CancellationPath -and [IO.File]::Exists($CancellationPath)) { $cancelled = $true; Stop-GcProcessTreeV1 -Process $process; break }
             if ($stopwatch.ElapsedMilliseconds -ge $TimeoutMilliseconds) { $timedOut = $true; Stop-GcProcessTreeV1 -Process $process; break }
         }
@@ -613,42 +743,53 @@ function Invoke-GcProviderAttemptV1 {
         $terminalEvent = $null
         $state = 'FAILED'
         $failureCategory = 'PROVIDER_FAILURE'
+        $diagnosticCode = $null
+        $stdoutProtocolDiagnostics = $null
 
         if ($cancelled) { $state = 'CANCELLED'; $failureCategory = 'CANCELLED' }
+        elseif ($fatalDetected) { $state = 'FAILED'; $failureCategory = $detectionState.FatalCategory; $diagnosticCode = $detectionState.DiagnosticCode }
         elseif ($timedOut) { $state = 'TIMED_OUT'; $failureCategory = 'TIMEOUT' }
         elseif ($exitCode -ne 0) { $failureCategory = Resolve-GcProviderFailureCategoryV1 -Stdout $stdoutText -Stderr $stderrText }
         elseif ($Protocol -eq 'codex-jsonl') {
             $protocolResult = Read-GcCodexJsonlEventV1 -Text $stdoutText -Truncated $stdoutCapture.Truncated
             $terminalEvent = $protocolResult.TerminalEvent
-            if (-not $protocolResult.Valid) { $failureCategory = 'PROTOCOL_FAILURE' }
+            if (-not $protocolResult.Valid) {
+                $failureCategory = 'PROTOCOL_FAILURE'; $diagnosticCode = $protocolResult.Reason
+                if ($null -ne $protocolResult.PSObject.Properties['Diagnostics']) { $stdoutProtocolDiagnostics = $protocolResult.Diagnostics }
+            }
             elseif ($terminalEvent -eq 'turn.failed') { $failureCategory = Resolve-GcProviderFailureCategoryV1 -Stdout $stdoutText -Stderr $stderrText }
             else { $state = 'COMPLETED'; $failureCategory = $null }
         }
         elseif ($Protocol -eq 'json-stream-exit') {
             $protocolResult = Read-GcJsonStreamExitProtocolV1 -Text $stdoutText -Truncated $stdoutCapture.Truncated
             $terminalEvent = $protocolResult.TerminalEvent
-            if (-not $protocolResult.Valid) { $failureCategory = 'PROTOCOL_FAILURE' }
+            if (-not $protocolResult.Valid) {
+                $failureCategory = 'PROTOCOL_FAILURE'; $diagnosticCode = $protocolResult.Reason
+                if ($null -ne $protocolResult.PSObject.Properties['Diagnostics']) { $stdoutProtocolDiagnostics = $protocolResult.Diagnostics }
+            }
             else { $state = 'COMPLETED'; $failureCategory = $null }
         }
         elseif ($Protocol -eq 'claude-json-exit') {
             $protocolResult = Read-GcClaudeJsonExitProtocolV1 -Text $stdoutText -Truncated $stdoutCapture.Truncated
             $terminalEvent = $protocolResult.TerminalEvent
-            if (-not $protocolResult.Valid) { $failureCategory = 'PROTOCOL_FAILURE' }
+            if (-not $protocolResult.Valid) { $failureCategory = 'PROTOCOL_FAILURE'; $diagnosticCode = $protocolResult.Reason }
             else { $state = 'COMPLETED'; $failureCategory = $null }
         }
         else { $failureCategory = 'PROTOCOL_FAILURE' }
 
         $endedAt = [DateTimeOffset]::UtcNow
         $transitions.Add([ordered]@{ state = $state; atUtc = $endedAt.ToString('o') })
+        $publicAttempt = [ordered]@{
+            attempt = $AttemptNumber; state = $state; failureCategory = $failureCategory; diagnosticCode = $diagnosticCode
+            startedAtUtc = $startedAt.ToString('o'); completedAtUtc = $endedAt.ToString('o')
+            durationMilliseconds = [long]$stopwatch.ElapsedMilliseconds; exitCode = $exitCode; terminalEvent = $terminalEvent
+            stdoutByteLength = [long]$stdoutCapture.TotalBytes; stdoutSha256 = [string]$stdoutCapture.Sha256; stdoutTruncated = [bool]$stdoutCapture.Truncated
+            stderrByteLength = [long]$stderrCapture.TotalBytes; stderrSha256 = [string]$stderrCapture.Sha256; stderrTruncated = [bool]$stderrCapture.Truncated
+            stateTransitions = $transitions.ToArray()
+        }
+        if ($null -ne $stdoutProtocolDiagnostics) { $publicAttempt['stdoutProtocolDiagnostics'] = $stdoutProtocolDiagnostics }
         return [pscustomobject]@{
-            Public = [ordered]@{
-                attempt = $AttemptNumber; state = $state; failureCategory = $failureCategory
-                startedAtUtc = $startedAt.ToString('o'); completedAtUtc = $endedAt.ToString('o')
-                durationMilliseconds = [long]$stopwatch.ElapsedMilliseconds; exitCode = $exitCode; terminalEvent = $terminalEvent
-                stdoutByteLength = [long]$stdoutCapture.TotalBytes; stdoutSha256 = [string]$stdoutCapture.Sha256; stdoutTruncated = [bool]$stdoutCapture.Truncated
-                stderrByteLength = [long]$stderrCapture.TotalBytes; stderrSha256 = [string]$stderrCapture.Sha256; stderrTruncated = [bool]$stderrCapture.Truncated
-                stateTransitions = $transitions.ToArray()
-            }
+            Public = $publicAttempt
             Stdout = $stdoutText
             Stderr = $stderrText
         }
@@ -695,12 +836,17 @@ function Invoke-GcProviderProcessRunnerV1 {
     $arguments = if ($null -ne $ArgumentsOverride) { $ArgumentsOverride } else { @($Profile['arguments']) }
     $protocol = if ($ProtocolOverride) { $ProtocolOverride } else { [string]$Profile['protocol'] }
     $transport = if ($PromptTransportOverride) { $PromptTransportOverride } else { [string]$Profile['promptTransport'] }
+    $environment = if ($null -eq $Profile['environment']) { [ordered]@{} } else { $Profile['environment'] }
+    if ($environment -isnot [Collections.IDictionary]) { Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_PROFILE_CONTRACT_INVALID' }
+    foreach ($key in $environment.Keys) {
+        if ($environment[$key] -isnot [string]) { Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_PROFILE_CONTRACT_INVALID' }
+    }
     $attempts = [Collections.Generic.List[object]]::new()
     $attemptNumber = 0
     $last = $null
     do {
         $attemptNumber++
-        $last = Invoke-GcProviderAttemptV1 -FilePath $filePath -Arguments $arguments -Prompt $Prompt -PromptTransport $transport -Protocol $protocol -WorkingDirectory ([string]$Request['repositoryRoot']) -TimeoutMilliseconds ([int]$Request['timeoutMilliseconds']) -MaximumCapturedBytes ([int]$Policy['maximumCapturedBytesPerStream']) -CancellationPath $CancellationPath -AttemptNumber $attemptNumber
+        $last = Invoke-GcProviderAttemptV1 -FilePath $filePath -Arguments $arguments -Prompt $Prompt -PromptTransport $transport -Protocol $protocol -WorkingDirectory ([string]$Request['repositoryRoot']) -TimeoutMilliseconds ([int]$Request['timeoutMilliseconds']) -MaximumCapturedBytes ([int]$Policy['maximumCapturedBytesPerStream']) -CancellationPath $CancellationPath -AttemptNumber $attemptNumber -ProfileEnvironment $environment
         $attempts.Add($last.Public)
         if ($last.Public['state'] -eq 'COMPLETED') { break }
         $retry = Get-GcRetryDecisionV1 -FailureCategory ([string]$last.Public['failureCategory']) -AttemptNumber $attemptNumber -Request $Request -Authorization $Authorization -Policy $Policy
@@ -713,6 +859,7 @@ function Invoke-GcProviderProcessRunnerV1 {
     return [pscustomobject]@{
         State = [string]$last.Public['state']
         FailureCategory = $last.Public['failureCategory']
+        DiagnosticCode = $last.Public['diagnosticCode']
         Attempts = $attempts.ToArray()
     }
 }
@@ -728,14 +875,14 @@ function Invoke-GcRunnerUtilityProcessV1 {
 
     Initialize-GcBoundedStreamDrainV1
     $process = [Diagnostics.Process]::new()
-    $process.StartInfo = New-GcProcessStartInfoV1 -FilePath $FilePath -Arguments $Arguments -WorkingDirectory $WorkingDirectory
+    $process.StartInfo = New-GcProcessStartInfoV1 -FilePath $FilePath -Arguments $Arguments -WorkingDirectory $WorkingDirectory -EnvironmentOverrides @{}
     $processStarted = $false
     try {
         if (-not $process.Start()) { Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_UTILITY_START_FAILED' }
         $processStarted = $true
         $process.StandardInput.Close()
-        $stdoutTask = [GcProviderRunnerV1.StreamDrain]::DrainAsync($process.StandardOutput.BaseStream, $MaximumBytes)
-        $stderrTask = [GcProviderRunnerV1.StreamDrain]::DrainAsync($process.StandardError.BaseStream, $MaximumBytes)
+        $stdoutTask = [GcProviderRunnerV1.StreamDrain]::DrainAsync($process.StandardOutput.BaseStream, $MaximumBytes, $null)
+        $stderrTask = [GcProviderRunnerV1.StreamDrain]::DrainAsync($process.StandardError.BaseStream, $MaximumBytes, $null)
         if (-not $process.WaitForExit($TimeoutMilliseconds)) { Stop-GcProcessTreeV1 -Process $process; Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_UTILITY_TIMEOUT' }
         $stdout = $stdoutTask.GetAwaiter().GetResult()
         $stderr = $stderrTask.GetAwaiter().GetResult()

@@ -16,15 +16,20 @@
       "executableNames": ["codex.exe"],
       "arguments": ["exec", "--ephemeral", "--json", "--sandbox", "read-only", "-"],
       "promptTransport": "stdin",
-      "protocol": "codex-jsonl"
+      "protocol": "codex-jsonl",
+      "environment": {}
     },
     {
       "id": "gemini-plan-review",
       "enabled": true,
       "executableNames": ["gemini.cmd"],
-      "arguments": ["--prompt", "Inspect the assigned repository context read-only.\nDo not modify files or invoke nested providers.\nReturn only the review.", "--approval-mode", "plan", "--output-format", "stream-json", "--skip-trust"],
+      "arguments": ["--prompt", "Inspect the assigned repository context read-only. Do not modify files or invoke nested providers. Return only the review.", "--approval-mode", "plan", "--output-format", "stream-json", "--skip-trust"],
       "promptTransport": "stdin",
-      "protocol": "json-stream-exit"
+      "protocol": "json-stream-exit",
+      "environment": {
+        "NO_COLOR": "1",
+        "FORCE_COLOR": "0"
+      }
     },
     {
       "id": "claude-readonly",
@@ -32,7 +37,8 @@
       "executableNames": ["claude.cmd"],
       "arguments": ["--system-prompt", "Inspect the assigned repository context read-only. Do not modify files or invoke nested providers. Return only the review.", "-p", "--output-format", "json", "--permission-mode", "plan", "--safe-mode", "--tools", "Read,Glob,Grep", "--disallowedTools", "Edit,Write,Bash,NotebookEdit,WebFetch,WebSearch,mcp__*", "--strict-mcp-config", "--disable-slash-commands", "--no-session-persistence"],
       "promptTransport": "stdin",
-      "protocol": "claude-json-exit"
+      "protocol": "claude-json-exit",
+      "environment": {}
     },
     {
       "id": "github-copilot-readonly",
@@ -40,7 +46,8 @@
       "executableNames": ["gh.exe"],
       "arguments": [],
       "promptTransport": "closed",
-      "protocol": "disabled"
+      "protocol": "disabled",
+      "environment": {}
     }
   ]
 }
