@@ -96,6 +96,7 @@ function Invoke-GcMockProviderV1 {
         [AllowNull()][string]$ChildPidPath,
         [AllowNull()][string]$CancellationPath,
         [AllowNull()][object[]]$ObservedArguments,
+        [AllowNull()][string]$RunDirectory,
         [string]$Protocol = 'codex-jsonl'
     )
 
@@ -121,7 +122,24 @@ function Invoke-GcMockProviderV1 {
             $arguments.Add($ObservedArguments[$index])
         }
     }
-    return Invoke-GcProviderProcessRunnerV1 -Request $Context.Request -Authorization $Context.Authorization -Policy $Context.Policy -Profile $Context.Profile -Prompt $Context.Prompt -CancellationPath $CancellationPath -ExecutableOverride $pwsh -ArgumentsOverride $arguments.ToArray() -ProtocolOverride $Protocol -PromptTransportOverride 'stdin' -RetryDelayOverrideMilliseconds 0
+    $invokeParameters = @{
+        Request = $Context.Request
+        Authorization = $Context.Authorization
+        Policy = $Context.Policy
+        Profile = $Context.Profile
+        Prompt = $Context.Prompt
+        CancellationPath = $CancellationPath
+        ExecutableOverride = $pwsh
+        ArgumentsOverride = $arguments.ToArray()
+        ProtocolOverride = $Protocol
+        PromptTransportOverride = 'stdin'
+        RetryDelayOverrideMilliseconds = 0
+    }
+    if ($RunDirectory) {
+        $invokeParameters['RunDirectory'] = $RunDirectory
+        $invokeParameters['RequestSha256'] = $Context.RequestSha256
+    }
+    return Invoke-GcProviderProcessRunnerV1 @invokeParameters
 }
 
 $temporaryRoot = [IO.Path]::Combine([IO.Path]::GetTempPath(), 'gc-provider-runner-v1-tests-' + [Guid]::NewGuid().ToString('N'))
@@ -133,6 +151,52 @@ try {
     $requestContext = Assert-GcRunnerRequestV1 -Request $context.Request -Policy $context.Policy
     Assert-GcTestEqualV1 $requestContext.Prompt.Sha256 $context.Request['promptSha256'] 'request binds exact prompt hash'
     Assert-GcHumanDispatchAuthorizationV1 -Authorization $context.Authorization -Request $context.Request -RequestSha256 $context.RequestSha256 -Policy $context.Policy
+
+    # DLP Unit Tests
+    $dlpTests = @(
+        @{ Name = 'ghp_'; Text = 'Bearer ghp_1234567890abcdefghijklmnopqrstuvwxyz'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'github_pat_'; Text = 'Token github_pat_11AAAAAAA0000000000000_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'gho_'; Text = 'gho_1234567890abcdefghijklmnopqrstuvwxyz'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'ghu_'; Text = 'ghu_1234567890abcdefghijklmnopqrstuvwxyz'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'ghs_'; Text = 'ghs_1234567890abcdefghijklmnopqrstuvwxyz'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'ghr_'; Text = 'ghr_1234567890abcdefghijklmnopqrstuvwxyz'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'AKIA'; Text = 'AKIAIOSFODNN7EXAMPLE'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'ASIA'; Text = 'ASIAIOSFODNN7EXAMPLE'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'AWS_ACCESS_KEY_ID'; Text = 'AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'AWS_SECRET_ACCESS_KEY'; Text = 'AWS_SECRET_ACCESS_KEY=gcTestAwsSecretAccessKey123456789'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'AWS_SESSION_TOKEN'; Text = 'AWS_SESSION_TOKEN=gcTestAwsSessionToken123456789'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'SESSION_COOKIE'; Text = 'SESSION_COOKIE=abcdefg'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'Cookie'; Text = 'Cookie: sessionId=123'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'Set-Cookie'; Text = 'Set-Cookie: sessionId=123'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'Bearer'; Text = 'Authorization: Bearer token123'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'Basic'; Text = 'Authorization: Basic YWxhZGRpbjpvcGVuc2VzYW1l'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'X-API-Key'; Text = 'X-API-Key: my-api-key-here'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'client_secret'; Text = '{"client_secret": "my-secret-value"}'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'access_token'; Text = '{"access_token": "my-secret-value"}'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'refresh_token'; Text = '{"refresh_token": "my-secret-value"}'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'PEM header'; Text = "-----BEGIN RSA PRIVATE KEY-----`nxyz`n-----END RSA PRIVATE KEY-----"; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'label-associated JWT'; Text = 'AUTH_JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'generic TOKEN assignment'; Text = 'BUILD_TOKEN=gcTestToken123'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'generic SECRET assignment'; Text = 'APP_SECRET: gcTestSecret123'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'generic PASSWORD assignment'; Text = '"PASSWORD": "gcTestPassword123"'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'generic PASSWD assignment'; Text = "'DB_PASSWD': 'gcTestPasswd123'"; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'generic APIKEY assignment'; Text = 'SERVICE_APIKEY=gcTestApiKey123'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'generic ACCESS_KEY assignment'; Text = 'STORAGE_ACCESS_KEY=gcTestAccessKey123'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'generic PRIVATE_KEY assignment'; Text = 'SIGNING_PRIVATE_KEY=gcTestPrivateKey123'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'generic CLIENT_SECRET assignment'; Text = 'OAUTH_CLIENT_SECRET=gcTestClientSecret123'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'generic SESSION assignment'; Text = 'USER_SESSION=gcTestSession123'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'generic COOKIE assignment'; Text = 'LOGIN_COOKIE=gcTestCookie123'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'generic AUTH assignment'; Text = 'SERVICE_AUTH=gcTestAuth123'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'generic CREDENTIAL assignment'; Text = 'DEPLOY_CREDENTIAL=gcTestCredential123'; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'multiple secrets'; Text = "BUILD_TOKEN=gcTestToken123`nSESSION_COOKIE=gcTestCookie123"; Expected = 'SENSITIVE_OUTPUT_BLOCKED' },
+        @{ Name = 'safe text'; Text = 'Just some safe output text.'; Expected = 'SAFE_RAW_RETAINED' }
+    )
+    foreach ($test in $dlpTests) {
+        $bytes = [Text.UTF8Encoding]::new($false, $true).GetBytes($test.Text)
+        $actualState = Get-GcSecurityStateV1 -Bytes $bytes
+        Assert-GcTestEqualV1 $actualState $test.Expected ("DLP coverage for " + $test.Name)
+    }
+    Write-Output "PASS DLP REDACTION COVERAGE"
 
     $spawnSentinel = [IO.Path]::Combine($temporaryRoot, 'auth-reject-spawn.txt')
     $badAuthorization = [ordered]@{}
@@ -263,7 +327,13 @@ try {
     $geminiSuccess = Invoke-GcMockProviderV1 -Context $context -Scenario 'gemini-success-result' -Protocol 'json-stream-exit'
     Assert-GcTestEqualV1 $geminiSuccess.State 'COMPLETED' 'gemini success reaches completed'
     Assert-GcTestEqualV1 $geminiSuccess.Attempts[0]['terminalEvent'] 'result' 'Gemini terminal result event extracted'
+    Assert-GcTestEqualV1 $geminiSuccess.Attempts[0]['payloadParseStatus'] 'VALID' 'Gemini success requires valid reviewer payload'
     Assert-GcTestTrueV1 (@($geminiSuccess.Attempts[0].Keys) -cnotcontains 'stdoutProtocolDiagnostics') 'valid JSON stream attempt shape remains unchanged'
+
+    $contiguousPayload = '{"type":"message","role":"assistant","content":"review follows: ```json\n{\"verdict\":\"PASS\",\"summary\":\"exact object\",\"requiredConstraints\":[],\"risks\":[],\"recommendedSeams\":[],\"acceptanceTests\":[],\"filesReviewed\":[]}\n```","delta":false}' + "`n" + '{"type":"result","status":"success"}'
+    $contiguousResult = Get-GcGeminiReviewerPayloadV1 -Text $contiguousPayload -Truncated $false
+    Assert-GcTestEqualV1 $contiguousResult.Status 'VALID' 'exact contiguous reviewer object is extracted without fence repair'
+    Assert-GcTestTrueV1 ([Text.UTF8Encoding]::new($false, $true).GetString($contiguousResult.Bytes).StartsWith('{"verdict":"PASS"', [StringComparison]::Ordinal)) 'persisted payload bytes are the exact JSON object only'
 
     $diagnosticCases = [ordered]@{
         ANSI_WRAPPED_JSON = ([string][char]27 + '[33m{"type":"init"}' + [string][char]27 + '[0m')
@@ -301,12 +371,113 @@ try {
         Assert-GcTestEqualV1 $geminiFailure.FailureCategory 'PROTOCOL_FAILURE' "gemini $scenario is protocol failure"
     }
 
+    $geminiMissingPayload = Invoke-GcMockProviderV1 -Context $context -Scenario 'gemini-missing-reviewer-payload' -Protocol 'json-stream-exit'
+    Assert-GcTestEqualV1 $geminiMissingPayload.State 'FAILED' 'Gemini missing reviewer payload fails gate'
+    Assert-GcTestEqualV1 $geminiMissingPayload.Attempts[0]['payloadParseStatus'] 'NOT_PRESENT' 'missing reviewer payload is not invented'
+    $geminiMalformedPayload = Invoke-GcMockProviderV1 -Context $context -Scenario 'gemini-malformed-reviewer-payload' -Protocol 'json-stream-exit'
+    Assert-GcTestEqualV1 $geminiMalformedPayload.State 'FAILED' 'Gemini malformed reviewer payload fails gate'
+    Assert-GcTestEqualV1 $geminiMalformedPayload.Attempts[0]['payloadParseStatus'] 'INVALID' 'malformed reviewer payload is retained as invalid without repair'
+
     $geminiTruncatedContext = New-GcTestContextV1 -Directory $temporaryRoot
     $geminiTruncatedResult = Invoke-GcProviderAttemptV1 -FilePath (Get-Command pwsh.exe -CommandType Application | Select-Object -First 1).Source -Arguments @('-NoProfile', '-Command', '[Console]::Out.WriteLine(''{"type":"init"}''); [Console]::Out.WriteLine(''{"type":"result","status":"success"}''); exit 0') -Prompt 'probe' -PromptTransport closed -Protocol 'json-stream-exit' -WorkingDirectory $repositoryRoot -TimeoutMilliseconds 5000 -MaximumCapturedBytes 10 -AttemptNumber 1
     Assert-GcTestEqualV1 $geminiTruncatedResult.Public['state'] 'FAILED' 'gemini truncated buffer fails lifecycle'
     Assert-GcTestEqualV1 $geminiTruncatedResult.Public['failureCategory'] 'PROTOCOL_FAILURE' 'gemini truncated buffer is protocol failure'
 
     Write-Output 'PASS GEMINI JSON STREAM EXIT TERMINAL EVENTS'
+
+    $retentionContext = New-GcTestContextV1 -Directory $temporaryRoot
+    $retentionContext.Request['providerProfileId'] = 'gemini-plan-review'
+    $retentionContext.Authorization['providerProfileId'] = 'gemini-plan-review'
+    $retentionContext.Profile = Get-GcProviderProfileV1 -Policy $retentionContext.Policy -ProfileId 'gemini-plan-review'
+    $retentionRoot = [IO.Path]::Combine($temporaryRoot, 'retained-success')
+    $retentionRun = New-GcRunnerRunDirectoryV1 -ArtifactRoot $retentionRoot -AuthorizationId $retentionContext.Authorization['authorizationId']
+    $retainedSuccess = Invoke-GcMockProviderV1 -Context $retentionContext -Scenario 'gemini-success-result' -Protocol 'json-stream-exit' -RunDirectory $retentionRun
+    Assert-GcTestEqualV1 $retainedSuccess.State 'COMPLETED' 'retained Gemini reviewer completes'
+    Assert-GcTestEqualV1 $retainedSuccess.Attempts.Count 1 'retained success uses exactly one attempt'
+    $retainedAttempt = $retainedSuccess.Attempts[0]
+    foreach ($pathKey in @('stdoutArtifactPath','stderrArtifactPath','attemptResultPath','parsedPayloadPath')) {
+        Assert-GcTestTrueV1 ([IO.File]::Exists([string]$retainedAttempt[$pathKey])) ($pathKey + ' survives cleanup')
+    }
+    Remove-GcRunnerTemporaryArtifactsV1 -RunDirectory $retentionRun
+    Assert-GcTestTrueV1 ([IO.File]::Exists([string]$retainedAttempt['stdoutArtifactPath'])) 'successful stdout survives temporary cleanup'
+    Assert-GcTestEqualV1 (Get-GcSha256HexV1 -Bytes ([IO.File]::ReadAllBytes([string]$retainedAttempt['stdoutArtifactPath']))) $retainedAttempt['stdoutArtifactSha256'] 'stdout lifecycle hash matches retained file'
+    Assert-GcTestEqualV1 (Get-GcSha256HexV1 -Bytes ([IO.File]::ReadAllBytes([string]$retainedAttempt['stderrArtifactPath']))) $retainedAttempt['stderrArtifactSha256'] 'stderr lifecycle hash matches retained file'
+    Assert-GcTestEqualV1 (Get-GcSha256HexV1 -Bytes ([IO.File]::ReadAllBytes([string]$retainedAttempt['parsedPayloadPath']))) $retainedAttempt['parsedPayloadSha256'] 'parsed payload lifecycle hash matches retained file'
+    $attemptResultFile = Read-GcRunnerJsonFileV1 -LiteralPath ([string]$retainedAttempt['attemptResultPath'])
+    Assert-GcTestEqualV1 $attemptResultFile.Value['cleanupStatus'] 'RETAINED' 'attempt result records retained cleanup state'
+    Assert-GcTestEqualV1 $attemptResultFile.Value['stderrLength'] ([IO.FileInfo]::new([string]$retainedAttempt['stderrArtifactPath']).Length) 'stderr metadata records retained byte length'
+    Assert-GcTestEqualV1 $attemptResultFile.Value['payloadParseStatus'] 'VALID' 'attempt result records valid reviewer payload'
+    Assert-GcTestThrowsCategoryV1 { Write-GcRunnerBytesAtomicV1 -Bytes ([byte[]](1,2,3)) -DestinationPath ([string]$retainedAttempt['stdoutArtifactPath']) } 'RUNNER_FAILURE' 'retained stdout artifact cannot be overwritten'
+    $retainedLifecycle = New-GcLifecycleArtifactV1 -Request $retentionContext.Request -Authorization $retentionContext.Authorization -RequestSha256 $retentionContext.RequestSha256 -CreatedAtUtc ([DateTimeOffset]::UtcNow.AddSeconds(-1)) -State $retainedSuccess.State -FailureCategory $retainedSuccess.FailureCategory -Attempts $retainedSuccess.Attempts -CheckpointWritten $false -WorktreePreserved $true
+    $retainedLifecycleResult = Write-GcRunnerArtifactAtomicV1 -Artifact $retainedLifecycle -DestinationPath ([IO.Path]::Combine($retentionRun, 'lifecycle.json'))
+    $persistedLifecycle = Read-GcRunnerJsonFileV1 -LiteralPath $retainedLifecycleResult.Path
+    Assert-GcTestEqualV1 $persistedLifecycle.Value['attempts'][0]['attemptResultSha256'] $retainedAttempt['attemptResultSha256'] 'lifecycle references attempt-result hash'
+    Assert-GcTestEqualV1 $persistedLifecycle.Value['attempts'][0]['parsedPayloadSha256'] $retainedAttempt['parsedPayloadSha256'] 'lifecycle references parsed payload hash'
+
+    foreach ($case in @(
+        [pscustomobject]@{ Scenario = 'gemini-malformed-reviewer-payload'; Expected = 'INVALID'; Name = 'retained-malformed' },
+        [pscustomobject]@{ Scenario = 'gemini-missing-reviewer-payload'; Expected = 'NOT_PRESENT'; Name = 'retained-missing' }
+    )) {
+        $caseContext = New-GcTestContextV1 -Directory $temporaryRoot
+        $caseContext.Request['providerProfileId'] = 'gemini-plan-review'
+        $caseContext.Authorization['providerProfileId'] = 'gemini-plan-review'
+        $caseContext.Profile = Get-GcProviderProfileV1 -Policy $caseContext.Policy -ProfileId 'gemini-plan-review'
+        $caseRun = New-GcRunnerRunDirectoryV1 -ArtifactRoot ([IO.Path]::Combine($temporaryRoot, $case.Name)) -AuthorizationId $caseContext.Authorization['authorizationId']
+        $caseResult = Invoke-GcMockProviderV1 -Context $caseContext -Scenario $case.Scenario -Protocol 'json-stream-exit' -RunDirectory $caseRun
+        Assert-GcTestEqualV1 $caseResult.State 'FAILED' ($case.Name + ' is reviewer-gate failure')
+        Assert-GcTestEqualV1 $caseResult.Attempts.Count 1 ($case.Name + ' remains one attempt')
+        Assert-GcTestEqualV1 $caseResult.Attempts[0]['payloadParseStatus'] $case.Expected ($case.Name + ' parse status retained')
+        Assert-GcTestTrueV1 ([IO.File]::Exists([string]$caseResult.Attempts[0]['stdoutArtifactPath'])) ($case.Name + ' raw stdout retained')
+        Assert-GcTestTrueV1 ($null -eq $caseResult.Attempts[0]['parsedPayloadPath']) ($case.Name + ' writes no invented parsed payload')
+    }
+
+    $timeoutArtifactContext = New-GcTestContextV1 -Directory $temporaryRoot
+    $timeoutArtifactContext.Request['timeoutMilliseconds'] = [long]1000
+    $timeoutArtifactRun = New-GcRunnerRunDirectoryV1 -ArtifactRoot ([IO.Path]::Combine($temporaryRoot, 'retained-timeout')) -AuthorizationId $timeoutArtifactContext.Authorization['authorizationId']
+    $retainedTimeout = Invoke-GcMockProviderV1 -Context $timeoutArtifactContext -Scenario 'timeout-evidence' -RunDirectory $timeoutArtifactRun
+    Assert-GcTestEqualV1 $retainedTimeout.State 'TIMED_OUT' 'timeout remains bounded failure'
+    Assert-GcTestEqualV1 $retainedTimeout.Attempts.Count 1 'timeout artifacts do not change attempt count'
+    Assert-GcTestTrueV1 ([IO.File]::Exists([string]$retainedTimeout.Attempts[0]['stdoutArtifactPath']) -and [IO.File]::Exists([string]$retainedTimeout.Attempts[0]['stderrArtifactPath'])) 'timeout stdout and stderr remain auditable'
+
+    $sensitiveContext = New-GcTestContextV1 -Directory $temporaryRoot
+    $sensitiveRun = New-GcRunnerRunDirectoryV1 -ArtifactRoot ([IO.Path]::Combine($temporaryRoot, 'retained-sensitive')) -AuthorizationId $sensitiveContext.Authorization['authorizationId']
+    $sensitiveResult = Invoke-GcMockProviderV1 -Context $sensitiveContext -Scenario 'sensitive-output' -RunDirectory $sensitiveRun
+    Assert-GcTestEqualV1 $sensitiveResult.State 'FAILED' 'sensitive output fails attempt'
+    Assert-GcTestEqualV1 $sensitiveResult.FailureCategory 'PROTOCOL_FAILURE' 'sensitive output is protocol failure'
+    Assert-GcTestEqualV1 $sensitiveResult.DiagnosticCode 'SENSITIVE_OUTPUT_BLOCKED' 'sensitive output yields explicit diagnostic code'
+    Assert-GcTestEqualV1 $sensitiveResult.Attempts.Count 1 'sensitive output is never retried'
+    Assert-GcTestEqualV1 $sensitiveResult.Attempts[0]['exitCode'] 0 'exit code zero does not bypass sensitive-output failure'
+    Assert-GcTestTrueV1 ($null -eq $sensitiveResult.Attempts[0]['stdoutArtifactPath']) 'sensitive attempt suppresses safe peer stdout raw artifact'
+    Assert-GcTestTrueV1 ($null -eq $sensitiveResult.Attempts[0]['stderrArtifactPath']) 'sensitive stderr artifact path is null'
+    Assert-GcTestTrueV1 ($null -eq $sensitiveResult.Attempts[0]['parsedPayloadPath']) 'sensitive attempt writes no reviewer payload'
+    $sensitiveAttemptResult = (Read-GcRunnerJsonFileV1 -LiteralPath ([string]$sensitiveResult.Attempts[0]['attemptResultPath'])).Value
+    Assert-GcTestEqualV1 $sensitiveAttemptResult['stderrSecurityState'] 'SENSITIVE_OUTPUT_BLOCKED' 'attempt result records explicit security state'
+
+    foreach ($sensitiveCase in @(
+        [pscustomobject]@{ Scenario = 'sensitive-stdout'; Protocol = 'codex-jsonl'; Stream = 'stdout'; Name = 'blocked-ghp-stdout' },
+        [pscustomobject]@{ Scenario = 'sensitive-split-output'; Protocol = 'codex-jsonl'; Stream = 'stdout'; Name = 'blocked-split-token' },
+        [pscustomobject]@{ Scenario = 'sensitive-multiple-output'; Protocol = 'codex-jsonl'; Stream = 'both'; Name = 'blocked-multiple-secrets' },
+        [pscustomobject]@{ Scenario = 'gemini-sensitive-reviewer'; Protocol = 'json-stream-exit'; Stream = 'stdout'; Name = 'blocked-sensitive-reviewer' }
+    )) {
+        $blockedContext = New-GcTestContextV1 -Directory $temporaryRoot
+        if ($sensitiveCase.Protocol -eq 'json-stream-exit') {
+            $blockedContext.Request['providerProfileId'] = 'gemini-plan-review'
+            $blockedContext.Authorization['providerProfileId'] = 'gemini-plan-review'
+            $blockedContext.Profile = Get-GcProviderProfileV1 -Policy $blockedContext.Policy -ProfileId 'gemini-plan-review'
+        }
+        $blockedRun = New-GcRunnerRunDirectoryV1 -ArtifactRoot ([IO.Path]::Combine($temporaryRoot, $sensitiveCase.Name)) -AuthorizationId $blockedContext.Authorization['authorizationId']
+        $blockedResult = Invoke-GcMockProviderV1 -Context $blockedContext -Scenario $sensitiveCase.Scenario -Protocol $sensitiveCase.Protocol -RunDirectory $blockedRun
+        Assert-GcTestEqualV1 $blockedResult.State 'FAILED' ($sensitiveCase.Name + ' fails closed')
+        Assert-GcTestEqualV1 $blockedResult.FailureCategory 'PROTOCOL_FAILURE' ($sensitiveCase.Name + ' is protocol failure')
+        Assert-GcTestEqualV1 $blockedResult.Attempts.Count 1 ($sensitiveCase.Name + ' remains one attempt')
+        Assert-GcTestEqualV1 $blockedResult.Attempts[0]['exitCode'] 0 ($sensitiveCase.Name + ' preserves provider exit zero without bypass')
+        Assert-GcTestTrueV1 ($null -eq $blockedResult.Attempts[0]['stdoutArtifactPath'] -and $null -eq $blockedResult.Attempts[0]['stderrArtifactPath']) ($sensitiveCase.Name + ' writes no raw stream artifact')
+        Assert-GcTestTrueV1 ($null -eq $blockedResult.Attempts[0]['parsedPayloadPath']) ($sensitiveCase.Name + ' writes no parsed reviewer payload')
+        Assert-GcTestEqualV1 @(Get-ChildItem -LiteralPath ([IO.Path]::Combine($blockedRun, 'attempt-1')) -File -Filter 'provider-*.raw').Count 0 ($sensitiveCase.Name + ' leaves no provider raw file')
+        $blockedAttemptResult = (Read-GcRunnerJsonFileV1 -LiteralPath ([string]$blockedResult.Attempts[0]['attemptResultPath'])).Value
+        Assert-GcTestEqualV1 $blockedAttemptResult['payloadParseReason'] 'SENSITIVE_OUTPUT_BLOCKED' ($sensitiveCase.Name + ' records security block in attempt result')
+    }
+    Write-Output 'PASS RETAINED STREAMS REVIEWER PAYLOAD ATTEMPT RESULT TIMEOUT AND REDACTION'
 
     foreach ($scenario in @('claude-success','claude-success-is-error-false')) {
         $claudeSuccess = Invoke-GcMockProviderV1 -Context $context -Scenario $scenario -Protocol 'claude-json-exit'

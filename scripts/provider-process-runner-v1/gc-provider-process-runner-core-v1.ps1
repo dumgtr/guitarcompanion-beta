@@ -479,6 +479,168 @@ function Test-GcJsonDocumentV1 {
     finally { if ($null -ne $document) { $document.Dispose() } }
 }
 
+function Get-GcSecurityStateV1 {
+    param([Parameter(Mandatory)][AllowEmptyCollection()][byte[]]$Bytes)
+
+    if ($Bytes.Length -eq 0) { return 'SAFE_RAW_RETAINED' }
+    try { $text = [Text.UTF8Encoding]::new($false, $true).GetString($Bytes) }
+    catch { return 'INVALID_OR_AMBIGUOUS_OUTPUT' }
+
+    $pattern = @(
+        '\b(?:ghp|github_pat|gho|ghu|ghs|ghr)_[a-zA-Z0-9_]+\b',
+        '\b(?:AKIA|ASIA)[A-Z0-9]{16}\b',
+        '\bAWS_(?:ACCESS_KEY_ID|SECRET_ACCESS_KEY|SESSION_TOKEN)\b',
+        '\bSESSION_COOKIE\b',
+        '(?i)\bCookie:\s*',
+        '(?i)\bSet-Cookie:\s*',
+        '(?i)\bAuthorization:\s+(?:Bearer|Basic)\b',
+        '(?i)\bX-API-Key\b',
+        '(?i)["''](?:client_secret|access_token|refresh_token)["'']\s*:\s*["''].+?["'']',
+        '-----BEGIN\s+[^-\r\n]+\s+PRIVATE\s+KEY-----',
+        '(?i)["'']?(?:[A-Za-z0-9]+_)*(?:token|secret|password|passwd|api[_\-]?key|apikey|access[_\-]?key|private[_\-]?key|client[_\-]?secret|session|cookie|auth|authorization|credential|jwt)["'']?\s*(?:=|:)\s*(?:"[^"\r\n]+"|''[^''\r\n]+''|[^\s"''\r\n]+)',
+        'eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}'
+    ) -join '|'
+
+    if ($text -match $pattern) { return 'SENSITIVE_OUTPUT_BLOCKED' }
+    return 'SAFE_RAW_RETAINED'
+}
+
+function Test-GcReviewerPayloadV1 {
+    param([Parameter(Mandatory)][Collections.IDictionary]$Payload)
+
+    $keys = @('verdict','summary','requiredConstraints','risks','recommendedSeams','acceptanceTests','filesReviewed')
+    if ($Payload.Count -ne $keys.Count) { return [pscustomobject]@{ Valid = $false; Reason = 'REVIEWER_PAYLOAD_SHAPE_INVALID' } }
+    foreach ($key in $keys) {
+        $present = $false
+        foreach ($candidate in $Payload.Keys) {
+            if ([string]::Equals([string]$candidate, $key, [StringComparison]::Ordinal)) { $present = $true; break }
+        }
+        if (-not $present) { return [pscustomobject]@{ Valid = $false; Reason = 'REVIEWER_PAYLOAD_SHAPE_INVALID' } }
+    }
+    if ($Payload['verdict'] -isnot [string] -or $Payload['verdict'] -cnotmatch '^(PASS|CONDITIONAL_PASS|FAIL)$') {
+        return [pscustomobject]@{ Valid = $false; Reason = 'REVIEWER_PAYLOAD_VERDICT_INVALID' }
+    }
+    if (-not (Test-GcOrdinalStringV1 -Value $Payload['summary'] -Maximum 16384)) {
+        return [pscustomobject]@{ Valid = $false; Reason = 'REVIEWER_PAYLOAD_SUMMARY_INVALID' }
+    }
+    foreach ($key in @('requiredConstraints','risks','recommendedSeams','acceptanceTests','filesReviewed')) {
+        if ($Payload[$key] -isnot [object[]] -or $Payload[$key].Count -gt 128) {
+            return [pscustomobject]@{ Valid = $false; Reason = 'REVIEWER_PAYLOAD_ARRAY_INVALID' }
+        }
+        foreach ($value in $Payload[$key]) {
+            if (-not (Test-GcOrdinalStringV1 -Value $value -Maximum 4096)) {
+                return [pscustomobject]@{ Valid = $false; Reason = 'REVIEWER_PAYLOAD_ARRAY_INVALID' }
+            }
+        }
+    }
+    return [pscustomobject]@{ Valid = $true; Reason = $null }
+}
+
+function Get-GcContiguousJsonObjectsV1 {
+    param([Parameter(Mandatory)][AllowEmptyString()][string]$Text)
+
+    $results = [Collections.Generic.List[string]]::new()
+    $start = -1
+    $depth = 0
+    $inString = $false
+    $escaped = $false
+    for ($index = 0; $index -lt $Text.Length; $index++) {
+        $character = $Text[$index]
+        if ($start -lt 0) {
+            if ($character -eq '{') { $start = $index; $depth = 1; $inString = $false; $escaped = $false }
+            continue
+        }
+        if ($inString) {
+            if ($escaped) { $escaped = $false; continue }
+            if ($character -eq '\') { $escaped = $true; continue }
+            if ($character -eq '"') { $inString = $false }
+            continue
+        }
+        if ($character -eq '"') { $inString = $true; continue }
+        if ($character -eq '{') { $depth++; continue }
+        if ($character -eq '}') {
+            $depth--
+            if ($depth -eq 0) {
+                $results.Add($Text.Substring($start, $index - $start + 1))
+                $start = -1
+            }
+        }
+    }
+    return $results.ToArray()
+}
+
+function Get-GcGeminiReviewerPayloadV1 {
+    param(
+        [Parameter(Mandatory)][AllowEmptyString()][string]$Text,
+        [Parameter(Mandatory)][bool]$Truncated
+    )
+
+    if ($Truncated) { return [pscustomobject]@{ Status = 'INVALID'; Reason = 'REVIEWER_PAYLOAD_OUTPUT_TRUNCATED'; Bytes = $null } }
+    $deltaFragments = [Collections.Generic.List[string]]::new()
+    $completeCandidates = [Collections.Generic.List[string]]::new()
+    $resultCandidates = [Collections.Generic.List[string]]::new()
+
+    foreach ($rawLine in ($Text -split "`r?`n")) {
+        $line = ($rawLine -replace '\x1B(?:\[[0-?]*[ -/]*[@-~])', '').Trim()
+        if ([string]::IsNullOrWhiteSpace($line)) { continue }
+        try {
+            $document = [Text.Json.JsonDocument]::Parse($line)
+            try {
+                if ($document.RootElement.ValueKind -ne [Text.Json.JsonValueKind]::Object) { continue }
+                $type = [Text.Json.JsonElement]::new()
+                if (-not $document.RootElement.TryGetProperty('type', [ref]$type) -or $type.ValueKind -ne [Text.Json.JsonValueKind]::String) { continue }
+                $typeName = $type.GetString()
+                if ([string]::Equals($typeName, 'message', [StringComparison]::Ordinal)) {
+                    $role = [Text.Json.JsonElement]::new()
+                    $content = [Text.Json.JsonElement]::new()
+                    if (-not $document.RootElement.TryGetProperty('role', [ref]$role) -or $role.ValueKind -ne [Text.Json.JsonValueKind]::String -or $role.GetString() -cne 'assistant') { continue }
+                    if (-not $document.RootElement.TryGetProperty('content', [ref]$content) -or $content.ValueKind -ne [Text.Json.JsonValueKind]::String) { continue }
+                    $delta = [Text.Json.JsonElement]::new()
+                    if ($document.RootElement.TryGetProperty('delta', [ref]$delta) -and $delta.ValueKind -eq [Text.Json.JsonValueKind]::True) { $deltaFragments.Add($content.GetString()) }
+                    else { $completeCandidates.Add($content.GetString()) }
+                }
+                elseif ([string]::Equals($typeName, 'result', [StringComparison]::Ordinal)) {
+                    foreach ($propertyName in @('result','response','content')) {
+                        $candidate = [Text.Json.JsonElement]::new()
+                        if ($document.RootElement.TryGetProperty($propertyName, [ref]$candidate) -and $candidate.ValueKind -eq [Text.Json.JsonValueKind]::String -and -not [string]::IsNullOrWhiteSpace($candidate.GetString())) {
+                            $resultCandidates.Add($candidate.GetString())
+                        }
+                    }
+                }
+            }
+            finally { $document.Dispose() }
+        }
+        catch { return [pscustomobject]@{ Status = 'INVALID'; Reason = 'REVIEWER_PAYLOAD_STREAM_INVALID'; Bytes = $null } }
+    }
+
+    $providerCandidates = [Collections.Generic.List[string]]::new()
+    if ($deltaFragments.Count -gt 0) { $providerCandidates.Add(($deltaFragments -join '')) }
+    foreach ($candidate in $completeCandidates) { $providerCandidates.Add($candidate) }
+    if ($providerCandidates.Count -eq 0) { foreach ($candidate in $resultCandidates) { $providerCandidates.Add($candidate) } }
+    if ($providerCandidates.Count -eq 0) { return [pscustomobject]@{ Status = 'NOT_PRESENT'; Reason = 'REVIEWER_PAYLOAD_MISSING'; Bytes = $null } }
+
+    $validPayloads = [Collections.Generic.List[object]]::new()
+    $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($providerCandidate in $providerCandidates) {
+        foreach ($jsonCandidate in @(Get-GcContiguousJsonObjectsV1 -Text $providerCandidate)) {
+            if (-not $seen.Add($jsonCandidate)) { continue }
+            try {
+                $payload = ConvertFrom-GcRunnerStrictJsonV1 -Text $jsonCandidate
+                if ($payload -isnot [Collections.IDictionary]) { continue }
+                $validation = Test-GcReviewerPayloadV1 -Payload $payload
+                if ($validation.Valid) { $validPayloads.Add([pscustomobject]@{ Text = $jsonCandidate; Value = $payload }) }
+            }
+            catch { }
+        }
+    }
+    if ($validPayloads.Count -ne 1) { return [pscustomobject]@{ Status = 'INVALID'; Reason = 'REVIEWER_PAYLOAD_INVALID_OR_AMBIGUOUS'; Bytes = $null } }
+
+    $bytes = [Text.UTF8Encoding]::new($false).GetBytes($validPayloads[0].Text)
+    $securityState = Get-GcSecurityStateV1 -Bytes $bytes
+    if ($securityState -ne 'SAFE_RAW_RETAINED') { return [pscustomobject]@{ Status = 'INVALID'; Reason = 'REVIEWER_PAYLOAD_SENSITIVE_CONTENT'; Bytes = $null } }
+    return [pscustomobject]@{ Status = 'VALID'; Reason = $null; Bytes = $bytes; Value = $validPayloads[0].Value }
+}
+
 function Get-GcStdoutProtocolDiagnosticsV1 {
     param([Parameter(Mandatory)][AllowEmptyString()][string]$Text)
 
@@ -685,8 +847,8 @@ function Invoke-GcProviderAttemptV1 {
         $ended = [DateTimeOffset]::UtcNow
         $transitions.Add([ordered]@{ state = 'CANCELLED'; atUtc = $ended.ToString('o') })
         return [pscustomobject]@{
-                Public = [ordered]@{ attempt = $AttemptNumber; state = 'CANCELLED'; failureCategory = 'CANCELLED'; diagnosticCode = $null; startedAtUtc = $startedAt.ToString('o'); completedAtUtc = $ended.ToString('o'); durationMilliseconds = 0; exitCode = $null; terminalEvent = $null; stdoutByteLength = 0; stdoutSha256 = Get-GcSha256HexV1 -Bytes ([byte[]]::new(0)); stdoutTruncated = $false; stderrByteLength = 0; stderrSha256 = Get-GcSha256HexV1 -Bytes ([byte[]]::new(0)); stderrTruncated = $false; stateTransitions = $transitions.ToArray() }
-            Stdout = ''; Stderr = ''
+                Public = [ordered]@{ attempt = $AttemptNumber; state = 'CANCELLED'; failureCategory = 'CANCELLED'; diagnosticCode = $null; startedAtUtc = $startedAt.ToString('o'); completedAtUtc = $ended.ToString('o'); durationMilliseconds = 0; exitCode = $null; terminalEvent = $null; stdoutByteLength = 0; stdoutSha256 = Get-GcSha256HexV1 -Bytes ([byte[]]::new(0)); stdoutTruncated = $false; stdoutSecurityState = 'SAFE_RAW_RETAINED'; stderrByteLength = 0; stderrSha256 = Get-GcSha256HexV1 -Bytes ([byte[]]::new(0)); stderrTruncated = $false; stderrSecurityState = 'SAFE_RAW_RETAINED'; payloadParseStatus = 'NOT_PRESENT'; stateTransitions = $transitions.ToArray() }
+            Stdout = ''; Stderr = ''; StdoutBytes = [byte[]]::new(0); StderrBytes = [byte[]]::new(0); ReviewerPayload = [pscustomobject]@{ Status = 'NOT_PRESENT'; Reason = 'REVIEWER_PAYLOAD_NOT_APPLICABLE'; Bytes = $null }
         }
     }
 
@@ -704,8 +866,8 @@ function Invoke-GcProviderAttemptV1 {
             $ended = [DateTimeOffset]::UtcNow
             $transitions.Add([ordered]@{ state = 'FAILED'; atUtc = $ended.ToString('o') })
             return [pscustomobject]@{
-                Public = [ordered]@{ attempt = $AttemptNumber; state = 'FAILED'; failureCategory = 'RUNNER_FAILURE'; diagnosticCode = $null; startedAtUtc = $startedAt.ToString('o'); completedAtUtc = $ended.ToString('o'); durationMilliseconds = [long]$stopwatch.ElapsedMilliseconds; exitCode = $null; terminalEvent = $null; stdoutByteLength = 0; stdoutSha256 = Get-GcSha256HexV1 -Bytes ([byte[]]::new(0)); stdoutTruncated = $false; stderrByteLength = 0; stderrSha256 = Get-GcSha256HexV1 -Bytes ([byte[]]::new(0)); stderrTruncated = $false; stateTransitions = $transitions.ToArray() }
-                Stdout = ''; Stderr = ''
+                Public = [ordered]@{ attempt = $AttemptNumber; state = 'FAILED'; failureCategory = 'RUNNER_FAILURE'; diagnosticCode = $null; startedAtUtc = $startedAt.ToString('o'); completedAtUtc = $ended.ToString('o'); durationMilliseconds = [long]$stopwatch.ElapsedMilliseconds; exitCode = $null; terminalEvent = $null; stdoutByteLength = 0; stdoutSha256 = Get-GcSha256HexV1 -Bytes ([byte[]]::new(0)); stdoutTruncated = $false; stdoutSecurityState = 'SAFE_RAW_RETAINED'; stderrByteLength = 0; stderrSha256 = Get-GcSha256HexV1 -Bytes ([byte[]]::new(0)); stderrTruncated = $false; stderrSecurityState = 'SAFE_RAW_RETAINED'; payloadParseStatus = 'NOT_PRESENT'; stateTransitions = $transitions.ToArray() }
+                Stdout = ''; Stderr = ''; StdoutBytes = [byte[]]::new(0); StderrBytes = [byte[]]::new(0); ReviewerPayload = [pscustomobject]@{ Status = 'NOT_PRESENT'; Reason = 'REVIEWER_PAYLOAD_NOT_APPLICABLE'; Bytes = $null }
             }
         }
 
@@ -745,10 +907,16 @@ function Invoke-GcProviderAttemptV1 {
         $failureCategory = 'PROVIDER_FAILURE'
         $diagnosticCode = $null
         $stdoutProtocolDiagnostics = $null
+        $reviewerPayload = [pscustomobject]@{ Status = 'NOT_PRESENT'; Reason = 'REVIEWER_PAYLOAD_NOT_APPLICABLE'; Bytes = $null }
+
+        $stdoutSecurityState = Get-GcSecurityStateV1 -Bytes ([byte[]]$stdoutCapture.CapturedBytes)
+        $stderrSecurityState = Get-GcSecurityStateV1 -Bytes ([byte[]]$stderrCapture.CapturedBytes)
+        $isSensitive = ($stdoutSecurityState -in @('SENSITIVE_OUTPUT_BLOCKED','INVALID_OR_AMBIGUOUS_OUTPUT') -or $stderrSecurityState -in @('SENSITIVE_OUTPUT_BLOCKED','INVALID_OR_AMBIGUOUS_OUTPUT'))
 
         if ($cancelled) { $state = 'CANCELLED'; $failureCategory = 'CANCELLED' }
         elseif ($fatalDetected) { $state = 'FAILED'; $failureCategory = $detectionState.FatalCategory; $diagnosticCode = $detectionState.DiagnosticCode }
         elseif ($timedOut) { $state = 'TIMED_OUT'; $failureCategory = 'TIMEOUT' }
+        elseif ($isSensitive) { $state = 'FAILED'; $failureCategory = 'PROTOCOL_FAILURE'; $diagnosticCode = 'SENSITIVE_OUTPUT_BLOCKED'; $reviewerPayload = [pscustomobject]@{ Status = 'INVALID'; Reason = 'SENSITIVE_OUTPUT_BLOCKED'; Bytes = $null } }
         elseif ($exitCode -ne 0) { $failureCategory = Resolve-GcProviderFailureCategoryV1 -Stdout $stdoutText -Stderr $stderrText }
         elseif ($Protocol -eq 'codex-jsonl') {
             $protocolResult = Read-GcCodexJsonlEventV1 -Text $stdoutText -Truncated $stdoutCapture.Truncated
@@ -762,11 +930,13 @@ function Invoke-GcProviderAttemptV1 {
         }
         elseif ($Protocol -eq 'json-stream-exit') {
             $protocolResult = Read-GcJsonStreamExitProtocolV1 -Text $stdoutText -Truncated $stdoutCapture.Truncated
+            $reviewerPayload = Get-GcGeminiReviewerPayloadV1 -Text $stdoutText -Truncated $stdoutCapture.Truncated
             $terminalEvent = $protocolResult.TerminalEvent
             if (-not $protocolResult.Valid) {
                 $failureCategory = 'PROTOCOL_FAILURE'; $diagnosticCode = $protocolResult.Reason
                 if ($null -ne $protocolResult.PSObject.Properties['Diagnostics']) { $stdoutProtocolDiagnostics = $protocolResult.Diagnostics }
             }
+            elseif ($reviewerPayload.Status -cne 'VALID') { $failureCategory = 'PROTOCOL_FAILURE'; $diagnosticCode = $reviewerPayload.Reason }
             else { $state = 'COMPLETED'; $failureCategory = $null }
         }
         elseif ($Protocol -eq 'claude-json-exit') {
@@ -783,8 +953,9 @@ function Invoke-GcProviderAttemptV1 {
             attempt = $AttemptNumber; state = $state; failureCategory = $failureCategory; diagnosticCode = $diagnosticCode
             startedAtUtc = $startedAt.ToString('o'); completedAtUtc = $endedAt.ToString('o')
             durationMilliseconds = [long]$stopwatch.ElapsedMilliseconds; exitCode = $exitCode; terminalEvent = $terminalEvent
-            stdoutByteLength = [long]$stdoutCapture.TotalBytes; stdoutSha256 = [string]$stdoutCapture.Sha256; stdoutTruncated = [bool]$stdoutCapture.Truncated
-            stderrByteLength = [long]$stderrCapture.TotalBytes; stderrSha256 = [string]$stderrCapture.Sha256; stderrTruncated = [bool]$stderrCapture.Truncated
+            stdoutByteLength = [long]$stdoutCapture.TotalBytes; stdoutSha256 = [string]$stdoutCapture.Sha256; stdoutTruncated = [bool]$stdoutCapture.Truncated; stdoutSecurityState = $stdoutSecurityState
+            stderrByteLength = [long]$stderrCapture.TotalBytes; stderrSha256 = [string]$stderrCapture.Sha256; stderrTruncated = [bool]$stderrCapture.Truncated; stderrSecurityState = $stderrSecurityState
+            payloadParseStatus = [string]$reviewerPayload.Status
             stateTransitions = $transitions.ToArray()
         }
         if ($null -ne $stdoutProtocolDiagnostics) { $publicAttempt['stdoutProtocolDiagnostics'] = $stdoutProtocolDiagnostics }
@@ -792,6 +963,9 @@ function Invoke-GcProviderAttemptV1 {
             Public = $publicAttempt
             Stdout = $stdoutText
             Stderr = $stderrText
+            StdoutBytes = [byte[]]$stdoutCapture.CapturedBytes
+            StderrBytes = [byte[]]$stderrCapture.CapturedBytes
+            ReviewerPayload = $reviewerPayload
         }
     }
     finally {
@@ -829,6 +1003,8 @@ function Invoke-GcProviderProcessRunnerV1 {
         [AllowNull()][object[]]$ArgumentsOverride,
         [AllowNull()][string]$ProtocolOverride,
         [AllowNull()][string]$PromptTransportOverride,
+        [AllowNull()][AllowEmptyString()][string]$RunDirectory,
+        [AllowNull()][AllowEmptyString()][string]$RequestSha256,
         [int]$RetryDelayOverrideMilliseconds = -1
     )
 
@@ -841,12 +1017,19 @@ function Invoke-GcProviderProcessRunnerV1 {
     foreach ($key in $environment.Keys) {
         if ($environment[$key] -isnot [string]) { Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_PROFILE_CONTRACT_INVALID' }
     }
+    $hasRunDirectory = -not [string]::IsNullOrEmpty($RunDirectory)
+    $hasRequestSha256 = -not [string]::IsNullOrEmpty($RequestSha256)
+    if ($hasRunDirectory -xor $hasRequestSha256) { Throw-GcRunnerFailureV1 -Category 'RUNNER_FAILURE' -Message 'RUNNER_ARTIFACT_CONTEXT_INCOMPLETE' }
     $attempts = [Collections.Generic.List[object]]::new()
     $attemptNumber = 0
     $last = $null
     do {
         $attemptNumber++
         $last = Invoke-GcProviderAttemptV1 -FilePath $filePath -Arguments $arguments -Prompt $Prompt -PromptTransport $transport -Protocol $protocol -WorkingDirectory ([string]$Request['repositoryRoot']) -TimeoutMilliseconds ([int]$Request['timeoutMilliseconds']) -MaximumCapturedBytes ([int]$Policy['maximumCapturedBytesPerStream']) -CancellationPath $CancellationPath -AttemptNumber $attemptNumber -ProfileEnvironment $environment
+        if ($hasRunDirectory) {
+            $artifactReferences = Write-GcProviderAttemptArtifactsV1 -RunDirectory $RunDirectory -Request $Request -Authorization $Authorization -RequestSha256 $RequestSha256 -Profile $Profile -Attempt $last
+            foreach ($key in $artifactReferences.Keys) { $last.Public[$key] = $artifactReferences[$key] }
+        }
         $attempts.Add($last.Public)
         if ($last.Public['state'] -eq 'COMPLETED') { break }
         $retry = Get-GcRetryDecisionV1 -FailureCategory ([string]$last.Public['failureCategory']) -AttemptNumber $attemptNumber -Request $Request -Authorization $Authorization -Policy $Policy

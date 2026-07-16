@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory)]
-    [ValidateSet('success','turn-failed','missing-terminal','event-after-terminal','malformed','exit-nonzero','quota','rate-limit','rate-then-success','timeout','timeout-then-success','cancel','flood','child-timeout','gemini-success-result','gemini-missing-result','gemini-result-failed','gemini-event-after-result','gemini-malformed','gemini-duplicate-result','gemini-missing-status','claude-success','claude-success-is-error-false','claude-missing-result','claude-result-number','claude-failed','claude-is-error','claude-malformed','claude-concatenated','claude-duplicate-key','quota-hang','rate-limit-hang','ansi-contamination','ansi-contamination-claude','ansi-contamination-codex','non-json-contamination')]
+    [ValidateSet('success','turn-failed','missing-terminal','event-after-terminal','malformed','exit-nonzero','quota','rate-limit','rate-then-success','timeout','timeout-evidence','timeout-then-success','cancel','flood','child-timeout','sensitive-output','sensitive-stdout','sensitive-split-output','sensitive-multiple-output','gemini-sensitive-reviewer','gemini-success-result','gemini-missing-reviewer-payload','gemini-malformed-reviewer-payload','gemini-missing-result','gemini-result-failed','gemini-event-after-result','gemini-malformed','gemini-duplicate-result','gemini-missing-status','claude-success','claude-success-is-error-false','claude-missing-result','claude-result-number','claude-failed','claude-is-error','claude-malformed','claude-concatenated','claude-duplicate-key','quota-hang','rate-limit-hang','ansi-contamination','ansi-contamination-claude','ansi-contamination-codex','non-json-contamination')]
     [string]$Scenario,
     [AllowNull()][string]$CounterPath,
     [AllowNull()][string]$ObservationPath,
@@ -51,6 +51,14 @@ function Write-MockSuccess {
     [Console]::Out.WriteLine('{"type":"turn.completed","usage":{"input_tokens":1,"output_tokens":1}}')
 }
 
+function Write-MockGeminiReviewerPayload {
+    param([Parameter(Mandatory)][string]$Payload)
+    $event = [ordered]@{ type = 'message'; role = 'assistant'; content = $Payload; delta = $false }
+    [Console]::Out.WriteLine(($event | ConvertTo-Json -Compress))
+}
+
+$validReviewerPayload = '{"verdict":"PASS","summary":"bounded review complete","requiredConstraints":[],"risks":[],"recommendedSeams":[],"acceptanceTests":["A"],"filesReviewed":["outputs/app.js"]}'
+
 switch ($Scenario) {
     'success' { Write-MockSuccess; exit 0 }
     'turn-failed' {
@@ -66,6 +74,19 @@ switch ($Scenario) {
     }
     'gemini-success-result' {
         [Console]::Out.WriteLine('{"type":"init"}')
+        Write-MockGeminiReviewerPayload -Payload $validReviewerPayload
+        [Console]::Error.WriteLine('mock reviewer stderr')
+        [Console]::Out.WriteLine('{"type":"result","status":"success"}')
+        exit 0
+    }
+    'gemini-missing-reviewer-payload' {
+        [Console]::Out.WriteLine('{"type":"init"}')
+        [Console]::Out.WriteLine('{"type":"result","status":"success"}')
+        exit 0
+    }
+    'gemini-malformed-reviewer-payload' {
+        [Console]::Out.WriteLine('{"type":"init"}')
+        Write-MockGeminiReviewerPayload -Payload '{"verdict":'
         [Console]::Out.WriteLine('{"type":"result","status":"success"}')
         exit 0
     }
@@ -119,6 +140,12 @@ switch ($Scenario) {
         exit 0
     }
     'timeout' { Start-Sleep -Seconds 30; Write-MockSuccess; exit 0 }
+    'timeout-evidence' {
+        [Console]::Out.WriteLine('{"type":"turn.started"}')
+        [Console]::Error.WriteLine('mock timeout stderr')
+        Start-Sleep -Seconds 30
+        exit 0
+    }
     'timeout-then-success' {
         if ($count -eq 1) { Start-Sleep -Seconds 30 }
         Write-MockSuccess
@@ -137,6 +164,37 @@ switch ($Scenario) {
             [Console]::Error.WriteLine(('mock stderr {0} {1}' -f $i, $payload))
         }
         [Console]::Out.WriteLine('{"type":"turn.completed"}')
+        exit 0
+    }
+    'sensitive-output' {
+        [Console]::Out.WriteLine('{"type":"thread.started","thread_id":"mock"}')
+        [Console]::Error.WriteLine('Authorization: Bearer GC_TEST_SECRET_TOKEN_123456789')
+        [Console]::Out.WriteLine('{"type":"turn.completed"}')
+        exit 0
+    }
+    'sensitive-stdout' {
+        [Console]::Out.WriteLine('ghp_1234567890abcdefghijklmnopqrstuvwxyz')
+        [Console]::Out.WriteLine('{"type":"turn.completed"}')
+        exit 0
+    }
+    'sensitive-split-output' {
+        [Console]::Out.Write('github_')
+        [Console]::Out.Flush()
+        Start-Sleep -Milliseconds 40
+        [Console]::Out.WriteLine('pat_11AAAAAAA0000000000000_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB')
+        [Console]::Out.WriteLine('{"type":"turn.completed"}')
+        exit 0
+    }
+    'sensitive-multiple-output' {
+        [Console]::Out.WriteLine('AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE')
+        [Console]::Error.WriteLine('SESSION_COOKIE=gc_test_session_cookie_123456')
+        [Console]::Out.WriteLine('{"type":"turn.completed"}')
+        exit 0
+    }
+    'gemini-sensitive-reviewer' {
+        [Console]::Out.WriteLine('{"type":"init"}')
+        Write-MockGeminiReviewerPayload -Payload '{"verdict":"PASS","summary":"client_secret=gc_test_client_secret_123456","requiredConstraints":[],"risks":[],"recommendedSeams":[],"acceptanceTests":[],"filesReviewed":[]}'
+        [Console]::Out.WriteLine('{"type":"result","status":"success"}')
         exit 0
     }
     'child-timeout' {

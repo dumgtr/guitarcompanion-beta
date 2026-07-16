@@ -1,0 +1,241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gc-provider-process-runner-v1.attempt-result/1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifactType",
+    "schemaVersion",
+    "authorizationId",
+    "requestId",
+    "requestSha256",
+    "providerProfileId",
+    "attemptNumber",
+    "startedAtUtc",
+    "completedAtUtc",
+    "durationMilliseconds",
+    "exitCode",
+    "terminalState",
+    "failureCategory",
+    "stdoutPath",
+    "stdoutSha256",
+    "stdoutLength",
+    "stdoutStreamSha256",
+    "stdoutStreamLength",
+    "stdoutTruncated",
+    "stdoutRedactionApplied",
+    "stderrPath",
+    "stderrSha256",
+    "stderrLength",
+    "stderrStreamSha256",
+    "stderrStreamLength",
+    "stderrTruncated",
+    "stderrRedactionApplied",
+    "parsedPayloadPath",
+    "parsedPayloadSha256",
+    "parsedPayloadLength",
+    "payloadParseStatus",
+    "payloadParseReason",
+    "cleanupStatus",
+    "stdoutSecurityState",
+    "stderrSecurityState"
+  ],
+  "properties": {
+    "artifactType": {
+      "const": "provider-process-attempt-result"
+    },
+    "schemaVersion": {
+      "const": "gc-provider-process-runner-v1.attempt-result/1"
+    },
+    "authorizationId": {
+      "type": "string",
+      "pattern": "^GC_AUTH_[0-9a-f]{32}$"
+    },
+    "requestId": {
+      "type": "string",
+      "pattern": "^GC_RUN_[0-9a-f]{32}$"
+    },
+    "requestSha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "providerProfileId": {
+      "enum": [
+        "codex-readonly",
+        "gemini-plan-review",
+        "claude-readonly",
+        "github-copilot-readonly"
+      ]
+    },
+    "attemptNumber": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2
+    },
+    "startedAtUtc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completedAtUtc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "durationMilliseconds": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "exitCode": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "terminalState": {
+      "enum": [
+        "COMPLETED",
+        "FAILED",
+        "TIMED_OUT",
+        "CANCELLED"
+      ]
+    },
+    "failureCategory": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        null,
+        "AUTH_FAILED",
+        "RATE_LIMITED",
+        "QUOTA_EXCEEDED",
+        "PROVIDER_FAILURE",
+        "PROTOCOL_FAILURE",
+        "RUNNER_FAILURE",
+        "TIMEOUT",
+        "CANCELLED"
+      ]
+    },
+    "stdoutPath": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 3
+    },
+    "stdoutSha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "stdoutLength": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "stdoutStreamSha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "stdoutStreamLength": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "stdoutTruncated": {
+      "type": "boolean"
+    },
+    "stdoutRedactionApplied": {
+      "type": "boolean"
+    },
+    "stderrPath": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 3
+    },
+    "stderrSha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "stderrLength": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "stderrStreamSha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "stderrStreamLength": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "stderrTruncated": {
+      "type": "boolean"
+    },
+    "stderrRedactionApplied": {
+      "type": "boolean"
+    },
+    "parsedPayloadPath": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "parsedPayloadSha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "parsedPayloadLength": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "payloadParseStatus": {
+      "enum": [
+        "VALID",
+        "INVALID",
+        "NOT_PRESENT"
+      ]
+    },
+    "payloadParseReason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cleanupStatus": {
+      "const": "RETAINED"
+    },
+    "stdoutSecurityState": {
+      "enum": [
+        "SAFE_RAW_RETAINED",
+        "SANITIZED_ONLY",
+        "SENSITIVE_OUTPUT_BLOCKED",
+        "INVALID_OR_AMBIGUOUS_OUTPUT"
+      ]
+    },
+    "stderrSecurityState": {
+      "enum": [
+        "SAFE_RAW_RETAINED",
+        "SANITIZED_ONLY",
+        "SENSITIVE_OUTPUT_BLOCKED",
+        "INVALID_OR_AMBIGUOUS_OUTPUT"
+      ]
+    }
+  }
+}
