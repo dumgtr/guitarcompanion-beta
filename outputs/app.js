@@ -198,6 +198,8 @@ const practiceRoomIaPreviewMode = parsePracticeRoomIaPreviewMode();
 const fretboardStudioPreviewMode = parseFretboardStudioPreviewMode();
 const legacyPracticeRoomMode = parseLegacyPracticeRoomMode();
 const practiceRoomMode = resolvePracticeRoomMode();
+const CONTINUE_PRACTICE_STATE_KEY = "gc_continue_practice_state_v1";
+let restoredContinuePracticeDestinationV1 = null;
 let courseData = null;
 let activeMiniCourseId = "";
 let practiceRoomIaPreviewPlacement = null;
@@ -425,6 +427,68 @@ function resolvePracticeRoomMode() {
 
 function isPracticeRoomIaPreviewActive() {
   return practiceRoomMode === "ia-v2";
+}
+
+function resolveValidContinuePracticeDestinationV1(rawState) {
+  try {
+    if (!isPracticeRoomIaPreviewActive()) return null;
+    const state = typeof rawState === "string" ? JSON.parse(rawState) : rawState;
+    const allowedKeys = ["version", "week", "day"];
+    if (
+      !state
+      || typeof state !== "object"
+      || Array.isArray(state)
+      || Object.keys(state).length !== allowedKeys.length
+      || !allowedKeys.every((key) => Object.prototype.hasOwnProperty.call(state, key))
+      || state.version !== 1
+      || !Number.isInteger(state.week)
+      || !Number.isInteger(state.day)
+    ) {
+      return null;
+    }
+
+    const liveWeek = foundationWeeks.find((weekItem) => Number(weekItem.number) === state.week);
+    const livePracticeDays = dailyPracticePlan[state.week];
+    const livePracticeDay = Array.isArray(livePracticeDays)
+      ? livePracticeDays[state.day - 1]
+      : null;
+    if (!liveWeek || !Array.isArray(livePracticeDay) || livePracticeDay.length === 0) return null;
+
+    return { version: 1, week: state.week, day: state.day };
+  } catch {
+    return null;
+  }
+}
+
+function readContinuePracticeState() {
+  try {
+    return resolveValidContinuePracticeDestinationV1(
+      localStorage.getItem(CONTINUE_PRACTICE_STATE_KEY)
+    );
+  } catch {
+    return null;
+  }
+}
+
+function writeContinuePracticeState(week, day) {
+  if (!isPracticeRoomIaPreviewActive()) return;
+
+  try {
+    const destination = resolveValidContinuePracticeDestinationV1({
+      version: 1,
+      week,
+      day
+    });
+    if (!destination) return;
+
+    localStorage.setItem(
+      CONTINUE_PRACTICE_STATE_KEY,
+      JSON.stringify(destination)
+    );
+    renderContinuePracticeBanner();
+  } catch {
+    // Continue Practice is optional; storage failures must not interrupt navigation.
+  }
 }
 
 function parseFretboardStudioPreviewMode() {
@@ -2395,6 +2459,61 @@ function setPracticeDay(weekNumber, dayNumber) {
   saveJson(foundationStorage.dayByWeek, days);
 }
 
+function getRenderedPracticeDayV1(weekNumber) {
+  if (
+    restoredContinuePracticeDestinationV1
+    && restoredContinuePracticeDestinationV1.week === weekNumber
+  ) {
+    return restoredContinuePracticeDestinationV1.day;
+  }
+  return getPracticeDay(weekNumber);
+}
+
+function switchDay(dayNumber) {
+  const weekNumber = Number(focusedSelectedWeek);
+  const day = Number(dayNumber);
+  if (
+    selectedFocusedMonth !== 1
+    || !Number.isInteger(weekNumber)
+    || weekNumber < 1
+    || weekNumber > 4
+    || !Number.isInteger(day)
+    || day < 1
+    || day > 7
+  ) return;
+
+  restoredContinuePracticeDestinationV1 = null;
+  setPracticeDay(weekNumber, day);
+  renderFocusedDashboard();
+  writeContinuePracticeState(weekNumber, day);
+}
+
+function renderPracticeDaySelector(weekNumber, activeDay) {
+  const todayMission = document.getElementById("todayMission");
+  const checklist = document.getElementById("todayChecklist");
+  todayMission?.querySelector(".practice-day-selector")?.remove();
+  if (!todayMission || !checklist || selectedFocusedMonth !== 1) return;
+
+  const selector = month2CreateElement("div", "practice-day-selector");
+  selector.setAttribute("role", "group");
+  selector.setAttribute("aria-label", `เลือกวันซ้อมสำหรับ Week ${weekNumber}`);
+  selector.appendChild(month2CreateElement("span", "practice-day-selector-label", "เลือกวันซ้อม"));
+
+  const dayButtons = month2CreateElement("div", "practice-day-selector-buttons");
+  for (let day = 1; day <= 7; day += 1) {
+    const button = month2CreateElement("button", `practice-day${day === activeDay ? " active" : ""}`, String(day));
+    button.type = "button";
+    button.dataset.day = String(day);
+    button.setAttribute("aria-label", `วันที่ ${day}`);
+    button.setAttribute("aria-pressed", String(day === activeDay));
+    button.addEventListener("click", () => switchDay(day));
+    dayButtons.appendChild(button);
+  }
+
+  selector.appendChild(dayButtons);
+  todayMission.insertBefore(selector, checklist);
+}
+
 function getMonthPosition(weekNumber, month) {
   if (month === 1) return weekNumber;
   return Math.max(1, weekNumber - ((month - 1) * 4));
@@ -2414,9 +2533,11 @@ function renderFocusedDashboard() {
     nextDayButton.hidden = false;
     nextDayButton.textContent = "วันถัดไป";
   }
-  const currentWeekNumber = getCurrentFoundationWeek();
+  const currentWeekNumber = foundationWeeks.some((week) => week.number === focusedSelectedWeek)
+    ? focusedSelectedWeek
+    : getCurrentFoundationWeek();
   const weekItem = foundationWeeks.find((week) => week.number === currentWeekNumber);
-  const dayNumber = getPracticeDay(currentWeekNumber);
+  const dayNumber = getRenderedPracticeDayV1(currentWeekNumber);
   const checkedItems = loadJson(getChecklistKey(currentWeekNumber, dayNumber), []);
   const tasks = dailyPracticePlan[currentWeekNumber][dayNumber - 1];
   const missionMinutes = tasks.reduce((total, task) => total + (Number(task.match(/(\d+)\s*นาที/)?.[1]) || 0), 0);
@@ -2438,6 +2559,7 @@ function renderFocusedDashboard() {
       <span>${task}</span>
     </label>
   `).join("");
+  renderPracticeDaySelector(currentWeekNumber, dayNumber);
 
   if (isDevPreviewActive()) return;
   document.querySelectorAll("[data-today-task]").forEach((input) => {
@@ -2575,19 +2697,48 @@ function renderMonthSwitcher(autoScroll = false) {
   }
 }
 
-function openFocusedWeek(weekNumber, options = {}) {
+async function openFocusedWeek(weekNumber, options = {}) {
   const source = options.source || "manual";
   const shouldScroll = Boolean(options.scroll);
+  const numericWeek = Number(weekNumber);
+  
+  let targetMonth = selectedFocusedMonth;
+  if (numericWeek >= 1 && numericWeek <= 4) {
+    targetMonth = 1;
+  } else if (weeks && weeks.length > 0) {
+    const match = weeks.find((w) => Number(w.number) === numericWeek);
+    if (match) targetMonth = match.month;
+  } else if (numericWeek >= 5) {
+    await loadFutureData();
+    const match = weeks.find((w) => Number(w.number) === numericWeek);
+    if (match) targetMonth = match.month;
+  }
+
+  if (targetMonth !== selectedFocusedMonth) {
+    await openFocusedMonth(targetMonth);
+  }
+
   const monthWeeks = getFocusedMonthWeeks(selectedFocusedMonth);
 
-  if (!monthWeeks.length) return;
+  if (!monthWeeks.length) return false;
 
-  const numericWeek = Number(weekNumber);
   const targetWeek = monthWeeks.some((week) => Number(week.number) === numericWeek)
     ? numericWeek
-    : monthWeeks[0].number;
+    : null;
+  if (targetWeek === null) {
+    updateDebugState({
+      currentMonth: selectedFocusedMonth,
+      lastAction: `Week ${numericWeek} rejected outside Month ${selectedFocusedMonth}`
+    });
+    return false;
+  }
 
+  if (!options.preserveContinueDestination) {
+    restoredContinuePracticeDestinationV1 = null;
+  }
+  
   focusedSelectedWeek = targetWeek;
+  selectedWeek = targetWeek;
 
   updateDebugState({
     currentMonth: selectedFocusedMonth,
@@ -2606,6 +2757,7 @@ function openFocusedWeek(weekNumber, options = {}) {
       block: "start"
     });
   }
+  return true;
 }
 
 async function openFocusedMonth(month) {
@@ -2632,6 +2784,7 @@ async function openFocusedMonth(month) {
     showToast(message, "error");
     return;
   }
+  restoredContinuePracticeDestinationV1 = null;
   selectedFocusedMonth = month;
   const brandSub = document.getElementById("brandSub");
   if (brandSub) {
@@ -2684,7 +2837,7 @@ function renderFocusedWeekTabs() {
   tabs.innerHTML = foundationWeeks.map((weekItem) => {
     const status = completed.includes(weekItem.number) ? "done" : weekItem.number === currentWeekNumber ? "current" : "pending";
     return `
-    <button type="button" role="tab" class="card-tab ${status} ${weekItem.number === focusedSelectedWeek ? "active" : ""}" aria-selected="${weekItem.number === focusedSelectedWeek}" data-foundation-week="${weekItem.number}">
+    <button type="button" role="tab" class="card-tab week-card ${status} ${weekItem.number === focusedSelectedWeek ? "active" : ""}" aria-selected="${weekItem.number === focusedSelectedWeek}" data-foundation-week="${weekItem.number}" data-week="${weekItem.number}">
       <span class="tab-kicker"><span aria-hidden="true">🎯</span> Foundation</span>
       <strong>${weekItem.title}</strong>
       <span class="status ${status}">${status}</span>
@@ -2693,11 +2846,11 @@ function renderFocusedWeekTabs() {
   }).join("");
 
   document.querySelectorAll("[data-foundation-week]").forEach((button) => {
-    button.addEventListener("click", () => {
-      focusedSelectedWeek = Number(button.dataset.foundationWeek);
-      renderJourney();
-      renderFocusedWeekTabs();
-      renderFocusedLesson();
+    button.addEventListener("click", async () => {
+      const requestedWeek = Number(button.dataset.week);
+      if (await openFocusedWeek(requestedWeek, { source: "week-card" })) {
+        writeContinuePracticeState(requestedWeek, getPracticeDay(requestedWeek));
+      }
     });
   });
 }
@@ -4845,6 +4998,50 @@ function restorePracticeRoomIaPreview() {
   practiceRoomIaPreviewPlacement = null;
 }
 
+
+
+function renderContinuePracticeBanner(shell = document.getElementById("practiceRoomIaPreviewShell")) {
+  shell?.querySelector(":scope > .continue-practice-banner")?.remove();
+  if (
+    !isPracticeRoomIaPreviewActive()
+    || !shell
+    || shell.id !== "practiceRoomIaPreviewShell"
+    || !shell.closest("#practice")
+  ) return;
+
+  const savedState = readContinuePracticeState();
+  if (!savedState) return;
+
+  const continuePractice = month2CreateElement("button", "continue-practice-banner");
+  continuePractice.type = "button";
+  continuePractice.setAttribute(
+    "aria-label",
+    `ซ้อมต่อจาก Week ${savedState.week} วันที่ ${savedState.day}`
+  );
+  continuePractice.append(
+    month2CreateElement("span", "continue-practice-kicker", "CONTINUE PRACTICE"),
+    month2CreateElement("span", "continue-practice-title", "ซ้อมต่อจากครั้งล่าสุด"),
+    month2CreateElement(
+      "span",
+      "continue-practice-copy",
+      `Week ${savedState.week} · Day ${savedState.day} — กลับไปยังจุดที่เลือกไว้`
+    ),
+    month2CreateElement("span", "continue-practice-action", "เปิดแผนซ้อม →")
+  );
+  continuePractice.addEventListener("click", async () => {
+    const freshState = readContinuePracticeState();
+    if (!freshState) {
+      renderContinuePracticeBanner(shell);
+      return;
+    }
+    await openFocusedWeek(freshState.week, { scroll: true, preserveContinueDestination: true });
+    restoredContinuePracticeDestinationV1 = freshState;
+    renderFocusedDashboard();
+  });
+
+  shell.prepend(continuePractice);
+}
+
 function renderPracticeRoomIaPreview() {
   const practiceGrid = document.querySelector("#practice .practice-grid");
   const originalHeading = document.querySelector("#practice > .section-heading");
@@ -4864,14 +5061,6 @@ function renderPracticeRoomIaPreview() {
 
   const shell = month2CreateElement("div", "practice-room-ia-preview-shell");
   shell.id = "practiceRoomIaPreviewShell";
-
-  const continuePractice = month2CreateElement("button", "continue-practice-banner");
-  continuePractice.type = "button";
-  continuePractice.disabled = true;
-  continuePractice.append(
-    month2CreateElement("span", "continue-practice-title", "Continue Practice"),
-    month2CreateElement("span", "continue-practice-copy", "ระบบกลับไปซ้อมต่อจะเปิดในเฟสถัดไป")
-  );
 
   const head = month2CreateElement("div", "section-heading");
   const iaTitle = month2CreateElement("h2", "", "Practice Room");
@@ -4967,7 +5156,7 @@ function renderPracticeRoomIaPreview() {
   refSection.appendChild(referenceList);
 
   guidedSection.append(quickMiniCourses, practicePrograms);
-  shell.append(continuePractice, head, studioSection, guidedSection, refSection);
+  shell.append(head, studioSection, guidedSection, refSection);
 
   const practiceSection = document.getElementById("practice");
   if (!practiceSection) return;
@@ -4989,6 +5178,7 @@ function renderPracticeRoomIaPreview() {
   practiceSection.setAttribute("aria-labelledby", "practiceRoomIaTitle");
   practiceSection.classList.add("practice-room-ia-active");
   practiceSection.prepend(shell);
+  renderContinuePracticeBanner(shell);
 
   if (miniCourseShelf) quickMiniCourses.appendChild(miniCourseShelf);
   referenceShelves.forEach((element) => {
@@ -6260,10 +6450,12 @@ function goToNextPracticeDay() {
 
     return;
   }
-  const currentWeekNumber = getCurrentFoundationWeek();
-  const nextDay = getPracticeDay(currentWeekNumber) >= 7 ? 1 : getPracticeDay(currentWeekNumber) + 1;
-  setPracticeDay(currentWeekNumber, nextDay);
-  renderFocusedDashboard();
+  const currentWeekNumber = foundationWeeks.some((week) => week.number === focusedSelectedWeek)
+    ? focusedSelectedWeek
+    : getCurrentFoundationWeek();
+  const renderedDay = getRenderedPracticeDayV1(currentWeekNumber);
+  const nextDay = renderedDay >= 7 ? 1 : renderedDay + 1;
+  switchDay(nextDay);
 }
 
 function resetFoundationProgress() {
@@ -6271,12 +6463,14 @@ function resetFoundationProgress() {
   localStorage.removeItem(foundationStorage.completedWeeks);
   localStorage.removeItem(foundationStorage.dayByWeek);
   localStorage.removeItem(foundationStorage.notes);
+  localStorage.removeItem('gc_continue_practice_state_v1');
   Object.keys(localStorage)
     .filter((key) => key.startsWith(foundationStorage.checklistPrefix))
     .forEach((key) => localStorage.removeItem(key));
   Object.keys(localStorage)
     .filter((key) => key.startsWith("gc_prelude_chk_"))
     .forEach((key) => localStorage.removeItem(key));
+  restoredContinuePracticeDestinationV1 = null;
   focusedSelectedWeek = 1;
   renderFocusedApp();
 }
@@ -6299,3 +6493,5 @@ document.addEventListener("visibilitychange", () => {
 });
 
 initFocusedApp();
+
+
