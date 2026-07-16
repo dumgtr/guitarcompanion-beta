@@ -3,6 +3,7 @@
   "inputSchemaVersion": "gc-scope-router-v2.input/1",
   "outputSchemaVersion": "gc-scope-router-v2.output/1",
   "assessorSchemaVersion": "gc-scope-router-v2.assessor/1",
+  "protectedWriteAuthorizationSchemaVersion": "gc-scope-router-v2.protected-write-authorization/1",
   "shadowMode": true,
   "executionPermitted": false,
   "autoRepairAllowed": false,
@@ -11,6 +12,11 @@
     "Security Reviewer",
     "Test-Integrity Reviewer",
     "Final External Reviewer"
+  ],
+  "reviewerProfileBindings": [
+    { "role": "Security Reviewer", "providerProfileId": "claude-readonly" },
+    { "role": "Test-Integrity Reviewer", "providerProfileId": "claude-readonly" },
+    { "role": "Final External Reviewer", "providerProfileId": "gemini-plan-review" }
   ],
   "classifications": [
     { "id": "simple", "rank": 1, "route": "fast-path" },
@@ -28,6 +34,7 @@
     { "id": "process_or_ipc", "classification": "critical", "reasonCode": "OP_PROCESS_IPC" },
     { "id": "strict_parser_trust_boundary", "classification": "critical", "reasonCode": "OP_STRICT_PARSER" },
     { "id": "production_runtime_or_audio", "classification": "critical", "reasonCode": "OP_PRODUCTION_RUNTIME_AUDIO" },
+    { "id": "human_authorized_protected_write", "classification": "critical", "reasonCode": "OP_HUMAN_AUTHORIZED_PROTECTED_WRITE" },
     { "id": "deployment_or_release", "classification": "critical", "reasonCode": "OP_DEPLOYMENT_RELEASE" },
     { "id": "destructive_git_recovery", "classification": "critical", "reasonCode": "OP_DESTRUCTIVE_GIT" },
     { "id": "dependency_supply_chain", "classification": "critical", "reasonCode": "OP_DEPENDENCY_SUPPLY_CHAIN" },

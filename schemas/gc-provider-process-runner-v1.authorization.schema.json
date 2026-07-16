@@ -22,7 +22,7 @@
     "authorizedAtUtc": { "type": "string", "format": "date-time" },
     "expiresAtUtc": { "type": "string", "format": "date-time" },
     "requestSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-    "providerProfileId": { "enum": ["codex-readonly", "gemini-plan-review", "github-copilot-readonly"] },
+    "providerProfileId": { "enum": ["codex-readonly", "gemini-plan-review", "claude-readonly", "github-copilot-readonly"] },
     "providerInvocation": { "const": true },
     "maxAttempts": { "type": "integer", "minimum": 1, "maximum": 2 },
     "allowRetryOn": {

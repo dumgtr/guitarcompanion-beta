@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 
 $script:GcV2ScriptRoot = [IO.Path]::GetFullPath([IO.Path]::Combine($PSScriptRoot, '..'))
 $script:GcV2RepositoryRoot = [IO.Path]::GetFullPath([IO.Path]::Combine($script:GcV2ScriptRoot, '..', '..'))
-foreach ($moduleFile in @('gc-strict-json-v2.ps1','gc-identity-v2.ps1','gc-path-policy-v2.ps1','gc-git-state-v2.ps1','gc-policy-v2.ps1','gc-semantic-v2.ps1','gc-evidence-v2.ps1')) {
+foreach ($moduleFile in @('gc-strict-json-v2.ps1','gc-identity-v2.ps1','gc-path-policy-v2.ps1','gc-protected-write-authorization-v2.ps1','gc-git-state-v2.ps1','gc-policy-v2.ps1','gc-semantic-v2.ps1','gc-evidence-v2.ps1')) {
     . ([IO.Path]::Combine($script:GcV2ScriptRoot, $moduleFile))
 }
 

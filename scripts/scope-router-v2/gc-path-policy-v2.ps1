@@ -139,11 +139,24 @@ function ConvertTo-GcPathScopeListV2 {
     return $result
 }
 
+function Test-GcAuthorizableProtectedFileV2 {
+    param([Parameter(Mandatory)]$Candidate, [Parameter(Mandatory)][AllowEmptyCollection()]$ProtectedScopes)
+    if ([bool]$Candidate['isSubtree']) { return $false }
+    foreach ($boundary in $ProtectedScopes) {
+        if ([bool]$boundary['isSubtree']) {
+            if (([string]$Candidate['basePath']).StartsWith(([string]$boundary['basePath'] + '/'), [StringComparison]::Ordinal)) { return $true }
+        }
+        elseif ([StringComparer]::Ordinal.Equals([string]$Candidate['basePath'], [string]$boundary['basePath'])) { return $true }
+    }
+    return $false
+}
+
 function Resolve-GcPathPolicyV2 {
     param(
         [Parameter(Mandatory)]$InputObject,
         [Parameter(Mandatory)]$Policy,
-        [Parameter(Mandatory)][string]$RepositoryRoot
+        [Parameter(Mandatory)][string]$RepositoryRoot,
+        [AllowNull()]$ProtectedWriteAuthorization
     )
 
     $readScopes = @(ConvertTo-GcPathScopeListV2 -Values $InputObject['requestedReadPaths'] -FieldId 'requestedReadPaths' -RepositoryRoot $RepositoryRoot)
@@ -151,19 +164,48 @@ function Resolve-GcPathPolicyV2 {
     $forbiddenScopes = @(ConvertTo-GcPathScopeListV2 -Values $Policy['forbiddenPaths'] -FieldId 'policy.forbiddenPaths' -RepositoryRoot $null)
     $protectedScopes = @(ConvertTo-GcPathScopeListV2 -Values $Policy['protectedNamespaces'] -FieldId 'policy.protectedNamespaces' -RepositoryRoot $null)
 
+    $approvedScopes = if ($null -eq $ProtectedWriteAuthorization) { @() } else { @($ProtectedWriteAuthorization['approvedScopes']) }
+    $approvedSet = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($scope in $approvedScopes) { [void]$approvedSet.Add([string]$scope['canonical']) }
+    $matchedApproved = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    $ordinaryReadScopes = [Collections.Generic.List[object]]::new()
+    $ordinaryWriteScopes = [Collections.Generic.List[object]]::new()
+    $authorizedWriteScopes = [Collections.Generic.List[object]]::new()
     $blockedReasons = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
-    foreach ($candidate in @($readScopes) + @($writeScopes)) {
-        foreach ($boundary in @($forbiddenScopes) + @($protectedScopes)) {
-            if (Test-GcPathScopeOverlapV2 -Left $candidate -Right $boundary) {
-                [void]$blockedReasons.Add('PATH_PROTECTED_NAMESPACE_OVERLAP')
-            }
+
+    foreach ($candidate in $readScopes) {
+        $forbidden = $false
+        $protected = $false
+        foreach ($boundary in $forbiddenScopes) { if (Test-GcPathScopeOverlapV2 -Left $candidate -Right $boundary) { $forbidden = $true; break } }
+        foreach ($boundary in $protectedScopes) { if (Test-GcPathScopeOverlapV2 -Left $candidate -Right $boundary) { $protected = $true; break } }
+        if ($forbidden) { [void]$blockedReasons.Add('PATH_PROTECTED_NAMESPACE_OVERLAP') }
+        elseif ($protected) {
+            if ((Test-GcAuthorizableProtectedFileV2 -Candidate $candidate -ProtectedScopes $protectedScopes) -and $approvedSet.Contains([string]$candidate['canonical'])) { continue }
+            [void]$blockedReasons.Add('PATH_PROTECTED_NAMESPACE_OVERLAP')
         }
+        else { $ordinaryReadScopes.Add($candidate) }
     }
-    foreach ($readScope in $readScopes) {
-        foreach ($writeScope in $writeScopes) {
-            if (Test-GcPathScopeOverlapV2 -Left $readScope -Right $writeScope) {
-                [void]$blockedReasons.Add('PATH_INPUT_PARTITION_OVERLAP')
+    foreach ($candidate in $writeScopes) {
+        $forbidden = $false
+        $protected = $false
+        foreach ($boundary in $forbiddenScopes) { if (Test-GcPathScopeOverlapV2 -Left $candidate -Right $boundary) { $forbidden = $true; break } }
+        foreach ($boundary in $protectedScopes) { if (Test-GcPathScopeOverlapV2 -Left $candidate -Right $boundary) { $protected = $true; break } }
+        if ($forbidden) { [void]$blockedReasons.Add('PATH_PROTECTED_NAMESPACE_OVERLAP') }
+        elseif ($protected) {
+            if ((Test-GcAuthorizableProtectedFileV2 -Candidate $candidate -ProtectedScopes $protectedScopes) -and $approvedSet.Contains([string]$candidate['canonical'])) {
+                $authorizedWriteScopes.Add($candidate)
+                [void]$matchedApproved.Add([string]$candidate['canonical'])
             }
+            else { [void]$blockedReasons.Add('PATH_PROTECTED_NAMESPACE_OVERLAP') }
+        }
+        else { $ordinaryWriteScopes.Add($candidate) }
+    }
+    if ($null -ne $ProtectedWriteAuthorization -and -not $matchedApproved.SetEquals($approvedSet)) {
+        Throw-GcFailureV2 -ReasonCode 'PROTECTED_WRITE_AUTHORIZATION_INVALID' -FieldId 'protectedWriteAuthorization.approvedWritePaths' -PolicyRuleId 'V2-PROTECTED-WRITE-AUTH-PATH-BINDING' -FailureCategory 'authorization'
+    }
+    foreach ($readScope in $ordinaryReadScopes) {
+        foreach ($writeScope in @($ordinaryWriteScopes) + @($authorizedWriteScopes)) {
+            if (Test-GcPathScopeOverlapV2 -Left $readScope -Right $writeScope) { [void]$blockedReasons.Add('PATH_INPUT_PARTITION_OVERLAP') }
         }
     }
     for ($i = 0; $i -lt $readScopes.Count; $i++) {
@@ -183,9 +225,11 @@ function Resolve-GcPathPolicyV2 {
 
     $effectiveReadScopes = @()
     $effectiveWriteScopes = @()
+    $effectiveAuthorizedWriteScopes = @()
     if ($blockedReasons.Count -eq 0) {
-        $effectiveReadScopes = @($readScopes)
-        $effectiveWriteScopes = @($writeScopes)
+        $effectiveReadScopes = @($ordinaryReadScopes)
+        $effectiveWriteScopes = @($ordinaryWriteScopes)
+        $effectiveAuthorizedWriteScopes = @($authorizedWriteScopes)
     }
     Assert-GcPathPartitionsV2 -AllowedReadScopes $effectiveReadScopes -AllowedWriteScopes $effectiveWriteScopes -ForbiddenScopes $forbiddenScopes -ProtectedScopes $protectedScopes | Out-Null
 
@@ -196,10 +240,13 @@ function Resolve-GcPathPolicyV2 {
     return [ordered]@{
         allowedReadPaths = @(& $ordinalSort $effectiveReadScopes)
         allowedWritePaths = @(& $ordinalSort $effectiveWriteScopes)
+        authorizedProtectedWritePaths = @(& $ordinalSort $effectiveAuthorizedWriteScopes)
         forbiddenPaths = @(& $ordinalSort $forbiddenScopes)
         protectedNamespaces = @(& $ordinalSort $protectedScopes)
         readScopes = $effectiveReadScopes
-        writeScopes = $effectiveWriteScopes
+        writeScopes = @($effectiveWriteScopes) + @($effectiveAuthorizedWriteScopes)
         blockedReasonCodes = @($blockedReasonList)
+        routingReasonCodes = $(if ($effectiveAuthorizedWriteScopes.Count -gt 0) { @('PATH_HUMAN_AUTHORIZED_PROTECTED_WRITE') } else { @() })
+        protectedWriteAuthorization = $ProtectedWriteAuthorization
     }
 }

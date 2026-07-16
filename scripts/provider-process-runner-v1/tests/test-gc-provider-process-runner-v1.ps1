@@ -91,8 +91,11 @@ function Invoke-GcMockProviderV1 {
         [Parameter(Mandatory)][string]$Scenario,
         [AllowNull()][string]$CounterPath,
         [AllowNull()][string]$ObservationPath,
+        [AllowNull()][string]$EnvironmentObservationPath,
+        [AllowNull()][string]$ArgumentObservationPath,
         [AllowNull()][string]$ChildPidPath,
         [AllowNull()][string]$CancellationPath,
+        [AllowNull()][object[]]$ObservedArguments,
         [string]$Protocol = 'codex-jsonl'
     )
 
@@ -103,10 +106,20 @@ function Invoke-GcMockProviderV1 {
     foreach ($pair in @(
         @('CounterPath',$CounterPath),
         @('ObservationPath',$ObservationPath),
+        @('EnvironmentObservationPath',$EnvironmentObservationPath),
+        @('ArgumentObservationPath',$ArgumentObservationPath),
         @('ChildPidPath',$ChildPidPath),
         @('CancellationPath',$CancellationPath)
     )) {
         if ($pair[1]) { $arguments.Add('-' + $pair[0]); $arguments.Add($pair[1]) }
+    }
+    if ($null -ne $ObservedArguments) {
+        if ($ObservedArguments.Count -ne 4) { throw 'MOCK_OBSERVED_ARGUMENT_COUNT_INVALID' }
+        $names = @('ObservedArgumentOne','ObservedArgumentTwo','ObservedArgumentThree','ObservedArgumentFour')
+        for ($index = 0; $index -lt $ObservedArguments.Count; $index++) {
+            $arguments.Add('-' + $names[$index])
+            $arguments.Add($ObservedArguments[$index])
+        }
     }
     return Invoke-GcProviderProcessRunnerV1 -Request $Context.Request -Authorization $Context.Authorization -Policy $Context.Policy -Profile $Context.Profile -Prompt $Context.Prompt -CancellationPath $CancellationPath -ExecutableOverride $pwsh -ArgumentsOverride $arguments.ToArray() -ProtocolOverride $Protocol -PromptTransportOverride 'stdin' -RetryDelayOverrideMilliseconds 0
 }
@@ -131,12 +144,95 @@ try {
     $context.Request['executable'] = 'cmd.exe'
     Assert-GcTestThrowsCategoryV1 { Assert-GcRunnerRequestV1 -Request $context.Request -Policy $context.Policy } 'PROTOCOL_FAILURE' 'request cannot add executable'
     $context.Request.Remove('executable')
+    $context.Request['environment'] = [ordered]@{ GC_PROVIDER_RUNNER_V1_FIXED_ENV_TEST = 'request-injected' }
+    Assert-GcTestThrowsCategoryV1 { Assert-GcRunnerRequestV1 -Request $context.Request -Policy $context.Policy } 'PROTOCOL_FAILURE' 'request cannot inject environment variables'
+    $context.Request.Remove('environment')
     Assert-GcTestThrowsCategoryV1 { Get-GcProviderProfileV1 -Policy $context.Policy -ProfileId 'github-copilot-readonly' } 'AUTH_FAILED' 'disabled profile fails closed'
     $codexPolicyProfile = @($context.Policy['profiles'] | Where-Object { [string]::Equals([string]$_['id'], 'codex-readonly', [StringComparison]::Ordinal) })[0]
     $originalArguments = $codexPolicyProfile['arguments']
     $codexPolicyProfile['arguments'] = [object[]]@('exec','--ephemeral','--json','--sandbox','danger-full-access','-')
     Assert-GcTestThrowsCategoryV1 { Assert-GcRunnerPolicyV1 -Policy $context.Policy } 'RUNNER_FAILURE' 'policy cannot widen fixed provider arguments'
     $codexPolicyProfile['arguments'] = $originalArguments
+    $claudeProfile = Get-GcProviderProfileV1 -Policy $context.Policy -ProfileId 'claude-readonly'
+    Assert-GcTestEqualV1 $claudeProfile['protocol'] 'claude-json-exit' 'Claude uses isolated protocol'
+    Assert-GcTestTrueV1 ((@($claudeProfile['arguments']) -join "`n") -cmatch '--permission-mode\nplan' -and (@($claudeProfile['arguments']) -join "`n") -cmatch '--tools\nRead,Glob,Grep') 'Claude fixed contract is read-only'
+    $geminiProfile = Get-GcProviderProfileV1 -Policy $context.Policy -ProfileId 'gemini-plan-review'
+    Assert-GcTestTrueV1 ((@($geminiProfile['arguments']) -join "`n") -cmatch '--approval-mode\nplan') 'Gemini fixed contract uses controlled plan mode'
+    $expectedGeminiPrompt = 'Inspect the assigned repository context read-only. Do not modify files or invoke nested providers. Return only the review.'
+    $expectedGeminiArguments = [object[]]@('--prompt',$expectedGeminiPrompt,'--approval-mode','plan','--output-format','stream-json','--skip-trust')
+    Assert-GcTestEqualV1 $geminiProfile['arguments'][1] $expectedGeminiPrompt 'Gemini policy prompt matches core fixed prompt contract'
+    Assert-GcTestTrueV1 ([string]$geminiProfile['arguments'][1] -cnotmatch '[\r\n]') 'Gemini fixed prompt contains no CR or LF'
+    Assert-GcTestEqualV1 (@($geminiProfile['arguments']) -join "`0") ($expectedGeminiArguments -join "`0") 'Gemini argument order remains exact'
+    Assert-GcTestEqualV1 $geminiProfile['promptTransport'] 'stdin' 'Gemini prompt transport remains stdin'
+
+    $originalGeminiArguments = $geminiProfile['arguments']
+    $alteredGeminiArguments = [object[]]@($originalGeminiArguments)
+    $alteredGeminiArguments[1] = $expectedGeminiPrompt + ' altered'
+    $geminiProfile['arguments'] = $alteredGeminiArguments
+    Assert-GcTestThrowsCategoryV1 { Assert-GcRunnerPolicyV1 -Policy $context.Policy } 'RUNNER_FAILURE' 'policy rejects altered Gemini fixed prompt'
+    $geminiProfile['arguments'] = $originalGeminiArguments
+    Assert-GcRunnerPolicyV1 -Policy $context.Policy
+    Assert-GcTestTrueV1 $true 'synchronized Gemini policy and core contract validate'
+    Assert-GcTestEqualV1 (@($context.Profile['arguments']) -join "`0") "exec`0--ephemeral`0--json`0--sandbox`0read-only`0-" 'Codex fixed contract remains unchanged'
+    Assert-GcTestTrueV1 ((@($claudeProfile['arguments']) -join "`n") -cmatch '--output-format\njson' -and (@($claudeProfile['arguments']) -join "`n") -cmatch '--no-session-persistence') 'Claude fixed contract remains unchanged'
+
+    $argumentVector = [object[]]@('--first-flag','value containing spaces','--second-flag','plain-value')
+    $argumentStartInfo = New-GcProcessStartInfoV1 -FilePath 'mock.exe' -Arguments $argumentVector -WorkingDirectory $repositoryRoot
+    Assert-GcTestEqualV1 $argumentStartInfo.ArgumentList.Count $argumentVector.Count 'each semantic argument has one ArgumentList entry'
+    Assert-GcTestEqualV1 $argumentStartInfo.ArgumentList[1] 'value containing spaces' 'space-containing value remains one entry'
+    Assert-GcTestEqualV1 (@($argumentStartInfo.ArgumentList) -join "`0") ($argumentVector -join "`0") 'ArgumentList preserves exact argument order'
+    Assert-GcTestTrueV1 (@($argumentStartInfo.ArgumentList | Where-Object { $_.Length -ge 2 -and $_[0] -eq '"' -and $_[$_.Length - 1] -eq '"' }).Count -eq 0) 'ArgumentList entries have no unnecessary wrapping quotes'
+    Assert-GcTestEqualV1 $argumentStartInfo.Arguments '' 'combined ProcessStartInfo.Arguments remains unused'
+
+    foreach ($profile in @($context.Profile,$geminiProfile,$claudeProfile)) {
+        $profileStartInfo = New-GcProcessStartInfoV1 -FilePath 'mock.exe' -Arguments @($profile['arguments']) -WorkingDirectory $repositoryRoot
+        Assert-GcTestEqualV1 (@($profileStartInfo.ArgumentList) -join "`0") (@($profile['arguments']) -join "`0") (([string]$profile['id']) + ' fixed arguments remain separate and ordered')
+        Assert-GcTestEqualV1 $profileStartInfo.Arguments '' (([string]$profile['id']) + ' does not use combined Arguments')
+    }
+    Assert-GcTestEqualV1 $argumentStartInfo.ArgumentList[0] '--first-flag' 'first flag remains first'
+    Assert-GcTestEqualV1 $argumentStartInfo.ArgumentList[2] '--second-flag' 'second flag remains in declared position'
+
+    $argumentObservationPath = [IO.Path]::Combine($temporaryRoot, 'argument-observation.json')
+    $argumentResult = Invoke-GcMockProviderV1 -Context $context -Scenario 'success' -ArgumentObservationPath $argumentObservationPath -ObservedArguments $argumentVector
+    Assert-GcTestEqualV1 $argumentResult.State 'COMPLETED' 'mock child argument observation completes'
+    $argumentRecord = Get-Content -LiteralPath $argumentObservationPath -Raw | ConvertFrom-Json
+    Assert-GcTestEqualV1 $argumentRecord.count $argumentVector.Count 'mock child receives exact semantic argument count'
+    $expectedArgumentHashes = @($argumentVector | ForEach-Object { Get-GcSha256HexV1 -Bytes ([Text.UTF8Encoding]::new($false).GetBytes([string]$_)) })
+    Assert-GcTestEqualV1 (@($argumentRecord.hashes) -join "`0") ($expectedArgumentHashes -join "`0") 'mock child receives argument values in exact order'
+    $argumentRecordText = [IO.File]::ReadAllText($argumentObservationPath)
+    Assert-GcTestTrueV1 (-not $argumentRecordText.Contains('value containing spaces') -and -not $argumentRecordText.Contains('--first-flag')) 'mock argument evidence persists only count and hashes'
+
+    $environmentVariableName = 'GC_PROVIDER_RUNNER_V1_FIXED_ENV_TEST'
+    $profileHadEnvironment = @($context.Profile.Keys) -ccontains 'environment'
+    $originalProfileEnvironment = $context.Profile['environment']
+    $originalParentEnvironment = [Environment]::GetEnvironmentVariable($environmentVariableName, 'Process')
+    try {
+        [void]$context.Profile.Remove('environment')
+        $missingEnvironmentResult = Invoke-GcMockProviderV1 -Context $context -Scenario 'success'
+        Assert-GcTestEqualV1 $missingEnvironmentResult.State 'COMPLETED' 'missing profile environment normalizes to empty dictionary'
+
+        $context.Profile['environment'] = $null
+        $nullEnvironmentResult = Invoke-GcMockProviderV1 -Context $context -Scenario 'success'
+        Assert-GcTestEqualV1 $nullEnvironmentResult.State 'COMPLETED' 'null profile environment normalizes to empty dictionary'
+
+        $context.Profile['environment'] = [ordered]@{}
+        $emptyEnvironmentResult = Invoke-GcMockProviderV1 -Context $context -Scenario 'success'
+        Assert-GcTestEqualV1 $emptyEnvironmentResult.State 'COMPLETED' 'empty profile environment remains usable'
+
+        [Environment]::SetEnvironmentVariable($environmentVariableName, 'parent-value', 'Process')
+        $context.Profile['environment'] = [ordered]@{ GC_PROVIDER_RUNNER_V1_FIXED_ENV_TEST = 'fixed-child-value' }
+        $environmentObservationPath = [IO.Path]::Combine($temporaryRoot, 'environment-observation.txt')
+        $fixedEnvironmentResult = Invoke-GcMockProviderV1 -Context $context -Scenario 'success' -EnvironmentObservationPath $environmentObservationPath
+        Assert-GcTestEqualV1 $fixedEnvironmentResult.State 'COMPLETED' 'fixed profile environment reaches child process'
+        Assert-GcTestEqualV1 ([IO.File]::ReadAllText($environmentObservationPath)) 'fixed-child-value' 'child receives exact fixed environment value'
+        Assert-GcTestEqualV1 $context.Profile['environment'][$environmentVariableName] 'fixed-child-value' 'fixed profile environment dictionary is preserved'
+        Assert-GcTestEqualV1 ([Environment]::GetEnvironmentVariable($environmentVariableName, 'Process')) 'parent-value' 'parent process environment remains unchanged'
+    }
+    finally {
+        if ($profileHadEnvironment) { $context.Profile['environment'] = $originalProfileEnvironment }
+        else { [void]$context.Profile.Remove('environment') }
+        [Environment]::SetEnvironmentVariable($environmentVariableName, $originalParentEnvironment, 'Process')
+    }
     Write-Output 'PASS CONTRACT AND HUMAN AUTHORIZATION'
 
     $observation = [IO.Path]::Combine($temporaryRoot, 'stdin-observation.txt')
@@ -167,6 +263,33 @@ try {
     $geminiSuccess = Invoke-GcMockProviderV1 -Context $context -Scenario 'gemini-success-result' -Protocol 'json-stream-exit'
     Assert-GcTestEqualV1 $geminiSuccess.State 'COMPLETED' 'gemini success reaches completed'
     Assert-GcTestEqualV1 $geminiSuccess.Attempts[0]['terminalEvent'] 'result' 'Gemini terminal result event extracted'
+    Assert-GcTestTrueV1 (@($geminiSuccess.Attempts[0].Keys) -cnotcontains 'stdoutProtocolDiagnostics') 'valid JSON stream attempt shape remains unchanged'
+
+    $diagnosticCases = [ordered]@{
+        ANSI_WRAPPED_JSON = ([string][char]27 + '[33m{"type":"init"}' + [string][char]27 + '[0m')
+        MARKDOWN_FENCE = ('```json' + "`n" + '{"type":"init"}' + "`n" + '```')
+        PLAIN_TEXT = 'provider warning text'
+        JSON_FRAGMENT = ('{' + "`n" + '"type": "init"' + "`n" + '}')
+        MALFORMED_JSON = '{"type":}'
+        MIXED_OUTPUT = ('{"type":"init"}' + "`n" + 'provider warning text')
+    }
+    foreach ($classification in $diagnosticCases.Keys) {
+        $diagnostics = Get-GcStdoutProtocolDiagnosticsV1 -Text $diagnosticCases[$classification]
+        Assert-GcTestEqualV1 $diagnostics['firstInvalidLineKind'] $classification ("stdout classification: $classification")
+    }
+    $ansiDiagnostics = Get-GcStdoutProtocolDiagnosticsV1 -Text $diagnosticCases['ANSI_WRAPPED_JSON']
+    Assert-GcTestTrueV1 ([bool]$ansiDiagnostics['ansiDetected']) 'ANSI detection is metadata only'
+    $fenceDiagnostics = Get-GcStdoutProtocolDiagnosticsV1 -Text $diagnosticCases['MARKDOWN_FENCE']
+    Assert-GcTestTrueV1 ([bool]$fenceDiagnostics['markdownFenceDetected']) 'markdown fence detection is metadata only'
+    $fragmentDiagnostics = Get-GcStdoutProtocolDiagnosticsV1 -Text $diagnosticCases['JSON_FRAGMENT']
+    Assert-GcTestTrueV1 ([bool]$fragmentDiagnostics['multilineJsonLikely']) 'multiline JSON likelihood detected'
+
+    $rawDiagnosticSentinel = 'GC_RAW_PROVIDER_CONTENT_' + [Guid]::NewGuid().ToString('N')
+    $contaminatedResult = Read-GcJsonStreamExitProtocolV1 -Text ("{`"type`":`"init`"}`n" + $rawDiagnosticSentinel) -Truncated $false
+    Assert-GcTestEqualV1 $contaminatedResult.Reason 'PROVIDER_STDOUT_NON_JSON_CONTAMINATION' 'contamination remains strict protocol failure'
+    $serializedDiagnostics = ConvertTo-GcCanonicalJsonV1 -Value $contaminatedResult.Diagnostics
+    Assert-GcTestTrueV1 (-not $serializedDiagnostics.Contains($rawDiagnosticSentinel)) 'sanitized diagnostics exclude raw provider content'
+    Assert-GcTestTrueV1 ($serializedDiagnostics.Contains([string]$contaminatedResult.Diagnostics['firstInvalidLineSha256'])) 'sanitized diagnostics retain only invalid-line hash evidence'
 
     $geminiFailedResult = Invoke-GcMockProviderV1 -Context $context -Scenario 'gemini-result-failed' -Protocol 'json-stream-exit'
     Assert-GcTestEqualV1 $geminiFailedResult.State 'FAILED' 'gemini result=failure fails lifecycle'
@@ -184,6 +307,21 @@ try {
     Assert-GcTestEqualV1 $geminiTruncatedResult.Public['failureCategory'] 'PROTOCOL_FAILURE' 'gemini truncated buffer is protocol failure'
 
     Write-Output 'PASS GEMINI JSON STREAM EXIT TERMINAL EVENTS'
+
+    foreach ($scenario in @('claude-success','claude-success-is-error-false')) {
+        $claudeSuccess = Invoke-GcMockProviderV1 -Context $context -Scenario $scenario -Protocol 'claude-json-exit'
+        Assert-GcTestEqualV1 $claudeSuccess.State 'COMPLETED' "Claude $scenario reaches completed"
+        Assert-GcTestEqualV1 $claudeSuccess.Attempts[0]['terminalEvent'] 'result' "Claude $scenario terminal result required"
+    }
+    foreach ($scenario in @('claude-missing-result','claude-result-number','claude-failed','claude-is-error','claude-malformed','claude-concatenated','claude-duplicate-key')) {
+        $claudeFailure = Invoke-GcMockProviderV1 -Context $context -Scenario $scenario -Protocol 'claude-json-exit'
+        Assert-GcTestEqualV1 $claudeFailure.State 'FAILED' "Claude $scenario fails lifecycle"
+        Assert-GcTestEqualV1 $claudeFailure.FailureCategory 'PROTOCOL_FAILURE' "Claude $scenario is protocol failure"
+    }
+    $claudeNonzero = Invoke-GcProviderAttemptV1 -FilePath (Get-Command pwsh.exe -CommandType Application | Select-Object -First 1).Source -Arguments @('-NoProfile','-Command','[Console]::Out.Write(''{"type":"result","subtype":"success","result":"not accepted"}''); exit 9') -Prompt 'probe' -PromptTransport closed -Protocol 'claude-json-exit' -WorkingDirectory $repositoryRoot -TimeoutMilliseconds 5000 -MaximumCapturedBytes 4096 -AttemptNumber 1
+    Assert-GcTestEqualV1 $claudeNonzero.Public['state'] 'FAILED' 'Claude nonzero exit fails despite valid JSON'
+    Assert-GcTestEqualV1 $claudeNonzero.Public['exitCode'] 9 'Claude nonzero exit code preserved'
+    Write-Output 'PASS CLAUDE JSON EXIT TERMINAL CONTRACT'
 
     $quotaContext = New-GcTestContextV1 -Directory $temporaryRoot
     $quotaContext.Request['retryIntent'] = $true
@@ -257,7 +395,10 @@ try {
     Assert-GcTestThrowsCategoryV1 { Claim-GcRunnerAuthorizationV1 -AuthorizationId $artifactContext.Authorization['authorizationId'] } 'AUTH_FAILED' 'authorization id is one use even with different artifact root'
     $checkpoint = New-GcCheckpointArtifactV1 -Request $artifactContext.Request -Authorization $artifactContext.Authorization -RequestSha256 $artifactContext.RequestSha256 -State 'FAILED' -FailureCategory 'QUOTA_EXCEEDED' -AttemptCount 1 -RepositorySnapshot $artifactContext.Snapshot -WorktreePreserved $true
     $checkpointResult = Write-GcRunnerArtifactAtomicV1 -Artifact $checkpoint -DestinationPath ([IO.Path]::Combine($runDirectory, 'checkpoint.json'))
-    $lifecycle = New-GcLifecycleArtifactV1 -Request $artifactContext.Request -Authorization $artifactContext.Authorization -RequestSha256 $artifactContext.RequestSha256 -CreatedAtUtc ([DateTimeOffset]::UtcNow.AddSeconds(-1)) -State 'FAILED' -FailureCategory 'QUOTA_EXCEEDED' -Attempts @($quota.Attempts) -CheckpointWritten $true -WorktreePreserved $true
+    $sanitizedAttempt = [ordered]@{}
+    foreach ($key in $quota.Attempts[0].Keys) { $sanitizedAttempt[$key] = $quota.Attempts[0][$key] }
+    $sanitizedAttempt['stdoutProtocolDiagnostics'] = $contaminatedResult.Diagnostics
+    $lifecycle = New-GcLifecycleArtifactV1 -Request $artifactContext.Request -Authorization $artifactContext.Authorization -RequestSha256 $artifactContext.RequestSha256 -CreatedAtUtc ([DateTimeOffset]::UtcNow.AddSeconds(-1)) -State 'FAILED' -FailureCategory 'QUOTA_EXCEEDED' -Attempts @($sanitizedAttempt) -CheckpointWritten $true -WorktreePreserved $true
     $lifecycleResult = Write-GcRunnerArtifactAtomicV1 -Artifact $lifecycle -DestinationPath ([IO.Path]::Combine($runDirectory, 'lifecycle.json'))
     Remove-GcRunnerTemporaryArtifactsV1 -RunDirectory $runDirectory
     Assert-GcTestTrueV1 ([IO.File]::Exists($checkpointResult.Path) -and [IO.File]::Exists($lifecycleResult.Path)) 'checkpoint and lifecycle written atomically'
@@ -265,6 +406,8 @@ try {
     $persisted = [IO.File]::ReadAllText($checkpointResult.Path) + [IO.File]::ReadAllText($lifecycleResult.Path)
     Assert-GcTestTrueV1 (-not $persisted.Contains($artifactContext.Prompt)) 'raw prompt not persisted'
     Assert-GcTestTrueV1 (-not $persisted.Contains('You have exceeded your monthly quota.')) 'raw provider error not persisted'
+    Assert-GcTestTrueV1 (-not $persisted.Contains($rawDiagnosticSentinel)) 'raw stdout contamination not persisted in lifecycle or checkpoint'
+    Assert-GcTestTrueV1 ($persisted.Contains([string]$contaminatedResult.Diagnostics['firstInvalidLineSha256'])) 'sanitized stdout diagnostic metadata persists'
 
     $resumeRequest = $artifactContext.Request
     $resumeRequest['resumeCheckpointPath'] = $checkpointResult.Path

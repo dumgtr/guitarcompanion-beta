@@ -9,7 +9,7 @@ GC Provider Process Runner V1 performs one explicitly authorized provider CLI in
 The following boundaries are unconditional:
 
 - Sound Lab A3.2 remains on hold.
-- Scope Router V2 is not imported or modified and remains Shadow Mode only.
+- The runner does not import or invoke Scope Router V2. Router V2 remains Shadow Mode only.
 - A Router decision is advisory input. It is never dispatch authorization.
 - Every provider invocation requires a separate Human Dispatch Authorization bound to the exact request SHA-256.
 - The runner never accepts an executable, shell command, or arbitrary argument from request or authorization data.
@@ -53,6 +53,9 @@ V1 enables only profiles whose installed CLI contract was verified:
 
 - `codex-readonly`: `codex exec --ephemeral --json --sandbox read-only -`; completion requires one `turn.completed` event and exit code 0. `turn.failed`, malformed JSONL, missing terminal event, truncation, or nonzero exit fails closed.
 - `gemini-plan-review`: Gemini headless plan mode with `stream-json`; completion requires valid JSON lines, non-empty output, and exit code 0.
+- `claude-readonly`: Claude one-shot JSON mode with only `Read`, `Glob`, and `Grep`; edit, write, shell, web, notebook, and MCP tools are denied, session persistence and slash commands are disabled, and completion requires one JSON object with `type=result`, `subtype=success`, a non-empty string `result`, `is_error` absent or false, and exit code 0.
+
+Claude and Gemini reviewer invocations are permitted only through these immutable Provider Runner profiles with a separate Human Dispatch Authorization. Ad-hoc direct provider commands, request-supplied executables or arguments, and `GC_*_AGENT_CMD` command templates are prohibited. A Host Broker is not required and is not invoked; the runner itself is the controlled one-shot boundary.
 
 `github-copilot-readonly` remains disabled in the V1 runner policy because Dispatcher integration has not started. This is a fail-closed integration state, not a permanent provider disable. Its availability in the external `gh` CLI does not override this hard-coded policy. The current live status is `TEMPORARILY_UNAVAILABLE` with `reasonCode: PROVIDER_QUOTA_EXCEEDED`, `retryAllowedNow: false`, `reviewAccepted: false`, `permanentlyDisabled: false`, and `recheckRequired: true`. Gemini is the fallback reviewer with a warning while the external quota is unavailable. When the external quota is restored, a code and policy change is still required to fully enable the Copilot profile with proper arguments, protocols, and tests before it can be invoked by the Runner.
 
@@ -104,4 +107,4 @@ Artifacts contain hashes, byte lengths, timestamps, state transitions, stable fa
 
 ## 8. Acceptance tests
 
-Tests use mock child processes only. They cover authorization rejection before spawn, stdin EOF, concurrent stdout/stderr flooding, Codex JSONL completion and failure, malformed or missing terminal events, real exit codes, timeout and descendant-process termination, cancellation, failure classification, quota zero-retry, rate-limit and timeout single retry, checkpoint/resume binding, atomic cleanup, redaction, output caps, worktree preservation, parse checks, and forbidden-path/static command checks.
+Tests use mock child processes only. They cover authorization rejection before spawn, stdin EOF, concurrent stdout/stderr flooding, Codex JSONL, Gemini stream JSON, strict Claude JSON completion and failures, real exit codes, timeout and descendant-process termination, cancellation, failure classification, quota zero-retry, rate-limit and timeout single retry, checkpoint/resume binding, atomic cleanup, redaction, output caps, worktree preservation, parse checks, and forbidden-path/static command checks.

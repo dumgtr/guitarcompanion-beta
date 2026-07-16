@@ -32,6 +32,17 @@
     "reviewers": { "type": "array", "items": { "type": "object" } },
     "allowedReadPaths": { "type": "array", "items": { "type": "string" } },
     "allowedWritePaths": { "type": "array", "items": { "type": "string" } },
+    "authorizedProtectedWritePaths": { "type": "array", "items": { "type": "string" } },
+    "protectedWriteAuthorization": {
+      "type": ["object", "null"],
+      "properties": {
+        "authorizationId": { "type": "string", "pattern": "^GC_PWA_[0-9a-f]{32}$" },
+        "authorizationSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "reviewRequired": { "const": true }
+      },
+      "required": ["authorizationId", "authorizationSha256", "reviewRequired"],
+      "additionalProperties": false
+    },
     "forbiddenPaths": { "type": "array", "items": { "type": "string" } },
     "protectedNamespaces": { "type": "array", "items": { "type": "string" } },
     "dirtyState": { "type": "object" },

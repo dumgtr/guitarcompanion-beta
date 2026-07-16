@@ -2,6 +2,7 @@ param(
     [ValidateSet('Route','ValidateEvidence')][string]$Mode = 'Route',
     [AllowNull()][string]$InputPath,
     [AllowNull()][string]$EvidencePath,
+    [AllowNull()][string]$ProtectedWriteAuthorizationPath,
     [AllowNull()][AllowEmptyString()][string]$ExpectedTaskId
 )
 
@@ -12,6 +13,7 @@ $moduleFiles = @(
     'gc-strict-json-v2.ps1',
     'gc-identity-v2.ps1',
     'gc-path-policy-v2.ps1',
+    'gc-protected-write-authorization-v2.ps1',
     'gc-git-state-v2.ps1',
     'gc-policy-v2.ps1',
     'gc-semantic-v2.ps1',
@@ -59,10 +61,24 @@ try {
     $identity = Get-GcRepositoryIdentityV2 -RepositoryRoot ([string]$inputObject['repositoryRoot'])
     Assert-GcOrdinalIdentityV2 -InputObject $inputObject -ActualIdentity $identity | Out-Null
 
-    $pathPolicy = Resolve-GcPathPolicyV2 -InputObject $inputObject -Policy $policy -RepositoryRoot ([string]$identity['repositoryRoot'])
+    $protectedWriteAuthorization = $null
+    if (-not [string]::IsNullOrEmpty($ProtectedWriteAuthorizationPath)) {
+        $authorizationBytes = Read-GcStrictUtf8V2 -LiteralPath $ProtectedWriteAuthorizationPath
+        $authorizationObject = ConvertFrom-GcStrictJsonV2 -Bytes $authorizationBytes
+        $protectedWriteAuthorization = Assert-GcProtectedWriteAuthorizationV2 -Authorization $authorizationObject -AuthorizationBytes $authorizationBytes -InputObject $inputObject -InputSha256 (Get-GcSha256HexV2 -Bytes $inputBytes) -Identity $identity -Policy $policy
+    }
+    else {
+        foreach ($operation in $inputObject['requestedOperations']) {
+            if (Test-GcOrdinalEqualsV2 ([string]$operation) 'human_authorized_protected_write') {
+                Throw-GcFailureV2 -ReasonCode 'PROTECTED_WRITE_AUTHORIZATION_INVALID' -FieldId 'protectedWriteAuthorization' -PolicyRuleId 'V2-PROTECTED-WRITE-AUTH-REQUIRED' -FailureCategory 'authorization'
+            }
+        }
+    }
+
+    $pathPolicy = Resolve-GcPathPolicyV2 -InputObject $inputObject -Policy $policy -RepositoryRoot ([string]$identity['repositoryRoot']) -ProtectedWriteAuthorization $protectedWriteAuthorization
     $gitState = Get-GcGitStateV2 -RepositoryRoot ([string]$identity['repositoryRoot'])
     $dirtyConflicts = @(Get-GcDirtyScopeConflictsV2 -WriteScopes $pathPolicy['writeScopes'] -GitState $gitState)
-    $deterministicRisk = Get-GcDeterministicRiskV2 -InputObject $inputObject -Policy $policy -DirtyConflicts $dirtyConflicts -PathPolicyBlockReasons @($pathPolicy['blockedReasonCodes'])
+    $deterministicRisk = Get-GcDeterministicRiskV2 -InputObject $inputObject -Policy $policy -DirtyConflicts $dirtyConflicts -PathPolicyBlockReasons @($pathPolicy['blockedReasonCodes']) -PathPolicyRoutingReasons @($pathPolicy['routingReasonCodes'])
     $assessor = if (Test-GcObjectHasKeyV2 -Object $inputObject -Key 'assessorResult') { $inputObject['assessorResult'] } else { $null }
     $risk = Merge-GcAssessorRiskV2 -DeterministicRisk $deterministicRisk -Assessor $assessor -Policy $policy
 

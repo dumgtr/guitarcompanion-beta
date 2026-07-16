@@ -25,15 +25,16 @@ V2 is isolated from production, Legacy, and Scope Router V1. It is not productio
 2. Enforce the closed input schema.
 3. verify the machine-readable input-consumption contract.
 4. obtain and compare exact ordinal repository identity from System Git.
-5. apply the canonical protected-path lattice.
-6. query and structurally parse `git status --porcelain=v1 -z --untracked-files=all`.
-7. classify deterministic risk.
-8. optionally merge a strictly validated data-only assessor result.
-9. choose the most restrictive result.
-10. validate output schema and independent semantic invariants.
-11. write evidence atomically.
-12. invoke a separate checked child process to validate the promoted artifact.
-13. exit without dispatch or repair.
+5. validate an optional, separate Product Owner protected-write authorization bound to the exact input SHA-256 and repository identity.
+6. apply the canonical protected-path lattice.
+7. query and structurally parse `git status --porcelain=v1 -z --untracked-files=all`.
+8. classify deterministic risk.
+9. optionally merge a strictly validated data-only assessor result.
+10. choose the most restrictive result.
+11. validate output schema and independent semantic invariants.
+12. write evidence atomically.
+13. invoke a separate checked child process to validate the promoted artifact.
+14. exit without dispatch or repair.
 
 Any failure is fail-closed. Rejected raw input and exception text are never printed or persisted.
 
@@ -56,6 +57,8 @@ The assessor is data only and accepts exactly `schemaVersion`, `classification`,
 
 The schema, `config/gc-scope-router-v2.input-consumption.json`, implementation consumers, and behavioral tests must enumerate the same accepted properties. Every accepted property has exactly one disposition. V2 has no evidence-only input property.
 
+Protected-write authorization is never embedded in this input. It is a separate strict JSON artifact accepted only through `-ProtectedWriteAuthorizationPath`. It is bound ordinally to task ID, input SHA-256, canonical repository root, branch, HEAD, exact requested protected file paths, Product Owner identity, UTC issue/expiry, and `reviewRequired: true`. It cannot authorize subtrees, ancestors, unrequested paths, forbidden paths, or periods longer than 24 hours.
+
 ## 4. Exact ordinal identity
 
 Trust identities use `StringComparer.Ordinal` or `StringComparison.Ordinal`, never PowerShell default equality. This applies to task ID, branch, HEAD, schema version, policy version, and canonical repository root.
@@ -70,7 +73,9 @@ Input scopes use repository-relative forward-slash paths. The only wildcard form
 
 Overlap is symmetric and includes exact, ancestor, descendant, and subtree intersection. Therefore a protected `outputs/**` namespace blocks `outputs`, `outputs/`, every descendant, a repository-root scope, and every accepted broader scope. Existing ancestors of a candidate are checked for symbolic links or reparse points; a non-existing child under such an ancestor is blocked.
 
-The output partitions `allowedReadPaths`, `allowedWritePaths`, `forbiddenPaths`, and `protectedNamespaces` are pairwise disjoint under this lattice. Input read/write overlap is rejected rather than merged. A write scope implies the ability to read that scope and is not duplicated in `allowedReadPaths`.
+The output partitions `allowedReadPaths`, `allowedWritePaths`, `forbiddenPaths`, and `protectedNamespaces` are pairwise disjoint under this lattice. Exact Product Owner-authorized protected files are reported separately as `authorizedProtectedWritePaths`; their sanitized authorization evidence includes only authorization ID, authorization SHA-256, and `reviewRequired: true`. Input read/write overlap is rejected except when an exact authorized protected write also names its implied read path. A write scope implies the ability to read that scope and is not duplicated in `allowedReadPaths`.
+
+Without the separate authorization, protected reads and writes retain the existing blocked result. A valid authorization never permits `.git/**`, never changes the protected namespace policy, and always routes as at least `critical-controlled-path` with fixed read-only reviewer profiles. Router V2 remains advisory and never dispatches a reviewer or implementer.
 
 ## 6. Actual Git state
 
@@ -88,7 +93,7 @@ Git failure, timeout, invalid UTF-8, missing NUL termination, malformed status, 
 
 Classifications, from least to most restrictive, are `simple`, `moderate`, `complex`, `critical`, and `blocked`. Routes are respectively `fast-path`, `planned-path`, `architecture-path`, `critical-controlled-path`, and `blocked-path`.
 
-Closed operation IDs map deterministically through the policy. Credentials/authorization, provider adapters, process/IPC, strict parsers, production runtime/audio, deployment/release, destructive Git recovery, and dependency supply chain are at least critical. Force push, trust/test bypass, credential logging, multiple writers, reviewer editing, outside-root writes, protected namespace overlap, and dirty-scope overlap are blocked.
+Closed operation IDs map deterministically through the policy. Credentials/authorization, provider adapters, process/IPC, strict parsers, production runtime/audio, human-authorized protected writes, deployment/release, destructive Git recovery, and dependency supply chain are at least critical. Force push, trust/test bypass, credential logging, multiple writers, reviewer editing, outside-root writes, unauthorized protected namespace overlap, and dirty-scope overlap are blocked.
 
 The optional assessor may raise but can never lower deterministic severity. Its classification, uncertainty, and every flag participate in the merge.
 

@@ -15,17 +15,16 @@ This document defines the preferred cross-platform agent workflow for Guitar Com
 ### Claude: Deep Code Reviewer / Risk Reviewer
 - Reviews code, architecture, regressions, edge cases, naming, and hidden coupling.
 - Prioritizes risks, missing tests, production regressions, and unclear ownership.
-- Should normally operate read-only unless explicitly assigned a separate review branch.
+- Operates read-only through the fixed `claude-readonly` Provider Runner profile only.
 
 ### Gemini: Research / Alternative Design / Audio-Web Reviewer
 - Researches browser APIs, Web Audio behavior, mobile compatibility, and alternative design approaches.
 - Useful for audio-engine tradeoffs, cross-browser constraints, and external technical comparison.
-- Should return findings and recommendations rather than directly editing production files.
+- Operates read-only through the fixed `gemini-plan-review` Provider Runner profile only.
 
-### Copilot: Small Patch Worker / PR Assistant
-- Helps with small, well-scoped patches, repetitive edits, and PR text.
-- Should only work from explicit instructions and on an assigned branch.
-- Should not independently broaden scope or touch production-sensitive files.
+### Copilot: Optional Read-Only Reviewer
+- Remains disabled in Provider Runner policy until its profile passes a separate approval and live recheck.
+- Must never replace the sole Implementer or edit repository files.
 
 ### ChatGPT/User: Product Owner / Curriculum Director
 - Defines product intent, curriculum direction, learner experience, and launch decisions.
@@ -36,7 +35,9 @@ This document defines the preferred cross-platform agent workflow for Guitar Com
 
 - One writer, many reviewers.
 - Codex is the default committer and integrator.
-- Other agents should be read-only unless explicitly assigned a separate branch.
+- Reviewer agents are always read-only and must not be assigned implementation work.
+- Claude and Gemini are invoked only through fixed Provider Runner profiles with separate Human Dispatch Authorization; ad-hoc CLI calls and environment command templates are prohibited.
+- Scope Router V2 is advisory and never dispatches a provider. A Host Broker is not required when none is present and verifiable.
 - No direct edits to `main`.
 - No production file edits without explicit approval.
 - No hidden-month reveal without an explicit reveal task.
