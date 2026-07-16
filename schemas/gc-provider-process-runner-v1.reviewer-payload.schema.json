@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gc-provider-process-runner-v1.reviewer-payload/1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "verdict", "summary", "requiredConstraints", "risks",
+    "recommendedSeams", "acceptanceTests", "filesReviewed"
+  ],
+  "properties": {
+    "verdict": { "enum": ["PASS", "CONDITIONAL_PASS", "FAIL"] },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 16384 },
+    "requiredConstraints": { "$ref": "#/$defs/stringList" },
+    "risks": { "$ref": "#/$defs/stringList" },
+    "recommendedSeams": { "$ref": "#/$defs/stringList" },
+    "acceptanceTests": { "$ref": "#/$defs/stringList" },
+    "filesReviewed": { "$ref": "#/$defs/stringList" }
+  },
+  "$defs": {
+    "stringList": {
+      "type": "array",
+      "maxItems": 128,
+      "items": { "type": "string", "minLength": 1, "maxLength": 4096 }
+    }
+  }
+}

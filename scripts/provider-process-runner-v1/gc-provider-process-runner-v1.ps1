@@ -49,7 +49,7 @@ try {
         Throw-GcRunnerFailureV1 -Category 'AUTH_FAILED' -Message 'RUNNER_RESUME_WORKTREE_CHANGED'
     }
 
-    $result = Invoke-GcProviderProcessRunnerV1 -Request $request -Authorization $authorization -Policy $policy -Profile $profile -Prompt $requestContext.Prompt.Text -CancellationPath $CancellationPath -ExecutableOverride $null -ArgumentsOverride $null -ProtocolOverride $null -PromptTransportOverride $null
+    $result = Invoke-GcProviderProcessRunnerV1 -Request $request -Authorization $authorization -Policy $policy -Profile $profile -Prompt $requestContext.Prompt.Text -CancellationPath $CancellationPath -ExecutableOverride $null -ArgumentsOverride $null -ProtocolOverride $null -PromptTransportOverride $null -RunDirectory $runDirectory -RequestSha256 $requestSha256
     $attempts = @($result.Attempts)
 
     $finalSnapshot = Get-GcRunnerRepositorySnapshotV1 -RepositoryRoot $requestContext.RepositoryRoot
@@ -74,7 +74,20 @@ try {
     $lifecycleResult = Write-GcRunnerArtifactAtomicV1 -Artifact $lifecycle -DestinationPath ([IO.Path]::Combine($runDirectory, 'lifecycle.json'))
     Remove-GcRunnerTemporaryArtifactsV1 -RunDirectory $runDirectory
 
-    [Console]::Out.WriteLine((ConvertTo-GcCanonicalJsonV1 -Value ([ordered]@{ state = $state; failureCategory = $failureCategory; lifecyclePath = $lifecycleResult.Path; lifecycleSha256 = $lifecycleResult.Sha256; checkpointWritten = $checkpointWritten })))
+    $lastAttempt = if ($attempts.Count -eq 0) { $null } else { $attempts[$attempts.Count - 1] }
+    $reviewerPayloadPath = if ($null -eq $lastAttempt -or -not $lastAttempt.Contains('parsedPayloadPath')) { $null } else { $lastAttempt['parsedPayloadPath'] }
+    $reviewerPayloadSha256 = if ($null -eq $lastAttempt -or -not $lastAttempt.Contains('parsedPayloadSha256')) { $null } else { $lastAttempt['parsedPayloadSha256'] }
+    $reviewerPayloadParseStatus = if ($null -eq $lastAttempt -or -not $lastAttempt.Contains('payloadParseStatus')) { 'NOT_PRESENT' } else { $lastAttempt['payloadParseStatus'] }
+    [Console]::Out.WriteLine((ConvertTo-GcCanonicalJsonV1 -Value ([ordered]@{
+        state = $state
+        failureCategory = $failureCategory
+        lifecyclePath = $lifecycleResult.Path
+        lifecycleSha256 = $lifecycleResult.Sha256
+        checkpointWritten = $checkpointWritten
+        reviewerPayloadPath = $reviewerPayloadPath
+        reviewerPayloadSha256 = $reviewerPayloadSha256
+        reviewerPayloadParseStatus = $reviewerPayloadParseStatus
+    })))
     switch ($state) {
         'COMPLETED' { exit 0 }
         'TIMED_OUT' { exit 4 }

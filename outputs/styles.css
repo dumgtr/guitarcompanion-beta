@@ -6480,31 +6480,153 @@ body {
 }
 
 .continue-practice-banner {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   width: 100%;
   min-width: 0;
   display: grid;
-  gap: 5px;
-  padding: 18px 20px;
-  border: 1px solid color-mix(in srgb, var(--accent) 48%, var(--line));
-  border-radius: 14px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 20px;
+  padding: 22px 24px;
+  border: 1px solid color-mix(in srgb, var(--accent) 62%, rgba(255, 255, 255, 0.18));
+  border-radius: 18px;
   background:
-    linear-gradient(125deg, color-mix(in srgb, var(--accent) 14%, transparent), transparent 62%),
-    var(--surface);
+    radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--warm) 28%, transparent), transparent 34%),
+    linear-gradient(125deg, color-mix(in srgb, var(--accent) 24%, transparent), transparent 58%),
+    color-mix(in srgb, var(--surface) 82%, transparent);
   color: var(--ink);
   text-align: left;
-  opacity: 1;
-  cursor: not-allowed;
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+  backdrop-filter: blur(18px) saturate(135%);
+  cursor: pointer;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  animation: continue-practice-arrive 480ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.continue-practice-banner::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 18%, rgba(255, 255, 255, 0.13) 46%, transparent 72%);
+  transform: translateX(-120%);
+  animation: continue-practice-sheen 5.5s ease-in-out 1.2s infinite;
+}
+
+.continue-practice-banner:hover {
+  border-color: color-mix(in srgb, var(--accent) 82%, white);
+  box-shadow:
+    0 24px 60px color-mix(in srgb, var(--accent) 18%, rgba(0, 0, 0, 0.24)),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transform: translateY(-2px);
+}
+
+.continue-practice-banner:active {
+  transform: translateY(0) scale(0.995);
+}
+
+.continue-practice-banner:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 42%, transparent);
+  outline-offset: 3px;
+}
+
+.continue-practice-kicker {
+  grid-column: 1;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
 }
 
 .continue-practice-title {
+  grid-column: 1;
   font-size: clamp(1.15rem, 2.6vw, 1.45rem);
   font-weight: 900;
 }
 
 .continue-practice-copy {
+  grid-column: 1;
   color: var(--muted);
   font-size: 0.9rem;
   line-height: 1.5;
+}
+
+.continue-practice-action {
+  grid-column: 2;
+  grid-row: 1 / 4;
+  align-self: center;
+  border: 1px solid color-mix(in srgb, var(--accent) 44%, var(--line));
+  border-radius: 999px;
+  padding: 9px 13px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--ink);
+  font-size: 0.84rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+@keyframes continue-practice-arrive {
+  from { opacity: 0; transform: translateY(-10px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes continue-practice-sheen {
+  0%, 62% { transform: translateX(-120%); }
+  84%, 100% { transform: translateX(120%); }
+}
+
+.practice-day-selector {
+  display: grid;
+  gap: 9px;
+  margin: 18px 0 4px;
+}
+
+.practice-day-selector-label {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.practice-day-selector-buttons {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(36px, 1fr));
+  gap: 7px;
+}
+
+.practice-day {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  color: var(--muted);
+  font-weight: 850;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.practice-day:hover,
+.practice-day:focus-visible {
+  border-color: color-mix(in srgb, var(--accent) 68%, var(--line));
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.practice-day.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .continue-practice-banner,
+  .continue-practice-banner::before {
+    animation: none;
+  }
 }
 
 .ia-zone {
@@ -6700,6 +6822,21 @@ body {
   .ia-card-grid,
   .practice-studio-hero-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .continue-practice-banner {
+    grid-template-columns: 1fr;
+  }
+
+  .continue-practice-action {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+    margin-top: 6px;
+  }
+
+  .practice-day-selector-buttons {
+    gap: 4px;
   }
 
   .practice-studio-hero-card .small-button,

@@ -30,7 +30,7 @@ One-shot Process Runner
         |
 Codex / approved provider profile
         |
-Structured lifecycle artifact
+Retained per-attempt evidence and structured lifecycle artifact
         |
 AGY consolidation
 ```
@@ -52,7 +52,7 @@ The runner claims the authorization ID atomically before spawning the provider p
 V1 enables only profiles whose installed CLI contract was verified:
 
 - `codex-readonly`: `codex exec --ephemeral --json --sandbox read-only -`; completion requires one `turn.completed` event and exit code 0. `turn.failed`, malformed JSONL, missing terminal event, truncation, or nonzero exit fails closed.
-- `gemini-plan-review`: Gemini headless plan mode with `stream-json`; completion requires valid JSON lines, non-empty output, and exit code 0.
+- `gemini-plan-review`: Gemini headless plan mode with `stream-json`; completion requires valid JSON lines, one terminal success result, exit code 0, and exactly one mechanically extracted reviewer payload matching `gc-provider-process-runner-v1.reviewer-payload/1`. Exit code 0 without a valid payload is a protocol failure, never reviewer PASS.
 - `claude-readonly`: Claude one-shot JSON mode with only `Read`, `Glob`, and `Grep`; edit, write, shell, web, notebook, and MCP tools are denied, session persistence and slash commands are disabled, and completion requires one JSON object with `type=result`, `subtype=success`, a non-empty string `result`, `is_error` absent or false, and exit code 0.
 
 Claude and Gemini reviewer invocations are permitted only through these immutable Provider Runner profiles with a separate Human Dispatch Authorization. Ad-hoc direct provider commands, request-supplied executables or arguments, and `GC_*_AGENT_CMD` command templates are prohibited. A Host Broker is not required and is not invoked; the runner itself is the controlled one-shot boundary.
@@ -72,7 +72,9 @@ NOT_STARTED -> STARTED -> RUNNING -> COMPLETED
                                   -> CANCELLED
 ```
 
-Both stdout and stderr are drained concurrently in-process with a hard byte capture limit while the full streams continue to drain. The runner records full-stream byte lengths and SHA-256 hashes but never persists raw commands, raw prompts, credentials, or uncapped provider output.
+Both stdout and stderr are drained concurrently in-process with the existing hard byte capture limit while the full streams continue to drain. Each bounded capture is retained per attempt as `provider-stdout.raw` and `provider-stderr.raw`; full-stream byte lengths and SHA-256 hashes remain separate metadata when a stream exceeds the retained cap. Security redaction runs before persistence, and each attempt result records whether redaction changed a retained stream. Raw commands, prompts, credentials, authorization headers, access tokens, environment secrets, and uncapped provider output are not persisted.
+
+For `gemini-plan-review`, extraction reads only decoded assistant content or an exact contiguous JSON object from the already validated JSON stream. It does not add braces, remove fences from inside the object, rewrite keys, repair syntax, or infer missing fields. The accepted object has exactly `verdict`, `summary`, `requiredConstraints`, `risks`, `recommendedSeams`, `acceptanceTests`, and `filesReviewed`; verdict is `PASS`, `CONDITIONAL_PASS`, or `FAIL`. A sensitive, missing, malformed, ambiguous, truncated, or schema-invalid payload is not written as parsed evidence and fails the reviewer gate.
 
 Timeout and cancellation kill the complete process tree. The real process exit code is recorded when available. A process that starts but does not complete is never reported as `NOT_STARTED`.
 
@@ -101,10 +103,19 @@ Artifacts default to:
 %LOCALAPPDATA%\GuitarCompanion\ProviderProcessRunnerV1\runs\<authorizationId>
 ```
 
-An explicit artifact root is allowed only outside the repository, primarily for controlled tests. Lifecycle and checkpoint JSON are written atomically through unique same-directory temporary files. Temporary files are removed on every path.
+An explicit artifact root is allowed only outside the repository, primarily for controlled tests. Lifecycle, checkpoint, attempt-result, retained-stream, and parsed-payload artifacts are written atomically through unique same-directory temporary files. Retained destinations cannot be overwritten. Temporary transport files are removed only after retained files are written and verified.
 
-Artifacts contain hashes, byte lengths, timestamps, state transitions, stable failure categories, attempt metadata, and worktree-preservation results. Diagnostic text is reduced to stable closed summaries; raw prompt, raw command, tokens, and rejected values are not persisted.
+Every attempt has its own `attempt-<n>` directory containing:
+
+```text
+provider-stdout.raw
+provider-stderr.raw
+attempt-result.json
+reviewer-payload.json  # only when payloadParseStatus is VALID
+```
+
+`attempt-result.json` binds the authorization, request, profile, attempt number, timestamps, terminal state, exit code, retained paths/hashes/lengths, full-stream hashes/lengths, truncation and redaction flags, parsed-payload evidence, parse status, and `cleanupStatus: RETAINED`. Lifecycle attempt entries reference the retained stdout, stderr, attempt result, and optional reviewer payload with their SHA-256 values. Timeout and failure attempts retain the same bounded evidence wherever capture completed. Diagnostic text outside retained streams remains reduced to stable closed summaries.
 
 ## 8. Acceptance tests
 
-Tests use mock child processes only. They cover authorization rejection before spawn, stdin EOF, concurrent stdout/stderr flooding, Codex JSONL, Gemini stream JSON, strict Claude JSON completion and failures, real exit codes, timeout and descendant-process termination, cancellation, failure classification, quota zero-retry, rate-limit and timeout single retry, checkpoint/resume binding, atomic cleanup, redaction, output caps, worktree preservation, parse checks, and forbidden-path/static command checks.
+Tests use mock child processes only. They cover authorization rejection before spawn, stdin EOF, concurrent stdout/stderr flooding, Codex JSONL, Gemini stream JSON and strict reviewer-payload extraction, malformed and missing reviewer payloads, strict Claude JSON completion and failures, real exit codes, timeout and descendant-process termination, retained timeout evidence, cancellation, failure classification, quota zero-retry, unchanged rate-limit and timeout retry policy, checkpoint/resume binding, immutable atomic artifacts, retained-file hash verification, credential/header redaction, output caps, worktree preservation, parse checks, and forbidden-path/static command checks.
