@@ -1,5 +1,5 @@
 import { createReadStream } from "node:fs";
-import { access, stat } from "node:fs/promises";
+import { access, stat, readFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -36,7 +36,8 @@ const server = createServer(async (request, response) => {
     }
 
     const url = new URL(request.url || "/", `http://${HOST}:${port}`);
-    const pathname = decodePath(url.pathname);
+    let pathname = decodePath(url.pathname);
+    const isAlias = pathname === "/soundlab-v2" || pathname === "/soundlab-v2/";
 
     if ((pathname === "/" || pathname === "/index.html") && !(await exists(path.join(root, "index.html")))) {
       const outputIndex = path.join(root, "outputs", "index.html");
@@ -44,6 +45,10 @@ const server = createServer(async (request, response) => {
         redirect(response, "/outputs/index.html");
         return;
       }
+    }
+
+    if (isAlias) {
+      pathname = "/outputs/index.html";
     }
 
     const filePath = await resolveFilePath(pathname);
@@ -60,6 +65,15 @@ const server = createServer(async (request, response) => {
 
     if (request.method === "HEAD") {
       response.end();
+      return;
+    }
+
+    if (isAlias && filePath.endsWith("index.html")) {
+      let content = await readFile(filePath, "utf-8");
+      if (!content.includes("<base ")) {
+        content = content.replace("<head>", "<head>\n    <base href=\"/outputs/\">");
+      }
+      response.end(content);
       return;
     }
 

@@ -5,7 +5,7 @@
   const PROFILES = Object.freeze(["fsl-note-preview", "soundlab-guide-tone"]);
   const PROFILE_RANGES = Object.freeze({
     "fsl-note-preview": { min: 60, max: 72 },
-    "soundlab-guide-tone": { min: 57, max: 72 }
+    "soundlab-guide-tone": { min: 48, max: 72 }
   });
   const PROFILE_DEFAULTS = Object.freeze({
     "fsl-note-preview": {
@@ -40,14 +40,42 @@
     Bb: 10,
     B: 11
   });
+  const SOUNDLAB_SAMPLER_STATES = Object.freeze(["idle", "loading", "ready", "partial", "failed"]);
+  const APPROVED_SOUNDLAB_SAMPLES = Object.freeze([
+    { note: "A3", midi: 57, url: "assets/audio/nylon-guitar/A3.ogg" },
+    { note: "C#4", midi: 61, url: "assets/audio/nylon-guitar/Cs4.ogg" },
+    { note: "E4", midi: 64, url: "assets/audio/nylon-guitar/E4.ogg" },
+    { note: "G#4", midi: 68, url: "assets/audio/nylon-guitar/Gs4.ogg" },
+    { note: "A4", midi: 69, url: "assets/audio/nylon-guitar/A4.ogg" },
+    { note: "C#5", midi: 73, url: "assets/audio/nylon-guitar/Cs5.ogg" },
+    { note: "E5", midi: 76, url: "assets/audio/nylon-guitar/E5.ogg" }
+  ]);
+
+  // Nylon sample attribution:
+  // Original sample author: quartertone
+  // Source family: classical guitar multisample pack
+  // Intermediary preparation: tonejs-instruments / Nicholaus P. Brosowsky
+  // License: Creative Commons Attribution 3.0
 
   let audioCtx = null;
   let masterGain = null;
   let compressor = null;
   let channelGains = null;
   let lastError = null;
+  let soundLabSamplerState = "idle";
+  let loadedSampleCount = 0;
+  let failedSampleCount = 0;
+  let lastPlaybackBackend = "none";
+  let lastPlaybackInstrument = "none";
+  let lastRequestedNote = null;
+  let lastResolvedSample = null;
+  let lastFallbackReason = null;
+  let soundLabRequestGeneration = 0;
+  let soundLabSamplerLoadPromise = null;
 
   const activeVoices = new Map();
+  const soundLabSampleBuffers = new Map();
+  const soundLabFailedSamples = new Set();
 
   function getAudioContextCtor() {
     return window.AudioContext || window.webkitAudioContext || null;
@@ -171,12 +199,7 @@
     return true;
   }
 
-  function stopChannel(channel) {
-    if (!isSupportedChannel(channel)) {
-      setLastError(`Invalid channel: ${channel}`);
-      return false;
-    }
-
+  function releaseChannel(channel) {
     const voice = activeVoices.get(channel);
     if (!voice) return false;
 
@@ -185,6 +208,16 @@
       activeVoices.delete(channel);
     }
     return true;
+  }
+
+  function stopChannel(channel) {
+    if (!isSupportedChannel(channel)) {
+      setLastError(`Invalid channel: ${channel}`);
+      return false;
+    }
+
+    if (channel === "soundlab") soundLabRequestGeneration += 1;
+    return releaseChannel(channel);
   }
 
   function stopAllTonal() {
@@ -316,6 +349,209 @@
     }
   }
 
+  async function loadApprovedSoundLabSample(sample) {
+    try {
+      const response = await fetch(sample.url, { cache: "force-cache" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const encodedAudio = await response.arrayBuffer();
+      const decodedAudio = await audioCtx.decodeAudioData(encodedAudio.slice(0));
+      soundLabSampleBuffers.set(sample.note, decodedAudio);
+      loadedSampleCount = soundLabSampleBuffers.size;
+    } catch (error) {
+      soundLabFailedSamples.add(sample.note);
+      failedSampleCount = soundLabFailedSamples.size;
+      console.warn(`[AudioEngine] Nylon sample ${sample.note} failed to load.`, error);
+    }
+  }
+
+  function updateSoundLabSamplerState() {
+    loadedSampleCount = soundLabSampleBuffers.size;
+    failedSampleCount = soundLabFailedSamples.size;
+    soundLabSamplerState = loadedSampleCount === APPROVED_SOUNDLAB_SAMPLES.length
+      ? "ready"
+      : loadedSampleCount > 0
+        ? "partial"
+        : "failed";
+    return soundLabSamplerState;
+  }
+
+  async function prepareSoundLabSampler() {
+    if (soundLabSamplerState === "ready" || soundLabSamplerState === "partial" || soundLabSamplerState === "failed") {
+      return soundLabSamplerState;
+    }
+    if (soundLabSamplerLoadPromise) return soundLabSamplerLoadPromise;
+
+    const didUnlock = isReady() || await unlock();
+    if (!didUnlock) {
+      soundLabSamplerState = "failed";
+      lastFallbackReason = "audio-unavailable";
+      return soundLabSamplerState;
+    }
+
+    soundLabSamplerState = "loading";
+    loadedSampleCount = 0;
+    failedSampleCount = 0;
+    soundLabSampleBuffers.clear();
+    soundLabFailedSamples.clear();
+
+    soundLabSamplerLoadPromise = Promise.all(
+      APPROVED_SOUNDLAB_SAMPLES.map(loadApprovedSoundLabSample)
+    ).then(updateSoundLabSamplerState).finally(() => {
+      soundLabSamplerLoadPromise = null;
+    });
+
+    return soundLabSamplerLoadPromise;
+  }
+
+  function resolveNearestApprovedSample(parsedPitch) {
+    return APPROVED_SOUNDLAB_SAMPLES.reduce((nearest, sample) => {
+      if (!nearest) return sample;
+      return Math.abs(sample.midi - parsedPitch.midi) < Math.abs(nearest.midi - parsedPitch.midi)
+        ? sample
+        : nearest;
+    }, null);
+  }
+
+  function createSampleVoice(parsedPitch, velocity, sample) {
+    const buffer = soundLabSampleBuffers.get(sample.note);
+    if (!buffer) throw new Error(`Nylon sample ${sample.note} is unavailable.`);
+
+    const now = audioCtx.currentTime;
+    const source = audioCtx.createBufferSource();
+    const voiceGain = audioCtx.createGain();
+    const playbackRate = 2 ** ((parsedPitch.midi - sample.midi) / 12);
+    const duration = buffer.duration / playbackRate;
+
+    source.buffer = buffer;
+    source.playbackRate.setValueAtTime(playbackRate, now);
+    voiceGain.gain.setValueAtTime(Math.max(velocity, 0.0001), now);
+    voiceGain.gain.setValueAtTime(Math.max(velocity, 0.0001), Math.max(now, now + duration - 0.04));
+    voiceGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    source.connect(voiceGain);
+    voiceGain.connect(channelGains.soundlab);
+    source.start(now);
+    source.stop(now + duration + 0.02);
+
+    const voice = {
+      channel: "soundlab",
+      profile: "soundlab-guide-tone",
+      sources: [source],
+      nodes: [source, voiceGain],
+      timerId: null
+    };
+    voice.timerId = window.setTimeout(() => {
+      if (activeVoices.get("soundlab") !== voice) return;
+      cleanupVoice(voice);
+      activeVoices.delete("soundlab");
+    }, Math.ceil((duration + 0.08) * 1000));
+    return voice;
+  }
+
+  async function playSoundLabGuideNote(options = {}) {
+    const requestGeneration = ++soundLabRequestGeneration;
+    releaseChannel("soundlab");
+
+    const note = String(options.note || "").trim();
+    const requestedInstrument = options.instrument === "nylon" ? "nylon" : "synth";
+    lastRequestedNote = note || null;
+    lastResolvedSample = null;
+    lastFallbackReason = null;
+
+    const parsedPitch = parseScientificPitch(note);
+    if (!parsedPitch) {
+      setLastError(`Invalid scientific pitch: ${note}`);
+      return { played: false, requestGeneration, reason: "invalid-note" };
+    }
+
+    if (!isPitchInProfileRange(parsedPitch, "soundlab-guide-tone")) {
+      setLastError(`Pitch ${note} is outside soundlab-guide-tone range.`);
+      return { played: false, requestGeneration, reason: "out-of-range" };
+    }
+
+    try {
+      if (!isReady()) {
+        const didUnlock = await unlock();
+        if (!didUnlock) {
+          return { played: false, requestGeneration, reason: "audio-unavailable" };
+        }
+      }
+
+      if (requestGeneration !== soundLabRequestGeneration) {
+        return { played: false, requestGeneration, reason: "superseded" };
+      }
+
+      let voice = null;
+      let playbackInstrument = requestedInstrument;
+      if (requestedInstrument === "nylon") {
+        await prepareSoundLabSampler();
+        if (requestGeneration !== soundLabRequestGeneration) {
+          return { played: false, requestGeneration, reason: "superseded" };
+        }
+
+        const resolvedSample = resolveNearestApprovedSample(parsedPitch);
+        lastResolvedSample = resolvedSample?.note || null;
+        if (
+          resolvedSample &&
+          (soundLabSamplerState === "ready" || soundLabSamplerState === "partial") &&
+          soundLabSampleBuffers.has(resolvedSample.note)
+        ) {
+          try {
+            voice = createSampleVoice(
+              parsedPitch,
+              clampVelocity(options.velocity),
+              resolvedSample
+            );
+          } catch {
+            lastFallbackReason = "sample-playback-failed";
+          }
+        } else {
+          lastFallbackReason = soundLabFailedSamples.has(resolvedSample?.note)
+            ? "resolved-sample-failed"
+            : "sampler-unavailable";
+        }
+      }
+
+      if (!voice) {
+        playbackInstrument = "synth";
+        voice = createVoice(
+          "soundlab",
+          "soundlab-guide-tone",
+          parsedPitch,
+          clampVelocity(options.velocity)
+        );
+      }
+
+      if (requestGeneration !== soundLabRequestGeneration) {
+        cleanupVoice(voice);
+        return { played: false, requestGeneration, reason: "superseded" };
+      }
+
+      activeVoices.set("soundlab", voice);
+      lastPlaybackBackend = playbackInstrument === "nylon" ? "native-sampler" : "native-synth";
+      lastPlaybackInstrument = playbackInstrument;
+      lastError = null;
+      return {
+        played: true,
+        requestGeneration,
+        backend: lastPlaybackBackend,
+        instrument: lastPlaybackInstrument,
+        resolvedSample: lastResolvedSample,
+        fallbackReason: lastFallbackReason,
+        note
+      };
+    } catch (error) {
+      releaseChannel("soundlab");
+      setLastError(error?.message || "Sound Lab guide-note playback failed.");
+      return { played: false, requestGeneration, reason: "playback-failed" };
+    }
+  }
+
+  function stopSoundLab() {
+    soundLabRequestGeneration += 1;
+    const stopped = releaseChannel("soundlab");
+    return { stopped, requestGeneration: soundLabRequestGeneration };
+  }
+
   function getStatus() {
     const supported = Boolean(getAudioContextCtor());
     const contextState = audioCtx ? audioCtx.state : "uninitialized";
@@ -329,6 +565,18 @@
       availableProfiles: Array.from(PROFILES),
       availableChannels: Array.from(CHANNELS),
       engine: "native",
+      samplerState: SOUNDLAB_SAMPLER_STATES.includes(soundLabSamplerState)
+        ? soundLabSamplerState
+        : "failed",
+      approvedSampleCount: APPROVED_SOUNDLAB_SAMPLES.length,
+      loadedSampleCount,
+      failedSampleCount,
+      lastPlaybackBackend,
+      lastPlaybackInstrument,
+      lastRequestedNote,
+      lastResolvedSample,
+      lastFallbackReason,
+      activeSoundLabVoiceCount: activeVoices.has("soundlab") ? 1 : 0,
       lastError
     };
   }
@@ -337,6 +585,9 @@
     unlock,
     isReady,
     playNote,
+    prepareSoundLabSampler,
+    playSoundLabGuideNote,
+    stopSoundLab,
     stopChannel,
     stopAllTonal,
     getStatus

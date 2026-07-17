@@ -183,6 +183,10 @@ let pluckedCompressor = null;
 const PLUCKED_OUTPUT_MULTIPLIER = 1.6;
 let activeNodes = [];
 let sequenceTimers = [];
+let soundLabAudioSession = 0;
+let soundLabInstrumentSelectionSession = 0;
+let soundLabNylonSelectionPending = false;
+let selectedSoundLabInstrument = "synth";
 let metronomeTimer;
 let nextBeatTime = 0;
 let beatCount = 0;
@@ -196,6 +200,8 @@ const FEATURE_MINI_COURSE_SHELF = false;
 const miniCoursePreviewMode = parseMiniCoursePreviewMode();
 const practiceRoomIaPreviewMode = parsePracticeRoomIaPreviewMode();
 const fretboardStudioPreviewMode = parseFretboardStudioPreviewMode();
+const soundLabV2AliasMode = isSoundLabV2AliasPath();
+const sharedSoundLabAudioPreviewMode = parseSharedSoundLabAudioPreviewMode() || soundLabV2AliasMode;
 const legacyPracticeRoomMode = parseLegacyPracticeRoomMode();
 const practiceRoomMode = resolvePracticeRoomMode();
 const CONTINUE_PRACTICE_STATE_KEY = "gc_continue_practice_state_v1";
@@ -410,6 +416,59 @@ function parsePracticeRoomIaPreviewMode() {
   const params = new URLSearchParams(window.location.search);
   const value = String(params.get("practiceRoomIaPreview") || "").trim().toLowerCase();
   return ["1", "true", "yes"].includes(value);
+}
+
+function isSoundLabV2AliasPath() {
+  const pathname = window.location.pathname.replace(/\/+$/, "");
+  return pathname === "/soundlab-v2";
+}
+
+function parseSharedSoundLabAudioPreviewMode() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("sharedSoundLabAudioPreview") === "1";
+}
+
+function isSoundLabV2PreviewActive() {
+  if (soundLabV2AliasMode) return true;
+  const params = new URLSearchParams(window.location.search);
+  return (
+    params.get("soundLabV2Preview") === "1" &&
+    sharedSoundLabAudioPreviewMode
+  );
+}
+
+const SOUND_LAB_V2_SINGLE_GUIDE_TONE_LABS = new Set([
+  "m4-w13-ear-scale-color",
+  "m5-w17-sound-diatonic-family"
+]);
+
+function isSingleGuideToneLab(lab = {}, block = {}, labRef = "") {
+  const stableRefs = [lab.id, labRef, block.labRef]
+    .map((value) => String(value || "").trim())
+    .filter(Boolean);
+
+  if (stableRefs.some((value) => SOUND_LAB_V2_SINGLE_GUIDE_TONE_LABS.has(value))) {
+    return true;
+  }
+
+  if (
+    lab.audioEngine?.model !== "sound-lab-v2" ||
+    lab.audioEngine?.voice !== "guide-tone"
+  ) {
+    return false;
+  }
+
+  const items = getLabPlaybackItems(lab);
+  if (!items.length || month2AsArray(lab.sequence).length > 1) return false;
+
+  return items.every((item) => {
+    const playbackNote = item.playbackNote || item.auditionNote;
+    return (
+      typeof playbackNote === "string" &&
+      playbackNote.trim().length > 0 &&
+      getChordNotes(item).length === 1
+    );
+  });
 }
 
 function parseLegacyPracticeRoomMode() {
@@ -3897,12 +3956,119 @@ function renderMiniTab(tab, block = {}, tabRef = "") {
   return month2AppendResult(card, container);
 }
 
+function getSelectedSoundLabInstrument() {
+  return selectedSoundLabInstrument;
+}
+
+function getSoundLabSamplerStatus() {
+  const engine = getSharedSoundLabAudioEngine();
+  return typeof engine?.getStatus === "function" ? engine.getStatus() : null;
+}
+
+function isSoundLabNylonAvailable(status = getSoundLabSamplerStatus()) {
+  return status?.samplerState === "ready" || status?.samplerState === "partial";
+}
+
+function setSelectedSoundLabInstrument(instrument) {
+  selectedSoundLabInstrument = instrument === "nylon" && isSoundLabNylonAvailable()
+    ? "nylon"
+    : "synth";
+  return selectedSoundLabInstrument;
+}
+
+function syncSoundLabInstrumentSelectors() {
+  const status = getSoundLabSamplerStatus();
+  const isLoading = soundLabNylonSelectionPending || status?.samplerState === "loading";
+  const hasFailed = status?.samplerState === "failed";
+
+  document.querySelectorAll(".sound-lab-instrument-button[data-instrument]").forEach((button) => {
+    const instrument = button.dataset.instrument;
+    const isActive = instrument === getSelectedSoundLabInstrument();
+    button.setAttribute("aria-pressed", String(isActive));
+    button.classList.toggle("is-active", isActive);
+    if (instrument === "nylon") {
+      button.disabled = isLoading || hasFailed;
+      button.classList.toggle("is-loading", isLoading);
+      button.setAttribute("aria-busy", String(isLoading));
+      button.textContent = isLoading ? "Nylon…" : "Nylon";
+    }
+  });
+}
+
+function renderSoundLabInstrumentSelector() {
+  const selector = month2CreateElement("div", "sound-lab-instrument-selector");
+  const row = month2CreateElement("div", "sound-lab-instrument-selector-row");
+  const buttonGroup = month2CreateElement("div", "sound-lab-instrument-selector-buttons");
+  buttonGroup.setAttribute("role", "group");
+  buttonGroup.setAttribute("aria-label", "เลือกเสียงโน้ต Synth หรือ Nylon");
+
+  row.appendChild(month2CreateElement("span", "sound-lab-instrument-selector-label", "เสียงโน้ต"));
+  [
+    { value: "synth", label: "Synth" },
+    { value: "nylon", label: "Nylon" }
+  ].forEach(({ value, label }) => {
+    const button = month2CreateElement("button", "sound-lab-instrument-button", label);
+    const isActive = value === getSelectedSoundLabInstrument();
+    button.type = "button";
+    button.dataset.instrument = value;
+    button.setAttribute("aria-pressed", String(isActive));
+    button.classList.toggle("is-active", isActive);
+    if (value === "nylon") {
+      const samplerStatus = getSoundLabSamplerStatus();
+      const isLoading = soundLabNylonSelectionPending || samplerStatus?.samplerState === "loading";
+      button.disabled = isLoading || samplerStatus?.samplerState === "failed";
+      button.classList.toggle("is-loading", isLoading);
+      button.setAttribute("aria-busy", String(isLoading));
+      button.textContent = isLoading ? "Nylon…" : "Nylon";
+    }
+    button.addEventListener("click", async () => {
+      const selectionSession = ++soundLabInstrumentSelectionSession;
+      stopActiveAudio(true);
+      if (value === "synth") {
+        soundLabNylonSelectionPending = false;
+        setSelectedSoundLabInstrument("synth");
+        syncSoundLabInstrumentSelectors();
+        return;
+      }
+
+      const engine = getSharedSoundLabAudioEngine();
+      if (!engine || typeof engine.prepareSoundLabSampler !== "function") {
+        setSelectedSoundLabInstrument("synth");
+        syncSoundLabInstrumentSelectors();
+        return;
+      }
+
+      soundLabNylonSelectionPending = true;
+      syncSoundLabInstrumentSelectors();
+      try {
+        await engine.prepareSoundLabSampler();
+      } catch {}
+      if (selectionSession !== soundLabInstrumentSelectionSession) {
+        syncSoundLabInstrumentSelectors();
+        return;
+      }
+
+      soundLabNylonSelectionPending = false;
+      setSelectedSoundLabInstrument("nylon");
+      syncSoundLabInstrumentSelectors();
+    });
+    buttonGroup.appendChild(button);
+  });
+
+  row.appendChild(buttonGroup);
+  selector.appendChild(row);
+  return selector;
+}
+
 function renderChordSoundLab(lab, block = {}, labRef = "") {
   const container = block && typeof block.appendChild === "function" ? block : null;
   const blockData = container ? {} : block;
   if (!lab) return month2AppendResult(renderMonth2MissingCard(`ยังไม่มีห้องทดลองฟังเสียงคอร์ดสำหรับบล็อกนี้${labRef ? ` (${labRef})` : ""}`), container);
 
-  const isV2Preview = new URLSearchParams(window.location.search).get('soundLabV2Preview') === '1';
+  const isV2Preview = new URLSearchParams(window.location.search).get('soundLabV2Preview') === '1' || soundLabV2AliasMode;
+  const useSoundLabV2 =
+    isSoundLabV2PreviewActive() &&
+    isSingleGuideToneLab(lab, blockData, labRef);
   if (lab?.audioEngine?.model === "sound-lab-v2" && !isV2Preview) {
     return month2AppendResult(document.createDocumentFragment(), container);
   }
@@ -3914,7 +4080,7 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
 
   const eyebrowRow = month2CreateElement("div", "sound-lab-eyebrow-row");
   eyebrowRow.appendChild(month2CreateElement("p", "eyebrow", "ห้องทดลองฟังเสียงคอร์ด"));
-  if (isV2Preview && lab?.audioEngine?.model === "sound-lab-v2") {
+  if (useSoundLabV2) {
     eyebrowRow.appendChild(month2CreateElement("span", "sound-lab-v2-badge", "V2 PREVIEW"));
   }
 
@@ -3930,6 +4096,9 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
     month2AppendText(instruction, blockData.instruction);
     head.appendChild(instruction);
   }
+  if (useSoundLabV2) {
+    head.appendChild(renderSoundLabInstrumentSelector());
+  }
 
   const labItems = getLabPlaybackItems(lab);
   const controls = month2CreateElement("div", "chord-lab-controls");
@@ -3938,6 +4107,31 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
     button.type = "button";
     button.dataset.chordId = chord.id || chord.chord || "";
     button.addEventListener("click", async () => {
+      if (useSoundLabV2) {
+        const requestSession = ++soundLabAudioSession;
+        activateChordButton(card, button.dataset.chordId);
+        const playback = await playSharedSoundLabItem(lab, chord, blockData);
+        if (requestSession !== soundLabAudioSession) return;
+
+        if (!playback.played) {
+          updateLabStatus(card, chord, false, lab, blockData);
+          return;
+        }
+
+        const statusMeta = {
+          state: "PLAYED",
+          primary: getSoundLabPrimaryName(chord),
+          guideTone: playback.note,
+          role: getSoundLabCompactRole(chord),
+          sequence: formatSoundLabSequenceLabel(lab)
+        };
+        if (lab.audioEngine?.model === "sound-lab-v2" && chord.theoryNote && chord.playbackNote && chord.theoryNote !== chord.playbackNote) {
+          statusMeta.helperLine = `โน้ตที่เรียน: ${chord.theoryNote} · เสียงที่เปิดให้ฟัง: ${chord.playbackNote}`;
+        }
+        setLabStatus(card, "", statusMeta);
+        return;
+      }
+
       clearSequenceTimers();
       activateChordButton(card, button.dataset.chordId);
       const played = await playLabItem(lab, chord, card, blockData);
@@ -3955,12 +4149,17 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
   }
   const progressionButton = month2CreateElement("button", "progression-button", playSeqText);
   progressionButton.type = "button";
-  progressionButton.addEventListener("click", () => playSequence(lab, card, blockData));
+  if (useSoundLabV2) {
+    progressionButton.disabled = true;
+    progressionButton.textContent = "V2 Preview เล่นทีละคอร์ด — ปิดการเล่นเรียงชั่วคราว";
+  } else {
+    progressionButton.addEventListener("click", () => playSequence(lab, card, blockData, labRef));
+  }
 
   const stopButton = month2CreateElement("button", "stop-button", lab.uiCopy?.stop || "หยุดเสียง");
   stopButton.type = "button";
   stopButton.addEventListener("click", () => {
-    stopActiveAudio();
+    stopActiveAudio(useSoundLabV2);
     clearActiveChord(card);
     setLabStatus(card, "", {
       state: "STOPPED",
@@ -4158,6 +4357,10 @@ function getLabPlaybackNotes(lab = {}, chord = {}, block = {}, options = {}) {
     return [normalizeAuditionPitch(explicitAuditionNote)];
   }
 
+  if (lab.type === "ear-training-lab" && notes.length > 1) {
+    return notes.map(normalizeAuditionPitch);
+  }
+
   // Default: one representative note per chord item.
   // Current chord data stores root as the first note.
   return [normalizeAuditionPitch(notes[0])];
@@ -4218,6 +4421,44 @@ function getLabItemTotalDurationMs(lab = {}, chord = {}, block = {}) {
   if (!notes.length) return timing.durationMs;
   if (timing.sequential && notes.length > 1) return ((notes.length - 1) * timing.stepMs) + timing.durationMs + 120;
   return timing.durationMs + 120;
+}
+
+function getSharedSoundLabAudioEngine() {
+  const engine = window.AudioEngine;
+  if (
+    !engine
+    || typeof engine.playSoundLabGuideNote !== "function"
+    || typeof engine.stopSoundLab !== "function"
+  ) {
+    return null;
+  }
+  return engine;
+}
+
+async function playSharedSoundLabItem(lab = {}, chord = {}, block = {}) {
+  const engine = getSharedSoundLabAudioEngine();
+  const [guideNote] = getLabPlaybackNotes(lab, chord, block);
+  const resolvedGuideNote = guideNote;
+  if (!engine || !resolvedGuideNote) return { played: false, note: "" };
+
+  try {
+    const result = await engine.playSoundLabGuideNote({
+      note: resolvedGuideNote,
+      velocity: Number(lab.audioEngine?.gain ?? 0.7),
+      instrument: getSelectedSoundLabInstrument()
+    });
+    return {
+      played: result?.played === true,
+      note: resolvedGuideNote,
+      requestGeneration: result?.requestGeneration,
+      backend: result?.backend || "none",
+      instrument: result?.instrument || "none",
+      resolvedSample: result?.resolvedSample || null,
+      fallbackReason: result?.fallbackReason || null
+    };
+  } catch {
+    return { played: false, note: resolvedGuideNote };
+  }
 }
 
 async function playLabItem(lab = {}, chord = {}, card, block = {}, options = {}) {
@@ -4644,7 +4885,22 @@ function normalizePitchName(note) {
   return `${trimmed}3`;
 }
 
-function playSequence(lab = {}, card, block = {}) {
+function playSequence(lab = {}, card, block = {}, labRef = "") {
+  if (
+    isSoundLabV2PreviewActive() &&
+    isSingleGuideToneLab(lab, block, labRef)
+  ) {
+    stopActiveAudio(true);
+    clearActiveChord(card);
+    setLabStatus(card, "", {
+      state: "SOUND LAB",
+      primary: "เลือกฟังทีละเสียง",
+      hint: "Guide Tone ทีละเสียงเท่านั้น",
+      sequence: formatSoundLabSequenceLabel(lab)
+    });
+    return;
+  }
+
   clearSequenceTimers();
   stopAllSounds();
   stopOscillators();
@@ -4691,10 +4947,17 @@ function playSequence(lab = {}, card, block = {}) {
   sequenceTimers.push(clearTimer);
 }
 
-function stopActiveAudio() {
-  clearSequenceTimers();
-  stopAllSounds();
-  stopOscillators();
+function stopActiveAudio(useSoundLabV2 = null) {
+  if (useSoundLabV2 !== false && sharedSoundLabAudioPreviewMode) {
+    soundLabAudioSession += 1;
+    getSharedSoundLabAudioEngine()?.stopSoundLab();
+  }
+
+  if (useSoundLabV2 !== true) {
+    clearSequenceTimers();
+    stopAllSounds();
+    stopOscillators();
+  }
 }
 
 function stopOscillators() {

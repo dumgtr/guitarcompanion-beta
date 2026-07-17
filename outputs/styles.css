@@ -148,6 +148,7 @@ button {
   justify-content: flex-start;
   gap: 10px;
   min-width: 0;
+  max-width: 100%;
 }
 
 .brand {
@@ -155,6 +156,7 @@ button {
   align-items: center;
   gap: 10px;
   min-width: 0;
+  max-width: 100%;
 }
 
 .brand-mark {
@@ -203,6 +205,7 @@ footer,
   gap: 12px;
   width: 100%;
   min-width: 0;
+  max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -444,9 +447,16 @@ main {
   gap: 18px;
   align-content: center;
   min-height: min(560px, calc(100vh - 76px));
+  min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   padding: clamp(44px, 8vw, 92px) clamp(16px, 5vw, 64px) clamp(28px, 5vw, 58px);
   isolation: isolate;
+}
+
+.hero > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .hero::before {
@@ -562,6 +572,7 @@ h3 {
 }
 
 .panel {
+  min-width: 0;
   padding: clamp(18px, 3vw, 24px);
   transition:
     border-color 0.2s ease,
@@ -1285,6 +1296,7 @@ h3 {
   box-shadow: none;
   padding: 0;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 0;
@@ -1346,11 +1358,15 @@ h3 {
   display: flex;
   position: relative;
   top: auto;
-  width: max-content;
+  width: 100%;
+  min-width: 0;
   max-width: 100%;
   gap: 4px;
   margin: 16px 0 24px 0;
   overflow-x: auto;
+  overflow-y: hidden;
+  justify-content: flex-start;
+  overscroll-behavior-inline: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   border: 1px solid var(--line);
@@ -4299,6 +4315,77 @@ footer p {
     var(--surface);
 }
 
+.sound-lab-instrument-selector {
+  display: grid;
+  max-width: 100%;
+  margin-top: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface), transparent 8%);
+  padding: 8px 10px;
+}
+
+.sound-lab-instrument-selector-row {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.sound-lab-instrument-selector-label {
+  flex: 0 0 auto;
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.sound-lab-instrument-selector-buttons {
+  display: flex;
+  min-width: 0;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.sound-lab-instrument-button {
+  min-width: 64px;
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 900;
+  line-height: 1;
+  padding: 7px 10px;
+  touch-action: manipulation;
+}
+
+.sound-lab-instrument-button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.sound-lab-instrument-button.is-active,
+.sound-lab-instrument-button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent), transparent 82%);
+}
+
+.sound-lab-instrument-button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent), transparent 38%);
+  outline-offset: 2px;
+}
+
+.sound-lab-instrument-button:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
 .month2-chord-lab-card .chord-lab-controls,
 .month2-chord-lab-card .chord-lab-actions {
   display: flex;
@@ -4339,6 +4426,14 @@ footer p {
   border-color: color-mix(in srgb, var(--warm), var(--line) 30%);
   background: linear-gradient(135deg, var(--warm), var(--accent));
   color: #17100a;
+}
+
+.month2-chord-lab-card .progression-button:disabled {
+  background: var(--surface-soft);
+  background-image: none;
+  border-color: var(--line);
+  color: var(--muted);
+  cursor: not-allowed;
 }
 
 .month2-chord-lab-card .stop-button {
@@ -6593,7 +6688,7 @@ body {
 
 .practice-day-selector-buttons {
   display: grid;
-  grid-template-columns: repeat(7, minmax(36px, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 7px;
 }
 
@@ -7013,4 +7108,10 @@ body {
 }
 .rhc-dynamic-list li {
   margin-bottom: 0.25rem;
+}
+
+@media (max-width: 720px) {
+  .topnav {
+    flex-wrap: wrap !important;
+  }
 }
