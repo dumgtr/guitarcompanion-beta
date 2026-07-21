@@ -184,9 +184,7 @@ const PLUCKED_OUTPUT_MULTIPLIER = 1.6;
 let activeNodes = [];
 let sequenceTimers = [];
 let soundLabAudioSession = 0;
-let soundLabInstrumentSelectionSession = 0;
-let soundLabNylonSelectionPending = false;
-let selectedSoundLabInstrument = "synth";
+let selectedAudioInstrument = "synth";
 let metronomeTimer;
 let nextBeatTime = 0;
 let beatCount = 0;
@@ -2100,6 +2098,7 @@ function renderQaPreviewBadge() {
 
 function initFocusedApp() {
   applyTheme(getInitialTheme());
+  renderGlobalInstrumentSelector();
   renderDevPreviewBanner();
   renderQaPreviewBadge();
   updateDebugState({ currentMonth: selectedFocusedMonth, lastAction: "app boot" });
@@ -3956,108 +3955,65 @@ function renderMiniTab(tab, block = {}, tabRef = "") {
   return month2AppendResult(card, container);
 }
 
-function getSelectedSoundLabInstrument() {
-  return selectedSoundLabInstrument;
+function getSelectedAudioInstrument() {
+  return selectedAudioInstrument;
 }
 
-function getSoundLabSamplerStatus() {
-  const engine = getSharedSoundLabAudioEngine();
-  return typeof engine?.getStatus === "function" ? engine.getStatus() : null;
+function setSelectedAudioInstrument(instrument) {
+  const engine = window.AudioEngine;
+  const availability = typeof engine?.getInstrumentAvailability === "function"
+    ? engine.getInstrumentAvailability(instrument)
+    : { available: instrument === "synth" || instrument === "nylon" };
+
+  if (!availability?.available || !["synth", "nylon", "electric"].includes(instrument)) {
+    syncGlobalInstrumentSelector();
+    return selectedAudioInstrument;
+  }
+
+  if (instrument !== selectedAudioInstrument) {
+    soundLabAudioSession += 1;
+    clearSequenceTimers();
+    stopAllSounds();
+    stopOscillators();
+    engine?.stopAllTonal?.();
+    selectedAudioInstrument = instrument;
+    engine?.setSelectedInstrument?.(instrument);
+  }
+
+  syncGlobalInstrumentSelector();
+  return selectedAudioInstrument;
 }
 
-function isSoundLabNylonAvailable(status = getSoundLabSamplerStatus()) {
-  return status?.samplerState === "ready" || status?.samplerState === "partial";
-}
+function renderGlobalInstrumentSelector() {
+  const existingSelector = document.getElementById("globalInstrumentSelector");
+  if (existingSelector) {
+    syncGlobalInstrumentSelector();
+    return existingSelector;
+  }
 
-function setSelectedSoundLabInstrument(instrument) {
-  selectedSoundLabInstrument = instrument === "nylon" && isSoundLabNylonAvailable()
-    ? "nylon"
-    : "synth";
-  return selectedSoundLabInstrument;
-}
-
-function syncSoundLabInstrumentSelectors() {
-  const status = getSoundLabSamplerStatus();
-  const isLoading = soundLabNylonSelectionPending || status?.samplerState === "loading";
-  const hasFailed = status?.samplerState === "failed";
-
-  document.querySelectorAll(".sound-lab-instrument-button[data-instrument]").forEach((button) => {
-    const instrument = button.dataset.instrument;
-    const isActive = instrument === getSelectedSoundLabInstrument();
-    button.setAttribute("aria-pressed", String(isActive));
-    button.classList.toggle("is-active", isActive);
-    if (instrument === "nylon") {
-      button.disabled = isLoading || hasFailed;
-      button.classList.toggle("is-loading", isLoading);
-      button.setAttribute("aria-busy", String(isLoading));
-      button.textContent = isLoading ? "Nylon…" : "Nylon";
-    }
-  });
-}
-
-function renderSoundLabInstrumentSelector() {
-  const selector = month2CreateElement("div", "sound-lab-instrument-selector");
-  const row = month2CreateElement("div", "sound-lab-instrument-selector-row");
-  const buttonGroup = month2CreateElement("div", "sound-lab-instrument-selector-buttons");
-  buttonGroup.setAttribute("role", "group");
-  buttonGroup.setAttribute("aria-label", "เลือกเสียงโน้ต Synth หรือ Nylon");
-
-  row.appendChild(month2CreateElement("span", "sound-lab-instrument-selector-label", "เสียงโน้ต"));
-  [
-    { value: "synth", label: "Synth" },
-    { value: "nylon", label: "Nylon" }
-  ].forEach(({ value, label }) => {
-    const button = month2CreateElement("button", "sound-lab-instrument-button", label);
-    const isActive = value === getSelectedSoundLabInstrument();
-    button.type = "button";
-    button.dataset.instrument = value;
-    button.setAttribute("aria-pressed", String(isActive));
-    button.classList.toggle("is-active", isActive);
-    if (value === "nylon") {
-      const samplerStatus = getSoundLabSamplerStatus();
-      const isLoading = soundLabNylonSelectionPending || samplerStatus?.samplerState === "loading";
-      button.disabled = isLoading || samplerStatus?.samplerState === "failed";
-      button.classList.toggle("is-loading", isLoading);
-      button.setAttribute("aria-busy", String(isLoading));
-      button.textContent = isLoading ? "Nylon…" : "Nylon";
-    }
-    button.addEventListener("click", async () => {
-      const selectionSession = ++soundLabInstrumentSelectionSession;
-      stopActiveAudio(true);
-      if (value === "synth") {
-        soundLabNylonSelectionPending = false;
-        setSelectedSoundLabInstrument("synth");
-        syncSoundLabInstrumentSelectors();
-        return;
-      }
-
-      const engine = getSharedSoundLabAudioEngine();
-      if (!engine || typeof engine.prepareSoundLabSampler !== "function") {
-        setSelectedSoundLabInstrument("synth");
-        syncSoundLabInstrumentSelectors();
-        return;
-      }
-
-      soundLabNylonSelectionPending = true;
-      syncSoundLabInstrumentSelectors();
-      try {
-        await engine.prepareSoundLabSampler();
-      } catch {}
-      if (selectionSession !== soundLabInstrumentSelectionSession) {
-        syncSoundLabInstrumentSelectors();
-        return;
-      }
-
-      soundLabNylonSelectionPending = false;
-      setSelectedSoundLabInstrument("nylon");
-      syncSoundLabInstrumentSelectors();
-    });
-    buttonGroup.appendChild(button);
+  const control = month2CreateElement("label", "global-instrument-control");
+  control.innerHTML = `
+    <span class="global-instrument-label">เสียงกีตาร์</span>
+    <select id="globalInstrumentSelector" aria-label="เลือกเสียงเครื่องดนตรี">
+      <option value="synth">Synth</option>
+      <option value="nylon">Nylon</option>
+      <option value="electric">Electric</option>
+    </select>
+  `;
+  const selector = control.querySelector("#globalInstrumentSelector");
+  selector.addEventListener("change", (event) => {
+    setSelectedAudioInstrument(event.currentTarget.value);
   });
 
-  row.appendChild(buttonGroup);
-  selector.appendChild(row);
+  document.querySelector(".topbar-main")?.appendChild(control);
+  window.AudioEngine?.setSelectedInstrument?.(selectedAudioInstrument);
+  syncGlobalInstrumentSelector();
   return selector;
+}
+
+function syncGlobalInstrumentSelector() {
+  const selector = document.getElementById("globalInstrumentSelector");
+  if (selector) selector.value = getSelectedAudioInstrument();
 }
 
 function renderChordSoundLab(lab, block = {}, labRef = "") {
@@ -4096,10 +4052,6 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
     month2AppendText(instruction, blockData.instruction);
     head.appendChild(instruction);
   }
-  if (useSoundLabV2) {
-    head.appendChild(renderSoundLabInstrumentSelector());
-  }
-
   const labItems = getLabPlaybackItems(lab);
   const controls = month2CreateElement("div", "chord-lab-controls");
   labItems.forEach((chord = {}) => {
@@ -4149,12 +4101,7 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
   }
   const progressionButton = month2CreateElement("button", "progression-button", playSeqText);
   progressionButton.type = "button";
-  if (useSoundLabV2) {
-    progressionButton.disabled = true;
-    progressionButton.textContent = "V2 Preview เล่นทีละคอร์ด — ปิดการเล่นเรียงชั่วคราว";
-  } else {
-    progressionButton.addEventListener("click", () => playSequence(lab, card, blockData, labRef));
-  }
+  progressionButton.addEventListener("click", () => playSequence(lab, card, blockData, labRef));
 
   const stopButton = month2CreateElement("button", "stop-button", lab.uiCopy?.stop || "หยุดเสียง");
   stopButton.type = "button";
@@ -4316,6 +4263,16 @@ function normalizeAuditionPitch(note) {
 }
 
 function getLabPlaybackNotes(lab = {}, chord = {}, block = {}, options = {}) {
+  const contract = lab.playbackContract || chord.playbackContract || "";
+  if (contract === "single-guide-tone") {
+    const playbackNote = chord.playbackNote;
+    if (typeof playbackNote !== "string" || !playbackNote.trim()) {
+      console.warn("single-guide-tone item is missing a scalar playbackNote", { labId: lab.id, itemId: chord.id });
+      return [];
+    }
+    return [normalizeAuditionPitch(playbackNote)];
+  }
+
   if (lab.audioEngine?.model === "sound-lab-v2") {
     const v2Note = chord.playbackNote || chord.auditionNote;
     if (v2Note) return [v2Note];
@@ -4445,7 +4402,7 @@ async function playSharedSoundLabItem(lab = {}, chord = {}, block = {}) {
     const result = await engine.playSoundLabGuideNote({
       note: resolvedGuideNote,
       velocity: Number(lab.audioEngine?.gain ?? 0.7),
-      instrument: getSelectedSoundLabInstrument()
+      instrument: getSelectedAudioInstrument()
     });
     return {
       played: result?.played === true,
@@ -4467,11 +4424,10 @@ async function playLabItem(lab = {}, chord = {}, card, block = {}, options = {})
   stopOscillators();
 
   try {
-    const context = await ensureAudioContext();
-    if (!context) return false;
-
     const notes = getLabPlaybackNotes(lab, chord, block, options);
     if (!notes.length) return false;
+    const engine = window.AudioEngine;
+    if (!engine || typeof engine.playNote !== "function") return false;
 
     const timing = getLabItemPlaybackTiming(lab, chord, block);
     setLabStatus(card, "", {
@@ -4482,42 +4438,34 @@ async function playLabItem(lab = {}, chord = {}, card, block = {}, options = {})
       sequence: formatSoundLabSequenceLabel(lab)
     });
 
-    await Promise.all(notes.map((note, index) => {
-      const timeOffset = timing.sequential ? (index * timing.stepMs) / 1000 : (index * timing.strumMs) / 1000;
-      const duration = timing.durationMs / 1000;
-
-      const voice = lab.audioEngine?.voice;
+    const velocities = notes.map((note) => {
       const gainMultiplier = Number(lab.audioEngine?.gain ?? 1.0);
       const stackedPlayback = notes.length > 1 && !timing.sequential;
       const singleAudition = notes.length === 1 && !stackedPlayback;
-
       const basePeakGain = singleAudition
         ? Number(lab.audioEngine?.singleNotePeakGain || lab.audioEngine?.auditionPeakGain || 1.18)
         : timing.sequential
           ? 0.95
           : getStackedChordPeakGain(note, notes.length);
-
       const maxPeakGain = singleAudition ? 1.35 : 1.0;
       const peakGain = Math.min(basePeakGain * gainMultiplier, maxPeakGain);
-
-      const synthFn = singleAudition
-        ? playSoundLabGuideTone
-        : (voice === 'soft-piano' || voice === 'piano')
-          ? playSoftPiano
-          : playPluckedString;
-
-      const finalPeakGain = singleAudition
+      return singleAudition
         ? Number(lab.audioEngine?.guideTonePeakGain || 0.92)
         : peakGain;
+    });
 
-      return synthFn(
-        note,
-        timeOffset,
-        duration,
-        finalPeakGain,
-        { isChord: stackedPlayback }
-      );
-    }));
+    const played = await engine.playNote({
+      channel: "soundlab",
+      profile: "soundlab-guide-tone",
+      notes,
+      timeOffsets: notes.map((_, index) => (
+        timing.sequential ? (index * timing.stepMs) / 1000 : (index * timing.strumMs) / 1000
+      )),
+      duration: timing.durationMs / 1000,
+      velocities,
+      instrument: getSelectedAudioInstrument()
+    });
+    if (!played) return false;
 
     const doneTimer = window.setTimeout(() => {
       updateLabStatus(card, chord, true, lab, block);
@@ -4659,18 +4607,18 @@ async function playChord(chord = {}, audioEngine = {}) {
     const duration = Number(audioEngine.durationMs || 850) / 1000;
     const strumMs = Number(audioEngine.strumMs ?? 35);
     const notes = getChordNotes(chord);
-    const voice = audioEngine.voice;
-    const gainMultiplier = audioEngine.gain ?? 1.0;
-    const synthFn = (voice === 'soft-piano' || voice === 'piano') ? playSoftPiano : playPluckedString;
     if (!notes.length) return false;
-    await Promise.all(notes.map((note, index) => synthFn(
-      note,
-      (index * strumMs) / 1000,
+    const engine = window.AudioEngine;
+    if (!engine || typeof engine.playNote !== "function") return false;
+    return engine.playNote({
+      channel: "soundlab",
+      profile: "soundlab-guide-tone",
+      notes,
+      timeOffsets: notes.map((_, index) => (index * strumMs) / 1000),
       duration,
-      getStackedChordPeakGain(note, notes.length) * gainMultiplier,
-      { isChord: true }
-    )));
-    return true;
+      velocities: notes.map((note) => getStackedChordPeakGain(note, notes.length) * Number(audioEngine.gain ?? 1.0)),
+      instrument: getSelectedAudioInstrument()
+    });
   } catch {
     stopAllSounds();
     return false;
@@ -4886,21 +4834,6 @@ function normalizePitchName(note) {
 }
 
 function playSequence(lab = {}, card, block = {}, labRef = "") {
-  if (
-    isSoundLabV2PreviewActive() &&
-    isSingleGuideToneLab(lab, block, labRef)
-  ) {
-    stopActiveAudio(true);
-    clearActiveChord(card);
-    setLabStatus(card, "", {
-      state: "SOUND LAB",
-      primary: "เลือกฟังทีละเสียง",
-      hint: "Guide Tone ทีละเสียงเท่านั้น",
-      sequence: formatSoundLabSequenceLabel(lab)
-    });
-    return;
-  }
-
   clearSequenceTimers();
   stopAllSounds();
   stopOscillators();
@@ -4957,7 +4890,10 @@ function stopActiveAudio(useSoundLabV2 = null) {
     clearSequenceTimers();
     stopAllSounds();
     stopOscillators();
+    window.AudioEngine?.stopChannel?.("soundlab");
   }
+
+  if (useSoundLabV2 === null) window.AudioEngine?.stopAllTonal?.();
 }
 
 function stopOscillators() {
@@ -5636,9 +5572,6 @@ function mountFretboardStudioLite(containerElement) {
   if (!containerElement || containerElement.dataset.fslMounted === "true") return;
   containerElement.dataset.fslMounted = "true";
 
-  let fslSoundEnabled = false;
-  let fslSoundSession = 0;
-
   function getFslAudioEngine() {
     const engine = window.AudioEngine;
     if (
@@ -5652,30 +5585,34 @@ function mountFretboardStudioLite(containerElement) {
     return engine;
   }
 
-  const FSL_PLAYBACK_PITCH = Object.freeze({
-    C: "C4", "C#": "C#4", Db: "Db4",
-    D: "D4", "D#": "D#4", Eb: "Eb4",
-    E: "E4", F: "F4", "F#": "F#4", Gb: "Gb4",
-    G: "G4", "G#": "G#4", Ab: "Ab4",
-    A: "A4", "A#": "A#4", Bb: "Bb4", B: "B4"
-  });
+  const FSL_OPEN_STRING_MIDI = Object.freeze([64, 59, 55, 50, 45, 40]);
 
-  function fslPlayNotePreview(noteName) {
-    if (!fslSoundEnabled) return;
+  function fslMidiToScientificPitch(midi) {
+    const oct = Math.floor(midi / 12) - 1;
+    const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    return notes[midi % 12] + oct;
+  }
 
+  async function fslPlayNotePreview(playbackNote) {
     const engine = getFslAudioEngine();
-    const playbackNote = FSL_PLAYBACK_PITCH[noteName];
-
     if (!engine || !playbackNote) return;
 
-    void engine.playNote({
-      channel: "fsl",
-      profile: "fsl-note-preview",
-      note: playbackNote,
-      velocity: 0.7
-    }).catch(() => {
+    try {
+      if (typeof engine.unlock === "function") {
+        const unlocked = await engine.unlock();
+        if (!unlocked || !containerElement.isConnected) return;
+      }
+
+      await engine.playNote({
+        channel: "fsl",
+        profile: "fsl-fretboard-position",
+        note: playbackNote,
+        velocity: 0.7,
+        instrument: getSelectedAudioInstrument()
+      });
+    } catch {
       // Audio failure must never break FSL interaction.
-    });
+    }
   }
 
   const fslSharpNotes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -5775,16 +5712,9 @@ function mountFretboardStudioLite(containerElement) {
               <option value="5-9">Mid (5-9)</option>
             </select>
           </label>
-          <label class="fsl-control-group">
-            <span class="fsl-control-label">Sound Preview</span>
-            <label class="fsl-sound-toggle-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-              <input type="checkbox" data-fsl-sound-toggle>
-              <span data-fsl-sound-status>Sound: Off</span>
-            </label>
-          </label>
         </div>
 
-        <div class="fsl-panel-card">
+        <div class="fsl-panel-card fsl-inspector-card">
           <h5 class="fsl-panel-title">โน้ตที่เลือก (Inspector)</h5>
           <div class="fsl-inspector-empty" data-fsl-inspector-content>จิ้มที่โน้ตบนคอกีตาร์เพื่อดูรายละเอียด</div>
         </div>
@@ -5849,72 +5779,8 @@ function mountFretboardStudioLite(containerElement) {
     compareContent: containerElement.querySelector("[data-fsl-compare-content]"),
     inspectorContent: containerElement.querySelector("[data-fsl-inspector-content]"),
     fretboard: containerElement.querySelector("[data-fsl-fretboard]"),
-    fretMarkers: containerElement.querySelector("[data-fsl-fret-markers]"),
-    soundToggle: containerElement.querySelector("[data-fsl-sound-toggle]"),
-    soundStatus: containerElement.querySelector("[data-fsl-sound-status]")
+    fretMarkers: containerElement.querySelector("[data-fsl-fret-markers]")
   };
-
-  if (fslRefs.soundToggle) {
-    fslRefs.soundToggle.checked = false;
-    fslSoundEnabled = false;
-    fslRefs.soundStatus.textContent = "Sound: Off";
-
-    fslRefs.soundToggle.addEventListener("change", async (e) => {
-      if (e.target.checked) {
-        const engine = getFslAudioEngine();
-        if (engine) {
-          const session = ++fslSoundSession;
-          fslRefs.soundStatus.textContent = "Unlocking...";
-
-          try {
-            const unlocked = await engine.unlock();
-            if (
-              session !== fslSoundSession ||
-              !containerElement.isConnected ||
-              !e.target.isConnected ||
-              !e.target.checked
-            ) {
-              return;
-            }
-
-            if (unlocked) {
-              fslSoundEnabled = true;
-              fslRefs.soundStatus.textContent = "Sound: On";
-            } else {
-              fslSoundEnabled = false;
-              e.target.checked = false;
-              fslRefs.soundStatus.textContent = "Sound: Unavailable";
-            }
-          } catch (err) {
-            if (
-              session !== fslSoundSession ||
-              !containerElement.isConnected ||
-              !e.target.isConnected ||
-              !e.target.checked
-            ) {
-              return;
-            }
-            console.warn("[FSL] Engine unlock error", err);
-            fslSoundEnabled = false;
-            e.target.checked = false;
-            fslRefs.soundStatus.textContent = "Sound: Unavailable";
-          }
-        } else {
-          fslSoundEnabled = false;
-          e.target.checked = false;
-          fslRefs.soundStatus.textContent = "Sound: Unavailable";
-        }
-      } else {
-        fslSoundSession++;
-        fslSoundEnabled = false;
-        fslRefs.soundStatus.textContent = "Sound: Off";
-        const engine = getFslAudioEngine();
-        if (engine) {
-          engine.stopChannel("fsl");
-        }
-      }
-    });
-  }
 
   fslRefs.keySelect?.addEventListener("change", (event) => {
     fslState.key = event.target.value;
@@ -6046,7 +5912,7 @@ function mountFretboardStudioLite(containerElement) {
   }
 
   function fslHandleNoteClick(noteData, noteNode) {
-    fslPlayNotePreview(noteData.noteName);
+    fslPlayNotePreview(noteData.playbackNote);
 
     if (fslState.challenge) {
       fslHandleChallengeClick(noteData, noteNode);
@@ -6156,7 +6022,9 @@ function mountFretboardStudioLite(containerElement) {
         }
 
         noteNode.textContent = fslState.overlay === "intervals" ? fslGetIntervalName(interval) : noteName;
-        const noteData = { noteName, stringIndex, stringNumber, fret, interval };
+        const midi = FSL_OPEN_STRING_MIDI[stringIndex] + fret;
+        const playbackNote = fslMidiToScientificPitch(midi);
+        const noteData = { noteName, stringIndex, stringNumber, fret, interval, midi, playbackNote };
         noteNode.addEventListener("click", () => {
           containerElement.querySelectorAll(".fsl-note-node").forEach((node) => node.classList.remove("fsl-is-selected"));
           if (!fslState.challenge) noteNode.classList.add("fsl-is-selected");
@@ -6191,11 +6059,6 @@ function mountFretboardStudioLite(containerElement) {
   fslRender();
 
   return () => {
-    fslSoundSession++;
-    fslSoundEnabled = false;
-    if (fslRefs && fslRefs.soundToggle) {
-      fslRefs.soundToggle.checked = false;
-    }
     const engine = getFslAudioEngine();
     if (engine) {
       engine.stopChannel("fsl");

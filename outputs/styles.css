@@ -3082,6 +3082,7 @@ footer p {
     grid-template-columns: minmax(0, 1fr) 34px 34px;
     grid-template-areas:
       "brand theme reset"
+      "instrument instrument instrument"
       "metro metro metro"
       "nav nav nav";
     gap: 5px;
@@ -3107,6 +3108,12 @@ footer p {
   .topbar-main,
   .top-controls {
     display: contents;
+  }
+
+  .global-instrument-control {
+    grid-area: instrument;
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .brand-mark {
@@ -3614,6 +3621,16 @@ footer p {
     justify-content: flex-start !important;
     min-width: 0 !important;
     width: auto !important;
+  }
+
+  .global-instrument-control {
+    gap: 3px;
+  }
+
+  .global-instrument-control select {
+    min-height: 24px;
+    padding: 3px 5px;
+    font-size: 0.68rem;
   }
 
   .top-controls {
@@ -4315,75 +4332,42 @@ footer p {
     var(--surface);
 }
 
-.sound-lab-instrument-selector {
-  display: grid;
-  max-width: 100%;
-  margin-top: 4px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--surface), transparent 8%);
-  padding: 8px 10px;
-}
-
-.sound-lab-instrument-selector-row {
-  display: flex;
-  min-width: 0;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 10px;
-}
-
-.sound-lab-instrument-selector-label {
-  flex: 0 0 auto;
-  color: var(--ink);
-  font-size: 0.86rem;
-  font-weight: 900;
-}
-
-.sound-lab-instrument-selector-buttons {
-  display: flex;
-  min-width: 0;
+.global-instrument-control {
+  display: inline-flex;
   flex: 0 1 auto;
-  flex-wrap: wrap;
-  gap: 5px;
+  min-width: 180px;
+  min-height: 38px;
+  max-width: 100%;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface), transparent 8%);
+  padding: 4px 8px;
 }
 
-.sound-lab-instrument-button {
-  min-width: 64px;
-  min-height: 36px;
+.global-instrument-label {
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.global-instrument-control select {
+  flex: 0 0 auto;
+  min-width: 92px;
+  max-width: 100%;
+  min-height: 30px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: 8px;
   background: var(--surface);
   color: var(--ink);
   cursor: pointer;
   font: inherit;
-  font-size: 0.82rem;
-  font-weight: 900;
-  line-height: 1;
-  padding: 7px 10px;
-  touch-action: manipulation;
-}
-
-.sound-lab-instrument-button:hover:not(:disabled) {
-  border-color: var(--accent);
-}
-
-.sound-lab-instrument-button.is-active,
-.sound-lab-instrument-button[aria-pressed="true"] {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent), transparent 82%);
-}
-
-.sound-lab-instrument-button:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--accent), transparent 38%);
-  outline-offset: 2px;
-}
-
-.sound-lab-instrument-button:disabled {
-  cursor: wait;
-  opacity: 0.68;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.2;
+  padding: 4px 6px;
 }
 
 .month2-chord-lab-card .chord-lab-controls,
@@ -5947,6 +5931,21 @@ body {
   padding: 1rem;
 }
 
+.fsl-inspector-card {
+  display: flex;
+  flex-direction: column;
+  block-size: 220px;
+  min-block-size: 220px;
+  overflow: hidden;
+}
+
+.fsl-inspector-card [data-fsl-inspector-content] {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 .fsl-hero-card {
   display: flex;
   justify-content: space-between;
@@ -6048,16 +6047,23 @@ body {
 }
 
 .fsl-inspector-empty {
-  padding: 1rem 0;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
   color: var(--fsl-text-muted);
   font-size: 0.92rem;
   font-style: italic;
   text-align: center;
+  padding: 0;
 }
 
 .fsl-inspector-data {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.5rem;
+  flex: 1;
+  min-height: 0;
 }
 
 .fsl-ins-row {
@@ -6065,6 +6071,7 @@ body {
   justify-content: space-between;
   gap: 0.75rem;
   font-size: 0.92rem;
+  flex: 0 0 auto;
 }
 
 .fsl-ins-label {
@@ -6076,12 +6083,17 @@ body {
 }
 
 .fsl-ins-desc {
-  margin-top: 0.5rem;
+  margin-top: auto;
   padding-top: 0.55rem;
   border-top: 1px dashed var(--line);
   color: var(--fsl-text-muted);
   font-size: 0.88rem;
   line-height: 1.5;
+  min-height: 4.8em;
+  max-height: 4.8em;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
 }
 
 .fsl-compare-content {
