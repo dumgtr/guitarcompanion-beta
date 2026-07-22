@@ -196,16 +196,27 @@ async function runIntegrationTests() {
     assert.strictEqual(status.lastPlaybackBackend, "native-sampler", "FSL Synth routes to native-sampler one-shot backend");
     assert.strictEqual(status.lastPlaybackInstrument, "synth");
 
-    // Test 2.2: Lesson Synth play (soundlab channel) does NOT route to FSL Synth one-shot (uses native-synth)
+    // Test 2.2: Sound Lab Synth play (soundlab channel) routes to FSL Synth one-shot (uses native-sampler)
     const playRes2 = await AudioEngine.playNote({
       channel: "soundlab",
       profile: "soundlab-guide-tone",
       note: "C4",
       instrument: "synth"
     });
-    assert.strictEqual(playRes2, true, "playNote returns true for native synth");
+    assert.strictEqual(playRes2, true, "playNote returns true for Sound Lab Synth");
     status = AudioEngine.getStatus();
-    assert.strictEqual(status.lastPlaybackBackend, "native-synth", "Sound Lab Synth continues to use native-synth oscillator path");
+    assert.strictEqual(status.lastPlaybackBackend, "native-sampler", "Sound Lab Synth routes to native-sampler");
+
+    // Test 2.2b: Normal lesson Synth play (lessons channel) does NOT route to FSL Synth one-shot (uses native-synth)
+    const playRes2b = await AudioEngine.playNote({
+      channel: "lessons",
+      profile: "lessons-profile",
+      note: "C4",
+      instrument: "synth"
+    });
+    assert.strictEqual(playRes2b, true, "playNote returns true for native synth");
+    status = AudioEngine.getStatus();
+    assert.strictEqual(status.lastPlaybackBackend, "native-synth", "Normal lesson Synth continues to use native-synth oscillator path");
 
     // Test 2.3: Same-note retrigger creates a new one-shot without stopping previous one-shot
     status = AudioEngine.getStatus();
