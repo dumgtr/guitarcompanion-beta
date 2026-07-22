@@ -631,9 +631,9 @@ async function applyContinuePracticeLocationV1(location) {
 
 async function applyFreshPracticeLocationV1() {
   selectedFocusedMonth = 1;
-  focusedSelectedWeek = getCurrentFoundationWeek();
-  selectedWeek = focusedSelectedWeek;
-  restoredContinuePracticeDestinationV1 = { week: focusedSelectedWeek, day: 1 };
+  focusedSelectedWeek = 1;
+  selectedWeek = 1;
+  restoredContinuePracticeDestinationV1 = { week: 1, day: 1 };
   if (window.history?.replaceState) window.history.replaceState(null, "", "#dashboard");
   renderFocusedApp();
   document.getElementById("dashboard")?.scrollIntoView({ behavior: "auto", block: "start" });

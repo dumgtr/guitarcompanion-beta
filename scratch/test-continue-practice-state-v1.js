@@ -3,6 +3,7 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
+const vm = require("node:vm");
 const ContinuePractice = require("../outputs/continue-practice-state.js");
 
 const FIXED_TIME = "2026-07-22T03:04:05.000Z";
@@ -102,6 +103,66 @@ function assertInvalid(mutator, message) {
   const record = makeRecord();
   mutator(record);
   assert.equal(ContinuePractice.validateRecord(record, validationOptions), null, message);
+}
+
+function extractProductionFunction(source, functionName) {
+  const declaration = `function ${functionName}(`;
+  const start = source.indexOf(declaration);
+  assert.notEqual(start, -1, `${functionName} must exist in outputs/app.js`);
+  const bodyStart = source.indexOf("{", start);
+  let depth = 0;
+  for (let index = bodyStart; index < source.length; index += 1) {
+    if (source[index] === "{") depth += 1;
+    if (source[index] === "}") {
+      depth -= 1;
+      if (depth === 0) return source.slice(start, index + 1);
+    }
+  }
+  throw new Error(`Could not extract ${functionName} from outputs/app.js`);
+}
+
+function createProductionStartFreshHarness(appSource, storage) {
+  const context = vm.createContext({
+    selectedFocusedMonth: 4,
+    focusedSelectedWeek: 3,
+    selectedWeek: 3,
+    restoredContinuePracticeDestinationV1: { week: 4, day: 6 },
+    foundationStorage: { completedWeeks: "foundationCompletedWeeks" },
+    foundationWeeks: [1, 2, 3, 4].map((number) => ({ number })),
+    loadJson(key, fallback) {
+      const raw = storage.getItem(key);
+      return raw === null ? fallback : JSON.parse(raw);
+    },
+    renderCount: 0,
+    renderFocusedApp() {
+      context.renderCount += 1;
+    },
+    window: {
+      history: {
+        replaceState(_state, _title, hash) {
+          context.hash = hash;
+        }
+      }
+    },
+    document: {
+      getElementById(id) {
+        if (id !== "dashboard") return null;
+        return {
+          scrollIntoView() {
+            context.dashboardScrolled = true;
+          }
+        };
+      }
+    }
+  });
+
+  const productionSource = [
+    extractProductionFunction(appSource, "getCompletedFoundationWeeks"),
+    extractProductionFunction(appSource, "getCurrentFoundationWeek"),
+    extractProductionFunction(appSource, "applyFreshPracticeLocationV1")
+  ].join("\n");
+  vm.runInContext(productionSource, context, { filename: "outputs/app.js" });
+  return context;
 }
 
 async function run() {
@@ -282,6 +343,78 @@ async function run() {
   assert.match(appSource, /flushContinuePracticeStateV1\(\);\s*stopActiveAudio\(\);/);
   assert.match(cssSource, /\.continue-practice-entry :focus-visible/);
   assert.match(cssSource, /@media \(max-width: 640px\)[\s\S]*?\.continue-practice-entry[\s\S]*?flex-direction: column/);
+
+  const productionStorage = createMemoryStorage({
+    [ContinuePractice.STORAGE_KEY]: JSON.stringify(makeRecord({
+      location: {
+        route: "practice",
+        lessonId: "foundation-week-4",
+        exerciseId: "foundation-week-4-day-6",
+        stepIndex: 5
+      }
+    })),
+    foundationCompletedWeeks: JSON.stringify([1, 2]),
+    foundationDayByWeek: JSON.stringify({ 1: 5, 2: 7, 3: 4 }),
+    theme: "dark",
+    unrelatedSetting: "preserve"
+  });
+  const productionHarness = createProductionStartFreshHarness(appSource, productionStorage);
+  assert.equal(
+    productionHarness.getCurrentFoundationWeek(),
+    3,
+    "seeded normal progress must still recommend Week 3"
+  );
+
+  let productionInstrument = "nylon";
+  let productionBpm = 96;
+  let productionMetronomePreference = true;
+  let productionNoteStarts = 0;
+  let productionMetronomeStarts = 0;
+  let productionAudioResumes = 0;
+  const productionStore = ContinuePractice.createStore({
+    storage: productionStorage,
+    ...validationOptions
+  });
+  const productionController = ContinuePractice.createDecisionController({
+    store: productionStore,
+    ...validationOptions,
+    adapters: {
+      applyInstrument: (value) => { productionInstrument = value; },
+      applyBpm: (value) => { productionBpm = value; },
+      applyMetronomePreference: (value) => { productionMetronomePreference = value; },
+      applyFreshLocation: () => productionHarness.applyFreshPracticeLocationV1()
+    }
+  });
+
+  const removeCallsBefore = productionStorage.calls.filter(([operation]) => operation === "removeItem").length;
+  assert.equal(await productionController.startFresh(), true);
+  assert.equal(productionHarness.selectedFocusedMonth, 1, "Start Fresh sets Month 1");
+  assert.equal(productionHarness.focusedSelectedWeek, 1, "Start Fresh sets focused Week 1");
+  assert.equal(productionHarness.selectedWeek, 1, "Start Fresh keeps the legacy selected Week at 1");
+  assert.equal(productionHarness.restoredContinuePracticeDestinationV1.week, 1);
+  assert.equal(productionHarness.restoredContinuePracticeDestinationV1.day, 1, "Start Fresh sets Day 1");
+  assert.equal(productionInstrument, "synth");
+  assert.equal(productionBpm, 82);
+  assert.equal(productionMetronomePreference, false);
+  assert.equal(productionNoteStarts, 0, "Start Fresh does not play a note");
+  assert.equal(productionMetronomeStarts, 0, "Start Fresh does not start the metronome");
+  assert.equal(productionAudioResumes, 0, "Start Fresh does not resume AudioContext");
+  assert.equal(productionStorage.has(ContinuePractice.STORAGE_KEY), false, "only the feature record is cleared");
+  assert.equal(productionStorage.value("foundationCompletedWeeks"), JSON.stringify([1, 2]));
+  assert.equal(productionStorage.value("foundationDayByWeek"), JSON.stringify({ 1: 5, 2: 7, 3: 4 }));
+  assert.equal(productionStorage.value("theme"), "dark");
+  assert.equal(productionStorage.value("unrelatedSetting"), "preserve");
+  assert.deepEqual(
+    productionStorage.calls.filter(([operation]) => operation === "removeItem").slice(removeCallsBefore),
+    [["removeItem", ContinuePractice.STORAGE_KEY]],
+    "Start Fresh removes exactly the feature key"
+  );
+  assert.equal(await productionController.startFresh(), false, "production Start Fresh remains idempotent");
+  assert.equal(
+    productionStorage.calls.filter(([operation]) => operation === "removeItem").length,
+    removeCallsBefore + 1,
+    "repeated Start Fresh performs no extra storage mutation"
+  );
 
   console.log("Continue Practice State V1 deterministic tests PASS (schema, storage, debounce, Continue, Start Fresh, no-audio).");
 }
