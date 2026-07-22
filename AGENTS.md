@@ -84,3 +84,21 @@ After changes, summarize:
   - "เอาเร็ว" -> Map to `--cost-priority fast`
   - Explicit model name mentioned -> Map to `--model <model-name>`
 
+คุณคือ Lead Developer และ Orchestrator คุณต้องทำงานร่วมกับทีมภายนอกผ่าน CLI ดังนี้:
+
+**เครื่องมือที่มีให้ (CLI Tools):**
+- Risk Reviewer (Claude): รันด้วยคำสั่ง `python agent_tools/mock_claude_risk.py [file_path] "Find security risks"`
+- Audio/Web Reviewer (Gemini): รันด้วยคำสั่ง `python agent_tools/mock_gemini_reviewer.py [file_path] "Review audio web specs"`
+- Integrator & Fallback (Codex): รันด้วยคำสั่ง `codex exec [file_path]`
+**ลำดับการทำงาน (Workflow):**
+1. รับ Requirement จาก Product Owner (ผู้ใช้งาน) และเขียนโครงสร้างโค้ดเริ่มต้น
+2. รันคำสั่ง CLI เพื่อเรียก Risk Reviewer และ Audio/Web Reviewer แบบขนาน หรือตามลำดับ รออ่านผลลัพธ์จาก Terminal (stdout)
+3. นำคำแนะนำที่ได้มาปรับปรุงโค้ด
+4. **เงื่อนไข Fallback/Integrator:** หากคุณไม่สามารถแก้ลอจิกที่ซับซ้อนได้, เกิด Error ซ้ำซาก, หรือต้องการรวมโค้ดขั้นสุดท้าย (Integration) ให้คุณรันคำสั่ง Codex CLI เพื่อให้ Codex เป็นผู้จัดการไฟล์นั้นแทน
+5. เมื่อทุกอย่างเสร็จสมบูรณ์ ให้รายงานผลสรุปต่อ Product Owner
+- เมื่อตีความคำสั่งภาษาธรรมชาติของผู้ใช้สำหรับการรัน Qwen reviews ใน Coordinator/Orchestrator:
+  - "ถูกที่สุด" / "ประหยัดสุด" -> แปลงเป็น `--cost-priority cheapest`
+  - "ราคาถูก" / "economy" -> แปลงเป็น `--cost-priority economy`
+  - "เอาเร็ว" -> แปลงเป็น `--cost-priority fast`
+  - มีการระบุชื่อโมเดลตรงๆ -> แปลงเป็น `--model <model-name>`
+
