@@ -183,6 +183,8 @@ let pluckedCompressor = null;
 const PLUCKED_OUTPUT_MULTIPLIER = 1.6;
 let activeNodes = [];
 let sequenceTimers = [];
+let soundLabAudioSession = 0;
+let selectedAudioInstrument = "synth";
 let metronomeTimer;
 let nextBeatTime = 0;
 let beatCount = 0;
@@ -196,6 +198,8 @@ const FEATURE_MINI_COURSE_SHELF = false;
 const miniCoursePreviewMode = parseMiniCoursePreviewMode();
 const practiceRoomIaPreviewMode = parsePracticeRoomIaPreviewMode();
 const fretboardStudioPreviewMode = parseFretboardStudioPreviewMode();
+const soundLabV2AliasMode = isSoundLabV2AliasPath();
+const sharedSoundLabAudioPreviewMode = parseSharedSoundLabAudioPreviewMode() || soundLabV2AliasMode;
 const legacyPracticeRoomMode = parseLegacyPracticeRoomMode();
 const practiceRoomMode = resolvePracticeRoomMode();
 const CONTINUE_PRACTICE_STATE_KEY = "gc_continue_practice_state_v1";
@@ -410,6 +414,59 @@ function parsePracticeRoomIaPreviewMode() {
   const params = new URLSearchParams(window.location.search);
   const value = String(params.get("practiceRoomIaPreview") || "").trim().toLowerCase();
   return ["1", "true", "yes"].includes(value);
+}
+
+function isSoundLabV2AliasPath() {
+  const pathname = window.location.pathname.replace(/\/+$/, "");
+  return pathname === "/soundlab-v2";
+}
+
+function parseSharedSoundLabAudioPreviewMode() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("sharedSoundLabAudioPreview") === "1";
+}
+
+function isSoundLabV2PreviewActive() {
+  if (soundLabV2AliasMode) return true;
+  const params = new URLSearchParams(window.location.search);
+  return (
+    params.get("soundLabV2Preview") === "1" &&
+    sharedSoundLabAudioPreviewMode
+  );
+}
+
+const SOUND_LAB_V2_SINGLE_GUIDE_TONE_LABS = new Set([
+  "m4-w13-ear-scale-color",
+  "m5-w17-sound-diatonic-family"
+]);
+
+function isSingleGuideToneLab(lab = {}, block = {}, labRef = "") {
+  const stableRefs = [lab.id, labRef, block.labRef]
+    .map((value) => String(value || "").trim())
+    .filter(Boolean);
+
+  if (stableRefs.some((value) => SOUND_LAB_V2_SINGLE_GUIDE_TONE_LABS.has(value))) {
+    return true;
+  }
+
+  if (
+    lab.audioEngine?.model !== "sound-lab-v2" ||
+    lab.audioEngine?.voice !== "guide-tone"
+  ) {
+    return false;
+  }
+
+  const items = getLabPlaybackItems(lab);
+  if (!items.length || month2AsArray(lab.sequence).length > 1) return false;
+
+  return items.every((item) => {
+    const playbackNote = item.playbackNote || item.auditionNote;
+    return (
+      typeof playbackNote === "string" &&
+      playbackNote.trim().length > 0 &&
+      getChordNotes(item).length === 1
+    );
+  });
 }
 
 function parseLegacyPracticeRoomMode() {
@@ -2041,6 +2098,7 @@ function renderQaPreviewBadge() {
 
 function initFocusedApp() {
   applyTheme(getInitialTheme());
+  renderGlobalInstrumentSelector();
   renderDevPreviewBanner();
   renderQaPreviewBadge();
   updateDebugState({ currentMonth: selectedFocusedMonth, lastAction: "app boot" });
@@ -3897,12 +3955,76 @@ function renderMiniTab(tab, block = {}, tabRef = "") {
   return month2AppendResult(card, container);
 }
 
+function getSelectedAudioInstrument() {
+  return selectedAudioInstrument;
+}
+
+function setSelectedAudioInstrument(instrument) {
+  const engine = window.AudioEngine;
+  const availability = typeof engine?.getInstrumentAvailability === "function"
+    ? engine.getInstrumentAvailability(instrument)
+    : { available: instrument === "synth" || instrument === "nylon" };
+
+  if (!availability?.available || !["synth", "nylon", "electric"].includes(instrument)) {
+    syncGlobalInstrumentSelector();
+    return selectedAudioInstrument;
+  }
+
+  if (instrument !== selectedAudioInstrument) {
+    soundLabAudioSession += 1;
+    clearSequenceTimers();
+    stopAllSounds();
+    stopOscillators();
+    engine?.stopAllTonal?.();
+    selectedAudioInstrument = instrument;
+    engine?.setSelectedInstrument?.(instrument);
+  }
+
+  syncGlobalInstrumentSelector();
+  return selectedAudioInstrument;
+}
+
+function renderGlobalInstrumentSelector() {
+  const existingSelector = document.getElementById("globalInstrumentSelector");
+  if (existingSelector) {
+    syncGlobalInstrumentSelector();
+    return existingSelector;
+  }
+
+  const control = month2CreateElement("label", "global-instrument-control");
+  control.innerHTML = `
+    <span class="global-instrument-label">เสียงกีตาร์</span>
+    <select id="globalInstrumentSelector" aria-label="เลือกเสียงเครื่องดนตรี">
+      <option value="synth">Synth</option>
+      <option value="nylon">Nylon</option>
+      <option value="electric">Electric</option>
+    </select>
+  `;
+  const selector = control.querySelector("#globalInstrumentSelector");
+  selector.addEventListener("change", (event) => {
+    setSelectedAudioInstrument(event.currentTarget.value);
+  });
+
+  document.querySelector(".topbar-main")?.appendChild(control);
+  window.AudioEngine?.setSelectedInstrument?.(selectedAudioInstrument);
+  syncGlobalInstrumentSelector();
+  return selector;
+}
+
+function syncGlobalInstrumentSelector() {
+  const selector = document.getElementById("globalInstrumentSelector");
+  if (selector) selector.value = getSelectedAudioInstrument();
+}
+
 function renderChordSoundLab(lab, block = {}, labRef = "") {
   const container = block && typeof block.appendChild === "function" ? block : null;
   const blockData = container ? {} : block;
   if (!lab) return month2AppendResult(renderMonth2MissingCard(`ยังไม่มีห้องทดลองฟังเสียงคอร์ดสำหรับบล็อกนี้${labRef ? ` (${labRef})` : ""}`), container);
 
-  const isV2Preview = new URLSearchParams(window.location.search).get('soundLabV2Preview') === '1';
+  const isV2Preview = new URLSearchParams(window.location.search).get('soundLabV2Preview') === '1' || soundLabV2AliasMode;
+  const useSoundLabV2 =
+    isSoundLabV2PreviewActive() &&
+    isSingleGuideToneLab(lab, blockData, labRef);
   if (lab?.audioEngine?.model === "sound-lab-v2" && !isV2Preview) {
     return month2AppendResult(document.createDocumentFragment(), container);
   }
@@ -3914,7 +4036,7 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
 
   const eyebrowRow = month2CreateElement("div", "sound-lab-eyebrow-row");
   eyebrowRow.appendChild(month2CreateElement("p", "eyebrow", "ห้องทดลองฟังเสียงคอร์ด"));
-  if (isV2Preview && lab?.audioEngine?.model === "sound-lab-v2") {
+  if (useSoundLabV2) {
     eyebrowRow.appendChild(month2CreateElement("span", "sound-lab-v2-badge", "V2 PREVIEW"));
   }
 
@@ -3930,7 +4052,6 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
     month2AppendText(instruction, blockData.instruction);
     head.appendChild(instruction);
   }
-
   const labItems = getLabPlaybackItems(lab);
   const controls = month2CreateElement("div", "chord-lab-controls");
   labItems.forEach((chord = {}) => {
@@ -3938,6 +4059,31 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
     button.type = "button";
     button.dataset.chordId = chord.id || chord.chord || "";
     button.addEventListener("click", async () => {
+      if (useSoundLabV2) {
+        const requestSession = ++soundLabAudioSession;
+        activateChordButton(card, button.dataset.chordId);
+        const playback = await playSharedSoundLabItem(lab, chord, blockData);
+        if (requestSession !== soundLabAudioSession) return;
+
+        if (!playback.played) {
+          updateLabStatus(card, chord, false, lab, blockData);
+          return;
+        }
+
+        const statusMeta = {
+          state: "PLAYED",
+          primary: getSoundLabPrimaryName(chord),
+          guideTone: playback.note,
+          role: getSoundLabCompactRole(chord),
+          sequence: formatSoundLabSequenceLabel(lab)
+        };
+        if (lab.audioEngine?.model === "sound-lab-v2" && chord.theoryNote && chord.playbackNote && chord.theoryNote !== chord.playbackNote) {
+          statusMeta.helperLine = `โน้ตที่เรียน: ${chord.theoryNote} · เสียงที่เปิดให้ฟัง: ${chord.playbackNote}`;
+        }
+        setLabStatus(card, "", statusMeta);
+        return;
+      }
+
       clearSequenceTimers();
       activateChordButton(card, button.dataset.chordId);
       const played = await playLabItem(lab, chord, card, blockData);
@@ -3955,12 +4101,12 @@ function renderChordSoundLab(lab, block = {}, labRef = "") {
   }
   const progressionButton = month2CreateElement("button", "progression-button", playSeqText);
   progressionButton.type = "button";
-  progressionButton.addEventListener("click", () => playSequence(lab, card, blockData));
+  progressionButton.addEventListener("click", () => playSequence(lab, card, blockData, labRef));
 
   const stopButton = month2CreateElement("button", "stop-button", lab.uiCopy?.stop || "หยุดเสียง");
   stopButton.type = "button";
   stopButton.addEventListener("click", () => {
-    stopActiveAudio();
+    stopActiveAudio(useSoundLabV2);
     clearActiveChord(card);
     setLabStatus(card, "", {
       state: "STOPPED",
@@ -4117,6 +4263,16 @@ function normalizeAuditionPitch(note) {
 }
 
 function getLabPlaybackNotes(lab = {}, chord = {}, block = {}, options = {}) {
+  const contract = lab.playbackContract || chord.playbackContract || "";
+  if (contract === "single-guide-tone") {
+    const playbackNote = chord.playbackNote;
+    if (typeof playbackNote !== "string" || !playbackNote.trim()) {
+      console.warn("single-guide-tone item is missing a scalar playbackNote", { labId: lab.id, itemId: chord.id });
+      return [];
+    }
+    return [normalizeAuditionPitch(playbackNote)];
+  }
+
   if (lab.audioEngine?.model === "sound-lab-v2") {
     const v2Note = chord.playbackNote || chord.auditionNote;
     if (v2Note) return [v2Note];
@@ -4156,6 +4312,10 @@ function getLabPlaybackNotes(lab = {}, chord = {}, block = {}, options = {}) {
 
   if (explicitAuditionNote) {
     return [normalizeAuditionPitch(explicitAuditionNote)];
+  }
+
+  if (lab.type === "ear-training-lab" && notes.length > 1) {
+    return notes.map(normalizeAuditionPitch);
   }
 
   // Default: one representative note per chord item.
@@ -4220,17 +4380,54 @@ function getLabItemTotalDurationMs(lab = {}, chord = {}, block = {}) {
   return timing.durationMs + 120;
 }
 
+function getSharedSoundLabAudioEngine() {
+  const engine = window.AudioEngine;
+  if (
+    !engine
+    || typeof engine.playSoundLabGuideNote !== "function"
+    || typeof engine.stopSoundLab !== "function"
+  ) {
+    return null;
+  }
+  return engine;
+}
+
+async function playSharedSoundLabItem(lab = {}, chord = {}, block = {}) {
+  const engine = getSharedSoundLabAudioEngine();
+  const [guideNote] = getLabPlaybackNotes(lab, chord, block);
+  const resolvedGuideNote = guideNote;
+  if (!engine || !resolvedGuideNote) return { played: false, note: "" };
+
+  try {
+    const result = await engine.playSoundLabGuideNote({
+      note: resolvedGuideNote,
+      velocity: Number(lab.audioEngine?.gain ?? 0.7),
+      instrument: getSelectedAudioInstrument()
+    });
+    return {
+      played: result?.played === true,
+      note: resolvedGuideNote,
+      requestGeneration: result?.requestGeneration,
+      backend: result?.backend || "none",
+      instrument: result?.instrument || "none",
+      resolvedSample: result?.resolvedSample || null,
+      fallbackReason: result?.fallbackReason || null
+    };
+  } catch {
+    return { played: false, note: resolvedGuideNote };
+  }
+}
+
 async function playLabItem(lab = {}, chord = {}, card, block = {}, options = {}) {
   if (options.clearTimers !== false) clearSequenceTimers();
   stopAllSounds();
   stopOscillators();
 
   try {
-    const context = await ensureAudioContext();
-    if (!context) return false;
-
     const notes = getLabPlaybackNotes(lab, chord, block, options);
     if (!notes.length) return false;
+    const engine = window.AudioEngine;
+    if (!engine || typeof engine.playNote !== "function") return false;
 
     const timing = getLabItemPlaybackTiming(lab, chord, block);
     setLabStatus(card, "", {
@@ -4241,42 +4438,34 @@ async function playLabItem(lab = {}, chord = {}, card, block = {}, options = {})
       sequence: formatSoundLabSequenceLabel(lab)
     });
 
-    await Promise.all(notes.map((note, index) => {
-      const timeOffset = timing.sequential ? (index * timing.stepMs) / 1000 : (index * timing.strumMs) / 1000;
-      const duration = timing.durationMs / 1000;
-
-      const voice = lab.audioEngine?.voice;
+    const velocities = notes.map((note) => {
       const gainMultiplier = Number(lab.audioEngine?.gain ?? 1.0);
       const stackedPlayback = notes.length > 1 && !timing.sequential;
       const singleAudition = notes.length === 1 && !stackedPlayback;
-
       const basePeakGain = singleAudition
         ? Number(lab.audioEngine?.singleNotePeakGain || lab.audioEngine?.auditionPeakGain || 1.18)
         : timing.sequential
           ? 0.95
           : getStackedChordPeakGain(note, notes.length);
-
       const maxPeakGain = singleAudition ? 1.35 : 1.0;
       const peakGain = Math.min(basePeakGain * gainMultiplier, maxPeakGain);
-
-      const synthFn = singleAudition
-        ? playSoundLabGuideTone
-        : (voice === 'soft-piano' || voice === 'piano')
-          ? playSoftPiano
-          : playPluckedString;
-
-      const finalPeakGain = singleAudition
+      return singleAudition
         ? Number(lab.audioEngine?.guideTonePeakGain || 0.92)
         : peakGain;
+    });
 
-      return synthFn(
-        note,
-        timeOffset,
-        duration,
-        finalPeakGain,
-        { isChord: stackedPlayback }
-      );
-    }));
+    const played = await engine.playNote({
+      channel: "soundlab",
+      profile: "soundlab-guide-tone",
+      notes,
+      timeOffsets: notes.map((_, index) => (
+        timing.sequential ? (index * timing.stepMs) / 1000 : (index * timing.strumMs) / 1000
+      )),
+      duration: timing.durationMs / 1000,
+      velocities,
+      instrument: getSelectedAudioInstrument()
+    });
+    if (!played) return false;
 
     const doneTimer = window.setTimeout(() => {
       updateLabStatus(card, chord, true, lab, block);
@@ -4418,18 +4607,18 @@ async function playChord(chord = {}, audioEngine = {}) {
     const duration = Number(audioEngine.durationMs || 850) / 1000;
     const strumMs = Number(audioEngine.strumMs ?? 35);
     const notes = getChordNotes(chord);
-    const voice = audioEngine.voice;
-    const gainMultiplier = audioEngine.gain ?? 1.0;
-    const synthFn = (voice === 'soft-piano' || voice === 'piano') ? playSoftPiano : playPluckedString;
     if (!notes.length) return false;
-    await Promise.all(notes.map((note, index) => synthFn(
-      note,
-      (index * strumMs) / 1000,
+    const engine = window.AudioEngine;
+    if (!engine || typeof engine.playNote !== "function") return false;
+    return engine.playNote({
+      channel: "soundlab",
+      profile: "soundlab-guide-tone",
+      notes,
+      timeOffsets: notes.map((_, index) => (index * strumMs) / 1000),
       duration,
-      getStackedChordPeakGain(note, notes.length) * gainMultiplier,
-      { isChord: true }
-    )));
-    return true;
+      velocities: notes.map((note) => getStackedChordPeakGain(note, notes.length) * Number(audioEngine.gain ?? 1.0)),
+      instrument: getSelectedAudioInstrument()
+    });
   } catch {
     stopAllSounds();
     return false;
@@ -4644,7 +4833,7 @@ function normalizePitchName(note) {
   return `${trimmed}3`;
 }
 
-function playSequence(lab = {}, card, block = {}) {
+function playSequence(lab = {}, card, block = {}, labRef = "") {
   clearSequenceTimers();
   stopAllSounds();
   stopOscillators();
@@ -4691,10 +4880,20 @@ function playSequence(lab = {}, card, block = {}) {
   sequenceTimers.push(clearTimer);
 }
 
-function stopActiveAudio() {
-  clearSequenceTimers();
-  stopAllSounds();
-  stopOscillators();
+function stopActiveAudio(useSoundLabV2 = null) {
+  if (useSoundLabV2 !== false && sharedSoundLabAudioPreviewMode) {
+    soundLabAudioSession += 1;
+    getSharedSoundLabAudioEngine()?.stopSoundLab();
+  }
+
+  if (useSoundLabV2 !== true) {
+    clearSequenceTimers();
+    stopAllSounds();
+    stopOscillators();
+    window.AudioEngine?.stopChannel?.("soundlab");
+  }
+
+  if (useSoundLabV2 === null) window.AudioEngine?.stopAllTonal?.();
 }
 
 function stopOscillators() {
@@ -5373,9 +5572,6 @@ function mountFretboardStudioLite(containerElement) {
   if (!containerElement || containerElement.dataset.fslMounted === "true") return;
   containerElement.dataset.fslMounted = "true";
 
-  let fslSoundEnabled = false;
-  let fslSoundSession = 0;
-
   function getFslAudioEngine() {
     const engine = window.AudioEngine;
     if (
@@ -5389,30 +5585,34 @@ function mountFretboardStudioLite(containerElement) {
     return engine;
   }
 
-  const FSL_PLAYBACK_PITCH = Object.freeze({
-    C: "C4", "C#": "C#4", Db: "Db4",
-    D: "D4", "D#": "D#4", Eb: "Eb4",
-    E: "E4", F: "F4", "F#": "F#4", Gb: "Gb4",
-    G: "G4", "G#": "G#4", Ab: "Ab4",
-    A: "A4", "A#": "A#4", Bb: "Bb4", B: "B4"
-  });
+  const FSL_OPEN_STRING_MIDI = Object.freeze([64, 59, 55, 50, 45, 40]);
 
-  function fslPlayNotePreview(noteName) {
-    if (!fslSoundEnabled) return;
+  function fslMidiToScientificPitch(midi) {
+    const oct = Math.floor(midi / 12) - 1;
+    const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    return notes[midi % 12] + oct;
+  }
 
+  async function fslPlayNotePreview(playbackNote) {
     const engine = getFslAudioEngine();
-    const playbackNote = FSL_PLAYBACK_PITCH[noteName];
-
     if (!engine || !playbackNote) return;
 
-    void engine.playNote({
-      channel: "fsl",
-      profile: "fsl-note-preview",
-      note: playbackNote,
-      velocity: 0.7
-    }).catch(() => {
+    try {
+      if (typeof engine.unlock === "function") {
+        const unlocked = await engine.unlock();
+        if (!unlocked || !containerElement.isConnected) return;
+      }
+
+      await engine.playNote({
+        channel: "fsl",
+        profile: "fsl-fretboard-position",
+        note: playbackNote,
+        velocity: 0.7,
+        instrument: getSelectedAudioInstrument()
+      });
+    } catch {
       // Audio failure must never break FSL interaction.
-    });
+    }
   }
 
   const fslSharpNotes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -5512,16 +5712,9 @@ function mountFretboardStudioLite(containerElement) {
               <option value="5-9">Mid (5-9)</option>
             </select>
           </label>
-          <label class="fsl-control-group">
-            <span class="fsl-control-label">Sound Preview</span>
-            <label class="fsl-sound-toggle-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-              <input type="checkbox" data-fsl-sound-toggle>
-              <span data-fsl-sound-status>Sound: Off</span>
-            </label>
-          </label>
         </div>
 
-        <div class="fsl-panel-card">
+        <div class="fsl-panel-card fsl-inspector-card">
           <h5 class="fsl-panel-title">โน้ตที่เลือก (Inspector)</h5>
           <div class="fsl-inspector-empty" data-fsl-inspector-content>จิ้มที่โน้ตบนคอกีตาร์เพื่อดูรายละเอียด</div>
         </div>
@@ -5586,72 +5779,8 @@ function mountFretboardStudioLite(containerElement) {
     compareContent: containerElement.querySelector("[data-fsl-compare-content]"),
     inspectorContent: containerElement.querySelector("[data-fsl-inspector-content]"),
     fretboard: containerElement.querySelector("[data-fsl-fretboard]"),
-    fretMarkers: containerElement.querySelector("[data-fsl-fret-markers]"),
-    soundToggle: containerElement.querySelector("[data-fsl-sound-toggle]"),
-    soundStatus: containerElement.querySelector("[data-fsl-sound-status]")
+    fretMarkers: containerElement.querySelector("[data-fsl-fret-markers]")
   };
-
-  if (fslRefs.soundToggle) {
-    fslRefs.soundToggle.checked = false;
-    fslSoundEnabled = false;
-    fslRefs.soundStatus.textContent = "Sound: Off";
-
-    fslRefs.soundToggle.addEventListener("change", async (e) => {
-      if (e.target.checked) {
-        const engine = getFslAudioEngine();
-        if (engine) {
-          const session = ++fslSoundSession;
-          fslRefs.soundStatus.textContent = "Unlocking...";
-
-          try {
-            const unlocked = await engine.unlock();
-            if (
-              session !== fslSoundSession ||
-              !containerElement.isConnected ||
-              !e.target.isConnected ||
-              !e.target.checked
-            ) {
-              return;
-            }
-
-            if (unlocked) {
-              fslSoundEnabled = true;
-              fslRefs.soundStatus.textContent = "Sound: On";
-            } else {
-              fslSoundEnabled = false;
-              e.target.checked = false;
-              fslRefs.soundStatus.textContent = "Sound: Unavailable";
-            }
-          } catch (err) {
-            if (
-              session !== fslSoundSession ||
-              !containerElement.isConnected ||
-              !e.target.isConnected ||
-              !e.target.checked
-            ) {
-              return;
-            }
-            console.warn("[FSL] Engine unlock error", err);
-            fslSoundEnabled = false;
-            e.target.checked = false;
-            fslRefs.soundStatus.textContent = "Sound: Unavailable";
-          }
-        } else {
-          fslSoundEnabled = false;
-          e.target.checked = false;
-          fslRefs.soundStatus.textContent = "Sound: Unavailable";
-        }
-      } else {
-        fslSoundSession++;
-        fslSoundEnabled = false;
-        fslRefs.soundStatus.textContent = "Sound: Off";
-        const engine = getFslAudioEngine();
-        if (engine) {
-          engine.stopChannel("fsl");
-        }
-      }
-    });
-  }
 
   fslRefs.keySelect?.addEventListener("change", (event) => {
     fslState.key = event.target.value;
@@ -5783,7 +5912,7 @@ function mountFretboardStudioLite(containerElement) {
   }
 
   function fslHandleNoteClick(noteData, noteNode) {
-    fslPlayNotePreview(noteData.noteName);
+    fslPlayNotePreview(noteData.playbackNote);
 
     if (fslState.challenge) {
       fslHandleChallengeClick(noteData, noteNode);
@@ -5893,7 +6022,9 @@ function mountFretboardStudioLite(containerElement) {
         }
 
         noteNode.textContent = fslState.overlay === "intervals" ? fslGetIntervalName(interval) : noteName;
-        const noteData = { noteName, stringIndex, stringNumber, fret, interval };
+        const midi = FSL_OPEN_STRING_MIDI[stringIndex] + fret;
+        const playbackNote = fslMidiToScientificPitch(midi);
+        const noteData = { noteName, stringIndex, stringNumber, fret, interval, midi, playbackNote };
         noteNode.addEventListener("click", () => {
           containerElement.querySelectorAll(".fsl-note-node").forEach((node) => node.classList.remove("fsl-is-selected"));
           if (!fslState.challenge) noteNode.classList.add("fsl-is-selected");
@@ -5928,11 +6059,6 @@ function mountFretboardStudioLite(containerElement) {
   fslRender();
 
   return () => {
-    fslSoundSession++;
-    fslSoundEnabled = false;
-    if (fslRefs && fslRefs.soundToggle) {
-      fslRefs.soundToggle.checked = false;
-    }
     const engine = getFslAudioEngine();
     if (engine) {
       engine.stopChannel("fsl");

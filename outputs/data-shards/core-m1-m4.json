@@ -5668,7 +5668,8 @@
             "C3",
             "E3",
             "G3"
-          ]
+          ],
+          "playbackNote": "E3"
         },
         {
           "id": "f-major",
@@ -5680,7 +5681,8 @@
             "F3",
             "A3",
             "C4"
-          ]
+          ],
+          "playbackNote": "A3"
         },
         {
           "id": "g-major",
@@ -5692,7 +5694,8 @@
             "G2",
             "B2",
             "D3"
-          ]
+          ],
+          "playbackNote": "B2"
         },
         {
           "id": "c-minor-contrast",
@@ -5704,9 +5707,11 @@
             "C3",
             "Eb3",
             "G3"
-          ]
+          ],
+          "playbackNote": "Eb3"
         }
-      ]
+      ],
+      "playbackContract": "single-guide-tone"
     },
     {
       "id": "m3-w10-chord-quality-ear-lab",
@@ -5729,7 +5734,8 @@
             "C3",
             "E3",
             "G3"
-          ]
+          ],
+          "playbackNote": "E3"
         },
         {
           "id": "m3-w10-ear-c-minor",
@@ -5741,7 +5747,8 @@
             "C3",
             "Eb3",
             "G3"
-          ]
+          ],
+          "playbackNote": "Eb3"
         },
         {
           "id": "m3-w10-ear-g-major",
@@ -5753,7 +5760,8 @@
             "G2",
             "B2",
             "D3"
-          ]
+          ],
+          "playbackNote": "B2"
         },
         {
           "id": "m3-w10-ear-bdim-preview",
@@ -5765,9 +5773,11 @@
             "B2",
             "D3",
             "F3"
-          ]
+          ],
+          "playbackNote": "F3"
         }
-      ]
+      ],
+      "playbackContract": "single-guide-tone"
     },
     {
       "id": "m3-w11-ear-7th-comparison",
@@ -5790,7 +5800,8 @@
             "C3",
             "E3",
             "G3"
-          ]
+          ],
+          "playbackNote": "C3"
         },
         {
           "id": "cmaj7",
@@ -5803,7 +5814,8 @@
             "E3",
             "G3",
             "B3"
-          ]
+          ],
+          "playbackNote": "B3"
         },
         {
           "id": "am-triad",
@@ -5815,7 +5827,8 @@
             "A2",
             "C3",
             "E3"
-          ]
+          ],
+          "playbackNote": "A2"
         },
         {
           "id": "am7",
@@ -5828,7 +5841,8 @@
             "C3",
             "E3",
             "G3"
-          ]
+          ],
+          "playbackNote": "G3"
         },
         {
           "id": "g7",
@@ -5841,7 +5855,8 @@
             "B2",
             "D3",
             "F3"
-          ]
+          ],
+          "playbackNote": "F3"
         },
         {
           "id": "c7-preview",
@@ -5854,9 +5869,11 @@
             "E3",
             "G3",
             "Bb3"
-          ]
+          ],
+          "playbackNote": "Bb3"
         }
-      ]
+      ],
+      "playbackContract": "single-guide-tone"
     },
     {
       "id": "m3-w12-progression-lab",

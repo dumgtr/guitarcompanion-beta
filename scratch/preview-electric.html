@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electric Guitar QA Sandbox</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            background: #1e1e1e;
+            color: #fff;
+        }
+        button {
+            padding: 0.75rem 1.5rem;
+            margin: 0.5rem;
+            border: none;
+            border-radius: 6px;
+            background: #4a90e2;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #357abd;
+        }
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+        #log {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #000;
+            border-radius: 6px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .controls {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #2d2d2d;
+            border-radius: 8px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Electric Guitar Samples QA</h1>
+
+    <div>
+        <button id="btn-unlock">Start / Unlock AudioContext</button>
+    </div>
+
+    <div id="controls" class="controls">
+        <h3>Test Notes <button id="btn-stop-all" style="background: #e74c3c;">Stop All</button></h3>
+        <div id="buttons-container"></div>
+        <h3>Special Tests</h3>
+        <button id="btn-sweep">Chromatic Sweep 40–76</button>
+        <button id="btn-rapid">Rapid Same Note ×8</button>
+    </div>
+
+    <div id="log"></div>
+
+    <script>
+        const logEl = document.getElementById('log');
+        function log(msg) {
+            console.log(msg);
+            logEl.textContent += `[${new Date().toLocaleTimeString()}] ${msg}\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        let audioCtx;
+        let masterGain;
+        let sampleMap = null;
+        let decodedBuffers = new Map();
+        let activeSources = new Set();
+        let stopRequested = false;
+
+        document.getElementById('btn-unlock').addEventListener('click', async (e) => {
+            const btn = e.target;
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+                masterGain = audioCtx.createGain();
+                masterGain.gain.value = 0.3;
+                masterGain.connect(audioCtx.destination);
+
+                log(`AudioContext state: ${audioCtx.state}`);
+                btn.disabled = true;
+                btn.textContent = 'AudioContext Unlocked';
+
+                log('Fetching APPROVED_SAMPLE_MAP.json...');
+                const res = await fetch('../outputs/assets/audio/electric/APPROVED_SAMPLE_MAP.json');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                const mapData = await res.json();
+
+                if (!mapData || mapData.schemaVersion !== 2) {
+                    throw new Error("Unsupported Electric sample-map schema in sandbox");
+                }
+
+                sampleMap = {};
+                Object.keys(mapData.notes).forEach(midiStr => {
+                    const midi = parseInt(midiStr, 10);
+                    const mapping = mapData.notes[midiStr];
+                    const fileRel = mapping.path.replace('assets/audio/electric/', '');
+                    sampleMap[midi] = {
+                        url: '../outputs/assets/audio/electric/' + fileRel,
+                        sourceMidi: mapping.sourceMidi
+                    };
+                });
+                log(`Loaded sample map: ${mapData.display_name} (Range: ${mapData.midi_range.low}-${mapData.midi_range.high})`);
+
+                generateButtons();
+                document.getElementById('controls').style.display = 'block';
+            } catch (err) {
+                log(`Failed to initialize: ${err.message}`);
+            }
+        });
+
+        function generateButtons() {
+            const container = document.getElementById('buttons-container');
+            container.innerHTML = '';
+
+            // Generate a button for every available MIDI note in the map
+            const notes = Object.keys(sampleMap).map(Number).sort((a, b) => a - b);
+
+            notes.forEach(midiNote => {
+                const btn = document.createElement('button');
+                btn.className = 'play-btn';
+                const sampleName = sampleMap[midiNote].url.split('/').pop(); // e.g. F2.ogg
+                btn.textContent = `MIDI ${midiNote} (${sampleName})`;
+                btn.addEventListener('click', () => playNote(midiNote));
+                container.appendChild(btn);
+            });
+        }
+
+        async function playNote(midi) {
+            if (!audioCtx) return log('Error: AudioContext not initialized.');
+            if (!sampleMap) return log('Error: Sample map not loaded.');
+
+            const mapping = sampleMap[midi];
+            if (!mapping) {
+                return log(`Error: No mapping found for MIDI note ${midi}.`);
+            }
+
+            const url = mapping.url;
+
+            try {
+                let buffer = decodedBuffers.get(url);
+
+                if (!buffer) {
+                    log(`Fetching ${url}...`);
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                    const arrayBuffer = await res.arrayBuffer();
+                    log(`Decoding ${url}...`);
+                    buffer = await audioCtx.decodeAudioData(arrayBuffer);
+                    decodedBuffers.set(url, buffer);
+                    log(`Decoded successfully.`);
+                }
+
+                log(`Playing MIDI ${midi} using ${url}`);
+                const source = audioCtx.createBufferSource();
+                source.buffer = buffer;
+                source.connect(masterGain);
+                const playbackRate = 2 ** ((midi - mapping.sourceMidi) / 12);
+                source.playbackRate.value = playbackRate;
+
+                source.onended = () => {
+                    activeSources.delete(source);
+                };
+                activeSources.add(source);
+                source.start(0);
+
+            } catch (err) {
+                log(`Playback error for note ${midi}: ${err.message}`);
+            }
+        }
+
+        document.querySelectorAll('.play-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const midi = parseInt(btn.dataset.midi, 10);
+                playNote(midi);
+            });
+        });
+
+        document.getElementById('btn-stop-all').addEventListener('click', () => {
+            stopRequested = true;
+            let count = 0;
+            activeSources.forEach(source => {
+                try {
+                    source.stop();
+                    count++;
+                } catch (e) {
+                    // Ignore errors
+                }
+            });
+            activeSources.clear();
+            log(`Stopped ${count} active audio source(s).`);
+        });
+
+        document.getElementById('btn-sweep').addEventListener('click', async () => {
+            stopRequested = false;
+            log('Starting Chromatic Sweep 40-76...');
+            const notes = Object.keys(sampleMap).map(Number).sort((a, b) => a - b);
+            for (let i = 0; i < notes.length; i++) {
+                if (stopRequested) break;
+                playNote(notes[i]);
+                await new Promise(r => setTimeout(r, 120)); // Sweep speed
+            }
+            log('Sweep complete.');
+        });
+
+        document.getElementById('btn-rapid').addEventListener('click', async () => {
+            stopRequested = false;
+            const availableNotes = Object.keys(sampleMap).map(Number);
+            const targetNote = availableNotes[Math.floor(Math.random() * availableNotes.length)];
+            log(`Starting Rapid Same Note ×8 (MIDI ${targetNote})...`);
+            for (let i = 0; i < 8; i++) {
+                if (stopRequested) break;
+                playNote(targetNote);
+                await new Promise(r => setTimeout(r, 90)); // Rapid speed
+            }
+            log('Rapid notes complete.');
+        });
+    </script>
+</body>
+</html>

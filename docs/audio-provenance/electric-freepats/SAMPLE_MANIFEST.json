@@ -1,0 +1,284 @@
+{
+  "schema_version": 1,
+  "source_sfz": "EGuitarFSBS-bridge-clean-small-20220911.sfz",
+  "source_archive_sha256": "91a8f2d1668a4bd819d44ca5e6f6d9b0406f7ac715ef22464c024164b1bd9529",
+  "sfz_velocity_defaults": {
+    "lovel": 0,
+    "hivel": 127
+  },
+  "regions": [
+    {
+      "region_index": 1,
+      "sample": "samples/C2_s1_01.wav",
+      "pitch_keycenter": 36,
+      "lokey": 35,
+      "hikey": 38,
+      "lovel": 0,
+      "hivel": 127,
+      "velocity_source": "SFZ default (velocity opcodes absent)",
+      "loop_mode": "loop_continuous",
+      "loop_start": 657845,
+      "loop_end": 883503,
+      "wav": {
+        "channels": 1,
+        "sample_width_bits": 16,
+        "sample_rate_hz": 44100,
+        "frame_count": 883519,
+        "duration_seconds": 20.034444,
+        "sha256": "8f94707d0638a4379eeca9d2b64076144de08bcd1b31c0b7d784b835ee729a11"
+      }
+    },
+    {
+      "region_index": 2,
+      "sample": "samples/F2_s1_01.wav",
+      "pitch_keycenter": 41,
+      "lokey": 39,
+      "hikey": 42,
+      "lovel": 0,
+      "hivel": 127,
+      "velocity_source": "SFZ default (velocity opcodes absent)",
+      "loop_mode": "loop_continuous",
+      "loop_start": 701254,
+      "loop_end": 879471,
+      "wav": {
+        "channels": 1,
+        "sample_width_bits": 16,
+        "sample_rate_hz": 44100,
+        "frame_count": 879487,
+        "duration_seconds": 19.943016,
+        "sha256": "bf3e04e7bc07874622d670be0673af625563915d050781f214ab365654e773a0"
+      }
+    },
+    {
+      "region_index": 3,
+      "sample": "samples/A2_s2_01.wav",
+      "pitch_keycenter": 45,
+      "lokey": 43,
+      "hikey": 46,
+      "lovel": 0,
+      "hivel": 127,
+      "velocity_source": "SFZ default (velocity opcodes absent)",
+      "loop_mode": "loop_continuous",
+      "loop_start": 566379,
+      "loop_end": 677450,
+      "wav": {
+        "channels": 1,
+        "sample_width_bits": 16,
+        "sample_rate_hz": 44100,
+        "frame_count": 677465,
+        "duration_seconds": 15.362018,
+        "sha256": "156e368ed118ba763e7ff5f6afea855f6eeafad00c9a81aab1e16c28a2046b97"
+      }
+    },
+    {
+      "region_index": 4,
+      "sample": "samples/C3_s2_02.wav",
+      "pitch_keycenter": 48,
+      "lokey": 47,
+      "hikey": 49,
+      "lovel": 0,
+      "hivel": 127,
+      "velocity_source": "SFZ default (velocity opcodes absent)",
+      "loop_mode": "loop_continuous",
+      "loop_start": 488769,
+      "loop_end": 551879,
+      "wav": {
+        "channels": 1,
+        "sample_width_bits": 16,
+        "sample_rate_hz": 44100,
+        "frame_count": 551894,
+        "duration_seconds": 12.514603,
+        "sha256": "8f465c52c1b2350c1629dece43f7b45e7c31bb285211545c74ff80148a9edfbc"
+      }
+    },
+    {
+      "region_index": 5,
+      "sample": "samples/E3_s3_01.wav",
+      "pitch_keycenter": 52,
+      "lokey": 50,
+      "hikey": 53,
+      "lovel": 0,
+      "hivel": 127,
+      "velocity_source": "SFZ default (velocity opcodes absent)",
+      "loop_mode": "loop_continuous",
+      "loop_start": 205029,
+      "loop_end": 314605,
+      "wav": {
+        "channels": 1,
+        "sample_width_bits": 16,
+        "sample_rate_hz": 44100,
+        "frame_count": 314621,
+        "duration_seconds": 7.134263,
+        "sha256": "d2eb2ec77e87e45ce967e80c124ac367256dbe35388368e16cacda6a0562767d"
+      }
+    },
+    {
+      "region_index": 6,
+      "sample": "samples/G3_s4_01.wav",
+      "pitch_keycenter": 55,
+      "lokey": 54,
+      "hikey": 56,
+      "lovel": 0,
+      "hivel": 127,
+      "velocity_source": "SFZ default (velocity opcodes absent)",
+      "loop_mode": "loop_continuous",
+      "loop_start": 329236,
+      "loop_end": 388720,
+      "wav": {
+        "channels": 1,
+        "sample_width_bits": 16,
+        "sample_rate_hz": 44100,
+        "frame_count": 388734,
+        "duration_seconds": 8.81483,
+        "sha256": "5b420881e32282510833ff8030eb2b7cbb35b8c24d0a95915e39014b9b90fff0"
+      }
+    },
+    {
+      "region_index": 7,
+      "sample": "samples/B3_s5_01.wav",
+      "pitch_keycenter": 59,
+      "lokey": 57,
+      "hikey": 61,
+      "lovel": 0,
+      "hivel": 127,
+      "velocity_source": "SFZ default (velocity opcodes absent)",
+      "loop_mode": "loop_continuous",
+      "loop_start": 262912,
+      "loop_end": 370979,
+      "wav": {
+        "channels": 1,
+        "sample_width_bits": 16,
+        "sample_rate_hz": 44100,
+        "frame_count": 370994,
+        "duration_seconds": 8.412562,
+        "sha256": "1b8eab0f3cf2fcc538c15bc92634da255f93e82d79b14f33026b0fb976f52a0c"
+      }
+    },
+    {
+      "region_index": 8,
+      "sample": "samples/E4_s6_01.wav",
+      "pitch_keycenter": 64,
+      "lokey": 62,
+      "hikey": 65,
+      "lovel": 0,
+      "hivel": 127,
+      "velocity_source": "SFZ default (velocity opcodes absent)",
+      "loop_mode": "loop_continuous",
+      "loop_start": 216555,
+      "loop_end": 310777,
+      "wav": {
+        "channels": 1,
+        "sample_width_bits": 16,
+        "sample_rate_hz": 44100,
+        "frame_count": 310792,
+        "duration_seconds": 7.047438,
+        "sha256": "27572ef38ebf009eb1860b27c1f62937e47ba794fb855e3f25790f6025831b17"
+      }
+    },
+    {
+      "region_index": 9,
+      "sample": "samples/G4_s6_01.wav",
+      "pitch_keycenter": 67,
+      "lokey": 66,
+      "hikey": 69,
+      "lovel": 0,
+      "hivel": 127,
+      "velocity_source": "SFZ default (velocity opcodes absent)",
+      "loop_mode": "loop_continuous",
+      "loop_start": 208236,
+      "loop_end": 265522,
+      "wav": {
+        "channels": 1,
+        "sample_width_bits": 16,
+        "sample_rate_hz": 44100,
+        "frame_count": 265537,
+        "duration_seconds": 6.021247,
+        "sha256": "aa92c40ba2e241db486be5bb3d49555efb8e777dcd9dd726ad4f449fb077b6d6"
+      }
+    },
+    {
+      "region_index": 10,
+      "sample": "samples/B4_s6_01.wav",
+      "pitch_keycenter": 71,
+      "lokey": 70,
+      "hikey": 72,
+      "lovel": 0,
+      "hivel": 127,
+      "velocity_source": "SFZ default (velocity opcodes absent)",
+      "loop_mode": "loop_continuous",
+      "loop_start": 201253,
+      "loop_end": 255851,
+      "wav": {
+        "channels": 1,
+        "sample_width_bits": 16,
+        "sample_rate_hz": 44100,
+        "frame_count": 255865,
+        "duration_seconds": 5.801927,
+        "sha256": "4cbd55dd7c1c6847f5c1e1cdef24c8ef7f65f0d77a70527a9a97a3464953e927"
+      }
+    },
+    {
+      "region_index": 11,
+      "sample": "samples/D5_s6_01.wav",
+      "pitch_keycenter": 74,
+      "lokey": 73,
+      "hikey": 76,
+      "lovel": 0,
+      "hivel": 127,
+      "velocity_source": "SFZ default (velocity opcodes absent)",
+      "loop_mode": "no_loop",
+      "loop_start": null,
+      "loop_end": null,
+      "wav": {
+        "channels": 1,
+        "sample_width_bits": 16,
+        "sample_rate_hz": 44100,
+        "frame_count": 168088,
+        "duration_seconds": 3.811519,
+        "sha256": "6cbe64db0a7d0978623fff08625bd4ce06987cbc6ccf13ebf6decb0fb38776c8"
+      }
+    },
+    {
+      "region_index": 12,
+      "sample": "samples/G#5_s6_03.wav",
+      "pitch_keycenter": 80,
+      "lokey": 77,
+      "hikey": 82,
+      "lovel": 0,
+      "hivel": 127,
+      "velocity_source": "SFZ default (velocity opcodes absent)",
+      "loop_mode": "no_loop",
+      "loop_start": null,
+      "loop_end": null,
+      "wav": {
+        "channels": 1,
+        "sample_width_bits": 16,
+        "sample_rate_hz": 44100,
+        "frame_count": 231905,
+        "duration_seconds": 5.258617,
+        "sha256": "71a934ca10ba5395925d0d57197587017b164a9ea54a7f56b34449d7a91d7987"
+      }
+    },
+    {
+      "region_index": 13,
+      "sample": "samples/C#6_s6_01.wav",
+      "pitch_keycenter": 85,
+      "lokey": 83,
+      "hikey": 86,
+      "lovel": 0,
+      "hivel": 127,
+      "velocity_source": "SFZ default (velocity opcodes absent)",
+      "loop_mode": "no_loop",
+      "loop_start": null,
+      "loop_end": null,
+      "wav": {
+        "channels": 1,
+        "sample_width_bits": 16,
+        "sample_rate_hz": 44100,
+        "frame_count": 127342,
+        "duration_seconds": 2.887574,
+        "sha256": "5803009d8a9fef999e695b65ddc64190e0e1f143692b42774480fcbec31c4a63"
+      }
+    }
+  ]
+}
