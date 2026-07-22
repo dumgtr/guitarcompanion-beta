@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "nylon-level-audit-policy/1",
+  "policyVersion": "v2.5a-1",
+  "algorithmVersion": "production-map-rendered-pcm-median-v1",
+  "measurementMode": "rendered-production-mapping",
+  "renderSampleRate": 44100,
+  "productionReferenceVelocity": 0.7,
+  "attackWindowSeconds": [
+    0,
+    0.1
+  ],
+  "bodyWindowSeconds": [
+    0.25,
+    0.75
+  ],
+  "correctionBoundsDb": [
+    -4,
+    4
+  ],
+  "minimumPredictedPeakHeadroomDb": 1,
+  "objectiveAdjacentDifferenceDb": 1.5,
+  "objectiveWithinAnchorDifferenceDb": 1,
+  "postCalibrationToleranceDb": 1.5,
+  "smoothing": {
+    "kernel": [
+      0.25,
+      0.5,
+      0.25
+    ],
+    "passes": 2,
+    "maxAdjacentStepDb": 1
+  },
+  "auditoryAcceptance": "pending-product-owner"
+}
