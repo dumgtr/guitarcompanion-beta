@@ -21,7 +21,7 @@ from typing import Any, Dict, List, Optional
 
 # Configure sys.path so we can import from same directory
 sys.path.append(str(Path(__file__).parent))
-from qwen_model_policy import validate_model, PolicyError
+from qwen_model_policy import validate_model, PolicyError, choose_model, TASK_ROUTES
 
 DEFAULT_MODEL = "qwen3.7-plus"
 
@@ -128,6 +128,16 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Permit an explicitly requested fixed snapshot model.",
     )
+    parser.add_argument(
+        "--task-type",
+        choices=sorted(TASK_ROUTES),
+        help="Task type for auto-routing selection"
+    )
+    parser.add_argument(
+        "--cost-priority",
+        choices=["cheapest", "economy", "fast"],
+        help="Explicit cost priority constraint overriding task route"
+    )
     return parser
 
 
@@ -143,6 +153,8 @@ def main() -> int:
     api_transport_status = "not_started"
     retry_count = 0
     fallback_occurred = False
+    routing_mode = "explicit"
+    routing_reason = "explicit coordinate request"
 
     input_files_metadata = []
     assembled_files_text = []
@@ -150,10 +162,28 @@ def main() -> int:
     combined_file_char_count = 0
     report_sha256 = "unavailable"
 
-    # Step 1: Policy validation
+    # Step 1: Policy validation & Model resolution
+    is_model_explicit = any(arg.startswith("--model") for arg in sys.argv)
+    resolved_model = args.model
+    if args.task_type and not is_model_explicit:
+        try:
+            selected_info = choose_model(args.task_type, args.cost_priority)
+            if selected_info:
+                resolved_model = selected_info["model"]
+                routing_mode = "auto-cost-priority" if args.cost_priority else "auto"
+                routing_reason = f"explicit {args.cost_priority} cost priority" if args.cost_priority else "default task route"
+            else:
+                safe_print_unicode("NO_QWEN\n", sys.stderr)
+                return ExitCode.SUCCESS
+        except PolicyError as error:
+            safe_print_unicode(f"POLICY_ERROR: {error}\n", sys.stderr)
+            return ExitCode.CLI_OR_CONFIG_ERROR
+
+    requested_model = resolved_model
+
     try:
         selected = validate_model(
-            args.model,
+            resolved_model,
             allow_compatibility=args.allow_compatibility,
             allow_experimental=args.allow_experimental,
             allow_reproducibility=args.allow_reproducibility,
@@ -264,7 +294,7 @@ def main() -> int:
 
     # Step 4: Construct payload body
     payload = {
-        "model": args.model,
+        "model": requested_model,
         "messages": [
             {
                 "role": "user",
@@ -332,7 +362,9 @@ def main() -> int:
             elapsed_time=time.time() - start_time,
             retry_count=retry_count,
             fallback_occurred=fallback_occurred,
-            report_sha256=report_sha256
+            report_sha256=report_sha256,
+            routing_mode=routing_mode,
+            routing_reason=routing_reason
         )
         return ExitCode.AUTH_OR_TRANSPORT_ERROR
 
@@ -355,7 +387,9 @@ def main() -> int:
             elapsed_time=time.time() - start_time,
             retry_count=retry_count,
             fallback_occurred=fallback_occurred,
-            report_sha256=report_sha256
+            report_sha256=report_sha256,
+            routing_mode=routing_mode,
+            routing_reason=routing_reason
         )
         return ExitCode.API_RESPONSE_ERROR
 
@@ -377,7 +411,9 @@ def main() -> int:
             elapsed_time=time.time() - start_time,
             retry_count=retry_count,
             fallback_occurred=fallback_occurred,
-            report_sha256=report_sha256
+            report_sha256=report_sha256,
+            routing_mode=routing_mode,
+            routing_reason=routing_reason
         )
         return ExitCode.MODEL_IDENTITY_UNVERIFIED
 
@@ -385,13 +421,13 @@ def main() -> int:
 
     # Check for silent substitution
     is_mismatch = (
-        reported_model != args.model
-        and not reported_model.startswith(args.model + "-")
-        and not reported_model.startswith(args.model)
+        reported_model != requested_model
+        and not reported_model.startswith(requested_model + "-")
+        and not reported_model.startswith(requested_model)
     )
     if is_mismatch:
         safe_print_unicode("MODEL_MISMATCH\n", sys.stderr)
-        safe_print_unicode(f"Requested model: {args.model}\n", sys.stderr)
+        safe_print_unicode(f"Requested model: {requested_model}\n", sys.stderr)
         safe_print_unicode(f"Provider model: {reported_model}\n", sys.stderr)
         exit_classification = "MODEL_MISMATCH"
         write_sidecar(
@@ -407,7 +443,9 @@ def main() -> int:
             elapsed_time=time.time() - start_time,
             retry_count=retry_count,
             fallback_occurred=fallback_occurred,
-            report_sha256=report_sha256
+            report_sha256=report_sha256,
+            routing_mode=routing_mode,
+            routing_reason=routing_reason
         )
         return ExitCode.MODEL_MISMATCH
 
@@ -458,7 +496,9 @@ def main() -> int:
         elapsed_time=time.time() - start_time,
         retry_count=retry_count,
         fallback_occurred=fallback_occurred,
-        report_sha256=report_sha256
+        report_sha256=report_sha256,
+        routing_mode=routing_mode,
+        routing_reason=routing_reason
     )
 
     return ExitCode.SUCCESS
@@ -478,7 +518,9 @@ def write_sidecar(
     elapsed_time: float,
     retry_count: int,
     fallback_occurred: bool,
-    report_sha256: str
+    report_sha256: str,
+    routing_mode: str = "explicit",
+    routing_reason: str = "explicit coordinate request"
 ) -> None:
     if not out_path_str:
         return
@@ -488,7 +530,8 @@ def write_sidecar(
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "requested_model": requested_model,
         "provider_reported_model": provider_reported_model,
-        "routing_mode": "explicit",
+        "routing_mode": routing_mode,
+        "routing_reason": routing_reason,
         "input_files": input_files,
         "prompt_sha256": compute_string_sha256(prompt),
         "prompt_char_count": len(prompt),

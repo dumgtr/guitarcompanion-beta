@@ -25,6 +25,24 @@ def test_inventory_skips_qwen() -> None:
     assert result.stdout.strip() == "NO_QWEN"
 
 
+def test_cheapest_model() -> None:
+    result = run("--task-type", "cheapest-review")
+    assert result.returncode == 0
+    assert result.stdout.strip() == "qwen-flash"
+
+
+def test_economy_model() -> None:
+    result = run("--task-type", "economy-review")
+    assert result.returncode == 0
+    assert result.stdout.strip() == "qwen3.5-flash"
+
+
+def test_fast_model() -> None:
+    result = run("--task-type", "fast-review")
+    assert result.returncode == 0
+    assert result.stdout.strip() == "qwen3.6-flash"
+
+
 def test_default_architecture_model() -> None:
     result = run("--task-type", "architecture")
     assert result.returncode == 0
@@ -85,10 +103,13 @@ def test_json_output_includes_request_defaults_and_no_fallback() -> None:
     payload = json.loads(result.stdout)
     assert payload == {
         "taskType": "architecture",
+        "costPriority": None,
         "dispatchQwen": True,
         "model": "qwen3.7-plus",
         "status": "allowed",
         "requestDefaults": {"enable_thinking": True},
+        "routing_mode": "auto",
+        "routing_reason": "default task route",
         "fallback": None,
     }
 
@@ -111,6 +132,70 @@ def test_coder_compatibility_disables_thinking() -> None:
     assert result.returncode == 0
     payload = json.loads(result.stdout)
     assert payload["requestDefaults"] == {"enable_thinking": False}
+
+
+def test_explicit_model_overrides_cost_priority() -> None:
+    result = run("--validate-model", "qwen3.7-plus")
+    assert result.returncode == 0
+    assert result.stdout.strip() == "qwen3.7-plus"
+
+
+def test_cheapest_cost_priority_routes_to_qwen_flash() -> None:
+    result = run("--task-type", "code-review", "--cost-priority", "cheapest")
+    assert result.returncode == 0
+    assert "selected_model: qwen-flash" in result.stdout
+    assert "routing_mode: auto-cost-priority" in result.stdout
+    assert "routing_reason: explicit cheapest cost priority" in result.stdout
+
+
+def test_economy_cost_priority_routes_to_qwen3_5_flash() -> None:
+    result = run("--task-type", "code-review", "--cost-priority", "economy")
+    assert result.returncode == 0
+    assert "selected_model: qwen3.5-flash" in result.stdout
+    assert "routing_mode: auto-cost-priority" in result.stdout
+    assert "routing_reason: explicit economy cost priority" in result.stdout
+
+
+def test_fast_cost_priority_routes_to_qwen3_6_flash() -> None:
+    result = run("--task-type", "code-review", "--cost-priority", "fast")
+    assert result.returncode == 0
+    assert "selected_model: qwen3.6-flash" in result.stdout
+    assert "routing_mode: auto-cost-priority" in result.stdout
+    assert "routing_reason: explicit fast cost priority" in result.stdout
+
+
+def test_cost_priority_overrides_default_task_route() -> None:
+    result = run("--task-type", "code-review", "--cost-priority", "cheapest")
+    assert result.returncode == 0
+    assert "selected_model: qwen-flash" in result.stdout
+
+
+def test_critical_task_with_cheapest_does_not_escalate() -> None:
+    result = run("--task-type", "critical", "--cost-priority", "cheapest")
+    assert result.returncode == 0
+    assert "selected_model: qwen-flash" in result.stdout
+
+
+def test_unavailable_cheapest_fails_closed() -> None:
+    result = run("--task-type", "code-review", "--cost-priority", "invalid-cost")
+    assert result.returncode == 2
+
+
+def test_vl_preview_snapshot_never_auto_selected() -> None:
+    result = run("--list-models", "--json")
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    for model in payload["models"]:
+        if model["status"] in ["experimental", "reproducibility"]:
+            assert not model["autoSelectable"]
+            assert model["selectionMode"] == "explicit-only"
+
+
+def test_no_silent_fallback_after_transport_failure() -> None:
+    result = run("--task-type", "code-review", "--json")
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    assert payload["fallback"] is None
 
 
 if __name__ == "__main__":

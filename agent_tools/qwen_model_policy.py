@@ -20,6 +20,9 @@ POLICY_PATH = Path(__file__).with_name("qwen_models.json")
 TASK_ROUTES = {
     "factual": None,
     "inventory": None,
+    "cheapest-review": "cheapest_review",
+    "economy-review": "economy_review",
+    "fast-review": "fast_review",
     "small-review": "small_review",
     "prompt-review": "small_review",
     "architecture": "default_review",
@@ -28,7 +31,10 @@ TASK_ROUTES = {
     "regression": "default_review",
     "test-gap": "default_review",
     "critical": "critical_review",
+    "critical-review": "critical_review",
     "disputed": "critical_review",
+    "chat": "small_review",
+    "semantic-review": "small_review",
 }
 
 
@@ -96,12 +102,21 @@ def validate_model(
     }
 
 
-def choose_model(task_type: str) -> dict[str, Any] | None:
+def choose_model(task_type: str, cost_priority: str | None = None) -> dict[str, Any] | None:
     policy = load_policy()
-    route = TASK_ROUTES.get(task_type)
     if task_type not in TASK_ROUTES:
         allowed = ", ".join(sorted(TASK_ROUTES))
         raise PolicyError(f"Unknown task type: {task_type}. Expected one of: {allowed}")
+
+    if cost_priority:
+        route = {
+            "cheapest": "cheapest_review",
+            "economy": "economy_review",
+            "fast": "fast_review",
+        }.get(cost_priority)
+    else:
+        route = TASK_ROUTES.get(task_type)
+
     if route is None:
         return None
 
@@ -161,6 +176,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Permit an explicitly requested fixed snapshot model.",
     )
+    parser.add_argument(
+        "--cost-priority",
+        choices=["cheapest", "economy", "fast"],
+        help="Explicit cost priority constraint overriding task route",
+    )
     parser.add_argument("--json", action="store_true", help="Emit JSON output")
     return parser
 
@@ -170,13 +190,16 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         if args.task_type:
-            selected = choose_model(args.task_type)
+            selected = choose_model(args.task_type, args.cost_priority)
             result = {
                 "taskType": args.task_type,
+                "costPriority": args.cost_priority,
                 "dispatchQwen": selected is not None,
                 "model": selected["model"] if selected else None,
                 "status": selected["status"] if selected else None,
                 "requestDefaults": selected["requestDefaults"] if selected else {},
+                "routing_mode": "auto-cost-priority" if args.cost_priority else "auto",
+                "routing_reason": f"explicit {args.cost_priority} cost priority" if args.cost_priority else "default task route",
                 "fallback": None,
             }
         elif args.validate_model:
@@ -200,7 +223,14 @@ def main(argv: list[str] | None = None) -> int:
     if args.json:
         print(json.dumps(result, ensure_ascii=False, indent=2))
     elif args.task_type:
-        print(result["model"] or "NO_QWEN")
+        if args.cost_priority:
+            model_name = result["model"] or "NO_QWEN"
+            print(f"selected_model: {model_name}")
+            print(f"routing_mode: {result['routing_mode']}")
+            print(f"routing_reason: {result['routing_reason']}")
+            print("fallback_occurred: false")
+        else:
+            print(result["model"] or "NO_QWEN")
     elif args.validate_model:
         print(result["model"])
     else:

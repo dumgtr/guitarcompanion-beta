@@ -203,6 +203,58 @@ class TestQwenAgentHardening(unittest.TestCase):
                 if f.exists():
                     f.unlink()
 
+    @patch("urllib.request.urlopen")
+    @patch.dict(os.environ, {"DASHSCOPE_API_KEY": "fake-key", "DASHSCOPE_BASE_URL": "http://fake-api"})
+    def test_transport_timeout_fails_closed_no_fallback(self, mock_urlopen: MagicMock) -> None:
+        from urllib.error import HTTPError
+        fp = MagicMock()
+        fp.read.return_value = b"Timeout"
+        mock_urlopen.side_effect = HTTPError("http://fake-api", 504, "Gateway Timeout", {}, fp)
+
+        out_report = ROOT / "tests" / "report.md"
+        out_sidecar = ROOT / "tests" / "report.json"
+
+        try:
+            with patch("sys.argv", ["qwen_agent.py", "--prompt", "Prompt Text", "--model", "qwen3.7-plus", "--out", str(out_report)]):
+                exit_code = qwen_agent.main()
+                self.assertEqual(exit_code, 3)
+
+                self.assertTrue(out_sidecar.exists())
+                meta = json.loads(out_sidecar.read_text(encoding="utf-8"))
+                self.assertEqual(meta["api_transport_status"], "http_error_504")
+                self.assertEqual(meta["exit_classification"], "AUTH_OR_TRANSPORT_ERROR")
+                self.assertEqual(meta["fallback_occurred"], False)
+        finally:
+            for f in (out_report, out_sidecar):
+                if f.exists():
+                    f.unlink()
+
+    @patch("urllib.request.urlopen")
+    @patch.dict(os.environ, {"DASHSCOPE_API_KEY": "fake-key", "DASHSCOPE_BASE_URL": "http://fake-api"})
+    def test_transport_rate_limit_fails_closed_no_escalation(self, mock_urlopen: MagicMock) -> None:
+        from urllib.error import HTTPError
+        fp = MagicMock()
+        fp.read.return_value = b"Rate Limit Exceeded"
+        mock_urlopen.side_effect = HTTPError("http://fake-api", 429, "Too Many Requests", {}, fp)
+
+        out_report = ROOT / "tests" / "report.md"
+        out_sidecar = ROOT / "tests" / "report.json"
+
+        try:
+            with patch("sys.argv", ["qwen_agent.py", "--prompt", "Prompt Text", "--model", "qwen-flash", "--out", str(out_report)]):
+                exit_code = qwen_agent.main()
+                self.assertEqual(exit_code, 3)
+
+                self.assertTrue(out_sidecar.exists())
+                meta = json.loads(out_sidecar.read_text(encoding="utf-8"))
+                self.assertEqual(meta["api_transport_status"], "http_error_429")
+                self.assertEqual(meta["exit_classification"], "AUTH_OR_TRANSPORT_ERROR")
+                self.assertEqual(meta["fallback_occurred"], False)
+        finally:
+            for f in (out_report, out_sidecar):
+                if f.exists():
+                    f.unlink()
+
 
 if __name__ == "__main__":
     unittest.main()
