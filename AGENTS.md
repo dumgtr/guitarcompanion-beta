@@ -81,3 +81,9 @@ After changes, summarize:
 3. นำคำแนะนำที่ได้มาปรับปรุงโค้ด
 4. **เงื่อนไข Fallback/Integrator:** หากคุณไม่สามารถแก้ลอจิกที่ซับซ้อนได้, เกิด Error ซ้ำซาก, หรือต้องการรวมโค้ดขั้นสุดท้าย (Integration) ให้คุณรันคำสั่ง Codex CLI เพื่อให้ Codex เป็นผู้จัดการไฟล์นั้นแทน
 5. เมื่อทุกอย่างเสร็จสมบูรณ์ ให้รายงานผลสรุปต่อ Product Owner
+- เมื่อตีความคำสั่งภาษาธรรมชาติของผู้ใช้สำหรับการรัน Qwen reviews ใน Coordinator/Orchestrator:
+  - "ถูกที่สุด" / "ประหยัดสุด" -> แปลงเป็น `--cost-priority cheapest`
+  - "ราคาถูก" / "economy" -> แปลงเป็น `--cost-priority economy`
+  - "เอาเร็ว" -> แปลงเป็น `--cost-priority fast`
+  - มีการระบุชื่อโมเดลตรงๆ -> แปลงเป็น `--model <model-name>`
+
