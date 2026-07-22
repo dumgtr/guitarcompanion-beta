@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 2,
+  "provider": "alibaba-model-studio-direct-api",
+  "lastReviewed": "2026-07-21",
+  "selectionPrinciple": "Use the smallest stable model that can reliably review the task. Auto-routing may select only stable aliases. Preview, snapshot, and compatibility models require an explicit request.",
+  "workspaceRule": "An allowlisted model must still pass an exact-ID live access probe in the current workspace and region before first use.",
+  "autoRouting": {
+    "cheapest_review": "qwen-flash",
+    "economy_review": "qwen3.5-flash",
+    "fast_review": "qwen3.6-flash",
+    "small_review": "qwen3.6-flash",
+    "default_review": "qwen3.7-plus",
+    "critical_review": "qwen3.7-max"
+  },
+  "models": {
+    "qwen-flash": {
+      "status": "allowed",
+      "selectionMode": "auto",
+      "autoSelectable": true,
+      "tier": "cheapest",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "minimal cost checks",
+        "basic greeting and simple trace"
+      ],
+      "doNotUseFor": [
+        "complex code paths",
+        "deterministic gates"
+      ]
+    },
+    "qwen3.5-flash": {
+      "status": "allowed",
+      "selectionMode": "auto",
+      "autoSelectable": true,
+      "tier": "economy",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "economy code analysis",
+        "low-risk semantic review"
+      ],
+      "doNotUseFor": [
+        "complex lifecycle gate"
+      ]
+    },
+    "qwen3.6-flash": {
+      "status": "allowed",
+      "selectionMode": "auto",
+      "autoSelectable": true,
+      "tier": "fast",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "small low-risk semantic review",
+        "prompt neutrality review",
+        "targeted code-path summary",
+        "test-output interpretation"
+      ],
+      "doNotUseFor": [
+        "critical architecture gate",
+        "complex lifecycle or race-condition review",
+        "final visual or auditory acceptance"
+      ]
+    },
+    "qwen3.7-plus": {
+      "status": "allowed",
+      "selectionMode": "auto",
+      "autoSelectable": true,
+      "tier": "default",
+      "requestDefaults": {
+        "enable_thinking": true
+      },
+      "useFor": [
+        "architecture feasibility",
+        "multi-file code review",
+        "Web Audio lifecycle review",
+        "regression analysis",
+        "test-plan and test-gap review",
+        "high-risk diff review"
+      ],
+      "doNotUseFor": [
+        "deterministic CLI inventory",
+        "final visual or auditory acceptance"
+      ]
+    },
+    "qwen3.7-max": {
+      "status": "allowed",
+      "selectionMode": "auto",
+      "autoSelectable": true,
+      "tier": "critical",
+      "requestDefaults": {
+        "enable_thinking": true
+      },
+      "useFor": [
+        "critical architecture decision",
+        "disputed reviewer conclusion",
+        "high-impact blocker analysis",
+        "complex cross-system reasoning"
+      ],
+      "selectionCondition": "Use only when the Coordinator explicitly classifies the task as critical or disputed.",
+      "doNotUseFor": [
+        "routine inventory",
+        "ordinary code review",
+        "final visual or auditory acceptance"
+      ]
+    },
+    "qwen3.8-max-preview": {
+      "status": "experimental",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "preview-critical",
+      "requestDefaults": {
+        "enable_thinking": true
+      },
+      "useFor": [
+        "Product Owner-authorized A/B comparison against qwen3.7-max",
+        "non-gating exploration of new model capability"
+      ],
+      "doNotUseFor": [
+        "automatic routing",
+        "sole architecture acceptance evidence",
+        "production approval"
+      ],
+      "reviewPolicy": "Preview model. Revalidate exact model ID, behavior, cost, and lifecycle before every workflow adoption decision."
+    },
+    "qwen3.7-plus-2026-05-26": {
+      "status": "reproducibility",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "snapshot-default",
+      "baseAlias": "qwen3.7-plus",
+      "requestDefaults": {
+        "enable_thinking": true
+      },
+      "useFor": [
+        "reproducing a prior review whose exact model snapshot must be fixed"
+      ],
+      "doNotUseFor": [
+        "normal automatic routing"
+      ]
+    },
+    "qwen3.7-max-2026-06-08": {
+      "status": "reproducibility",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "snapshot-critical",
+      "baseAlias": "qwen3.7-max",
+      "requestDefaults": {
+        "enable_thinking": true
+      },
+      "useFor": [
+        "reproducing a critical review whose exact model snapshot must be fixed"
+      ],
+      "doNotUseFor": [
+        "normal automatic routing"
+      ]
+    },
+    "qwen3-coder-plus": {
+      "status": "compatibility",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "legacy-code",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "existing validated code-review prompts during migration",
+        "comparison against a previous qwen3-coder-plus review"
+      ],
+      "replacement": "qwen3.7-plus",
+      "reviewPolicy": "Alibaba currently recommends latest general-purpose models for new coding workflows. Keep only for compatibility and comparison."
+    },
+    "qwen-turbo": {
+      "status": "compatibility",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "legacy-fast",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "existing validated narrow symbol-trace prompts",
+        "low-cost comparison with a previous qwen-turbo trace"
+      ],
+      "replacement": "qwen3.6-flash"
+    }
+  },
+  "defaultDeny": {
+    "enabled": true,
+    "categories": [
+      "unlisted catalog models",
+      "preview models not explicitly listed above",
+      "snapshot IDs not explicitly listed above",
+      "deprecated or scheduled-for-retirement models",
+      "open-source deployment IDs not benchmarked for this workflow",
+      "vision, audio, omni, image, or video models for text-only code review"
+    ]
+  },
+  "fallbackPolicy": "none",
+  "escalationPolicy": "manual-coordinator-only",
+  "humanGates": [
+    "architecture approval when required",
+    "visual acceptance",
+    "auditory acceptance",
+    "commit",
+    "push",
+    "merge",
+    "production activation"
+  ]
+}

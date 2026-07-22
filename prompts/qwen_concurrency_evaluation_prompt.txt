@@ -1,0 +1,40 @@
+คุณคือผู้เชี่ยวชาญการรีวิวระบบเสียง Web Audio
+กรุณาใช้หลักเกณฑ์และเช็คลิสต์ด้านล่างในการรีวิวไฟล์ซอร์สโค้ดของเล่นเสียงที่กำหนดให้
+
+---
+
+### หลักเกณฑ์และเช็คลิสต์การตรวจสอบ (Web Audio Concurrency & Lifecycle Invariants)
+
+1. First trigger creates and starts a voice. (การกระตุ้นครั้งแรกต้องเริ่มทำงานได้แม้ Context เริ่มต้นเป็น suspended)
+2. Every async request has an identity or generation token. (คำขอแบบ async ทุกตัวต้องมีรหัสระบุรุ่นหรือ token ประจำตัว)
+3. Cancellation invalidates late fetch/decode callbacks. (การยกเลิกคำขอจะต้องทำลายผลลัพธ์ของ callback ที่กลับมาล่าช้า)
+4. Stale callbacks fail closed and cannot create a voice. (Callback ที่เก่าแล้วต้องตกลงสภาวะปิดตายและห้ามสร้างเสียง)
+5. Each source is stopped at most once. (SourceNode แต่ละตัวต้องสั่ง stop ได้อย่างมากที่สุด 1 ครั้ง)
+6. Timer-first and onended-first cleanup are both safe. (การเคลียร์ด้วย timer ก่อน หรือ onended ก่อน ต้องปลอดภัยจากการเกิด error ทั้งคู่)
+7. Collection removal checks exact object identity. (การลบเสียงออกจากกลุ่มควบคุมต้องเช็คด้วยตัวตนของวัตถุจริง)
+8. Interrupted sources ramp gain to zero before stop. (เสียงที่ถูกขัดจังหวะต้องค่อยๆ หรี่ Gain เป็น 0 ก่อนกด stop เพื่อเลี่ยงเสียงคลิก)
+9. Incoming voice timing is explicitly defined. (การกำหนดเวลาของเสียงที่เข้ามาใหม่ต้องอิงกับเวลาจริงของ AudioContext)
+10. Channel cleanup cannot affect another channel. (การเคลียร์ช่องสัญญาณหนึ่งต้องไม่รบกวนเสียงของอีกช่องสัญญาณ)
+11. Repeated cleanup is safe. (การเรียกฟังก์ชันเคลียร์ซ้ำๆ ต้องปลอดภัยและทำงานแบบ idempotent)
+12. Active and releasing collections eventually empty. (คอลเลกชันตัวจัดการทั้งหมดต้องหรี่ลงและคืนเมมโมรีได้จริง)
+13. Fallback cannot resurrect a cancelled request. (กลไก fallback ห้ามทำให้คำขอที่ถูกยกเลิกไปแล้วฟื้นคืนชีพกลับมาเล่น)
+14. First-note, same-note, and different-note paths are all covered. (ต้องรองรับสภาวะการเริ่มเล่นเสียงครั้งแรก การกดโน้ตเดิมซ้ำ และโน้ตต่างตัว)
+15. Declared structures must actually participate in the implementation. (ตัวแปรและโครงสร้างที่ประกาศ เช่น releaseQueue ต้องถูกใช้งานจริงในระบบ)
+
+---
+
+### ซอร์สโค้ดจำลองที่ต้องการตรวจสอบ (Fixture Source Code)
+
+[file: known_bad_audio_engine.js]
+```javascript
+// ซอร์สโค้ดของ known_bad_audio_engine.js ที่จัดเตรียมไว้
+```
+
+---
+
+### หน้าที่ของคุณในการวิเคราะห์และสร้างรายงาน (Reviewer Tasks):
+1. ระบุข้อบกพร่อง (Seeded Defects) ทั้งหมดที่พบในซอร์สโค้ด โดยอ้างอิงฟังก์ชันและสัญลักษณ์ในโค้ดให้ชัดเจน
+2. จำแนกระหว่างจุดที่ตรวจสอบพบจริงบนซอร์สโค้ด กับข้อเสนอแนะในการแก้ไข
+3. สรุปรายการข้อบกพร่องที่ยังไม่ครอบคลุม invariants ทั้ง 15 ข้อ
+4. ห้ามลงมติ "PASS" เป็นอันขาดเนื่องจากโค้ดชุดนี้มีข้อบกพร่องเชิงโครงสร้างแบบเจาะจง
+5. ระบุข้อความปิดท้ายเสมอว่า "การทดสอบแบบกำหนดสภาวะ (Deterministic Tests) ยังคงมีความจำเป็นและเป็นที่ต้องการสำหรับกระบวนการตรวจสอบขั้นสุดท้าย"

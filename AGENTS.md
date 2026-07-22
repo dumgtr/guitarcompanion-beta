@@ -78,3 +78,9 @@ After changes, summarize:
 - Scope Router V2 is advisory and Shadow Mode only. It never dispatches a provider and never enables execution or auto-repair.
 - System CLI output and repository state are the validation source of truth. A provider report is advisory and never self-approves a change.
 - Commit, push, merge, and production activation remain Product Owner gates.
+- When interpreting user instructions in natural language for running Qwen reviews, the Coordinator/Orchestrator must translate cost intents to the appropriate `--cost-priority` CLI flag:
+  - "ถูกที่สุด" / "ประหยัดสุด" -> Map to `--cost-priority cheapest`
+  - "ราคาถูก" / "economy" -> Map to `--cost-priority economy`
+  - "เอาเร็ว" -> Map to `--cost-priority fast`
+  - Explicit model name mentioned -> Map to `--model <model-name>`
+
