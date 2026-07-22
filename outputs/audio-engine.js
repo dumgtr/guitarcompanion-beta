@@ -64,6 +64,47 @@
     { note: "C#5", midi: 73, url: "assets/audio/nylon-guitar/Cs5.ogg" },
     { note: "E5", midi: 76, url: "assets/audio/nylon-guitar/E5.ogg" }
   ]);
+  const NYLON_GLOBAL_MAKEUP_DB = 0.5;
+  const NYLON_GLOBAL_MAKEUP_GAIN = 10 ** (NYLON_GLOBAL_MAKEUP_DB / 20);
+  const APPROVED_NYLON_MIDI_GAINS = Object.freeze({
+    40: 0.63095734448,
+    41: 0.63095734448,
+    42: 0.63095734448,
+    43: 0.63095734448,
+    44: 0.63095734448,
+    45: 0.63095734448,
+    46: 0.649844447464,
+    47: 0.677989471876,
+    48: 0.708277394901,
+    49: 0.741918573881,
+    50: 0.779794389623,
+    51: 0.82206727367,
+    52: 0.868578962435,
+    53: 0.920036756249,
+    54: 0.977373365836,
+    55: 1.040504813738,
+    56: 1.109677582277,
+    57: 1.186236375824,
+    58: 1.222481855446,
+    59: 1.12154298133,
+    60: 0.999576234268,
+    61: 0.890873256527,
+    62: 0.902721860131,
+    63: 0.981273891302,
+    64: 1.059012777228,
+    65: 1.188231879391,
+    66: 1.333218096667,
+    67: 1.49589530807,
+    68: 1.584893192461,
+    69: 1.584893192461,
+    70: 1.584893192461,
+    71: 1.584893192461,
+    72: 1.584893192461,
+    73: 1.584893192461,
+    74: 1.584893192461,
+    75: 1.584893192461,
+    76: 1.584893192461
+  });
 
   // Nylon sample attribution:
   // Original sample author: quartertone
@@ -157,6 +198,44 @@
     const parsed = Number(value);
     if (!Number.isFinite(parsed)) return 0.7;
     return Math.min(1, Math.max(0, parsed));
+  }
+
+  function validateApprovedNylonCalibration() {
+    const midiKeys = Object.keys(APPROVED_NYLON_MIDI_GAINS).map(Number);
+    if (midiKeys.length !== 37 || midiKeys.some((midi, index) => midi !== 40 + index)) {
+      throw new Error("Approved Nylon calibration must contain exactly MIDI 40-76.");
+    }
+    if (NYLON_GLOBAL_MAKEUP_DB !== 0.5 || Math.abs(NYLON_GLOBAL_MAKEUP_GAIN - (10 ** (0.5 / 20))) > 1e-12) {
+      throw new Error("Approved Nylon global makeup must be exactly +0.5 dB.");
+    }
+    midiKeys.forEach((midi) => {
+      const gain = APPROVED_NYLON_MIDI_GAINS[midi];
+      if (!Number.isFinite(gain) || gain <= 0) {
+        throw new Error(`Invalid approved Nylon calibration gain for MIDI ${midi}.`);
+      }
+    });
+    return true;
+  }
+
+  const APPROVED_NYLON_CALIBRATION_VALID = validateApprovedNylonCalibration();
+
+  function usesApprovedNylonCalibration(channel, profile) {
+    return (
+      (channel === "fsl" && profile === "fsl-fretboard-position")
+      || (channel === "soundlab" && profile === "soundlab-guide-tone")
+    );
+  }
+
+  function resolveNylonVoiceGain(midi, velocity, channel, profile) {
+    const baseGain = Math.max(velocity, 0.0001);
+    if (!usesApprovedNylonCalibration(channel, profile)) return baseGain;
+
+    const perMidiGain = APPROVED_NYLON_MIDI_GAINS[midi];
+    if (!APPROVED_NYLON_CALIBRATION_VALID || !Number.isFinite(perMidiGain)) {
+      throw new Error(`Approved Nylon calibration is unavailable for MIDI ${midi}.`);
+    }
+    const perMidiCorrectedGain = baseGain * perMidiGain;
+    return Math.max(perMidiCorrectedGain * NYLON_GLOBAL_MAKEUP_GAIN, 0.0001);
   }
 
   function parseScientificPitch(note) {
@@ -925,14 +1004,15 @@
     const playbackRate = 2 ** ((parsedPitch.midi - sample.midi) / 12);
     const naturalDuration = buffer.duration / playbackRate;
     const requestedDuration = Number(playback.duration);
+    const effectiveGain = resolveNylonVoiceGain(parsedPitch.midi, velocity, channel, profile);
     const duration = Number.isFinite(requestedDuration) && requestedDuration > 0
       ? Math.min(requestedDuration, naturalDuration)
       : naturalDuration;
 
     source.buffer = buffer;
     source.playbackRate.setValueAtTime(playbackRate, now);
-    voiceGain.gain.setValueAtTime(Math.max(velocity, 0.0001), now);
-    voiceGain.gain.setValueAtTime(Math.max(velocity, 0.0001), Math.max(now, now + duration - 0.04));
+    voiceGain.gain.setValueAtTime(effectiveGain, now);
+    voiceGain.gain.setValueAtTime(effectiveGain, Math.max(now, now + duration - 0.04));
     voiceGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
     source.connect(voiceGain);
     voiceGain.connect(channelGains[channel]);
@@ -1012,6 +1092,8 @@
       approvedSampleCount: APPROVED_SOUNDLAB_SAMPLES.length,
       loadedSampleCount,
       failedSampleCount,
+      nylonCalibrationNoteCount: Object.keys(APPROVED_NYLON_MIDI_GAINS).length,
+      nylonGlobalMakeupDb: NYLON_GLOBAL_MAKEUP_DB,
       electricSamplerState,
       loadedElectricSampleCount,
       failedElectricSampleCount,

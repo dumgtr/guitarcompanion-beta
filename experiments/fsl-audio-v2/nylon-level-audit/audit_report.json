@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "nylon-level-audit-report/1",
+  "positionEquivalenceStatus": "PASS",
+  "measurementStatus": "PASS",
+  "classifications": [
+    "SOURCE_ANCHOR_LEVEL_MISMATCH"
+  ],
+  "objectiveCalibrationJustified": true,
+  "summary": {
+    "targetCount": 37,
+    "positionCount": 78,
+    "bodyLevelRangeDbfs": [
+      -39.601194,
+      -19.809509
+    ],
+    "maximumBodySpreadDb": 19.791685,
+    "largestAdjacentJump": {
+      "fromMidi": 71,
+      "toMidi": 72,
+      "differenceDb": 10.332493,
+      "sourceAnchorBoundary": true
+    },
+    "sourceAnchorBoundaries": [
+      {
+        "fromMidi": 59,
+        "toMidi": 60,
+        "differenceDb": 4.816488
+      },
+      {
+        "fromMidi": 62,
+        "toMidi": 63,
+        "differenceDb": -1.055374
+      },
+      {
+        "fromMidi": 66,
+        "toMidi": 67,
+        "differenceDb": -8.049087
+      },
+      {
+        "fromMidi": 68,
+        "toMidi": 69,
+        "differenceDb": -2.558067
+      },
+      {
+        "fromMidi": 71,
+        "toMidi": 72,
+        "differenceDb": 10.332493
+      },
+      {
+        "fromMidi": 74,
+        "toMidi": 75,
+        "differenceDb": -2.221211
+      }
+    ],
+    "boundaryMismatchMidis": [
+      60,
+      67,
+      69,
+      72,
+      75
+    ],
+    "transpositionDriftMidis": [],
+    "correctionRangeDb": [
+      -4,
+      4
+    ],
+    "minimumPredictedHeadroomDb": 1.98984,
+    "notesRemainingOutsideTolerance": [
+      40,
+      59,
+      60,
+      67,
+      68,
+      69,
+      70,
+      71,
+      75,
+      76
+    ],
+    "renderedClippingSampleCount": 0
+  }
+}

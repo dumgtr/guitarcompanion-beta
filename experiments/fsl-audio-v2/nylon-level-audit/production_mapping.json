@@ -1,0 +1,1251 @@
+{
+  "schemaVersion": "nylon-production-mapping-audit/1",
+  "productionEngineSha256": "657303216b1605fd52b7a81eb81cbf39a5bcf84f11fd2a47ebee2e0b69ab2e1f",
+  "productionAppSha256": "5afa907d9b6a43ec98b3da0634009d67e7ec0bd5576c4310631d6329529ea895",
+  "extractionMethod": "APPROVED_SOUNDLAB_SAMPLES and FSL_OPEN_STRING_MIDI parsed from production source",
+  "mappingPolicy": "nearest source MIDI; ties retain the earlier production anchor",
+  "runtimeGainPolicy": {
+    "voiceGain": "caller velocity; FSL production reference is 0.7",
+    "fslChannelGain": 1,
+    "soundLabChannelGain": 1,
+    "sharedResolverAndVoicePath": true
+  },
+  "activeVoiceLifecycle": "active channel group is stopped and disconnected before replacement; no Nylon overlap path",
+  "anchors": [
+    {
+      "note": "A3",
+      "sourceMidi": 57,
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg"
+    },
+    {
+      "note": "C#4",
+      "sourceMidi": 61,
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs4.ogg"
+    },
+    {
+      "note": "E4",
+      "sourceMidi": 64,
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E4.ogg"
+    },
+    {
+      "note": "G#4",
+      "sourceMidi": 68,
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Gs4.ogg"
+    },
+    {
+      "note": "A4",
+      "sourceMidi": 69,
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A4.ogg"
+    },
+    {
+      "note": "C#5",
+      "sourceMidi": 73,
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs5.ogg"
+    },
+    {
+      "note": "E5",
+      "sourceMidi": 76,
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E5.ogg"
+    }
+  ],
+  "sourceHashes": {
+    "outputs/assets/audio/nylon-guitar/A3.ogg": "a6c0c27d5e8b861dce470fa026d4714a598f5fa1180a3e625ed9611a1d8235ca",
+    "outputs/assets/audio/nylon-guitar/Cs4.ogg": "ef75771cb7aee1eaf3c1b575c05528dfeba4814ac60c763f5b4af4828c16ab7e",
+    "outputs/assets/audio/nylon-guitar/E4.ogg": "1d88953b8c4d17d99dff6231c09fb8243453a27ecc78c2020568fabdb4ca3bec",
+    "outputs/assets/audio/nylon-guitar/Gs4.ogg": "4b962a50c241ea2af6de4bbcc14582e50ff57ff4e661d10f7a42b0dc7f2b5ac1",
+    "outputs/assets/audio/nylon-guitar/A4.ogg": "10dec5624c2c6d06c4c2d00b64e31ff0bbda409c4edac6db5cfcc08797fa1af4",
+    "outputs/assets/audio/nylon-guitar/Cs5.ogg": "eb7bc0de450378d3b06b7f727bdd10d0a9337709fdb1e1ab13dec40f3e9f89f5",
+    "outputs/assets/audio/nylon-guitar/E5.ogg": "5e55b1d9edf6b52935768ed08db7a13d888802dc1e8b4a215000e29115b1bb7e"
+  },
+  "targets": [
+    {
+      "targetMidi": 40,
+      "scientificPitch": "E2",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 0.3745767692191704,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 41,
+      "scientificPitch": "F2",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 0.3968502629920499,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 42,
+      "scientificPitch": "F#2",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 0.42044820762685725,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 43,
+      "scientificPitch": "G2",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 0.44544935907016964,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 44,
+      "scientificPitch": "G#2",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 0.47193715634084676,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 45,
+      "scientificPitch": "A2",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 0.5,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 46,
+      "scientificPitch": "A#2",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 0.5297315471796477,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 47,
+      "scientificPitch": "B2",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 0.5612310241546865,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 48,
+      "scientificPitch": "C3",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 0.5946035575013605,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 49,
+      "scientificPitch": "C#3",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 0.6299605249474366,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 50,
+      "scientificPitch": "D3",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 0.6674199270850172,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 51,
+      "scientificPitch": "D#3",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 0.7071067811865476,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 52,
+      "scientificPitch": "E3",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 0.7491535384383408,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 53,
+      "scientificPitch": "F3",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 0.7937005259840998,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 54,
+      "scientificPitch": "F#3",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 0.8408964152537145,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 55,
+      "scientificPitch": "G3",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 0.8908987181403393,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 56,
+      "scientificPitch": "G#3",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 0.9438743126816935,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 57,
+      "scientificPitch": "A3",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 1,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 58,
+      "scientificPitch": "A#3",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 1.0594630943592953,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 59,
+      "scientificPitch": "B3",
+      "sourceMidi": 57,
+      "sourceNote": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "playbackRate": 1.122462048309373,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 60,
+      "scientificPitch": "C4",
+      "sourceMidi": 61,
+      "sourceNote": "C#4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs4.ogg",
+      "playbackRate": 0.9438743126816935,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 61,
+      "scientificPitch": "C#4",
+      "sourceMidi": 61,
+      "sourceNote": "C#4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs4.ogg",
+      "playbackRate": 1,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 62,
+      "scientificPitch": "D4",
+      "sourceMidi": 61,
+      "sourceNote": "C#4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs4.ogg",
+      "playbackRate": 1.0594630943592953,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 63,
+      "scientificPitch": "D#4",
+      "sourceMidi": 64,
+      "sourceNote": "E4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E4.ogg",
+      "playbackRate": 0.9438743126816935,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 64,
+      "scientificPitch": "E4",
+      "sourceMidi": 64,
+      "sourceNote": "E4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E4.ogg",
+      "playbackRate": 1,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 65,
+      "scientificPitch": "F4",
+      "sourceMidi": 64,
+      "sourceNote": "E4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E4.ogg",
+      "playbackRate": 1.0594630943592953,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 66,
+      "scientificPitch": "F#4",
+      "sourceMidi": 64,
+      "sourceNote": "E4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E4.ogg",
+      "playbackRate": 1.122462048309373,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 67,
+      "scientificPitch": "G4",
+      "sourceMidi": 68,
+      "sourceNote": "G#4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Gs4.ogg",
+      "playbackRate": 0.9438743126816935,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 68,
+      "scientificPitch": "G#4",
+      "sourceMidi": 68,
+      "sourceNote": "G#4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Gs4.ogg",
+      "playbackRate": 1,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 69,
+      "scientificPitch": "A4",
+      "sourceMidi": 69,
+      "sourceNote": "A4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A4.ogg",
+      "playbackRate": 1,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 70,
+      "scientificPitch": "A#4",
+      "sourceMidi": 69,
+      "sourceNote": "A4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A4.ogg",
+      "playbackRate": 1.0594630943592953,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 71,
+      "scientificPitch": "B4",
+      "sourceMidi": 69,
+      "sourceNote": "A4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A4.ogg",
+      "playbackRate": 1.122462048309373,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 72,
+      "scientificPitch": "C5",
+      "sourceMidi": 73,
+      "sourceNote": "C#5",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs5.ogg",
+      "playbackRate": 0.9438743126816935,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 73,
+      "scientificPitch": "C#5",
+      "sourceMidi": 73,
+      "sourceNote": "C#5",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs5.ogg",
+      "playbackRate": 1,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 74,
+      "scientificPitch": "D5",
+      "sourceMidi": 73,
+      "sourceNote": "C#5",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs5.ogg",
+      "playbackRate": 1.0594630943592953,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 75,
+      "scientificPitch": "D#5",
+      "sourceMidi": 76,
+      "sourceNote": "E5",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E5.ogg",
+      "playbackRate": 0.9438743126816935,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    },
+    {
+      "targetMidi": 76,
+      "scientificPitch": "E5",
+      "sourceMidi": 76,
+      "sourceNote": "E5",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E5.ogg",
+      "playbackRate": 1,
+      "runtimeVoiceGain": 0.7,
+      "runtimeChannelGain": 1,
+      "effectiveCurrentGain": 0.7
+    }
+  ],
+  "positions": [
+    {
+      "string": 1,
+      "fret": 0,
+      "targetMidi": 64,
+      "scientificPitch": "E4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E4.ogg",
+      "sourceMidi": 64,
+      "playbackRate": 1,
+      "gain": 0.7
+    },
+    {
+      "string": 1,
+      "fret": 1,
+      "targetMidi": 65,
+      "scientificPitch": "F4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E4.ogg",
+      "sourceMidi": 64,
+      "playbackRate": 1.0594630943592953,
+      "gain": 0.7
+    },
+    {
+      "string": 1,
+      "fret": 2,
+      "targetMidi": 66,
+      "scientificPitch": "F#4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E4.ogg",
+      "sourceMidi": 64,
+      "playbackRate": 1.122462048309373,
+      "gain": 0.7
+    },
+    {
+      "string": 1,
+      "fret": 3,
+      "targetMidi": 67,
+      "scientificPitch": "G4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Gs4.ogg",
+      "sourceMidi": 68,
+      "playbackRate": 0.9438743126816935,
+      "gain": 0.7
+    },
+    {
+      "string": 1,
+      "fret": 4,
+      "targetMidi": 68,
+      "scientificPitch": "G#4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Gs4.ogg",
+      "sourceMidi": 68,
+      "playbackRate": 1,
+      "gain": 0.7
+    },
+    {
+      "string": 1,
+      "fret": 5,
+      "targetMidi": 69,
+      "scientificPitch": "A4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A4.ogg",
+      "sourceMidi": 69,
+      "playbackRate": 1,
+      "gain": 0.7
+    },
+    {
+      "string": 1,
+      "fret": 6,
+      "targetMidi": 70,
+      "scientificPitch": "A#4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A4.ogg",
+      "sourceMidi": 69,
+      "playbackRate": 1.0594630943592953,
+      "gain": 0.7
+    },
+    {
+      "string": 1,
+      "fret": 7,
+      "targetMidi": 71,
+      "scientificPitch": "B4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A4.ogg",
+      "sourceMidi": 69,
+      "playbackRate": 1.122462048309373,
+      "gain": 0.7
+    },
+    {
+      "string": 1,
+      "fret": 8,
+      "targetMidi": 72,
+      "scientificPitch": "C5",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs5.ogg",
+      "sourceMidi": 73,
+      "playbackRate": 0.9438743126816935,
+      "gain": 0.7
+    },
+    {
+      "string": 1,
+      "fret": 9,
+      "targetMidi": 73,
+      "scientificPitch": "C#5",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs5.ogg",
+      "sourceMidi": 73,
+      "playbackRate": 1,
+      "gain": 0.7
+    },
+    {
+      "string": 1,
+      "fret": 10,
+      "targetMidi": 74,
+      "scientificPitch": "D5",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs5.ogg",
+      "sourceMidi": 73,
+      "playbackRate": 1.0594630943592953,
+      "gain": 0.7
+    },
+    {
+      "string": 1,
+      "fret": 11,
+      "targetMidi": 75,
+      "scientificPitch": "D#5",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E5.ogg",
+      "sourceMidi": 76,
+      "playbackRate": 0.9438743126816935,
+      "gain": 0.7
+    },
+    {
+      "string": 1,
+      "fret": 12,
+      "targetMidi": 76,
+      "scientificPitch": "E5",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E5.ogg",
+      "sourceMidi": 76,
+      "playbackRate": 1,
+      "gain": 0.7
+    },
+    {
+      "string": 2,
+      "fret": 0,
+      "targetMidi": 59,
+      "scientificPitch": "B3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 1.122462048309373,
+      "gain": 0.7
+    },
+    {
+      "string": 2,
+      "fret": 1,
+      "targetMidi": 60,
+      "scientificPitch": "C4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs4.ogg",
+      "sourceMidi": 61,
+      "playbackRate": 0.9438743126816935,
+      "gain": 0.7
+    },
+    {
+      "string": 2,
+      "fret": 2,
+      "targetMidi": 61,
+      "scientificPitch": "C#4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs4.ogg",
+      "sourceMidi": 61,
+      "playbackRate": 1,
+      "gain": 0.7
+    },
+    {
+      "string": 2,
+      "fret": 3,
+      "targetMidi": 62,
+      "scientificPitch": "D4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs4.ogg",
+      "sourceMidi": 61,
+      "playbackRate": 1.0594630943592953,
+      "gain": 0.7
+    },
+    {
+      "string": 2,
+      "fret": 4,
+      "targetMidi": 63,
+      "scientificPitch": "D#4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E4.ogg",
+      "sourceMidi": 64,
+      "playbackRate": 0.9438743126816935,
+      "gain": 0.7
+    },
+    {
+      "string": 2,
+      "fret": 5,
+      "targetMidi": 64,
+      "scientificPitch": "E4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E4.ogg",
+      "sourceMidi": 64,
+      "playbackRate": 1,
+      "gain": 0.7
+    },
+    {
+      "string": 2,
+      "fret": 6,
+      "targetMidi": 65,
+      "scientificPitch": "F4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E4.ogg",
+      "sourceMidi": 64,
+      "playbackRate": 1.0594630943592953,
+      "gain": 0.7
+    },
+    {
+      "string": 2,
+      "fret": 7,
+      "targetMidi": 66,
+      "scientificPitch": "F#4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E4.ogg",
+      "sourceMidi": 64,
+      "playbackRate": 1.122462048309373,
+      "gain": 0.7
+    },
+    {
+      "string": 2,
+      "fret": 8,
+      "targetMidi": 67,
+      "scientificPitch": "G4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Gs4.ogg",
+      "sourceMidi": 68,
+      "playbackRate": 0.9438743126816935,
+      "gain": 0.7
+    },
+    {
+      "string": 2,
+      "fret": 9,
+      "targetMidi": 68,
+      "scientificPitch": "G#4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Gs4.ogg",
+      "sourceMidi": 68,
+      "playbackRate": 1,
+      "gain": 0.7
+    },
+    {
+      "string": 2,
+      "fret": 10,
+      "targetMidi": 69,
+      "scientificPitch": "A4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A4.ogg",
+      "sourceMidi": 69,
+      "playbackRate": 1,
+      "gain": 0.7
+    },
+    {
+      "string": 2,
+      "fret": 11,
+      "targetMidi": 70,
+      "scientificPitch": "A#4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A4.ogg",
+      "sourceMidi": 69,
+      "playbackRate": 1.0594630943592953,
+      "gain": 0.7
+    },
+    {
+      "string": 2,
+      "fret": 12,
+      "targetMidi": 71,
+      "scientificPitch": "B4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A4.ogg",
+      "sourceMidi": 69,
+      "playbackRate": 1.122462048309373,
+      "gain": 0.7
+    },
+    {
+      "string": 3,
+      "fret": 0,
+      "targetMidi": 55,
+      "scientificPitch": "G3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.8908987181403393,
+      "gain": 0.7
+    },
+    {
+      "string": 3,
+      "fret": 1,
+      "targetMidi": 56,
+      "scientificPitch": "G#3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.9438743126816935,
+      "gain": 0.7
+    },
+    {
+      "string": 3,
+      "fret": 2,
+      "targetMidi": 57,
+      "scientificPitch": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 1,
+      "gain": 0.7
+    },
+    {
+      "string": 3,
+      "fret": 3,
+      "targetMidi": 58,
+      "scientificPitch": "A#3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 1.0594630943592953,
+      "gain": 0.7
+    },
+    {
+      "string": 3,
+      "fret": 4,
+      "targetMidi": 59,
+      "scientificPitch": "B3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 1.122462048309373,
+      "gain": 0.7
+    },
+    {
+      "string": 3,
+      "fret": 5,
+      "targetMidi": 60,
+      "scientificPitch": "C4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs4.ogg",
+      "sourceMidi": 61,
+      "playbackRate": 0.9438743126816935,
+      "gain": 0.7
+    },
+    {
+      "string": 3,
+      "fret": 6,
+      "targetMidi": 61,
+      "scientificPitch": "C#4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs4.ogg",
+      "sourceMidi": 61,
+      "playbackRate": 1,
+      "gain": 0.7
+    },
+    {
+      "string": 3,
+      "fret": 7,
+      "targetMidi": 62,
+      "scientificPitch": "D4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs4.ogg",
+      "sourceMidi": 61,
+      "playbackRate": 1.0594630943592953,
+      "gain": 0.7
+    },
+    {
+      "string": 3,
+      "fret": 8,
+      "targetMidi": 63,
+      "scientificPitch": "D#4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E4.ogg",
+      "sourceMidi": 64,
+      "playbackRate": 0.9438743126816935,
+      "gain": 0.7
+    },
+    {
+      "string": 3,
+      "fret": 9,
+      "targetMidi": 64,
+      "scientificPitch": "E4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E4.ogg",
+      "sourceMidi": 64,
+      "playbackRate": 1,
+      "gain": 0.7
+    },
+    {
+      "string": 3,
+      "fret": 10,
+      "targetMidi": 65,
+      "scientificPitch": "F4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E4.ogg",
+      "sourceMidi": 64,
+      "playbackRate": 1.0594630943592953,
+      "gain": 0.7
+    },
+    {
+      "string": 3,
+      "fret": 11,
+      "targetMidi": 66,
+      "scientificPitch": "F#4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/E4.ogg",
+      "sourceMidi": 64,
+      "playbackRate": 1.122462048309373,
+      "gain": 0.7
+    },
+    {
+      "string": 3,
+      "fret": 12,
+      "targetMidi": 67,
+      "scientificPitch": "G4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Gs4.ogg",
+      "sourceMidi": 68,
+      "playbackRate": 0.9438743126816935,
+      "gain": 0.7
+    },
+    {
+      "string": 4,
+      "fret": 0,
+      "targetMidi": 50,
+      "scientificPitch": "D3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.6674199270850172,
+      "gain": 0.7
+    },
+    {
+      "string": 4,
+      "fret": 1,
+      "targetMidi": 51,
+      "scientificPitch": "D#3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.7071067811865476,
+      "gain": 0.7
+    },
+    {
+      "string": 4,
+      "fret": 2,
+      "targetMidi": 52,
+      "scientificPitch": "E3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.7491535384383408,
+      "gain": 0.7
+    },
+    {
+      "string": 4,
+      "fret": 3,
+      "targetMidi": 53,
+      "scientificPitch": "F3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.7937005259840998,
+      "gain": 0.7
+    },
+    {
+      "string": 4,
+      "fret": 4,
+      "targetMidi": 54,
+      "scientificPitch": "F#3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.8408964152537145,
+      "gain": 0.7
+    },
+    {
+      "string": 4,
+      "fret": 5,
+      "targetMidi": 55,
+      "scientificPitch": "G3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.8908987181403393,
+      "gain": 0.7
+    },
+    {
+      "string": 4,
+      "fret": 6,
+      "targetMidi": 56,
+      "scientificPitch": "G#3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.9438743126816935,
+      "gain": 0.7
+    },
+    {
+      "string": 4,
+      "fret": 7,
+      "targetMidi": 57,
+      "scientificPitch": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 1,
+      "gain": 0.7
+    },
+    {
+      "string": 4,
+      "fret": 8,
+      "targetMidi": 58,
+      "scientificPitch": "A#3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 1.0594630943592953,
+      "gain": 0.7
+    },
+    {
+      "string": 4,
+      "fret": 9,
+      "targetMidi": 59,
+      "scientificPitch": "B3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 1.122462048309373,
+      "gain": 0.7
+    },
+    {
+      "string": 4,
+      "fret": 10,
+      "targetMidi": 60,
+      "scientificPitch": "C4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs4.ogg",
+      "sourceMidi": 61,
+      "playbackRate": 0.9438743126816935,
+      "gain": 0.7
+    },
+    {
+      "string": 4,
+      "fret": 11,
+      "targetMidi": 61,
+      "scientificPitch": "C#4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs4.ogg",
+      "sourceMidi": 61,
+      "playbackRate": 1,
+      "gain": 0.7
+    },
+    {
+      "string": 4,
+      "fret": 12,
+      "targetMidi": 62,
+      "scientificPitch": "D4",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/Cs4.ogg",
+      "sourceMidi": 61,
+      "playbackRate": 1.0594630943592953,
+      "gain": 0.7
+    },
+    {
+      "string": 5,
+      "fret": 0,
+      "targetMidi": 45,
+      "scientificPitch": "A2",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.5,
+      "gain": 0.7
+    },
+    {
+      "string": 5,
+      "fret": 1,
+      "targetMidi": 46,
+      "scientificPitch": "A#2",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.5297315471796477,
+      "gain": 0.7
+    },
+    {
+      "string": 5,
+      "fret": 2,
+      "targetMidi": 47,
+      "scientificPitch": "B2",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.5612310241546865,
+      "gain": 0.7
+    },
+    {
+      "string": 5,
+      "fret": 3,
+      "targetMidi": 48,
+      "scientificPitch": "C3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.5946035575013605,
+      "gain": 0.7
+    },
+    {
+      "string": 5,
+      "fret": 4,
+      "targetMidi": 49,
+      "scientificPitch": "C#3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.6299605249474366,
+      "gain": 0.7
+    },
+    {
+      "string": 5,
+      "fret": 5,
+      "targetMidi": 50,
+      "scientificPitch": "D3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.6674199270850172,
+      "gain": 0.7
+    },
+    {
+      "string": 5,
+      "fret": 6,
+      "targetMidi": 51,
+      "scientificPitch": "D#3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.7071067811865476,
+      "gain": 0.7
+    },
+    {
+      "string": 5,
+      "fret": 7,
+      "targetMidi": 52,
+      "scientificPitch": "E3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.7491535384383408,
+      "gain": 0.7
+    },
+    {
+      "string": 5,
+      "fret": 8,
+      "targetMidi": 53,
+      "scientificPitch": "F3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.7937005259840998,
+      "gain": 0.7
+    },
+    {
+      "string": 5,
+      "fret": 9,
+      "targetMidi": 54,
+      "scientificPitch": "F#3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.8408964152537145,
+      "gain": 0.7
+    },
+    {
+      "string": 5,
+      "fret": 10,
+      "targetMidi": 55,
+      "scientificPitch": "G3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.8908987181403393,
+      "gain": 0.7
+    },
+    {
+      "string": 5,
+      "fret": 11,
+      "targetMidi": 56,
+      "scientificPitch": "G#3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.9438743126816935,
+      "gain": 0.7
+    },
+    {
+      "string": 5,
+      "fret": 12,
+      "targetMidi": 57,
+      "scientificPitch": "A3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 1,
+      "gain": 0.7
+    },
+    {
+      "string": 6,
+      "fret": 0,
+      "targetMidi": 40,
+      "scientificPitch": "E2",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.3745767692191704,
+      "gain": 0.7
+    },
+    {
+      "string": 6,
+      "fret": 1,
+      "targetMidi": 41,
+      "scientificPitch": "F2",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.3968502629920499,
+      "gain": 0.7
+    },
+    {
+      "string": 6,
+      "fret": 2,
+      "targetMidi": 42,
+      "scientificPitch": "F#2",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.42044820762685725,
+      "gain": 0.7
+    },
+    {
+      "string": 6,
+      "fret": 3,
+      "targetMidi": 43,
+      "scientificPitch": "G2",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.44544935907016964,
+      "gain": 0.7
+    },
+    {
+      "string": 6,
+      "fret": 4,
+      "targetMidi": 44,
+      "scientificPitch": "G#2",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.47193715634084676,
+      "gain": 0.7
+    },
+    {
+      "string": 6,
+      "fret": 5,
+      "targetMidi": 45,
+      "scientificPitch": "A2",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.5,
+      "gain": 0.7
+    },
+    {
+      "string": 6,
+      "fret": 6,
+      "targetMidi": 46,
+      "scientificPitch": "A#2",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.5297315471796477,
+      "gain": 0.7
+    },
+    {
+      "string": 6,
+      "fret": 7,
+      "targetMidi": 47,
+      "scientificPitch": "B2",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.5612310241546865,
+      "gain": 0.7
+    },
+    {
+      "string": 6,
+      "fret": 8,
+      "targetMidi": 48,
+      "scientificPitch": "C3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.5946035575013605,
+      "gain": 0.7
+    },
+    {
+      "string": 6,
+      "fret": 9,
+      "targetMidi": 49,
+      "scientificPitch": "C#3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.6299605249474366,
+      "gain": 0.7
+    },
+    {
+      "string": 6,
+      "fret": 10,
+      "targetMidi": 50,
+      "scientificPitch": "D3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.6674199270850172,
+      "gain": 0.7
+    },
+    {
+      "string": 6,
+      "fret": 11,
+      "targetMidi": 51,
+      "scientificPitch": "D#3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.7071067811865476,
+      "gain": 0.7
+    },
+    {
+      "string": 6,
+      "fret": 12,
+      "targetMidi": 52,
+      "scientificPitch": "E3",
+      "sourcePath": "outputs/assets/audio/nylon-guitar/A3.ogg",
+      "sourceMidi": 57,
+      "playbackRate": 0.7491535384383408,
+      "gain": 0.7
+    }
+  ]
+}

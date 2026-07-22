@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nylon Level Consistency — Isolated A/B</title>
+<style>
+  body { max-width: 900px; margin: 0 auto; padding: 20px; font-family: sans-serif; }
+  .notice { padding: 14px; border: 2px solid #8a6500; background: #fff7d6; }
+  .controls { margin: 16px 0; }
+  button { margin: 4px; padding: 9px 13px; cursor: pointer; }
+  button[aria-pressed="true"] { background: #173f71; color: #fff; }
+  button:disabled { opacity: 0.55; cursor: not-allowed; }
+  #status, #readout { padding: 10px; margin: 12px 0; border: 1px solid #bbb; background: #f3f3f3; font-family: monospace; }
+  h2 { margin-top: 28px; }
+</style>
+</head>
+<body>
+<h1>Nylon Level Consistency — Isolated A/B</h1>
+<div class="notice">
+  Current production mapping versus the Product Owner-approved per-note calibration with +0.5 dB global Nylon makeup. No limiter or compressor is used, no production files are imported as executable code, and playback never starts automatically.
+</div>
+
+<div class="controls">
+  <button id="unlockBtn">Unlock and Load Nylon Samples</button>
+  <button id="stopBtn" disabled>Stop All</button>
+</div>
+
+<div class="controls" aria-label="Audition mode">
+  <button id="currentModeBtn" aria-pressed="true">Current</button>
+  <button id="calibratedModeBtn" aria-pressed="false">Calibrated</button>
+</div>
+
+<div id="status">Status: Waiting for user gesture. No automatic playback.</div>
+<div id="readout">Mode: Current | MIDI: — | Source: — | Rate: — | Gain: 0.700000 | Per-note: 0.000 dB | Makeup: 0.000 dB | Total: 0.000 dB</div>
+
+<h2>Reference Notes</h2>
+<div id="noteControls"></div>
+
+<h2>Level and Equivalence Tests</h2>
+<div>
+  <button id="slowSweepBtn" data-playback disabled>Slow Chromatic Sweep MIDI 40–76</button>
+  <button id="equivalenceBtn" data-playback disabled>Same-Pitch Position Equivalence</button>
+  <button id="rapidRetriggerBtn" data-playback disabled>Rapid Retrigger E4</button>
+  <button id="triadBtn" data-playback disabled>C Major Triad</button>
+  <button id="chordBtn" data-playback disabled>Six-String G Chord</button>
+</div>
+
+<script>
+const CURRENT_MODE = "current";
+const CALIBRATED_MODE = "calibrated";
+const PRODUCTION_VELOCITY = 0.7;
+const GLOBAL_NYLON_MAKEUP_DB = 0.5;
+const GLOBAL_NYLON_MAKEUP_GAIN = 10 ** (GLOBAL_NYLON_MAKEUP_DB / 20);
+const RELEASE_SECONDS = 0.025;
+const CHORD_RELEASE_MS = 1200;
+const C_MAJOR_TRIAD = [60, 64, 67];
+const G_MAJOR_CHORD = [43, 50, 55, 59, 62, 67];
+const REFERENCE_NOTES = [40, 45, 50, 55, 59, 64, 76];
+const POSITION_EQUIVALENCE = [
+  { midi: 64, first: "String 1 fret 0", second: "String 2 fret 5" },
+  { midi: 59, first: "String 2 fret 0", second: "String 3 fret 4" },
+  { midi: 55, first: "String 3 fret 0", second: "String 4 fret 5" },
+  { midi: 50, first: "String 4 fret 0", second: "String 5 fret 5" },
+  { midi: 45, first: "String 5 fret 0", second: "String 6 fret 5" }
+];
+
+let audioCtx = null;
+let mode = CURRENT_MODE;
+let productionMapping = null;
+let calibrationManifest = null;
+let sequenceGeneration = 0;
+const buffers = new Map();
+const activeVoices = new Set();
+const sequenceTimers = new Set();
+
+const statusEl = document.getElementById("status");
+const readoutEl = document.getElementById("readout");
+
+function setStatus(message) {
+  statusEl.textContent = `Status: ${message}`;
+}
+
+function schedule(callback, delay) {
+  const timer = window.setTimeout(() => {
+    sequenceTimers.delete(timer);
+    callback();
+  }, delay);
+  sequenceTimers.add(timer);
+}
+
+function clearSequence() {
+  sequenceGeneration += 1;
+  sequenceTimers.forEach((timer) => window.clearTimeout(timer));
+  sequenceTimers.clear();
+}
+
+function finalizeVoice(voice) {
+  if (!voice || voice.finalized) return;
+  voice.finalized = true;
+  if (voice.releaseTimer) window.clearTimeout(voice.releaseTimer);
+  try { voice.source.disconnect(); } catch {}
+  try { voice.gain.disconnect(); } catch {}
+  activeVoices.delete(voice);
+}
+
+function releaseVoice(voice) {
+  if (!voice || voice.releaseStarted || voice.finalized) return;
+  voice.releaseStarted = true;
+  const now = audioCtx.currentTime;
+  const gainParam = voice.gain.gain;
+  try {
+    if (typeof gainParam.cancelAndHoldAtTime === "function") {
+      gainParam.cancelAndHoldAtTime(now);
+    } else {
+      const currentGain = gainParam.value;
+      gainParam.cancelScheduledValues(now);
+      gainParam.setValueAtTime(currentGain, now);
+    }
+    gainParam.linearRampToValueAtTime(0.0001, now + RELEASE_SECONDS);
+  } catch {}
+  try { voice.source.stop(now + RELEASE_SECONDS); } catch {}
+}
+
+function stopAll() {
+  clearSequence();
+  activeVoices.forEach((voice) => releaseVoice(voice));
+  setStatus("Stopped with the shared click-safe release lifecycle.");
+}
+
+function selectedGain(targetMidi) {
+  if (mode === CURRENT_MODE) {
+    return { multiplier: 1, perNoteDb: 0, makeupDb: 0, totalDb: 0 };
+  }
+  const calibration = calibrationManifest.notes[String(targetMidi)];
+  return {
+    multiplier: calibration.calibrationGain * GLOBAL_NYLON_MAKEUP_GAIN,
+    perNoteDb: calibration.boundedFinalGainDb,
+    makeupDb: GLOBAL_NYLON_MAKEUP_DB,
+    totalDb: calibration.boundedFinalGainDb + GLOBAL_NYLON_MAKEUP_DB
+  };
+}
+
+function playMappedNote(targetMidi, label = null, automaticReleaseMs = null, replaceExisting = true) {
+  const mapping = productionMapping.targets.find((entry) => entry.targetMidi === targetMidi);
+  if (!audioCtx || !mapping || !buffers.has(mapping.sourcePath)) return;
+  if (replaceExisting) activeVoices.forEach((voice) => releaseVoice(voice));
+
+  const adjustment = selectedGain(targetMidi);
+  const effectiveGain = PRODUCTION_VELOCITY * adjustment.multiplier;
+  const source = audioCtx.createBufferSource();
+  const gain = audioCtx.createGain();
+  const voice = { source, gain, finalized: false, releaseStarted: false, releaseTimer: null };
+  source.buffer = buffers.get(mapping.sourcePath);
+  source.playbackRate.setValueAtTime(mapping.playbackRate, audioCtx.currentTime);
+  gain.gain.setValueAtTime(effectiveGain, audioCtx.currentTime);
+  source.connect(gain);
+  gain.connect(audioCtx.destination);
+  source.onended = () => finalizeVoice(voice);
+  source.start(audioCtx.currentTime);
+  activeVoices.add(voice);
+
+  readoutEl.textContent = `Mode: ${mode === CURRENT_MODE ? "Current" : "Calibrated"} | MIDI: ${targetMidi} | Source: ${mapping.sourceNote} (${mapping.sourceMidi}) | Rate: ${mapping.playbackRate.toFixed(6)} | Gain: ${effectiveGain.toFixed(6)} | Per-note: ${adjustment.perNoteDb.toFixed(3)} dB | Makeup: ${adjustment.makeupDb.toFixed(3)} dB | Total: ${adjustment.totalDb.toFixed(3)} dB`;
+  setStatus(label || `Playing MIDI ${targetMidi} (${mapping.scientificPitch}).`);
+  if (automaticReleaseMs !== null) {
+    voice.releaseTimer = window.setTimeout(() => releaseVoice(voice), automaticReleaseMs);
+  }
+}
+
+function playChord(midis, label) {
+  clearSequence();
+  activeVoices.forEach((voice) => releaseVoice(voice));
+  const generation = sequenceGeneration;
+  schedule(() => {
+    if (generation !== sequenceGeneration) return;
+    midis.forEach((midi) => playMappedNote(midi, label, CHORD_RELEASE_MS, false));
+    setStatus(`${label}: ${midis.length} simultaneous voices, direct to destination.`);
+  }, RELEASE_SECONDS * 1000);
+}
+
+function playSequence(steps, intervalMs, releaseMs) {
+  stopAll();
+  const generation = sequenceGeneration;
+  steps.forEach((step, index) => {
+    schedule(() => {
+      if (generation !== sequenceGeneration) return;
+      playMappedNote(step.midi, step.label, releaseMs);
+    }, index * intervalMs);
+  });
+}
+
+function setMode(nextMode) {
+  mode = nextMode;
+  document.getElementById("currentModeBtn").setAttribute("aria-pressed", String(mode === CURRENT_MODE));
+  document.getElementById("calibratedModeBtn").setAttribute("aria-pressed", String(mode === CALIBRATED_MODE));
+  const makeupDb = mode === CALIBRATED_MODE ? GLOBAL_NYLON_MAKEUP_DB : 0;
+  readoutEl.textContent = `Mode: ${mode === CURRENT_MODE ? "Current" : "Calibrated"} | MIDI: — | Source: — | Rate: — | Gain: ${PRODUCTION_VELOCITY.toFixed(6)} | Per-note: 0.000 dB | Makeup: ${makeupDb.toFixed(3)} dB | Total: ${makeupDb.toFixed(3)} dB`;
+  setStatus(`${mode === CURRENT_MODE ? "Current" : "Calibrated"} mode selected. No playback started.`);
+}
+
+async function unlockAndLoad() {
+  if (audioCtx) return;
+  try {
+    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AudioContextCtor();
+    await audioCtx.resume();
+    const [mappingResponse, calibrationResponse] = await Promise.all([
+      fetch("production_mapping.json"),
+      fetch("calibration_manifest.json")
+    ]);
+    if (!mappingResponse.ok || !calibrationResponse.ok) throw new Error("Audit manifest request failed");
+    productionMapping = await mappingResponse.json();
+    calibrationManifest = await calibrationResponse.json();
+    const uniquePaths = [...new Set(productionMapping.targets.map((entry) => entry.sourcePath))];
+    await Promise.all(uniquePaths.map(async (sourcePath) => {
+      const response = await fetch(`../../../${sourcePath}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status} for ${sourcePath}`);
+      const buffer = await audioCtx.decodeAudioData(await response.arrayBuffer());
+      buffers.set(sourcePath, buffer);
+    }));
+    document.getElementById("unlockBtn").disabled = true;
+    document.getElementById("stopBtn").disabled = false;
+    document.querySelectorAll("[data-playback]").forEach((button) => { button.disabled = false; });
+    setStatus("Seven production Nylon anchors loaded. Ready; no playback started.");
+  } catch (error) {
+    setStatus(`Load failed: ${error.message}`);
+  }
+}
+
+document.getElementById("unlockBtn").addEventListener("click", unlockAndLoad);
+document.getElementById("stopBtn").addEventListener("click", stopAll);
+document.getElementById("currentModeBtn").addEventListener("click", () => setMode(CURRENT_MODE));
+document.getElementById("calibratedModeBtn").addEventListener("click", () => setMode(CALIBRATED_MODE));
+
+const noteControls = document.getElementById("noteControls");
+REFERENCE_NOTES.forEach((midi) => {
+  const button = document.createElement("button");
+  button.textContent = ({ 40: "E2", 45: "A2", 50: "D3", 55: "G3", 59: "B3", 64: "E4", 76: "E5" })[midi];
+  button.disabled = true;
+  button.dataset.playback = "note";
+  button.addEventListener("click", () => playMappedNote(midi));
+  noteControls.appendChild(button);
+});
+
+document.getElementById("slowSweepBtn").addEventListener("click", () => {
+  const steps = Array.from({ length: 37 }, (_, index) => ({ midi: 40 + index }));
+  playSequence(steps, 1200, 850);
+});
+document.getElementById("equivalenceBtn").addEventListener("click", () => {
+  const steps = POSITION_EQUIVALENCE.flatMap((pair) => [
+    { midi: pair.midi, label: `${pair.first}: MIDI ${pair.midi}` },
+    { midi: pair.midi, label: `${pair.second}: MIDI ${pair.midi}` }
+  ]);
+  playSequence(steps, 1200, 850);
+});
+document.getElementById("rapidRetriggerBtn").addEventListener("click", () => {
+  const steps = Array.from({ length: 12 }, () => ({ midi: 64, label: "Rapid retrigger E4" }));
+  playSequence(steps, 90, 300);
+});
+document.getElementById("triadBtn").addEventListener("click", () => {
+  playChord(C_MAJOR_TRIAD, "C Major triad");
+});
+document.getElementById("chordBtn").addEventListener("click", () => {
+  playChord(G_MAJOR_CHORD, "Six-string G chord");
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) stopAll();
+});
+window.addEventListener("pagehide", stopAll);
+</script>
+</body>
+</html>
