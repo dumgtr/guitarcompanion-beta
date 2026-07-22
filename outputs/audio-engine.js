@@ -1,11 +1,12 @@
 (function() {
   "use strict";
 
-  const CHANNELS = Object.freeze(["fsl", "soundlab"]);
-  const PROFILES = Object.freeze(["fsl-fretboard-position", "soundlab-guide-tone"]);
+  const CHANNELS = Object.freeze(["fsl", "soundlab", "lessons"]);
+  const PROFILES = Object.freeze(["fsl-fretboard-position", "soundlab-guide-tone", "lessons-profile"]);
   const PROFILE_RANGES = Object.freeze({
     "fsl-fretboard-position": { min: 40, max: 76 },
-    "soundlab-guide-tone": { min: 48, max: 76 }
+    "soundlab-guide-tone": { min: 48, max: 76 },
+    "lessons-profile": { min: 40, max: 76 }
   });
   const PROFILE_DEFAULTS = Object.freeze({
     "fsl-fretboard-position": {
@@ -15,6 +16,12 @@
       type: "triangle"
     },
     "soundlab-guide-tone": {
+      duration: 1.15,
+      attack: 0.02,
+      peak: 0.58,
+      type: "triangle"
+    },
+    "lessons-profile": {
       duration: 1.15,
       attack: 0.02,
       peak: 0.58,
@@ -104,6 +111,7 @@
   const fslSynthSampleBuffers = new Map();
   const fslSynthFailedSamples = new Set();
   const fslSynthActiveSources = new Set();
+  const soundlabSynthActiveSources = new Set();
 
   function getAudioContextCtor() {
     return window.AudioContext || window.webkitAudioContext || null;
@@ -189,13 +197,16 @@
 
     channelGains = {
       fsl: audioCtx.createGain(),
-      soundlab: audioCtx.createGain()
+      soundlab: audioCtx.createGain(),
+      lessons: audioCtx.createGain()
     };
     channelGains.fsl.gain.setValueAtTime(1, audioCtx.currentTime);
     channelGains.soundlab.gain.setValueAtTime(1, audioCtx.currentTime);
+    channelGains.lessons.gain.setValueAtTime(1, audioCtx.currentTime);
 
     channelGains.fsl.connect(masterGain);
     channelGains.soundlab.connect(masterGain);
+    channelGains.lessons.connect(masterGain);
     masterGain.connect(compressor);
     compressor.connect(audioCtx.destination);
   }
@@ -261,6 +272,13 @@
         try { src.disconnect(); } catch {}
       });
       fslSynthActiveSources.clear();
+    }
+    if (channel === "soundlab" && !isPlaybackTrigger) {
+      soundlabSynthActiveSources.forEach((src) => {
+        try { src.stop(); } catch {}
+        try { src.disconnect(); } catch {}
+      });
+      soundlabSynthActiveSources.clear();
     }
     const voice = activeVoices.get(channel);
     if (!voice) return false;
@@ -462,7 +480,9 @@
         }
       }
 
-      if (channel === "fsl" && requestedInstrument === "synth") {
+      const isFslSynth = channel === "fsl" && profile === "fsl-fretboard-position";
+      const isSoundLabSynth = channel === "soundlab" && profile === "soundlab-guide-tone";
+      if ((isFslSynth || isSoundLabSynth) && requestedInstrument === "synth") {
         await prepareFslSynthSampler();
         if (requestGeneration !== channelRequestGenerations.get(channel)) {
           return { played: false, requestGeneration, reason: "superseded" };
@@ -538,7 +558,7 @@
               : "electric-note-unavailable";
           }
         }
-        if (channel === "fsl" && requestedInstrument === "synth") {
+        if ((isFslSynth || isSoundLabSynth) && requestedInstrument === "synth") {
           const mapping = parsedPitch.midi >= 40 && parsedPitch.midi <= 76
             ? approvedFslSynthMap?.notes?.[parsedPitch.midi.toString()]
             : null;
@@ -551,13 +571,14 @@
           ) {
             try {
               const sampleVoice = createFslSynthVoice(sampleUrl, {
+                channel,
                 timeOffset,
                 duration
               });
               usedFslSynth = true;
               return sampleVoice;
             } catch {
-              lastFallbackReason = "fsl-synth-sample-playback-failed";
+              lastFallbackReason = `${channel}-synth-sample-playback-failed`;
             }
           } else if (!lastFallbackReason) {
             lastFallbackReason = fslSynthFailedSamples.has(sampleUrl)
@@ -856,23 +877,25 @@
     const buffer = fslSynthSampleBuffers.get(sampleUrl);
     if (!buffer) throw new Error(`FSL Synth sample ${sampleUrl} is unavailable.`);
 
+    const channel = playback.channel === "soundlab" ? "soundlab" : "fsl";
     const timeOffset = Math.max(0, Number(playback.timeOffset) || 0);
     const now = audioCtx.currentTime + timeOffset;
     const source = audioCtx.createBufferSource();
 
     source.buffer = buffer;
     source.playbackRate.setValueAtTime(1.0, now);
-    source.connect(channelGains.fsl);
+    source.connect(channelGains[channel]);
     source.start(now);
 
-    fslSynthActiveSources.add(source);
+    const activeSet = channel === "soundlab" ? soundlabSynthActiveSources : fslSynthActiveSources;
+    activeSet.add(source);
     source.onended = () => {
-      fslSynthActiveSources.delete(source);
+      activeSet.delete(source);
     };
 
     return {
-      channel: "fsl",
-      profile: "fsl-fretboard-position",
+      channel,
+      profile: channel === "soundlab" ? "soundlab-guide-tone" : "fsl-fretboard-position",
       sources: [], // leave empty so cleanupVoice does not stop it during transition overlaps!
       nodes: [],
       timerId: null,
@@ -1007,6 +1030,7 @@
       instrumentAvailability: getInstrumentAvailability(),
       activeSoundLabVoiceCount: activeVoices.has("soundlab") ? 1 : 0,
       activeFslSynthVoiceCount: fslSynthActiveSources.size,
+      activeSoundLabSynthVoiceCount: soundlabSynthActiveSources.size,
       lastError
     };
   }
