@@ -488,6 +488,54 @@ main {
   font-size: clamp(1.05rem, 2vw, 1.35rem);
 }
 
+.continue-practice-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 24px clamp(16px, 4vw, 44px) 0;
+  padding: clamp(18px, 3vw, 28px);
+  border: 1px solid color-mix(in srgb, var(--accent), var(--line) 42%);
+  border-radius: 8px;
+  background:
+    linear-gradient(120deg, color-mix(in srgb, var(--accent), transparent 88%), transparent 64%),
+    var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.continue-practice-entry[hidden] {
+  display: none;
+}
+
+.continue-practice-entry h2,
+.continue-practice-entry p:last-child {
+  margin-bottom: 0;
+}
+
+.continue-practice-entry-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.continue-practice-entry :focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent), white 24%);
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .continue-practice-entry {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .continue-practice-entry-actions > * {
+    flex: 1 1 140px;
+  }
+}
+
 .cta-primary {
   margin-top: 14px;
   box-shadow: 0 14px 28px rgba(229, 123, 58, 0.22);

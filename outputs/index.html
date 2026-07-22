@@ -18,7 +18,7 @@
       })();
     </script>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="styles.css?v=v2.9.8-continue-practice-v1" />
+    <link rel="stylesheet" href="styles.css?v=v2.9.9-continue-practice-state-v1" />
   </head>
   <body>
     <header class="topbar">
@@ -80,6 +80,18 @@
     </section>
 
     <main id="top">
+      <section class="continue-practice-entry" id="continuePracticeEntry" aria-labelledby="continuePracticeTitle" hidden>
+        <div>
+          <p class="panel-label">Continue Practice</p>
+          <h2 id="continuePracticeTitle">กลับมาซ้อมต่อไหมครับ?</h2>
+          <p id="continuePracticeDescription">มีจุดซ้อมล่าสุดที่พร้อมเปิดต่อ โดยเสียงจะยังไม่เริ่มจนกว่าคุณจะกดเล่นเอง</p>
+        </div>
+        <div class="continue-practice-entry-actions">
+          <button class="primary-action" id="continuePracticeButton" type="button">ซ้อมต่อ</button>
+          <button class="small-button" id="startFreshButton" type="button">เริ่มใหม่</button>
+        </div>
+      </section>
+
       <div class="month-switcher readonly-progression-tracker" id="monthSwitcher" aria-hidden="true">
       </div>
 
@@ -880,6 +892,7 @@ TAB:    E|--0-------0---0-------0---|</pre>
 
     <script src="data-rhc.js"></script>
     <script src="audio-engine.js?v=v2.9.6-m5-m6-live-sync"></script>
-    <script src="app.js?v=v2.9.8-continue-practice-v1"></script>
+    <script src="continue-practice-state.js?v=v1"></script>
+    <script src="app.js?v=v2.9.9-continue-practice-state-v1"></script>
   </body>
 </html>

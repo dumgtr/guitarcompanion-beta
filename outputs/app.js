@@ -202,8 +202,15 @@ const soundLabV2AliasMode = isSoundLabV2AliasPath();
 const sharedSoundLabAudioPreviewMode = parseSharedSoundLabAudioPreviewMode() || soundLabV2AliasMode;
 const legacyPracticeRoomMode = parseLegacyPracticeRoomMode();
 const practiceRoomMode = resolvePracticeRoomMode();
-const CONTINUE_PRACTICE_STATE_KEY = "gc_continue_practice_state_v1";
+const continuePracticeStateApiV1 = window.GuitarCompanionContinuePracticeV1 || null;
+const CONTINUE_PRACTICE_MIN_BPM = 50;
+const CONTINUE_PRACTICE_MAX_BPM = 180;
 let restoredContinuePracticeDestinationV1 = null;
+let pendingContinuePracticeRecordV1 = null;
+let continuePracticeStoreV1 = null;
+let continuePracticeControllerV1 = null;
+let continuePracticeStartupDecisionV1 = "none";
+let metronomeEnabledPreferenceV1 = false;
 let courseData = null;
 let activeMiniCourseId = "";
 let practiceRoomIaPreviewPlacement = null;
@@ -368,9 +375,14 @@ function loadJson(key, fallback) {
 function safeSetItem(key, value) {
   if (typeof isDevPreviewActive === 'function' && isDevPreviewActive() && typeof selectedFocusedMonth !== 'undefined' && selectedFocusedMonth > 4) {
     console.warn("Dev Preview: Progress saving is disabled for hidden months.");
-    return;
+    return false;
   }
-  localStorage.setItem(key, value);
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function saveJson(key, value) {
@@ -486,66 +498,195 @@ function isPracticeRoomIaPreviewActive() {
   return practiceRoomMode === "ia-v2";
 }
 
-function resolveValidContinuePracticeDestinationV1(rawState) {
-  try {
-    if (!isPracticeRoomIaPreviewActive()) return null;
-    const state = typeof rawState === "string" ? JSON.parse(rawState) : rawState;
-    const allowedKeys = ["version", "week", "day"];
-    if (
-      !state
-      || typeof state !== "object"
-      || Array.isArray(state)
-      || Object.keys(state).length !== allowedKeys.length
-      || !allowedKeys.every((key) => Object.prototype.hasOwnProperty.call(state, key))
-      || state.version !== 1
-      || !Number.isInteger(state.week)
-      || !Number.isInteger(state.day)
-    ) {
-      return null;
+function createContinuePracticeCatalogV1() {
+  return {
+    lessons: foundationWeeks.map((weekItem) => ({
+      id: `foundation-week-${weekItem.number}`,
+      label: `สัปดาห์ที่ ${weekItem.number}: ${weekItem.title}`,
+      exercises: (dailyPracticePlan[weekItem.number] || []).map((_, dayIndex) => ({
+        id: `foundation-week-${weekItem.number}-day-${dayIndex + 1}`,
+        label: `วันที่ ${dayIndex + 1}`,
+        stepIndex: dayIndex
+      }))
+    }))
+  };
+}
+
+function parseContinuePracticeLocationV1(location) {
+  const lessonMatch = /^foundation-week-([1-4])$/.exec(String(location?.lessonId || ""));
+  const exerciseMatch = /^foundation-week-([1-4])-day-([1-7])$/.exec(String(location?.exerciseId || ""));
+  if (!lessonMatch || !exerciseMatch || lessonMatch[1] !== exerciseMatch[1]) return null;
+  return {
+    route: location.route,
+    week: Number(lessonMatch[1]),
+    day: Number(exerciseMatch[2])
+  };
+}
+
+function getCurrentContinuePracticeRouteV1() {
+  const route = String(window.location.hash || "").replace(/^#/, "");
+  return continuePracticeStateApiV1?.ALLOWED_ROUTES.includes(route) ? route : "dashboard";
+}
+
+function getCurrentContinuePracticeSnapshotV1() {
+  if (selectedFocusedMonth !== 1) return null;
+  const week = Number(focusedSelectedWeek);
+  const day = getRenderedPracticeDayV1(week);
+  if (!Number.isInteger(week) || week < 1 || week > 4 || !Number.isInteger(day) || day < 1 || day > 7) return null;
+  return {
+    location: {
+      route: getCurrentContinuePracticeRouteV1(),
+      lessonId: `foundation-week-${week}`,
+      exerciseId: `foundation-week-${week}-day-${day}`,
+      stepId: null,
+      stepIndex: day - 1
+    },
+    preferences: {
+      instrument: getSelectedAudioInstrument(),
+      metronomeBpm: bpm,
+      metronomeEnabled: metronomeEnabledPreferenceV1
     }
+  };
+}
 
-    const liveWeek = foundationWeeks.find((weekItem) => Number(weekItem.number) === state.week);
-    const livePracticeDays = dailyPracticePlan[state.week];
-    const livePracticeDay = Array.isArray(livePracticeDays)
-      ? livePracticeDays[state.day - 1]
-      : null;
-    if (!liveWeek || !Array.isArray(livePracticeDay) || livePracticeDay.length === 0) return null;
+function persistContinuePracticeStateV1(options = {}) {
+  const snapshot = getCurrentContinuePracticeSnapshotV1();
+  if (!snapshot || !continuePracticeStoreV1) return false;
+  return continuePracticeStoreV1.save(snapshot, { debounce: Boolean(options.debounce) });
+}
 
-    return { version: 1, week: state.week, day: state.day };
-  } catch {
-    return null;
+function flushContinuePracticeStateV1() {
+  return continuePracticeStoreV1?.flush() ?? true;
+}
+
+function setMetronomeEnabledPreferenceV1(value, options = {}) {
+  metronomeEnabledPreferenceV1 = Boolean(value);
+  const toggle = document.getElementById("metronomeToggle");
+  const container = document.querySelector(".top-metronome");
+  if (toggle) {
+    toggle.dataset.savedPreference = String(metronomeEnabledPreferenceV1);
+    toggle.setAttribute(
+      "aria-label",
+      isMetronomeRunning
+        ? "หยุด Metronome"
+        : metronomeEnabledPreferenceV1
+          ? "เริ่ม Metronome (จำค่าว่าเปิดไว้จากครั้งก่อน)"
+          : "เริ่ม Metronome"
+    );
+  }
+  if (container) container.dataset.savedEnabled = String(metronomeEnabledPreferenceV1);
+  if (options.persist !== false) persistContinuePracticeStateV1();
+}
+
+function describeContinuePracticeRecordV1(record) {
+  const catalog = createContinuePracticeCatalogV1();
+  const location = parseContinuePracticeLocationV1(record.location);
+  const lesson = catalog.lessons.find((item) => item.id === record.location.lessonId);
+  const exercise = lesson?.exercises.find((item) => item.id === record.location.exerciseId);
+  if (!location || !lesson || !exercise) return "มีจุดซ้อมล่าสุดที่พร้อมเปิดต่อ";
+  const instrumentLabels = { synth: "Synth", nylon: "Nylon", electric: "Electric" };
+  return `${lesson.label} · ${exercise.label} · ${instrumentLabels[record.preferences.instrument]} · ${record.preferences.metronomeBpm} BPM`;
+}
+
+function renderContinuePracticeEntryV1(record = pendingContinuePracticeRecordV1) {
+  const entry = document.getElementById("continuePracticeEntry");
+  if (!entry) return;
+  entry.hidden = !record;
+  if (!record) return;
+  const description = document.getElementById("continuePracticeDescription");
+  if (description) {
+    description.textContent = `${describeContinuePracticeRecordV1(record)} — ระบบจะยังไม่เปิดเสียงหรือเริ่ม Metronome อัตโนมัติ`;
   }
 }
 
-function readContinuePracticeState() {
-  try {
-    return resolveValidContinuePracticeDestinationV1(
-      localStorage.getItem(CONTINUE_PRACTICE_STATE_KEY)
-    );
-  } catch {
-    return null;
-  }
+function hideContinuePracticeEntryV1() {
+  const entry = document.getElementById("continuePracticeEntry");
+  if (entry) entry.hidden = true;
+  pendingContinuePracticeRecordV1 = null;
 }
 
-function writeContinuePracticeState(week, day) {
-  if (!isPracticeRoomIaPreviewActive()) return;
-
-  try {
-    const destination = resolveValidContinuePracticeDestinationV1({
-      version: 1,
-      week,
-      day
-    });
-    if (!destination) return;
-
-    localStorage.setItem(
-      CONTINUE_PRACTICE_STATE_KEY,
-      JSON.stringify(destination)
-    );
-    renderContinuePracticeBanner();
-  } catch {
-    // Continue Practice is optional; storage failures must not interrupt navigation.
+async function applyContinuePracticeLocationV1(location) {
+  const destination = parseContinuePracticeLocationV1(location);
+  if (!destination) throw new Error("INVALID_CONTINUE_PRACTICE_LOCATION");
+  selectedFocusedMonth = 1;
+  restoredContinuePracticeDestinationV1 = { week: destination.week, day: destination.day };
+  const opened = await openFocusedWeek(destination.week, {
+    source: "continue-practice",
+    scroll: false,
+    preserveContinueDestination: true,
+    persist: false
+  });
+  if (!opened) throw new Error("CONTINUE_PRACTICE_LOCATION_UNAVAILABLE");
+  restoredContinuePracticeDestinationV1 = { week: destination.week, day: destination.day };
+  renderFocusedDashboard();
+  if (window.history?.replaceState) {
+    window.history.replaceState(null, "", `#${destination.route}`);
   }
+  const target = document.getElementById(destination.route);
+  target?.scrollIntoView({
+    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    block: "start"
+  });
+}
+
+async function applyFreshPracticeLocationV1() {
+  selectedFocusedMonth = 1;
+  focusedSelectedWeek = getCurrentFoundationWeek();
+  selectedWeek = focusedSelectedWeek;
+  restoredContinuePracticeDestinationV1 = { week: focusedSelectedWeek, day: 1 };
+  if (window.history?.replaceState) window.history.replaceState(null, "", "#dashboard");
+  renderFocusedApp();
+  document.getElementById("dashboard")?.scrollIntoView({ behavior: "auto", block: "start" });
+}
+
+function initializeContinuePracticeStateV1() {
+  if (!continuePracticeStateApiV1 || continuePracticeStoreV1) return;
+  const catalog = createContinuePracticeCatalogV1();
+  let storage = null;
+  try {
+    storage = window.localStorage;
+  } catch {
+    storage = null;
+  }
+  continuePracticeStoreV1 = continuePracticeStateApiV1.createStore({
+    storage,
+    catalog,
+    minBpm: CONTINUE_PRACTICE_MIN_BPM,
+    maxBpm: CONTINUE_PRACTICE_MAX_BPM,
+    debounceMs: 180
+  });
+  continuePracticeControllerV1 = continuePracticeStateApiV1.createDecisionController({
+    store: continuePracticeStoreV1,
+    catalog,
+    minBpm: CONTINUE_PRACTICE_MIN_BPM,
+    maxBpm: CONTINUE_PRACTICE_MAX_BPM,
+    adapters: {
+      applyInstrument: (instrument) => setSelectedAudioInstrument(instrument, { persist: false }),
+      applyBpm: (value) => setBpm(value, { persist: false }),
+      applyMetronomePreference: (enabled) => setMetronomeEnabledPreferenceV1(enabled, { persist: false }),
+      applyLocation: applyContinuePracticeLocationV1,
+      applyFreshLocation: applyFreshPracticeLocationV1,
+      onDecision: (decision) => {
+        continuePracticeStartupDecisionV1 = decision;
+        hideContinuePracticeEntryV1();
+      }
+    }
+  });
+  pendingContinuePracticeRecordV1 = continuePracticeStoreV1.load();
+  continuePracticeStartupDecisionV1 = pendingContinuePracticeRecordV1 ? "pending" : "none";
+  renderContinuePracticeEntryV1();
+
+  const continueButton = document.getElementById("continuePracticeButton");
+  const freshButton = document.getElementById("startFreshButton");
+  continueButton?.addEventListener("click", async () => {
+    if (!pendingContinuePracticeRecordV1) return;
+    const succeeded = await continuePracticeControllerV1.continuePractice(pendingContinuePracticeRecordV1);
+    if (!succeeded) renderContinuePracticeEntryV1();
+  });
+  freshButton?.addEventListener("click", async () => {
+    const succeeded = await continuePracticeControllerV1.startFresh();
+    if (!succeeded) renderContinuePracticeEntryV1();
+  });
 }
 
 function parseFretboardStudioPreviewMode() {
@@ -1128,7 +1269,7 @@ function renderSetlist() {
   });
 }
 
-function setBpm(value) {
+function setBpm(value, options = {}) {
   const nextBpm = Number(value);
   if (!Number.isFinite(nextBpm)) {
     document.getElementById("bpmValue").value = bpm;
@@ -1137,10 +1278,14 @@ function setBpm(value) {
     return;
   }
 
-  bpm = Math.min(180, Math.max(50, Math.round(nextBpm)));
+  const previousBpm = bpm;
+  bpm = Math.min(CONTINUE_PRACTICE_MAX_BPM, Math.max(CONTINUE_PRACTICE_MIN_BPM, Math.round(nextBpm)));
   document.getElementById("bpmValue").value = bpm;
   document.getElementById("bpmSlider").value = bpm;
   updateQuickTempoActive(bpm);
+  if (options.persist !== false && bpm !== previousBpm) {
+    persistContinuePracticeStateV1({ debounce: true });
+  }
 }
 
 function setQuickTempo(value) {
@@ -1201,6 +1346,7 @@ function startMetronome() {
   isMetronomeRunning = true;
   renderBeatCounter(0);
   document.getElementById("metronomeToggle").textContent = "หยุด";
+  setMetronomeEnabledPreferenceV1(true);
   const announcer = document.getElementById("metronomeAnnouncer");
   if (announcer) announcer.textContent = `เริ่ม Metronome ที่ ${bpm} BPM`;
   scheduleMetronome();
@@ -1210,6 +1356,7 @@ function stopMetronome() {
   clearTimeout(metronomeTimer);
   isMetronomeRunning = false;
   document.getElementById("metronomeToggle").textContent = "เริ่ม";
+  setMetronomeEnabledPreferenceV1(false);
   document.getElementById("beatLight").classList.remove("active", "accent");
   renderBeatCounter(0);
   const announcer = document.getElementById("metronomeAnnouncer");
@@ -2098,6 +2245,7 @@ function renderQaPreviewBadge() {
 
 function initFocusedApp() {
   applyTheme(getInitialTheme());
+  initializeContinuePracticeStateV1();
   renderGlobalInstrumentSelector();
   renderDevPreviewBanner();
   renderQaPreviewBadge();
@@ -2109,10 +2257,14 @@ function initFocusedApp() {
   renderFocusedApp();
   renderPreludeEntry();
   renderMiniCourseShelf();
-  setBpm(bpm);
+  setBpm(bpm, { persist: false });
   loadFutureData().then(() => {
     renderPreludeEntry();
     if (isPreludePreviewActive()) {
+      renderMonthSwitcher();
+      return;
+    }
+    if (["pending", "continue", "fresh"].includes(continuePracticeStartupDecisionV1)) {
       renderMonthSwitcher();
       return;
     }
@@ -2130,8 +2282,12 @@ function initFocusedApp() {
 }
 
 function getSavedSelectedFocusedMonth() {
-  const saved = Number(localStorage.getItem(selectedFocusedMonthStorageKey) || 1);
-  return saved >= 2 && saved <= 6 ? saved : 1;
+  try {
+    const saved = Number(localStorage.getItem(selectedFocusedMonthStorageKey) || 1);
+    return saved >= 2 && saved <= 6 ? saved : 1;
+  } catch {
+    return 1;
+  }
 }
 
 function bindFocusedEvents() {
@@ -2152,6 +2308,7 @@ function bindFocusedEvents() {
   document.querySelectorAll(".brand, .topnav a").forEach((link) => {
     link.addEventListener("click", () => {
       if (isViewingPrelude) exitPreludeView();
+      window.setTimeout(() => persistContinuePracticeStateV1(), 0);
     });
   });
   document.querySelector(".close-panel")?.addEventListener("click", closePracticeLab);
@@ -2189,6 +2346,7 @@ function bindFocusedEvents() {
   document.getElementById("bpmSlider").addEventListener("input", (event) => setBpm(Number(event.target.value)));
   document.getElementById("metronomeToggle").addEventListener("click", toggleMetronome);
   document.getElementById("practiceNotes")?.addEventListener("input", savePracticeNotes);
+  window.addEventListener("hashchange", () => persistContinuePracticeStateV1());
 }
 
 function bindReferenceShelfToggle() {
@@ -2543,7 +2701,7 @@ function switchDay(dayNumber) {
   restoredContinuePracticeDestinationV1 = null;
   setPracticeDay(weekNumber, day);
   renderFocusedDashboard();
-  writeContinuePracticeState(weekNumber, day);
+  persistContinuePracticeStateV1();
 }
 
 function renderPracticeDaySelector(weekNumber, activeDay) {
@@ -2815,6 +2973,9 @@ async function openFocusedWeek(weekNumber, options = {}) {
       block: "start"
     });
   }
+  if (options.persist !== false && source !== "continue-practice") {
+    persistContinuePracticeStateV1();
+  }
   return true;
 }
 
@@ -2906,9 +3067,7 @@ function renderFocusedWeekTabs() {
   document.querySelectorAll("[data-foundation-week]").forEach((button) => {
     button.addEventListener("click", async () => {
       const requestedWeek = Number(button.dataset.week);
-      if (await openFocusedWeek(requestedWeek, { source: "week-card" })) {
-        writeContinuePracticeState(requestedWeek, getPracticeDay(requestedWeek));
-      }
+      await openFocusedWeek(requestedWeek, { source: "week-card" });
     });
   });
 }
@@ -3959,7 +4118,7 @@ function getSelectedAudioInstrument() {
   return selectedAudioInstrument;
 }
 
-function setSelectedAudioInstrument(instrument) {
+function setSelectedAudioInstrument(instrument, options = {}) {
   const engine = window.AudioEngine;
   const availability = typeof engine?.getInstrumentAvailability === "function"
     ? engine.getInstrumentAvailability(instrument)
@@ -3978,6 +4137,7 @@ function setSelectedAudioInstrument(instrument) {
     engine?.stopAllTonal?.();
     selectedAudioInstrument = instrument;
     engine?.setSelectedInstrument?.(instrument);
+    if (options.persist !== false) persistContinuePracticeStateV1();
   }
 
   syncGlobalInstrumentSelector();
@@ -5098,7 +5258,11 @@ function savePracticeNotes() {
 function renderPracticeNotes() {
   const noteInput = document.getElementById("practiceNotes");
   if (!noteInput) return;
-  noteInput.value = localStorage.getItem(foundationStorage.notes) || "";
+  try {
+    noteInput.value = localStorage.getItem(foundationStorage.notes) || "";
+  } catch {
+    noteInput.value = "";
+  }
 }
 
 function renderPracticeStudioPreviewShell() {
@@ -5196,51 +5360,6 @@ function restorePracticeRoomIaPreview() {
   }
   practiceRoomIaPreviewPlacement = null;
 }
-
-
-
-function renderContinuePracticeBanner(shell = document.getElementById("practiceRoomIaPreviewShell")) {
-  shell?.querySelector(":scope > .continue-practice-banner")?.remove();
-  if (
-    !isPracticeRoomIaPreviewActive()
-    || !shell
-    || shell.id !== "practiceRoomIaPreviewShell"
-    || !shell.closest("#practice")
-  ) return;
-
-  const savedState = readContinuePracticeState();
-  if (!savedState) return;
-
-  const continuePractice = month2CreateElement("button", "continue-practice-banner");
-  continuePractice.type = "button";
-  continuePractice.setAttribute(
-    "aria-label",
-    `ซ้อมต่อจาก Week ${savedState.week} วันที่ ${savedState.day}`
-  );
-  continuePractice.append(
-    month2CreateElement("span", "continue-practice-kicker", "CONTINUE PRACTICE"),
-    month2CreateElement("span", "continue-practice-title", "ซ้อมต่อจากครั้งล่าสุด"),
-    month2CreateElement(
-      "span",
-      "continue-practice-copy",
-      `Week ${savedState.week} · Day ${savedState.day} — กลับไปยังจุดที่เลือกไว้`
-    ),
-    month2CreateElement("span", "continue-practice-action", "เปิดแผนซ้อม →")
-  );
-  continuePractice.addEventListener("click", async () => {
-    const freshState = readContinuePracticeState();
-    if (!freshState) {
-      renderContinuePracticeBanner(shell);
-      return;
-    }
-    await openFocusedWeek(freshState.week, { scroll: true, preserveContinueDestination: true });
-    restoredContinuePracticeDestinationV1 = freshState;
-    renderFocusedDashboard();
-  });
-
-  shell.prepend(continuePractice);
-}
-
 function renderPracticeRoomIaPreview() {
   const practiceGrid = document.querySelector("#practice .practice-grid");
   const originalHeading = document.querySelector("#practice > .section-heading");
@@ -5377,7 +5496,6 @@ function renderPracticeRoomIaPreview() {
   practiceSection.setAttribute("aria-labelledby", "practiceRoomIaTitle");
   practiceSection.classList.add("practice-room-ia-active");
   practiceSection.prepend(shell);
-  renderContinuePracticeBanner(shell);
 
   if (miniCourseShelf) quickMiniCourses.appendChild(miniCourseShelf);
   referenceShelves.forEach((element) => {
@@ -6589,7 +6707,7 @@ function resetFoundationProgress() {
   localStorage.removeItem(foundationStorage.completedWeeks);
   localStorage.removeItem(foundationStorage.dayByWeek);
   localStorage.removeItem(foundationStorage.notes);
-  localStorage.removeItem('gc_continue_practice_state_v1');
+  continuePracticeStoreV1?.clear();
   Object.keys(localStorage)
     .filter((key) => key.startsWith(foundationStorage.checklistPrefix))
     .forEach((key) => localStorage.removeItem(key));
@@ -6613,7 +6731,10 @@ window.__GC_MONTH2_ENGINES__ = Object.freeze({
   stopAllSounds
 });
 
-window.addEventListener("pagehide", stopActiveAudio);
+window.addEventListener("pagehide", () => {
+  flushContinuePracticeStateV1();
+  stopActiveAudio();
+});
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) stopActiveAudio();
 });
