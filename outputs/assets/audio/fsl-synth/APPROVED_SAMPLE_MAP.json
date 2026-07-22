@@ -1,0 +1,271 @@
+{
+  "schemaVersion": 1,
+  "instrument": "fsl-synth-short-oneshot",
+  "sourceFamily": "caveman-cosmonaut-flutes",
+  "durationMs": 240,
+  "range": {
+    "minMidi": 40,
+    "maxMidi": 76
+  },
+  "notes": {
+    "40": {
+      "path": "assets/audio/fsl-synth/samples/40.wav",
+      "targetMidi": 40,
+      "sourceMidi": 40,
+      "playbackRate": 1,
+      "sha256": "17f7b12bd3a69d95e44f22d468e715a83de165724a4d8c62e378755bcde0ea53"
+    },
+    "41": {
+      "path": "assets/audio/fsl-synth/samples/41.wav",
+      "targetMidi": 41,
+      "sourceMidi": 41,
+      "playbackRate": 1,
+      "sha256": "71bd1c72810d7745bfb72317d3b4064be4069c07c3b513aaf360c0ac9a13687b"
+    },
+    "42": {
+      "path": "assets/audio/fsl-synth/samples/42.wav",
+      "targetMidi": 42,
+      "sourceMidi": 42,
+      "playbackRate": 1,
+      "sha256": "815e45fded81be86530932b883354ecbdbe4daf5c24506f72a3f8fff5c501682"
+    },
+    "43": {
+      "path": "assets/audio/fsl-synth/samples/43.wav",
+      "targetMidi": 43,
+      "sourceMidi": 43,
+      "playbackRate": 1,
+      "sha256": "e81b04d3905f9c1b7dd662f2beedbafb53441cc48055f4d16b9d1461de49909c"
+    },
+    "44": {
+      "path": "assets/audio/fsl-synth/samples/44.wav",
+      "targetMidi": 44,
+      "sourceMidi": 44,
+      "playbackRate": 1,
+      "sha256": "ec54305a4227bbb476b5f8b6261633187f98a44690135599eed40ef3725302f7"
+    },
+    "45": {
+      "path": "assets/audio/fsl-synth/samples/45.wav",
+      "targetMidi": 45,
+      "sourceMidi": 45,
+      "playbackRate": 1,
+      "sha256": "f3bc78cb601e3d1f4209a574e7ca9cc5f932619844d9bea10d2aa45bec4e3f83"
+    },
+    "46": {
+      "path": "assets/audio/fsl-synth/samples/46.wav",
+      "targetMidi": 46,
+      "sourceMidi": 46,
+      "playbackRate": 1,
+      "sha256": "bd0b4e3faef3c2ff032b76436d023516793e8995a731d2aa41caeaa812971c8d"
+    },
+    "47": {
+      "path": "assets/audio/fsl-synth/samples/47.wav",
+      "targetMidi": 47,
+      "sourceMidi": 47,
+      "playbackRate": 1,
+      "sha256": "f2a44917a267837cfb0c68a1fa1d86fe6b544bdf233408a118f1c21a941e42ea"
+    },
+    "48": {
+      "path": "assets/audio/fsl-synth/samples/48.wav",
+      "targetMidi": 48,
+      "sourceMidi": 48,
+      "playbackRate": 1,
+      "sha256": "4ce646017a0a0a3b80c5444b1710b48ff8459329fe231ab79b59a32d48b16421"
+    },
+    "49": {
+      "path": "assets/audio/fsl-synth/samples/49.wav",
+      "targetMidi": 49,
+      "sourceMidi": 49,
+      "playbackRate": 1,
+      "sha256": "978149653be485a396a2b189c3e073aedf3be5e5e5b1d0fe3c6e92af50e821b9"
+    },
+    "50": {
+      "path": "assets/audio/fsl-synth/samples/50.wav",
+      "targetMidi": 50,
+      "sourceMidi": 50,
+      "playbackRate": 1,
+      "sha256": "e808fa07819e46e6ad10f7066db7b2e3db5b2580496b8a3cac4178fc13c0e4cb"
+    },
+    "51": {
+      "path": "assets/audio/fsl-synth/samples/51.wav",
+      "targetMidi": 51,
+      "sourceMidi": 51,
+      "playbackRate": 1,
+      "sha256": "7f77a7f2f9d16ec5b47b15dd75f54718e434e77c08966aa54ec19dabb9cdf5ad"
+    },
+    "52": {
+      "path": "assets/audio/fsl-synth/samples/52.wav",
+      "targetMidi": 52,
+      "sourceMidi": 52,
+      "playbackRate": 1,
+      "sha256": "0a89284166338a10eed97128617008e58945a4048113df0f44b5da84e58ec778"
+    },
+    "53": {
+      "path": "assets/audio/fsl-synth/samples/53.wav",
+      "targetMidi": 53,
+      "sourceMidi": 53,
+      "playbackRate": 1,
+      "sha256": "f591e358fcc2e108e17874a2f7f19ed2b136dac86ac300c7f30b187e41e7597b"
+    },
+    "54": {
+      "path": "assets/audio/fsl-synth/samples/54.wav",
+      "targetMidi": 54,
+      "sourceMidi": 54,
+      "playbackRate": 1,
+      "sha256": "c23e7bc0e010f3795d5bd2c13d0b546df3aa463783ce49c5e0446091299643af"
+    },
+    "55": {
+      "path": "assets/audio/fsl-synth/samples/55.wav",
+      "targetMidi": 55,
+      "sourceMidi": 55,
+      "playbackRate": 1,
+      "sha256": "31fa8dfd54fdaf6d76a00746e4d66f8bda57284f71aa7b44122370fa21798638"
+    },
+    "56": {
+      "path": "assets/audio/fsl-synth/samples/56.wav",
+      "targetMidi": 56,
+      "sourceMidi": 56,
+      "playbackRate": 1,
+      "sha256": "81c1e0e46b6e481c56d2c7d9a716bb766587585fb029cbb96271d1b8f71eae9e"
+    },
+    "57": {
+      "path": "assets/audio/fsl-synth/samples/57.wav",
+      "targetMidi": 57,
+      "sourceMidi": 57,
+      "playbackRate": 1,
+      "sha256": "93aa69f846c37cf69eebd733c204b5afe8d2f204d9c697ddf14cf415a647a357"
+    },
+    "58": {
+      "path": "assets/audio/fsl-synth/samples/58.wav",
+      "targetMidi": 58,
+      "sourceMidi": 58,
+      "playbackRate": 1,
+      "sha256": "36da83e1e004dc586809f8a7643da04dc2142f219084079ccc2925ca1ab5830b"
+    },
+    "59": {
+      "path": "assets/audio/fsl-synth/samples/59.wav",
+      "targetMidi": 59,
+      "sourceMidi": 59,
+      "playbackRate": 1,
+      "sha256": "0a43f81e1b3f42b4a7f07b1a0777efe066e5f48ce1f0c372a6b5eacbb879241b"
+    },
+    "60": {
+      "path": "assets/audio/fsl-synth/samples/60.wav",
+      "targetMidi": 60,
+      "sourceMidi": 60,
+      "playbackRate": 1,
+      "sha256": "c9d08301f9da791b0c7df425e4127e15f0b48515387d40700aea0a7abe77a7ce"
+    },
+    "61": {
+      "path": "assets/audio/fsl-synth/samples/61.wav",
+      "targetMidi": 61,
+      "sourceMidi": 61,
+      "playbackRate": 1,
+      "sha256": "54c0932d897939fe6fe76388662a11cb0adaba58f735a830d473237ea9b2fb2c"
+    },
+    "62": {
+      "path": "assets/audio/fsl-synth/samples/62.wav",
+      "targetMidi": 62,
+      "sourceMidi": 62,
+      "playbackRate": 1,
+      "sha256": "02b02cbbed6bad4b026f55aa8f5134a99280b0078ec0e08612997eac29586150"
+    },
+    "63": {
+      "path": "assets/audio/fsl-synth/samples/63.wav",
+      "targetMidi": 63,
+      "sourceMidi": 63,
+      "playbackRate": 1,
+      "sha256": "6acc18147281343dd96e2fcac6d2af77d7e72d97d516301395af671214c0adae"
+    },
+    "64": {
+      "path": "assets/audio/fsl-synth/samples/64.wav",
+      "targetMidi": 64,
+      "sourceMidi": 64,
+      "playbackRate": 1,
+      "sha256": "d8011f39ea183915ee35a5d28825ff9e1808106d49bc9213c63ea8298e8123d2"
+    },
+    "65": {
+      "path": "assets/audio/fsl-synth/samples/65.wav",
+      "targetMidi": 65,
+      "sourceMidi": 65,
+      "playbackRate": 1,
+      "sha256": "6248ca2cef9870c7f203e5c47aa889c88b0ca0aba67fc5fb7bdd894c66c0de36"
+    },
+    "66": {
+      "path": "assets/audio/fsl-synth/samples/66.wav",
+      "targetMidi": 66,
+      "sourceMidi": 66,
+      "playbackRate": 1,
+      "sha256": "cf4e33be5e7f91df3747890fbd2c4498acb18de62905bc54298d214f76f1733c"
+    },
+    "67": {
+      "path": "assets/audio/fsl-synth/samples/67.wav",
+      "targetMidi": 67,
+      "sourceMidi": 67,
+      "playbackRate": 1,
+      "sha256": "d0ecaa9e524ba72a4778cf38fc557a48478fb439777c67918023332e2ab41bc0"
+    },
+    "68": {
+      "path": "assets/audio/fsl-synth/samples/68.wav",
+      "targetMidi": 68,
+      "sourceMidi": 68,
+      "playbackRate": 1,
+      "sha256": "80a54de74a8bb04a7b9907ca3067a1f44cf8c0a20030bb19106c94c5a3591bec"
+    },
+    "69": {
+      "path": "assets/audio/fsl-synth/samples/69.wav",
+      "targetMidi": 69,
+      "sourceMidi": 69,
+      "playbackRate": 1,
+      "sha256": "29dfe6881fb72794402534f82d50a8dc09bed9bc85cac1fc20c3b1cf5e77ffd7"
+    },
+    "70": {
+      "path": "assets/audio/fsl-synth/samples/70.wav",
+      "targetMidi": 70,
+      "sourceMidi": 70,
+      "playbackRate": 1,
+      "sha256": "13b568e0d76ce4689210624db4049a9ca986c5bf20ff150eca6f089d07574f12"
+    },
+    "71": {
+      "path": "assets/audio/fsl-synth/samples/71.wav",
+      "targetMidi": 71,
+      "sourceMidi": 71,
+      "playbackRate": 1,
+      "sha256": "cb65c081700fc6f7c7a15d9698003f2aad9f379dfa244f5cc16ecc1d361f45ea"
+    },
+    "72": {
+      "path": "assets/audio/fsl-synth/samples/72.wav",
+      "targetMidi": 72,
+      "sourceMidi": 72,
+      "playbackRate": 1,
+      "sha256": "fe839dee53c52a1f1984726bdd68292ec093da0759c4e910a45eb793bfb8bd08"
+    },
+    "73": {
+      "path": "assets/audio/fsl-synth/samples/73.wav",
+      "targetMidi": 73,
+      "sourceMidi": 73,
+      "playbackRate": 1,
+      "sha256": "63e447d29e6219f8a58beaeb5f1dc350d9d8d8b1919fd85eb052e64d93fa95d5"
+    },
+    "74": {
+      "path": "assets/audio/fsl-synth/samples/74.wav",
+      "targetMidi": 74,
+      "sourceMidi": 74,
+      "playbackRate": 1,
+      "sha256": "b07db6a8183b85fc90577daaecf0b40e1c32319d9936e9b19bc7343d1c00e955"
+    },
+    "75": {
+      "path": "assets/audio/fsl-synth/samples/75.wav",
+      "targetMidi": 75,
+      "sourceMidi": 75,
+      "playbackRate": 1,
+      "sha256": "ad7dc80848b35296624eee66f05e96ca138031049bc99b105e9eb25bade938ed"
+    },
+    "76": {
+      "path": "assets/audio/fsl-synth/samples/76.wav",
+      "targetMidi": 76,
+      "sourceMidi": 76,
+      "playbackRate": 1,
+      "sha256": "852f589ef39ab3693203627fe4d7fec74d882ed2b670b6b9affe96b0ac739aca"
+    }
+  }
+}

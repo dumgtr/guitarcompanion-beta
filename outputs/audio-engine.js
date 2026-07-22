@@ -89,12 +89,21 @@
   let electricSamplerLoadPromise = null;
   let approvedElectricMap = null;
 
+  let fslSynthSamplerState = "idle";
+  let loadedFslSynthSampleCount = 0;
+  let failedFslSynthSampleCount = 0;
+  let fslSynthSamplerLoadPromise = null;
+  let approvedFslSynthMap = null;
+
   const activeVoices = new Map();
   const channelRequestGenerations = new Map(CHANNELS.map((channel) => [channel, 0]));
   const soundLabSampleBuffers = new Map();
   const soundLabFailedSamples = new Set();
   const electricSampleBuffers = new Map();
   const electricFailedSamples = new Set();
+  const fslSynthSampleBuffers = new Map();
+  const fslSynthFailedSamples = new Set();
+  const fslSynthActiveSources = new Set();
 
   function getAudioContextCtor() {
     return window.AudioContext || window.webkitAudioContext || null;
@@ -245,7 +254,14 @@
     return true;
   }
 
-  function releaseChannel(channel) {
+  function releaseChannel(channel, isPlaybackTrigger = false) {
+    if (channel === "fsl" && !isPlaybackTrigger) {
+      fslSynthActiveSources.forEach((src) => {
+        try { src.stop(); } catch {}
+        try { src.disconnect(); } catch {}
+      });
+      fslSynthActiveSources.clear();
+    }
     const voice = activeVoices.get(channel);
     if (!voice) return false;
 
@@ -382,7 +398,7 @@
       }
 
       channelRequestGenerations.set(channel, requestGeneration);
-      releaseChannel(channel);
+      releaseChannel(channel, true);
 
       if (!isSupportedProfile(profile)) {
         setLastError(`Invalid profile: ${profile}`);
@@ -446,8 +462,16 @@
         }
       }
 
+      if (channel === "fsl" && requestedInstrument === "synth") {
+        await prepareFslSynthSampler();
+        if (requestGeneration !== channelRequestGenerations.get(channel)) {
+          return { played: false, requestGeneration, reason: "superseded" };
+        }
+      }
+
       let usedNylon = false;
       let usedElectric = false;
+      let usedFslSynth = false;
       let usedSynth = false;
       const voices = parsedPitches.map((parsedPitch, index) => {
         const timeOffset = Number(options.timeOffsets?.[index] ?? options.timeOffset ?? 0);
@@ -514,6 +538,33 @@
               : "electric-note-unavailable";
           }
         }
+        if (channel === "fsl" && requestedInstrument === "synth") {
+          const mapping = parsedPitch.midi >= 40 && parsedPitch.midi <= 76
+            ? approvedFslSynthMap?.notes?.[parsedPitch.midi.toString()]
+            : null;
+          const sampleUrl = mapping ? mapping.path : null;
+          lastResolvedSample = sampleUrl || null;
+          if (
+            sampleUrl
+            && (fslSynthSamplerState === "ready" || fslSynthSamplerState === "partial")
+            && fslSynthSampleBuffers.has(sampleUrl)
+          ) {
+            try {
+              const sampleVoice = createFslSynthVoice(sampleUrl, {
+                timeOffset,
+                duration
+              });
+              usedFslSynth = true;
+              return sampleVoice;
+            } catch {
+              lastFallbackReason = "fsl-synth-sample-playback-failed";
+            }
+          } else if (!lastFallbackReason) {
+            lastFallbackReason = fslSynthFailedSamples.has(sampleUrl)
+              ? "fsl-synth-sample-failed"
+              : "fsl-synth-sampler-unavailable";
+          }
+        }
 
         usedSynth = true;
         return createVoice(channel, profile, parsedPitch, velocity, { timeOffset, duration });
@@ -525,12 +576,12 @@
       }
 
       activateVoiceGroup(channel, voices);
-      lastPlaybackInstrument = usedElectric && !usedSynth
+      lastPlaybackInstrument = usedElectric && !usedSynth && !usedFslSynth
         ? "electric"
-        : usedNylon && !usedSynth
+        : usedNylon && !usedSynth && !usedFslSynth
           ? "nylon"
           : "synth";
-      lastPlaybackBackend = lastPlaybackInstrument === "synth" ? "native-synth" : "native-sampler";
+      lastPlaybackBackend = (lastPlaybackInstrument === "synth" && !usedFslSynth) ? "native-synth" : "native-sampler";
       lastError = null;
       return {
         played: true,
@@ -703,6 +754,132 @@
     return electricSamplerLoadPromise;
   }
 
+  async function prepareFslSynthSampler() {
+    if (fslSynthSamplerState === "ready" || fslSynthSamplerState === "partial" || fslSynthSamplerState === "failed") {
+      return fslSynthSamplerState;
+    }
+    if (fslSynthSamplerLoadPromise) return fslSynthSamplerLoadPromise;
+
+    const didUnlock = isReady() || await unlock();
+    if (!didUnlock) {
+      fslSynthSamplerState = "failed";
+      lastFallbackReason = "audio-unavailable";
+      return fslSynthSamplerState;
+    }
+
+    fslSynthSamplerState = "loading";
+    loadedFslSynthSampleCount = 0;
+    failedFslSynthSampleCount = 0;
+    approvedFslSynthMap = null;
+    fslSynthSampleBuffers.clear();
+    fslSynthFailedSamples.clear();
+
+    fslSynthSamplerLoadPromise = (async () => {
+      try {
+        const mapResponse = await fetch(
+          "assets/audio/fsl-synth/APPROVED_SAMPLE_MAP.json",
+          { cache: "force-cache" }
+        );
+        if (!mapResponse.ok) throw new Error(`HTTP ${mapResponse.status}`);
+
+        approvedFslSynthMap = await mapResponse.json();
+
+        if (!approvedFslSynthMap || approvedFslSynthMap.schemaVersion !== 1) {
+          throw new Error("Unsupported FSL Synth sample-map schema version");
+        }
+        if (approvedFslSynthMap.instrument !== "fsl-synth-short-oneshot") {
+          throw new Error("Invalid FSL Synth instrument type");
+        }
+        if (!approvedFslSynthMap.notes || typeof approvedFslSynthMap.notes !== "object" || Array.isArray(approvedFslSynthMap.notes)) {
+          throw new Error("Invalid notes object in FSL Synth schema");
+        }
+
+        const noteKeys = Object.keys(approvedFslSynthMap.notes);
+        if (noteKeys.length !== 37) {
+          throw new Error("FSL Synth map must contain exactly 37 entries");
+        }
+
+        for (let m = 40; m <= 76; m++) {
+          const mapping = approvedFslSynthMap.notes[m.toString()];
+          if (!mapping || typeof mapping !== "object" || Array.isArray(mapping)) {
+            throw new Error(`Missing or invalid mapping for FSL Synth MIDI ${m}`);
+          }
+          if (typeof mapping.path !== "string" || mapping.path.trim() === "") {
+            throw new Error(`Invalid path for FSL Synth MIDI ${m}`);
+          }
+          if (!mapping.path.startsWith("assets/audio/fsl-synth/")) {
+            throw new Error(`Path ${mapping.path} outside assets/audio/fsl-synth/ for MIDI ${m}`);
+          }
+          if (mapping.targetMidi !== m || mapping.sourceMidi !== m) {
+            throw new Error(`MIDI mismatch: targetMidi/sourceMidi must equal ${m}`);
+          }
+          if (mapping.playbackRate !== 1) {
+            throw new Error(`playbackRate must equal 1 for MIDI ${m}`);
+          }
+        }
+
+        const uniqueUrls = Array.from(new Set(Object.values(approvedFslSynthMap.notes).map(m => m.path)));
+        await Promise.all(uniqueUrls.map(async (url) => {
+          try {
+             const response = await fetch(url, { cache: "force-cache" });
+             if (!response.ok) throw new Error(`HTTP ${response.status}`);
+             const encodedAudio = await response.arrayBuffer();
+             const decodedAudio = await audioCtx.decodeAudioData(encodedAudio.slice(0));
+             fslSynthSampleBuffers.set(url, decodedAudio);
+          } catch (error) {
+             fslSynthFailedSamples.add(url);
+             console.warn(`[AudioEngine] FSL Synth sample ${url} failed to load.`, error);
+          }
+        }));
+
+        loadedFslSynthSampleCount = fslSynthSampleBuffers.size;
+        failedFslSynthSampleCount = fslSynthFailedSamples.size;
+        fslSynthSamplerState = uniqueUrls.length > 0 && loadedFslSynthSampleCount === uniqueUrls.length
+          ? "ready"
+          : loadedFslSynthSampleCount > 0
+            ? "partial"
+            : "failed";
+      } catch (error) {
+        fslSynthSamplerState = "failed";
+        console.warn("[AudioEngine] FSL Synth sample map failed to load.", error);
+      }
+
+      return fslSynthSamplerState;
+    })().finally(() => {
+      fslSynthSamplerLoadPromise = null;
+    });
+
+    return fslSynthSamplerLoadPromise;
+  }
+
+  function createFslSynthVoice(sampleUrl, playback = {}) {
+    const buffer = fslSynthSampleBuffers.get(sampleUrl);
+    if (!buffer) throw new Error(`FSL Synth sample ${sampleUrl} is unavailable.`);
+
+    const timeOffset = Math.max(0, Number(playback.timeOffset) || 0);
+    const now = audioCtx.currentTime + timeOffset;
+    const source = audioCtx.createBufferSource();
+
+    source.buffer = buffer;
+    source.playbackRate.setValueAtTime(1.0, now);
+    source.connect(channelGains.fsl);
+    source.start(now);
+
+    fslSynthActiveSources.add(source);
+    source.onended = () => {
+      fslSynthActiveSources.delete(source);
+    };
+
+    return {
+      channel: "fsl",
+      profile: "fsl-fretboard-position",
+      sources: [], // leave empty so cleanupVoice does not stop it during transition overlaps!
+      nodes: [],
+      timerId: null,
+      endTime: now + buffer.duration
+    };
+  }
+
   function resolveNearestApprovedSample(parsedPitch) {
     return APPROVED_SOUNDLAB_SAMPLES.reduce((nearest, sample) => {
       if (!nearest) return sample;
@@ -815,6 +992,9 @@
       electricSamplerState,
       loadedElectricSampleCount,
       failedElectricSampleCount,
+      fslSynthSamplerState,
+      loadedFslSynthSampleCount,
+      failedFslSynthSampleCount,
       selectedInstrument,
       requestedInstrument,
       lastPlaybackBackend,
@@ -826,6 +1006,7 @@
       lastFallbackReason,
       instrumentAvailability: getInstrumentAvailability(),
       activeSoundLabVoiceCount: activeVoices.has("soundlab") ? 1 : 0,
+      activeFslSynthVoiceCount: fslSynthActiveSources.size,
       lastError
     };
   }
@@ -838,6 +1019,7 @@
     playNote,
     prepareSoundLabSampler,
     prepareElectricSampler,
+    prepareFslSynthSampler,
     playSoundLabGuideNote,
     stopSoundLab,
     stopChannel,
