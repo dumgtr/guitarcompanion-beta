@@ -198,6 +198,74 @@ def test_no_silent_fallback_after_transport_failure() -> None:
     assert payload["fallback"] is None
 
 
+def test_all_sixteen_new_models_present_and_explicit_only() -> None:
+    new_models = [
+        ("qwen3.7-max-preview", "experimental", "--allow-experimental"),
+        ("qwen3.6-max-preview", "experimental", "--allow-experimental"),
+        ("qwen3.7-max-2026-05-20", "reproducibility", "--allow-reproducibility"),
+        ("qwen3.7-max-2026-05-17", "reproducibility", "--allow-reproducibility"),
+        ("qwen3.6-flash-2026-04-16", "reproducibility", "--allow-reproducibility"),
+        ("qwen3.6-plus-2026-04-02", "reproducibility", "--allow-reproducibility"),
+        ("qwen3.6-27b", "allowed", None),
+        ("qwen3.6-35b-a3b", "allowed", None),
+        ("qwen3.5-plus", "allowed", None),
+        ("qwen3.5-27b", "allowed", None),
+        ("qwen3.5-35b-a3b", "allowed", None),
+        ("qwen3.5-122b-a10b", "allowed", None),
+        ("qwen3.5-397b-a17b", "allowed", None),
+        ("qwen3.5-plus-2026-02-15", "reproducibility", "--allow-reproducibility"),
+        ("qwen3.5-plus-2026-04-20", "reproducibility", "--allow-reproducibility"),
+        ("qwen3.5-flash-2026-02-23", "reproducibility", "--allow-reproducibility"),
+    ]
+
+    result = run("--list-models", "--json")
+    assert result.returncode == 0
+    models_list = json.loads(result.stdout)["models"]
+    model_names = [m["model"] for m in models_list]
+    assert len(model_names) == len(set(model_names)), "Duplicate model IDs found in catalog!"
+
+    for model_id, status, flag in new_models:
+        assert model_id in model_names, f"Model {model_id} missing from catalog!"
+        item = next(m for m in models_list if m["model"] == model_id)
+        assert item["autoSelectable"] is False, f"Model {model_id} must not be auto-selectable!"
+        assert item["selectionMode"] == "explicit-only", f"Model {model_id} must be explicit-only!"
+
+    policy = json.loads(ROOT.joinpath("qwen_models.json").read_text(encoding="utf-8"))
+    auto_routes = list(policy.get("autoRouting", {}).values())
+    for model_id, _, _ in new_models:
+        assert model_id not in auto_routes, f"Model {model_id} must not appear in autoRouting!"
+
+    for model_id, status, flag in new_models:
+        if flag:
+            denied = run("--validate-model", model_id)
+            assert denied.returncode == 2, f"Model {model_id} without {flag} must fail!"
+            allowed = run("--validate-model", model_id, flag)
+            assert allowed.returncode == 0, f"Model {model_id} with {flag} must succeed!"
+            assert allowed.stdout.strip() == model_id
+        else:
+            allowed = run("--validate-model", model_id)
+            assert allowed.returncode == 0, f"Explicit model {model_id} must succeed!"
+            assert allowed.stdout.strip() == model_id
+
+
+def test_qwen3_6_max_preview_lifecycle_deprecation() -> None:
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    from qwen_model_policy import validate_model, PolicyError
+
+    valid_res = validate_model("qwen3.6-max-preview", allow_experimental=True, today="2026-09-01")
+    assert valid_res["model"] == "qwen3.6-max-preview"
+    assert "DEPRECATION_WARNING" in valid_res.get("warning", "")
+    assert "2026-10-10" in valid_res.get("warning", "")
+
+    try:
+        validate_model("qwen3.6-max-preview", allow_experimental=True, today="2026-10-10")
+        assert False, "Should have raised PolicyError after deprecation date"
+    except PolicyError as err:
+        assert "deprecated on 2026-10-10" in str(err)
+        assert "qwen3.7-max" in str(err)
+
+
 if __name__ == "__main__":
     import sys
     tests = [obj for name, obj in globals().items() if name.startswith("test_") and callable(obj)]

@@ -71,6 +71,7 @@ def validate_model(
     allow_compatibility: bool = False,
     allow_experimental: bool = False,
     allow_reproducibility: bool = False,
+    today: str | None = None,
 ) -> dict[str, Any]:
     policy = load_policy()
     item = policy["models"].get(model)
@@ -94,12 +95,36 @@ def validate_model(
             raise PolicyError(f"{status.title()} model requires explicit {flag}: {model}")
         raise PolicyError(f"Model is not active: {model}")
 
-    return {
+    # Deprecation lifecycle check
+    deprecation_date = item.get("deprecationDate")
+    warning = None
+    if deprecation_date:
+        import datetime
+        current_date = today or datetime.date.today().isoformat()
+        if current_date >= deprecation_date:
+            replacement = item.get("replacement", "qwen3.7-max")
+            raise PolicyError(
+                f"Model {model} was deprecated on {deprecation_date} and is no longer available. "
+                f"Recommended replacement: {replacement}"
+            )
+        else:
+            replacement = item.get("replacement", "qwen3.7-max")
+            warning = (
+                f"DEPRECATION_WARNING: Model {model} is scheduled for deprecation on {deprecation_date}. "
+                f"Recommended replacement: {replacement}"
+            )
+
+    result = {
         "model": model,
         "status": status,
         "requestDefaults": dict(item.get("requestDefaults") or {}),
         "fallback": None,
     }
+    if item.get("thinkingRequired"):
+        result["thinkingRequired"] = True
+    if warning:
+        result["warning"] = warning
+    return result
 
 
 def choose_model(task_type: str, cost_priority: str | None = None) -> dict[str, Any] | None:

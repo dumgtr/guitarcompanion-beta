@@ -187,6 +187,263 @@
         "low-cost comparison with a previous qwen-turbo trace"
       ],
       "replacement": "qwen3.6-flash"
+    },
+    "qwen3.7-max-preview": {
+      "status": "experimental",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "preview-critical",
+      "requestDefaults": {
+        "enable_thinking": true
+      },
+      "thinkingRequired": true,
+      "useFor": [
+        "explicit preview evaluation of qwen3.7-max capabilities"
+      ],
+      "doNotUseFor": [
+        "automatic routing",
+        "normal production review"
+      ],
+      "reviewPolicy": "Preview model. Text-only, thinking-required, explicit-only."
+    },
+    "qwen3.7-max-2026-05-20": {
+      "status": "reproducibility",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "snapshot-critical",
+      "baseAlias": "qwen3.7-max",
+      "requestDefaults": {
+        "enable_thinking": true
+      },
+      "useFor": [
+        "reproducing a review using exact qwen3.7-max-2026-05-20 snapshot"
+      ],
+      "doNotUseFor": [
+        "normal automatic routing"
+      ]
+    },
+    "qwen3.7-max-2026-05-17": {
+      "status": "reproducibility",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "snapshot-critical",
+      "baseAlias": "qwen3.7-max",
+      "requestDefaults": {
+        "enable_thinking": true
+      },
+      "thinkingRequired": true,
+      "useFor": [
+        "reproducing an early review using exact qwen3.7-max-2026-05-17 snapshot"
+      ],
+      "doNotUseFor": [
+        "normal automatic routing"
+      ]
+    },
+    "qwen3.6-max-preview": {
+      "status": "experimental",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "preview-critical-deprecated",
+      "deprecationDate": "2026-10-10",
+      "replacement": "qwen3.7-max",
+      "requestDefaults": {
+        "enable_thinking": true
+      },
+      "useFor": [
+        "legacy preview evaluation prior to 2026-10-10 deprecation"
+      ],
+      "doNotUseFor": [
+        "automatic routing",
+        "new production review"
+      ],
+      "reviewPolicy": "Deprecated preview model scheduled for retirement on 2026-10-10. Recommended replacement: qwen3.7-max."
+    },
+    "qwen3.6-flash-2026-04-16": {
+      "status": "reproducibility",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "snapshot-fast",
+      "baseAlias": "qwen3.6-flash",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "reproducing a review using exact qwen3.6-flash-2026-04-16 snapshot"
+      ],
+      "doNotUseFor": [
+        "normal automatic routing"
+      ]
+    },
+    "qwen3.6-plus-2026-04-02": {
+      "status": "reproducibility",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "snapshot-default",
+      "baseAlias": "qwen3.6-plus",
+      "requestDefaults": {
+        "enable_thinking": true
+      },
+      "useFor": [
+        "reproducing a review using exact qwen3.6-plus-2026-04-02 snapshot"
+      ],
+      "doNotUseFor": [
+        "normal automatic routing"
+      ]
+    },
+    "qwen3.6-27b": {
+      "status": "allowed",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "hosted-open-source",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "explicit evaluation of hosted qwen3.6-27b open-source model"
+      ],
+      "doNotUseFor": [
+        "automatic routing",
+        "default task review"
+      ]
+    },
+    "qwen3.6-35b-a3b": {
+      "status": "allowed",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "hosted-open-source",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "explicit evaluation of hosted qwen3.6-35b-a3b open-source model"
+      ],
+      "doNotUseFor": [
+        "automatic routing",
+        "default task review"
+      ]
+    },
+    "qwen3.5-plus": {
+      "status": "allowed",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "explicit-stable-default",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "explicit evaluation of stable qwen3.5-plus model"
+      ],
+      "doNotUseFor": [
+        "automatic routing"
+      ]
+    },
+    "qwen3.5-27b": {
+      "status": "allowed",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "hosted-open-source",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "explicit evaluation of hosted qwen3.5-27b open-source model"
+      ],
+      "doNotUseFor": [
+        "automatic routing"
+      ]
+    },
+    "qwen3.5-35b-a3b": {
+      "status": "allowed",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "hosted-open-source",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "explicit evaluation of hosted qwen3.5-35b-a3b open-source model"
+      ],
+      "doNotUseFor": [
+        "automatic routing"
+      ]
+    },
+    "qwen3.5-122b-a10b": {
+      "status": "allowed",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "hosted-open-source",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "explicit evaluation of hosted qwen3.5-122b-a10b open-source model"
+      ],
+      "doNotUseFor": [
+        "automatic routing"
+      ]
+    },
+    "qwen3.5-397b-a17b": {
+      "status": "allowed",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "hosted-open-source",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "explicit evaluation of hosted qwen3.5-397b-a17b open-source model"
+      ],
+      "doNotUseFor": [
+        "automatic routing"
+      ]
+    },
+    "qwen3.5-plus-2026-02-15": {
+      "status": "reproducibility",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "snapshot-default",
+      "baseAlias": "qwen3.5-plus",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "reproducing a review using exact qwen3.5-plus-2026-02-15 snapshot"
+      ],
+      "doNotUseFor": [
+        "normal automatic routing"
+      ]
+    },
+    "qwen3.5-plus-2026-04-20": {
+      "status": "reproducibility",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "snapshot-default",
+      "baseAlias": "qwen3.5-plus",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "reproducing a review using exact qwen3.5-plus-2026-04-20 snapshot"
+      ],
+      "doNotUseFor": [
+        "normal automatic routing"
+      ]
+    },
+    "qwen3.5-flash-2026-02-23": {
+      "status": "reproducibility",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "snapshot-economy",
+      "baseAlias": "qwen3.5-flash",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "reproducing a review using exact qwen3.5-flash-2026-02-23 snapshot"
+      ],
+      "doNotUseFor": [
+        "normal automatic routing"
+      ]
     }
   },
   "defaultDeny": {

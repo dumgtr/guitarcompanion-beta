@@ -188,6 +188,8 @@ def main() -> int:
             allow_experimental=args.allow_experimental,
             allow_reproducibility=args.allow_reproducibility,
         )
+        if selected.get("warning"):
+            safe_print_unicode(f"qwen_agent: {selected['warning']}\n", sys.stderr)
     except PolicyError as error:
         safe_print_unicode(f"POLICY_ERROR: {error}\n", sys.stderr)
         return ExitCode.CLI_OR_CONFIG_ERROR
