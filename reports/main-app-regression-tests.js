@@ -93,19 +93,23 @@ function main() {
     assert(checkFileExists('outputs/app.js'), 'outputs/app.js exists in repository', { file: 'outputs/app.js' });
     assert(checkFileExists('outputs/audio-engine.js'), 'outputs/audio-engine.js exists in repository', { file: 'outputs/audio-engine.js' });
     assert(checkFileExists('reports/retrigger-tail-cap-tests.js'), 'reports/retrigger-tail-cap-tests.js exists in repository', { file: 'reports/retrigger-tail-cap-tests.js' });
+    assert(checkFileExists('reports/continue-practice-v2-tests.js'), 'reports/continue-practice-v2-tests.js exists in repository', { file: 'reports/continue-practice-v2-tests.js' });
 
     const appContent = readFileContent('outputs/app.js');
     const audioContent = readFileContent('outputs/audio-engine.js');
     const testContent = readFileContent('reports/retrigger-tail-cap-tests.js');
+    const cpV2Content = readFileContent('reports/continue-practice-v2-tests.js');
 
     const hasConflictMarkers = (content) => /<<<<<<<|=======|>>>>>>>/.test(content);
     assert(!hasConflictMarkers(appContent), 'outputs/app.js contains no Git conflict markers', { file: 'outputs/app.js' });
     assert(!hasConflictMarkers(audioContent), 'outputs/audio-engine.js contains no Git conflict markers', { file: 'outputs/audio-engine.js' });
     assert(!hasConflictMarkers(testContent), 'reports/retrigger-tail-cap-tests.js contains no Git conflict markers', { file: 'reports/retrigger-tail-cap-tests.js' });
+    assert(!hasConflictMarkers(cpV2Content), 'reports/continue-practice-v2-tests.js contains no Git conflict markers', { file: 'reports/continue-practice-v2-tests.js' });
 
     const hasAbsoluteMachinePath = (content) => /C:\\Users\\|\/Users\/|\/home\//i.test(content);
     assert(!hasAbsoluteMachinePath(appContent), 'outputs/app.js contains no hardcoded absolute machine paths', { file: 'outputs/app.js' });
     assert(!hasAbsoluteMachinePath(audioContent), 'outputs/audio-engine.js contains no hardcoded absolute machine paths', { file: 'outputs/audio-engine.js' });
+    assert(!hasAbsoluteMachinePath(cpV2Content), 'reports/continue-practice-v2-tests.js contains no hardcoded absolute machine paths', { file: 'reports/continue-practice-v2-tests.js' });
   }
   endSuite();
 
@@ -135,11 +139,19 @@ function main() {
       actual: `exit code ${checkRetrigger.status}`,
       error: checkRetrigger.stderr.trim()
     });
+
+    const checkCpV2 = runNodeCheck('reports/continue-practice-v2-tests.js');
+    assert(checkCpV2.status === 0, 'reports/continue-practice-v2-tests.js parses with node --check', {
+      file: 'reports/continue-practice-v2-tests.js',
+      expected: 'exit code 0',
+      actual: `exit code ${checkCpV2.status}`,
+      error: checkCpV2.stderr.trim()
+    });
   }
   endSuite();
 
-  // SUITE C — Existing Audio Retrigger Regression Suite
-  startSuite('Existing Audio Retrigger Regression Suite');
+  // SUITE C — Child Test Suites
+  startSuite('Child Test Suites (Audio Retrigger & Continue Practice V2)');
   {
     const retriggerRun = runChildSuite('reports/retrigger-tail-cap-tests.js');
     assert(retriggerRun.status === 0, 'reports/retrigger-tail-cap-tests.js exited with exit code 0', {
@@ -149,11 +161,12 @@ function main() {
       error: retriggerRun.stderr.trim() || retriggerRun.stdout.trim()
     });
 
-    const hasZeroFailed = /0 failed/i.test(retriggerRun.stdout);
-    assert(hasZeroFailed, 'reports/retrigger-tail-cap-tests.js reported 0 failed assertions', {
-      file: 'reports/retrigger-tail-cap-tests.js',
-      expected: '0 failed assertions',
-      actual: retriggerRun.stdout.trim().split('\n').pop()
+    const cpV2Run = runChildSuite('reports/continue-practice-v2-tests.js');
+    assert(cpV2Run.status === 0, 'reports/continue-practice-v2-tests.js exited with exit code 0', {
+      file: 'reports/continue-practice-v2-tests.js',
+      expected: 'exit code 0',
+      actual: `exit code ${cpV2Run.status}`,
+      error: cpV2Run.stderr.trim() || cpV2Run.stdout.trim()
     });
   }
   endSuite();

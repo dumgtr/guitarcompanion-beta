@@ -553,23 +553,37 @@ function parseContinuePracticeLocationV1(location) {
   };
 }
 
+let currentRhythmGeometryMnemonicMode = "food_en";
+
 function getCurrentContinuePracticeRouteV1() {
   const route = String(window.location.hash || "").replace(/^#/, "");
   return continuePracticeStateApiV1?.ALLOWED_ROUTES.includes(route) ? route : "dashboard";
 }
 
 function getCurrentContinuePracticeSnapshotV1() {
-  if (selectedFocusedMonth !== 1) return null;
+  const month = selectedFocusedMonth || 1;
+  if (!canOpenMonth(month)) return null;
   const week = Number(focusedSelectedWeek);
   const day = getRenderedPracticeDayV1(week);
   if (!Number.isInteger(week) || week < 1 || week > 4 || !Number.isInteger(day) || day < 1 || day > 7) return null;
+
+  const isWeek2 = week === 2;
   return {
     location: {
-      route: getCurrentContinuePracticeRouteV1(),
+      monthId: month,
+      weekId: week,
       lessonId: `foundation-week-${week}`,
+      sectionId: isWeek2 ? "learn" : null,
+      blockId: isWeek2 ? "w2-rhythm-geometry-16th-syncopation" : null,
+      route: getCurrentContinuePracticeRouteV1(),
       exerciseId: `foundation-week-${week}-day-${day}`,
       stepId: null,
       stepIndex: day - 1
+    },
+    blockState: {
+      "w2-rhythm-geometry-16th-syncopation": {
+        mnemonicMode: currentRhythmGeometryMnemonicMode
+      }
     },
     preferences: {
       instrument: getSelectedAudioInstrument(),
@@ -610,12 +624,13 @@ function setMetronomeEnabledPreferenceV1(value, options = {}) {
 
 function describeContinuePracticeRecordV1(record) {
   const catalog = createContinuePracticeCatalogV1();
-  const location = parseContinuePracticeLocationV1(record.location);
-  const lesson = catalog.lessons.find((item) => item.id === record.location.lessonId);
-  const exercise = lesson?.exercises.find((item) => item.id === record.location.exerciseId);
+  const location = parseContinuePracticeLocationV1(record?.location);
+  const lesson = catalog.lessons.find((item) => item.id === record?.location?.lessonId);
+  const exercise = lesson?.exercises.find((item) => item.id === record?.location?.exerciseId);
   if (!location || !lesson || !exercise) return "มีจุดซ้อมล่าสุดที่พร้อมเปิดต่อ";
   const instrumentLabels = { synth: "Synth", nylon: "Nylon", electric: "Electric" };
-  return `${lesson.label} · ${exercise.label} · ${instrumentLabels[record.preferences.instrument]} · ${record.preferences.metronomeBpm} BPM`;
+  const blockLabel = record?.location?.blockId === "w2-rhythm-geometry-16th-syncopation" ? " · Geometry of Rhythm" : "";
+  return `${lesson.label} · ${exercise.label}${blockLabel} · ${instrumentLabels[record.preferences.instrument]} · ${record.preferences.metronomeBpm} BPM`;
 }
 
 function renderContinuePracticeEntryV1(record = pendingContinuePracticeRecordV1) {
@@ -635,11 +650,18 @@ function hideContinuePracticeEntryV1() {
   pendingContinuePracticeRecordV1 = null;
 }
 
-async function applyContinuePracticeLocationV1(location) {
+async function applyContinuePracticeLocationV1(location, record = null) {
   const destination = parseContinuePracticeLocationV1(location);
   if (!destination) throw new Error("INVALID_CONTINUE_PRACTICE_LOCATION");
-  selectedFocusedMonth = 1;
+
+  const targetMonth = Number(location?.monthId || 1);
+  if (!canOpenMonth(targetMonth)) {
+    throw new Error("CONTINUE_PRACTICE_MONTH_UNAVAILABLE");
+  }
+
+  selectedFocusedMonth = targetMonth;
   restoredContinuePracticeDestinationV1 = { week: destination.week, day: destination.day };
+
   const opened = await openFocusedWeek(destination.week, {
     source: "continue-practice",
     scroll: false,
@@ -647,13 +669,44 @@ async function applyContinuePracticeLocationV1(location) {
     persist: false
   });
   if (!opened) throw new Error("CONTINUE_PRACTICE_LOCATION_UNAVAILABLE");
+
   restoredContinuePracticeDestinationV1 = { week: destination.week, day: destination.day };
   renderFocusedDashboard();
+
+  // Restore blockState for Rhythm Geometry if present
+  const blockState = record?.blockState || {};
+  const rgState = blockState["w2-rhythm-geometry-16th-syncopation"];
+  if (rgState && typeof rgState.mnemonicMode === "string") {
+    currentRhythmGeometryMnemonicMode = rgState.mnemonicMode;
+    const cardEl = document.querySelector(".rhythm-geometry-card");
+    if (cardEl && typeof setRhythmGeometryCardMode === "function") {
+      setRhythmGeometryCardMode(cardEl, currentRhythmGeometryMnemonicMode);
+    }
+  }
+
   if (window.history?.replaceState) {
     window.history.replaceState(null, "", `#${destination.route}`);
   }
-  const target = document.getElementById(destination.route);
-  target?.scrollIntoView({
+
+  // Stale block & section resolution order:
+  // 1. Block ID
+  // 2. Section ID
+  // 3. Lesson Root
+  let targetElement = null;
+  const targetBlockId = location?.blockId;
+  const targetSectionId = location?.sectionId;
+
+  if (targetBlockId) {
+    targetElement = document.querySelector(`[data-rhythm-geometry-id="${targetBlockId}"]`) || document.getElementById(targetBlockId);
+  }
+  if (!targetElement && targetSectionId) {
+    targetElement = document.querySelector(`.${targetSectionId}-block`) || document.getElementById(targetSectionId);
+  }
+  if (!targetElement) {
+    targetElement = document.getElementById("lessonPanel") || document.getElementById(destination.route);
+  }
+
+  targetElement?.scrollIntoView({
     behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
     block: "start"
   });
@@ -3947,7 +4000,7 @@ function renderRhythmGeometryBlock(block = {}) {
 
     header.append(titleGroup, badges);
 
-    const activeMode = String(block.defaultMnemonicMode || "food_en");
+    const initialMode = (block.id === "w2-rhythm-geometry-16th-syncopation" && currentRhythmGeometryMnemonicMode) ? currentRhythmGeometryMnemonicMode : String(block.defaultMnemonicMode || "food_en");
     const modes = [
       { key: "food_en", label: "Food (EN)" },
       { key: "takadimi", label: "Takadimi" },
@@ -3960,10 +4013,10 @@ function renderRhythmGeometryBlock(block = {}) {
     modeSelector.setAttribute("aria-label", "เลือกรูปแบบคำท่องสัดส่วนโน้ต");
 
     modes.forEach((m) => {
-      const btn = month2CreateElement("button", `rhythm-mode-btn ${m.key === activeMode ? "is-selected" : ""}`, m.label);
+      const btn = month2CreateElement("button", `rhythm-mode-btn ${m.key === initialMode ? "is-selected" : ""}`, m.label);
       btn.type = "button";
       btn.setAttribute("role", "tab");
-      btn.setAttribute("aria-selected", m.key === activeMode ? "true" : "false");
+      btn.setAttribute("aria-selected", m.key === initialMode ? "true" : "false");
       btn.setAttribute("data-mnemonic-mode", m.key);
       modeSelector.appendChild(btn);
     });
@@ -3996,7 +4049,7 @@ function renderRhythmGeometryBlock(block = {}) {
         cell.setAttribute("data-text-counting", mnemonics.counting || "");
         cell.setAttribute("data-text-food_th", mnemonics.food_th || mnemonics.counting || "");
 
-        const initialText = mnemonics[activeMode] || mnemonics.food_en || mnemonics.counting || "";
+        const initialText = mnemonics[initialMode] || mnemonics.food_en || mnemonics.counting || "";
         const textSpan = month2CreateElement("span", "subbeat-mnemonic", initialText);
 
         const pickingSymbol = pickingVal === "down" ? "⬇️" : pickingVal === "up" ? "⬆️" : "Rest";
@@ -4030,20 +4083,11 @@ function renderRhythmGeometryBlock(block = {}) {
       const newMode = targetBtn.getAttribute("data-mnemonic-mode");
       if (!newMode) return;
 
-      modeSelector.querySelectorAll("[data-mnemonic-mode]").forEach((b) => {
-        const isSel = b === targetBtn;
-        b.classList.toggle("is-selected", isSel);
-        b.setAttribute("aria-selected", isSel ? "true" : "false");
-      });
-
-      card.querySelectorAll(".rhythm-geometry-card__subbeat").forEach((cell) => {
-        const textSpan = cell.querySelector(".subbeat-mnemonic");
-        if (!textSpan) return;
-        const attrVal = cell.getAttribute(`data-text-${newMode}`);
-        if (attrVal !== null) {
-          textSpan.textContent = attrVal;
-        }
-      });
+      if (block.id === "w2-rhythm-geometry-16th-syncopation") {
+        currentRhythmGeometryMnemonicMode = newMode;
+      }
+      setRhythmGeometryCardMode(card, newMode);
+      persistContinuePracticeStateV1({ debounce: true });
     });
 
     return card;
@@ -4051,6 +4095,26 @@ function renderRhythmGeometryBlock(block = {}) {
     console.error("[RhythmGeometry] Renderer error:", err);
     return renderMonth2MissingCard("เกิดข้อผิดพลาดในการแสดงผล Rhythm Geometry Block");
   }
+}
+
+function setRhythmGeometryCardMode(card, newMode) {
+  if (!card || !newMode) return;
+  const modeSelector = card.querySelector(".rhythm-geometry-card__mode-selector");
+  if (modeSelector) {
+    modeSelector.querySelectorAll("[data-mnemonic-mode]").forEach((b) => {
+      const isSel = b.getAttribute("data-mnemonic-mode") === newMode;
+      b.classList.toggle("is-selected", isSel);
+      b.setAttribute("aria-selected", isSel ? "true" : "false");
+    });
+  }
+  card.querySelectorAll(".rhythm-geometry-card__subbeat").forEach((cell) => {
+    const textSpan = cell.querySelector(".subbeat-mnemonic");
+    if (!textSpan) return;
+    const attrVal = cell.getAttribute(`data-text-${newMode}`);
+    if (attrVal !== null) {
+      textSpan.textContent = attrVal;
+    }
+  });
 }
 
 window.addEventListener("gc:metronome-step", (event) => {

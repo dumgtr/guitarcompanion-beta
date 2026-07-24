@@ -1,12 +1,15 @@
-(function attachContinuePracticeStateV1(root, factory) {
+(function attachContinuePracticeStateV2(root, factory) {
   const api = factory();
   if (typeof module === "object" && module.exports) module.exports = api;
-  if (root) root.GuitarCompanionContinuePracticeV1 = api;
-})(typeof globalThis !== "undefined" ? globalThis : this, function createContinuePracticeStateV1() {
+  if (root) {
+    root.GuitarCompanionContinuePracticeV2 = api;
+    root.GuitarCompanionContinuePracticeV1 = api;
+  }
+})(typeof globalThis !== "undefined" ? globalThis : this, function createContinuePracticeStateV2() {
   "use strict";
 
   const STORAGE_KEY = "guitarCompanion.continuePractice.v1";
-  const SCHEMA_VERSION = 1;
+  const SCHEMA_VERSION = 2;
   const DEFAULT_PREFERENCES = Object.freeze({
     instrument: "synth",
     metronomeBpm: 82,
@@ -14,11 +17,27 @@
   });
   const ALLOWED_ROUTES = Object.freeze(["dashboard", "lessons", "practice"]);
   const ALLOWED_INSTRUMENTS = Object.freeze(["synth", "nylon", "electric"]);
+  const ALLOWED_MNEMONIC_MODES = Object.freeze(["food_en", "takadimi", "counting", "food_th"]);
 
   function isPlainObject(value) {
     if (!value || typeof value !== "object" || Array.isArray(value)) return false;
     const prototype = Object.getPrototypeOf(value);
     return prototype === Object.prototype || prototype === null;
+  }
+
+  function sanitizeBlockState(candidate) {
+    if (!isPlainObject(candidate)) return {};
+    const sanitized = {};
+    for (const [blockId, state] of Object.entries(candidate)) {
+      if (typeof blockId !== "string" || !blockId || !isPlainObject(state)) continue;
+      if (blockId === "w2-rhythm-geometry-16th-syncopation") {
+        const mode = typeof state.mnemonicMode === "string" ? state.mnemonicMode.trim() : "";
+        if (ALLOWED_MNEMONIC_MODES.includes(mode)) {
+          sanitized[blockId] = { mnemonicMode: mode };
+        }
+      }
+    }
+    return sanitized;
   }
 
   function normalizeCatalog(catalog) {
@@ -58,7 +77,35 @@
     return Number.isFinite(timestamp) && new Date(timestamp).toISOString() === value;
   }
 
-  function validateRecord(candidate, options = {}) {
+  function migrateV1Record(candidate) {
+    if (!isPlainObject(candidate) || candidate.schemaVersion !== 1) return candidate;
+    const lessonMatch = /^foundation-week-([1-4])$/.exec(String(candidate?.location?.lessonId || ""));
+    const weekNum = lessonMatch ? Number(lessonMatch[1]) : 1;
+    return {
+      schemaVersion: 2,
+      updatedAt: candidate.updatedAt || new Date().toISOString(),
+      location: {
+        monthId: 1,
+        weekId: weekNum,
+        lessonId: candidate.location?.lessonId || `foundation-week-${weekNum}`,
+        sectionId: null,
+        blockId: null,
+        route: candidate.location?.route || "dashboard",
+        exerciseId: candidate.location?.exerciseId ?? null,
+        stepId: candidate.location?.stepId ?? null,
+        stepIndex: candidate.location?.stepIndex ?? null
+      },
+      blockState: {},
+      preferences: {
+        instrument: candidate.preferences?.instrument || DEFAULT_PREFERENCES.instrument,
+        metronomeBpm: candidate.preferences?.metronomeBpm || DEFAULT_PREFERENCES.metronomeBpm,
+        metronomeEnabled: Boolean(candidate.preferences?.metronomeEnabled)
+      }
+    };
+  }
+
+  function validateRecord(candidateRaw, options = {}) {
+    const candidate = candidateRaw?.schemaVersion === 1 ? migrateV1Record(candidateRaw) : candidateRaw;
     const catalog = normalizeCatalog(options.catalog);
     const minBpm = Number(options.minBpm);
     const maxBpm = Number(options.maxBpm);
@@ -71,6 +118,11 @@
     const exerciseId = candidate.location.exerciseId ?? null;
     const stepId = candidate.location.stepId ?? null;
     const stepIndex = candidate.location.stepIndex ?? null;
+    const monthId = Number.isInteger(candidate.location.monthId) && candidate.location.monthId >= 1 ? candidate.location.monthId : 1;
+    const weekId = Number.isInteger(candidate.location.weekId) && candidate.location.weekId >= 1 ? candidate.location.weekId : 1;
+    const sectionId = typeof candidate.location.sectionId === "string" && candidate.location.sectionId ? candidate.location.sectionId : null;
+    const blockId = typeof candidate.location.blockId === "string" && candidate.location.blockId ? candidate.location.blockId : null;
+
     if (!ALLOWED_ROUTES.includes(route) || typeof lessonId !== "string") return null;
 
     const lesson = catalog.get(lessonId);
@@ -95,16 +147,23 @@
     if (!Number.isFinite(metronomeBpm) || metronomeBpm < minBpm || metronomeBpm > maxBpm) return null;
     if (typeof metronomeEnabled !== "boolean") return null;
 
+    const blockState = sanitizeBlockState(candidate.blockState);
+
     return {
       schemaVersion: SCHEMA_VERSION,
       updatedAt: candidate.updatedAt,
       location: {
-        route,
+        monthId,
+        weekId,
         lessonId,
+        sectionId,
+        blockId,
+        route,
         exerciseId,
         stepId,
         stepIndex
       },
+      blockState,
       preferences: {
         instrument,
         metronomeBpm,
@@ -137,12 +196,17 @@
       schemaVersion: SCHEMA_VERSION,
       updatedAt,
       location: {
-        route: snapshot.location.route,
+        monthId: snapshot.location.monthId ?? 1,
+        weekId: snapshot.location.weekId ?? 1,
         lessonId: snapshot.location.lessonId,
+        sectionId: snapshot.location.sectionId ?? null,
+        blockId: snapshot.location.blockId ?? null,
+        route: snapshot.location.route,
         exerciseId: snapshot.location.exerciseId ?? null,
         stepId: snapshot.location.stepId ?? null,
         stepIndex: snapshot.location.stepIndex ?? null
       },
+      blockState: snapshot.blockState || {},
       preferences: {
         instrument: snapshot.preferences.instrument,
         metronomeBpm: snapshot.preferences.metronomeBpm,
@@ -153,7 +217,7 @@
 
   function recordSignature(record) {
     if (!record) return "";
-    return JSON.stringify({ location: record.location, preferences: record.preferences });
+    return JSON.stringify({ location: record.location, blockState: record.blockState, preferences: record.preferences });
   }
 
   function createStore(options = {}) {
