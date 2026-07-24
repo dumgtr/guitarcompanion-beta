@@ -154,6 +154,14 @@ QUESTION_FOR_REVIEWER:
 
 For Audio Engine work, the baseline must explicitly determine whether cleanup such as `dispose()` is required, whether one-active/one-release-tail covers the intended lifecycle, and whether `onended` is an acceptance requirement or only an implementation option.
 
+#### Baseline Completeness Gate
+
+Before dispatching a specialist:
+- Read every function and code window named in the review scope, including the relevant control flow between them.
+- Record enough file and line-window evidence in the execution log to show that each scoped area was reviewed.
+- Put any unread, unavailable, or unresolved area under `MISSING_CONTEXT`.
+- Do not declare the baseline complete while any required source window remains unread.
+
 ### Step 4: One Specialist Review
 Owner: One read-only reviewer, with separate Human Dispatch Authorization.
 
@@ -203,6 +211,17 @@ Codex checks every reviewer finding against:
 - Known intentional behavior and guardrails.
 
 Reviewer output is advisory and never self-approves a defect, patch, or scope expansion. Codex presents the adjudicated findings to the Product Owner before implementation.
+
+#### Contract Consistency Gate
+
+Before issuing the final adjudication, Codex must:
+- Re-read the Product Owner question and each behavioral acceptance requirement.
+- Distinguish intentional behavior from behavior that complies with the stated requirement.
+- Distinguish bounded lifetime from bounded concurrent count.
+- Distinguish the absence of a permanent resource leak from compliance with a voice or overlap policy.
+- Classify an observed behavior that contradicts the requirement as `CONFIRMED`, even when the behavior is intentional and cleanup occurs later.
+
+A finding may be intentional and non-leaking, yet still violate the Product Owner's behavioral acceptance requirement.
 
 ### Step 7: Optional Second Opinion
 Owner: One additional read-only reviewer.
