@@ -7175,3 +7175,389 @@ body {
     flex-wrap: wrap !important;
   }
 }
+
+/* Rhythm Geometry Block Styles */
+.rhythm-geometry-card {
+  background: var(--surface, #1e2430);
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.rhythm-geometry-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.rhythm-geometry-card__title-group h3 {
+  margin: 0.2rem 0 0 0;
+  font-size: 1.35rem;
+  color: var(--ink, #ffffff);
+}
+
+.rhythm-geometry-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.rhythm-badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted, #a0aec0);
+}
+
+.rhythm-badge--picking {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.rhythm-badge--bpm {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.rhythm-badge--subdivision {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.rhythm-geometry-card__mode-selector {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0.25rem;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.rhythm-mode-btn {
+  flex: 1;
+  padding: 0.4rem 0.75rem;
+  border: none;
+  background: transparent;
+  color: var(--muted, #94a3b8);
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.rhythm-mode-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.rhythm-mode-btn.is-selected {
+  background: var(--accent, #3b82f6);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+.rhythm-geometry-card__beat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .rhythm-geometry-card__beat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .rhythm-geometry-card__beat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rhythm-geometry-card__beat {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 0.6rem;
+}
+
+.rhythm-geometry-card__beat-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.rhythm-geometry-card__subbeats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.35rem;
+}
+
+.rhythm-geometry-card__subbeat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.2rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  min-height: 64px;
+  position: relative;
+  transition: transform 0.1s ease, border-color 0.1s ease, background-color 0.1s ease;
+}
+
+.rhythm-geometry-card__subbeat.is-accent {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.06);
+}
+
+.subbeat-mnemonic {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.rhythm-geometry-card__picking {
+  font-size: 0.75rem;
+  margin-top: 0.2rem;
+  color: var(--muted, #94a3b8);
+}
+
+.rhythm-geometry-card__accent-tag {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #f59e0b;
+  text-transform: uppercase;
+}
+
+.rhythm-geometry-card__subbeat.is-active {
+  background: rgba(59, 130, 246, 0.35) !important;
+  border-color: #3b82f6 !important;
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  z-index: 2;
+}
+
+.rhythm-geometry-card__subbeat.is-active-accent {
+  background: rgba(245, 158, 11, 0.45) !important;
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+}
+
+.rhythm-geometry-card__teacher-tip {
+  margin-top: 1.25rem;
+  padding: 0.75rem 1rem;
+  background: rgba(245, 158, 11, 0.08);
+  border-left: 3px solid #f59e0b;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #f1f5f9;
+}
+
+.rhythm-geometry-card__teacher-tip strong {
+  color: #f59e0b;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+/* Rhythm Geometry Block V1 Canonical Styles */
+.rhythm-geometry-card {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: var(--surface, #1e293b);
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+}
+
+.rhythm-geometry-header {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.rhythm-geometry-badge {
+  width: fit-content;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.rhythm-geometry-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--ink, #f8fafc);
+}
+
+.rhythm-geometry-subtitle {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted, #94a3b8);
+}
+
+.rhythm-geometry-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.control-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted, #94a3b8);
+}
+
+.mnemonic-tabs {
+  display: flex;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.mnemonic-tab {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted, #94a3b8);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mnemonic-tab.active {
+  background: #3b82f6;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4);
+}
+
+.rhythm-geometry-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .rhythm-geometry-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.rhythm-beat-group {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.beat-header {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--muted, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+.subbeats-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.35rem;
+}
+
+.rhythm-subbeat-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.2rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  min-height: 64px;
+  position: relative;
+  transition: transform 0.1s ease, border-color 0.1s ease, background-color 0.1s ease;
+}
+
+.rhythm-subbeat-slot.is-accent {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.06);
+}
+
+.mnemonic-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.picking-indicator {
+  font-size: 0.75rem;
+  margin-bottom: 0.2rem;
+  color: var(--muted, #94a3b8);
+}
+
+.accent-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #f59e0b;
+  text-transform: uppercase;
+}
+
+.rhythm-subbeat-slot.active-pulse {
+  background: rgba(59, 130, 246, 0.35) !important;
+  border-color: #3b82f6 !important;
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  z-index: 2;
+}
+
+.rhythm-subbeat-slot.is-accent.active-pulse {
+  background: rgba(245, 158, 11, 0.45) !important;
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+}
+
+.rhythm-geometry-footer .teacher-tip {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  background: rgba(245, 158, 11, 0.08);
+  border-left: 3px solid #f59e0b;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #f1f5f9;
+}

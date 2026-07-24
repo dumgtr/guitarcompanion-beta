@@ -91,6 +91,36 @@ let weeks = [
       "ไม่หลงตำแหน่ง e และ a",
       "ghost note เบากว่า accent ชัด",
       "เล่น 4 รอบติดโดยไม่หลุด"
+    ],
+    "lessonBlocks": [
+      {
+        "type": "text",
+        "id": "w2-syncopation-overview",
+        "title": "ภาพรวมบทเรียน",
+        "body": "วางคอร์ดบน off-beat และ ghost strum ให้ groove ฟังมีชีวิต"
+      },
+      {
+        "type": "technique-drill",
+        "id": "w2-syncopation-drill",
+        "drill": {
+          "title": "แบบฝึกหัดหลัก",
+          "steps": [
+            "ฝึก pattern Funk 16 ช้า ๆ",
+            "เน้น accent บน 2 และ 4",
+            "เล่นกับ backing track ที่มี drum loop"
+          ]
+        }
+      },
+      {
+        "type": "mechanics-check",
+        "id": "w2-syncopation-checks",
+        "title": "เกณฑ์ผ่าน",
+        "checks": [
+          "ไม่หลงตำแหน่ง e และ a",
+          "ghost note เบากว่า accent ชัด",
+          "เล่น 4 รอบติดโดยไม่หลุด"
+        ]
+      }
     ]
   },
   {
@@ -1359,6 +1389,7 @@ function stopMetronome() {
   setMetronomeEnabledPreferenceV1(false);
   document.getElementById("beatLight").classList.remove("active", "accent");
   renderBeatCounter(0);
+  window.dispatchEvent(new CustomEvent("gc:metronome-stop"));
   const announcer = document.getElementById("metronomeAnnouncer");
   if (announcer) announcer.textContent = "หยุด Metronome";
 }
@@ -1368,12 +1399,34 @@ function scheduleMetronome() {
   while (nextBeatTime < audioContext.currentTime + 0.12) {
     const visualBeat = (beatCount % 4) + 1;
     playClick(nextBeatTime, visualBeat === 1);
-    const beatDelay = Math.max(0, (nextBeatTime - audioContext.currentTime) * 1000);
-    window.setTimeout(() => flashBeat(visualBeat), beatDelay);
+
+    const sixteenthInterval = (60 / bpm) / 4;
+    for (let sub = 0; sub < 4; sub++) {
+      const subTime = nextBeatTime + (sub * sixteenthInterval);
+      const stepIndex = ((visualBeat - 1) * 4) + sub;
+      const subDelay = Math.max(0, (subTime - audioContext.currentTime) * 1000);
+      window.setTimeout(() => emitMetronomeStep(stepIndex, visualBeat, sub === 0), subDelay);
+    }
+
     nextBeatTime += 60 / bpm;
     beatCount += 1;
   }
   metronomeTimer = window.setTimeout(scheduleMetronome, 25);
+}
+
+function emitMetronomeStep(stepIndex, visualBeat, isQuarterBeat) {
+  if (!isMetronomeRunning) return;
+  if (isQuarterBeat) {
+    flashBeat(visualBeat);
+  }
+  window.dispatchEvent(new CustomEvent("gc:metronome-step", {
+    detail: {
+      stepIndex,
+      beat: visualBeat,
+      subbeat: (stepIndex % 4) + 1,
+      isAccent: stepIndex % 4 === 0
+    }
+  }));
 }
 
 function playClick(time, accent) {
@@ -1626,6 +1679,54 @@ const foundationWeeks = [
     youtube: {
       title: "ฟังตัวอย่าง Syncopation และ Accent บน off-beat",
       embedUrl: "https://www.youtube.com/embed?listType=search&list=guitar%20rhythm%20syncopation%20strumming"
+    },
+    rhythmGeometry: {
+      id: "w2-rhythm-geometry-16th-syncopation",
+      type: "rhythm-geometry",
+      title: "Off-Beat Syncopation Geometry (16th Grid)",
+      subdivision: "16th Grid",
+      pickingStyle: "Alternate (D U D U)",
+      bpmRecommended: "50-80",
+      defaultMnemonicMode: "food_en",
+      teacherTip: "เน้นลงน้ำหนัก (Accent) ที่ subbeat ที่ 4 (& หลัง 2 และ & หลัง 4) โดยให้เท้านิ่งเคาะอยู่ที่ 1 2 3 4",
+      pattern: [
+        {
+          beat: 1,
+          subbeats: [
+            { picking: "down", accent: false, mnemonics: { food_en: "1", takadimi: "ta", counting: "1", food_th: "1" } },
+            { picking: "up", accent: false, mnemonics: { food_en: "e", takadimi: "ka", counting: "e", food_th: "อี" } },
+            { picking: "down", accent: false, mnemonics: { food_en: "&", takadimi: "di", counting: "&", food_th: "และ" } },
+            { picking: "up", accent: false, mnemonics: { food_en: "a", takadimi: "mi", counting: "a", food_th: "อา" } }
+          ]
+        },
+        {
+          beat: 2,
+          subbeats: [
+            { picking: "down", accent: false, mnemonics: { food_en: "2", takadimi: "ta", counting: "2", food_th: "2" } },
+            { picking: "up", accent: false, mnemonics: { food_en: "e", takadimi: "ka", counting: "e", food_th: "อี" } },
+            { picking: "down", accent: false, mnemonics: { food_en: "&", takadimi: "di", counting: "&", food_th: "และ" } },
+            { picking: "up", accent: true, mnemonics: { food_en: "a", takadimi: "mi", counting: "a", food_th: "อา" } }
+          ]
+        },
+        {
+          beat: 3,
+          subbeats: [
+            { picking: "down", accent: false, mnemonics: { food_en: "3", takadimi: "ta", counting: "3", food_th: "3" } },
+            { picking: "up", accent: false, mnemonics: { food_en: "e", takadimi: "ka", counting: "e", food_th: "อี" } },
+            { picking: "down", accent: false, mnemonics: { food_en: "&", takadimi: "di", counting: "&", food_th: "และ" } },
+            { picking: "up", accent: false, mnemonics: { food_en: "a", takadimi: "mi", counting: "a", food_th: "อา" } }
+          ]
+        },
+        {
+          beat: 4,
+          subbeats: [
+            { picking: "down", accent: false, mnemonics: { food_en: "4", takadimi: "ta", counting: "4", food_th: "4" } },
+            { picking: "up", accent: false, mnemonics: { food_en: "e", takadimi: "ka", counting: "e", food_th: "อี" } },
+            { picking: "down", accent: false, mnemonics: { food_en: "&", takadimi: "di", counting: "&", food_th: "และ" } },
+            { picking: "up", accent: true, mnemonics: { food_en: "a", takadimi: "mi", counting: "a", food_th: "อา" } }
+          ]
+        }
+      ]
     },
     learn: {
       targetBpm: "50-80 BPM",
@@ -3462,6 +3563,9 @@ function renderLessonMedia(weekItem) {
   `;
 }
 function renderLearnSection(weekItem) {
+  const isWeek2 = Number(weekItem?.number || weekItem?.week) === 2;
+  const rhythmBlock = isWeek2 ? (weekItem?.rhythmGeometry || weeks[1]?.lessonBlocks?.find((b) => b.type === "rhythm-geometry") || null) : null;
+
   if (weekItem.learn) {
     return `
       <section class="lesson-block learn-block">
@@ -3471,6 +3575,7 @@ function renderLearnSection(weekItem) {
           <strong>${weekItem.learn.targetBpm}</strong>
         </div>
         ${renderLessonDiagram(weekItem.learn.diagram)}
+        ${rhythmBlock ? renderRhythmGeometryBlock(rhythmBlock).outerHTML : ""}
         ${weekItem.learn.paragraphs.map((paragraph) => `<p>${paragraph}</p>`).join("")}
         <div class="lesson-learn-grid">
           <div>
@@ -3802,11 +3907,172 @@ function renderLessonBlocks(blocks, visualsById = {}, tabsById = {}, labsById = 
       return;
     }
 
+    if (block.type === "rhythm-geometry") {
+      flow.appendChild(renderRhythmGeometryBlock(block));
+      return;
+    }
+
     flow.appendChild(renderMonth2MissingCard(`ยังไม่รองรับ lesson block type: ${block.type || "unknown"}`));
   });
 
   return flow;
 }
+
+function renderRhythmGeometryBlock(block = {}) {
+  try {
+    if (!block || typeof block !== "object" || !Array.isArray(block.pattern) || block.pattern.length !== 4) {
+      console.warn("[RhythmGeometry] Invalid block data, skipping rendering.", block);
+      return renderMonth2MissingCard("ยังไม่รองรับข้อมูล Rhythm Geometry Block หรือโครงสร้างไม่ถูกต้อง");
+    }
+
+    const blockId = String(block.id || `rg-${Date.now()}`);
+    const card = month2CreateElement("article", "month2-component rhythm-geometry-card");
+    card.setAttribute("data-rhythm-geometry-id", blockId);
+
+    const header = month2CreateElement("div", "rhythm-geometry-card__header");
+    const titleGroup = month2CreateElement("div", "rhythm-geometry-card__title-group");
+    titleGroup.append(
+      month2CreateElement("p", "eyebrow", "Rhythm Geometry"),
+      month2CreateElement("h3", "", block.title || "Geometry of Rhythm")
+    );
+
+    const badges = month2CreateElement("div", "rhythm-geometry-card__badges");
+    if (block.pickingStyle) {
+      badges.appendChild(month2CreateElement("span", "rhythm-badge rhythm-badge--picking", block.pickingStyle));
+    }
+    if (block.bpmRecommended) {
+      badges.appendChild(month2CreateElement("span", "rhythm-badge rhythm-badge--bpm", `BPM ${block.bpmRecommended}`));
+    }
+    badges.appendChild(month2CreateElement("span", "rhythm-badge rhythm-badge--subdivision", block.subdivision || "16th Grid"));
+
+    header.append(titleGroup, badges);
+
+    const activeMode = String(block.defaultMnemonicMode || "food_en");
+    const modes = [
+      { key: "food_en", label: "Food (EN)" },
+      { key: "takadimi", label: "Takadimi" },
+      { key: "counting", label: "Counting" },
+      { key: "food_th", label: "Food (TH)" }
+    ];
+
+    const modeSelector = month2CreateElement("div", "rhythm-geometry-card__mode-selector");
+    modeSelector.setAttribute("role", "tablist");
+    modeSelector.setAttribute("aria-label", "เลือกรูปแบบคำท่องสัดส่วนโน้ต");
+
+    modes.forEach((m) => {
+      const btn = month2CreateElement("button", `rhythm-mode-btn ${m.key === activeMode ? "is-selected" : ""}`, m.label);
+      btn.type = "button";
+      btn.setAttribute("role", "tab");
+      btn.setAttribute("aria-selected", m.key === activeMode ? "true" : "false");
+      btn.setAttribute("data-mnemonic-mode", m.key);
+      modeSelector.appendChild(btn);
+    });
+
+    const grid = month2CreateElement("div", "rhythm-geometry-card__beat-grid");
+
+    block.pattern.forEach((beatGroup, bIndex) => {
+      const beatNum = beatGroup.beat || bIndex + 1;
+      const beatCard = month2CreateElement("div", "rhythm-geometry-card__beat");
+      beatCard.appendChild(month2CreateElement("div", "rhythm-geometry-card__beat-title", `Beat ${beatNum}`));
+
+      const subbeatsContainer = month2CreateElement("div", "rhythm-geometry-card__subbeats");
+      const subbeats = Array.isArray(beatGroup.subbeats) ? beatGroup.subbeats : [];
+
+      subbeats.forEach((sb, sIndex) => {
+        const stepIndex = bIndex * 4 + sIndex;
+        const pickingVal = String(sb.picking || "down").toLowerCase();
+        const isAccent = Boolean(sb.accent);
+
+        const cell = month2CreateElement("div", `rhythm-geometry-card__subbeat ${isAccent ? "is-accent" : ""}`);
+        cell.setAttribute("data-beat-index", String(beatNum));
+        cell.setAttribute("data-subbeat-index", String(sIndex + 1));
+        cell.setAttribute("data-rhythm-step-index", String(stepIndex));
+        cell.setAttribute("data-accent", String(isAccent));
+        cell.setAttribute("data-picking", pickingVal);
+
+        const mnemonics = sb.mnemonics || {};
+        cell.setAttribute("data-text-food_en", mnemonics.food_en || mnemonics.counting || "");
+        cell.setAttribute("data-text-takadimi", mnemonics.takadimi || mnemonics.counting || "");
+        cell.setAttribute("data-text-counting", mnemonics.counting || "");
+        cell.setAttribute("data-text-food_th", mnemonics.food_th || mnemonics.counting || "");
+
+        const initialText = mnemonics[activeMode] || mnemonics.food_en || mnemonics.counting || "";
+        const textSpan = month2CreateElement("span", "subbeat-mnemonic", initialText);
+
+        const pickingSymbol = pickingVal === "down" ? "⬇️" : pickingVal === "up" ? "⬆️" : "Rest";
+        const pickingSpan = month2CreateElement("span", "rhythm-geometry-card__picking", pickingSymbol);
+
+        cell.append(textSpan, pickingSpan);
+        if (isAccent) {
+          cell.appendChild(month2CreateElement("span", "rhythm-geometry-card__accent-tag", "Accent"));
+        }
+        subbeatsContainer.appendChild(cell);
+      });
+
+      beatCard.appendChild(subbeatsContainer);
+      grid.appendChild(beatCard);
+    });
+
+    card.append(header, modeSelector, grid);
+
+    if (block.teacherTip) {
+      const tipBox = month2CreateElement("aside", "rhythm-geometry-card__teacher-tip");
+      tipBox.append(
+        month2CreateElement("strong", "", "💡 คำแนะนำจากครู"),
+        month2CreateElement("p", "", block.teacherTip)
+      );
+      card.appendChild(tipBox);
+    }
+
+    modeSelector.addEventListener("click", (event) => {
+      const targetBtn = event.target instanceof Element ? event.target.closest("[data-mnemonic-mode]") : null;
+      if (!targetBtn) return;
+      const newMode = targetBtn.getAttribute("data-mnemonic-mode");
+      if (!newMode) return;
+
+      modeSelector.querySelectorAll("[data-mnemonic-mode]").forEach((b) => {
+        const isSel = b === targetBtn;
+        b.classList.toggle("is-selected", isSel);
+        b.setAttribute("aria-selected", isSel ? "true" : "false");
+      });
+
+      card.querySelectorAll(".rhythm-geometry-card__subbeat").forEach((cell) => {
+        const textSpan = cell.querySelector(".subbeat-mnemonic");
+        if (!textSpan) return;
+        const attrVal = cell.getAttribute(`data-text-${newMode}`);
+        if (attrVal !== null) {
+          textSpan.textContent = attrVal;
+        }
+      });
+    });
+
+    return card;
+  } catch (err) {
+    console.error("[RhythmGeometry] Renderer error:", err);
+    return renderMonth2MissingCard("เกิดข้อผิดพลาดในการแสดงผล Rhythm Geometry Block");
+  }
+}
+
+window.addEventListener("gc:metronome-step", (event) => {
+  const detail = event.detail || {};
+  const currentStep = Number(detail.stepIndex);
+  if (!Number.isInteger(currentStep)) return;
+
+  document.querySelectorAll("[data-rhythm-step-index]").forEach((cell) => {
+    const stepIdx = Number(cell.getAttribute("data-rhythm-step-index"));
+    const isActive = stepIdx === currentStep;
+    cell.classList.toggle("is-active", isActive);
+    if (cell.getAttribute("data-accent") === "true") {
+      cell.classList.toggle("is-active-accent", isActive);
+    }
+  });
+});
+
+window.addEventListener("gc:metronome-stop", () => {
+  document.querySelectorAll("[data-rhythm-step-index]").forEach((cell) => {
+    cell.classList.remove("is-active", "is-active-accent");
+  });
+});
 
 function renderMonth2TextBlock(block = {}) {
   const card = month2CreateElement("article", "month2-component month2-text-block lesson-text-block");
@@ -6726,6 +6992,7 @@ window.__GC_MONTH2_ENGINES__ = Object.freeze({
   renderChordSoundLab,
   renderTechniqueDrillBlock,
   renderMechanicsCheckBlock,
+  renderRhythmGeometryBlock,
   playChord,
   playPluckedString,
   stopAllSounds

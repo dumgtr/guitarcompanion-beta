@@ -189,8 +189,8 @@ function main() {
     const hasElectricAssetPath = audioContent.includes('assets/audio/electric/');
     assert(hasElectricSchemaV2 && hasElectric37Entries && hasElectricAssetPath, 'Electric Schema v2 invariant present in outputs/audio-engine.js', { file: 'outputs/audio-engine.js' });
 
-    // D.6 AudioEngine canonical public exports
-    const exportsToTest = [
+    // D.6 AudioEngine public exports contract
+    const requiredExports = [
       'unlock',
       'prepareElectricSampler',
       'prepareFslSynthSampler',
@@ -201,10 +201,48 @@ function main() {
       'getStatus',
       'getInstrumentAvailability'
     ];
-    exportsToTest.forEach((exp) => {
-      const isExported = new RegExp(`\\b${exp}\\b`).test(audioContent);
-      assert(isExported, `AudioEngine public export '${exp}' present in outputs/audio-engine.js`, { file: 'outputs/audio-engine.js' });
+
+    requiredExports.forEach((exportName) => {
+      const hasExport = new RegExp(`\\b${exportName}\\b`).test(audioContent);
+      assert(hasExport, `AudioEngine public export '${exportName}' present in outputs/audio-engine.js`, { file: 'outputs/audio-engine.js' });
     });
+
+    // D.7 Rhythm Geometry Block Invariants
+    const hasRhythmGeometryDispatch = appContent.includes('block.type === "rhythm-geometry"') && appContent.includes('renderRhythmGeometryBlock(block)');
+    const hasRhythmGeometryRenderer = appContent.includes('function renderRhythmGeometryBlock');
+    const hasStepListener = appContent.includes('gc:metronome-step') && appContent.includes('data-rhythm-step-index');
+    assert(hasRhythmGeometryDispatch && hasRhythmGeometryRenderer && hasStepListener, 'Rhythm Geometry block renderer, dispatcher, and step listener present in outputs/app.js', { file: 'outputs/app.js' });
+
+    const stylesContent = readFileContent('outputs/styles.css');
+    const hasRhythmGeometryStyles = stylesContent.includes('.rhythm-geometry-card') && stylesContent.includes('.rhythm-mode-btn') && stylesContent.includes('.is-active');
+    assert(hasRhythmGeometryStyles, 'Rhythm Geometry block CSS styles, tabs and pulse highlights present in outputs/styles.css', { file: 'outputs/styles.css' });
+
+    // D.8 Production Block Count Invariant (Exactly 1 block in Month 1 Week 2)
+    const rhythmBlockMatches = appContent.match(/(?:"type"|type):\s*"rhythm-geometry"/g) || [];
+    assert(rhythmBlockMatches.length === 1, 'Exactly 1 rhythm-geometry block exists in production foundationWeeks (Week 2)', {
+      file: 'outputs/app.js',
+      expected: 1,
+      actual: rhythmBlockMatches.length
+    });
+
+    // D.9 Production Block ID and Week Location
+    const hasWeek2BlockId = appContent.includes('id: "w2-rhythm-geometry-16th-syncopation"');
+    assert(hasWeek2BlockId, 'Rhythm Geometry block w2-rhythm-geometry-16th-syncopation present in Week 2 data', { file: 'outputs/app.js' });
+
+    // D.10 4 Beats x 4 Subbeats Structure (16 subbeats total) and 4 Mnemonic modes
+    const has4Beats = appContent.includes('beat: 1') && appContent.includes('beat: 2') && appContent.includes('beat: 3') && appContent.includes('beat: 4');
+    const has4Mnemonics = appContent.includes('food_en:') && appContent.includes('takadimi:') && appContent.includes('counting:') && appContent.includes('food_th:');
+    assert(has4Beats && has4Mnemonics, 'Rhythm Geometry production data contains 4 beats x 4 subbeats with all 4 mnemonic modes', { file: 'outputs/app.js' });
+
+    // D.11 No independent setInterval musical clock in renderer
+    const rendererSlice = appContent.slice(appContent.indexOf('function renderRhythmGeometryBlock'), appContent.indexOf('function renderMonth2TextBlock'));
+    const hasIndependentClock = rendererSlice.includes('setInterval(') || rendererSlice.includes('setTimeout(');
+    assert(!hasIndependentClock, 'renderRhythmGeometryBlock contains no independent setInterval musical clock', { file: 'outputs/app.js' });
+
+    // D.12 Metronome event dispatch contract
+    const hasMetronomeStepEmitter = appContent.includes('emitMetronomeStep(') && appContent.includes('new CustomEvent("gc:metronome-step"');
+    const hasMetronomeStopEmitter = appContent.includes('new CustomEvent("gc:metronome-stop")');
+    assert(hasMetronomeStepEmitter && hasMetronomeStopEmitter, 'Metronome dispatches gc:metronome-step and gc:metronome-stop events', { file: 'outputs/app.js' });
   }
   endSuite();
 
