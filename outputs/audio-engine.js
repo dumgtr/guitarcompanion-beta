@@ -346,16 +346,22 @@
 
   function releaseChannel(channel, isPlaybackTrigger = false) {
     if (channel === "fsl" && !isPlaybackTrigger) {
-      fslSynthActiveSources.forEach((src) => {
+      fslSynthActiveSources.forEach((entry) => {
+        const src = entry.source || entry;
+        const gain = entry.voiceGain;
         try { src.stop(); } catch {}
         try { src.disconnect(); } catch {}
+        if (gain) try { gain.disconnect(); } catch {}
       });
       fslSynthActiveSources.clear();
     }
     if (channel === "soundlab" && !isPlaybackTrigger) {
-      soundlabSynthActiveSources.forEach((src) => {
+      soundlabSynthActiveSources.forEach((entry) => {
+        const src = entry.source || entry;
+        const gain = entry.voiceGain;
         try { src.stop(); } catch {}
         try { src.disconnect(); } catch {}
+        if (gain) try { gain.disconnect(); } catch {}
       });
       soundlabSynthActiveSources.clear();
     }
@@ -958,27 +964,65 @@
 
     const channel = playback.channel === "soundlab" ? "soundlab" : "fsl";
     const timeOffset = Math.max(0, Number(playback.timeOffset) || 0);
-    const now = audioCtx.currentTime + timeOffset;
-    const source = audioCtx.createBufferSource();
-
-    source.buffer = buffer;
-    source.playbackRate.setValueAtTime(1.0, now);
-    source.connect(channelGains[channel]);
-    source.start(now);
+    const currentTime = audioCtx.currentTime;
 
     const activeSet = channel === "soundlab" ? soundlabSynthActiveSources : fslSynthActiveSources;
-    activeSet.add(source);
-    source.onended = () => {
-      activeSet.delete(source);
+
+    let startDelay = 0;
+    if (activeSet.size >= 2) {
+      startDelay = 0.005; // 5ms fade window for smooth retirement
+    }
+    const retireTime = currentTime + startDelay;
+
+    while (activeSet.size >= 2) {
+      const oldestEntry = activeSet.values().next().value;
+      if (!oldestEntry) break;
+      activeSet.delete(oldestEntry);
+
+      const oldestSource = oldestEntry.source || oldestEntry;
+      const oldestGain = oldestEntry.voiceGain;
+
+      if (oldestGain) {
+        try {
+          oldestGain.gain.cancelScheduledValues(currentTime);
+          oldestGain.gain.setValueAtTime(oldestGain.gain.value, currentTime);
+          oldestGain.gain.linearRampToValueAtTime(0.0001, retireTime);
+        } catch {}
+      }
+      try { oldestSource.stop(retireTime); } catch {}
+    }
+
+    const startNow = Math.max(currentTime + timeOffset, retireTime);
+
+    const source = audioCtx.createBufferSource();
+    const voiceGain = audioCtx.createGain();
+
+    source.buffer = buffer;
+    source.playbackRate.setValueAtTime(1.0, startNow);
+
+    voiceGain.gain.setValueAtTime(1.0, startNow);
+    source.connect(voiceGain);
+    voiceGain.connect(channelGains[channel]);
+
+    const entry = { source, voiceGain };
+    activeSet.add(entry);
+
+    const cleanup = () => {
+      activeSet.delete(entry);
+      try { source.disconnect(); } catch {}
+      try { voiceGain.disconnect(); } catch {}
     };
+
+    source.onended = cleanup;
+    source.start(startNow);
 
     return {
       channel,
       profile: channel === "soundlab" ? "soundlab-guide-tone" : "fsl-fretboard-position",
       sources: [], // leave empty so cleanupVoice does not stop it during transition overlaps!
-      nodes: [],
+      nodes: [voiceGain],
       timerId: null,
-      endTime: now + buffer.duration
+      endTime: startNow + buffer.duration
     };
   }
 
