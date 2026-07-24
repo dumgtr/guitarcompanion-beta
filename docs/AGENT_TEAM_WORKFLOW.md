@@ -98,73 +98,160 @@ Sound Lab V2 work must remain isolated until a spike passes QA and receives appr
 
 ## 6. Sample Sound Lab V2 Review Workflow
 
-### Step 1: Audio Engine Review
-Owner: Gemini or Claude as reviewer, Codex as integrator.
+The default sequence is:
 
-Review:
-- Browser audio unlock behavior.
-- User-gesture gating.
-- Gain staging and clipping risk.
-- Mobile speaker audibility.
-- Fallback behavior when audio fails.
+```text
+PO Contract
+-> System CLI Truth
+-> Codex Baseline Audit
+-> ONE Specialist
+-> Evidence Integrity Gate
+-> Codex Adjudication
+-> Optional Second Opinion
+-> PO Approval
+-> Codex Implementation
+-> Tests/QA
+-> Optional Diff Review
+-> Commit/Push/Merge Gates
+```
 
-Output:
-- Risk list.
-- Recommended implementation constraints.
-- QA checklist.
+### Step 1: Product Owner Contract
+Owner: ChatGPT/User as Product Owner, with Codex recording the contract.
 
-### Step 2: Learning UX Review
-Owner: ChatGPT/User with Codex support.
+Define before review:
+- The actual task and acceptance requirements.
+- Production behavior that must remain unchanged.
+- Allowed files and prohibited scope.
+- Required QA and approval gates.
+- The intended listening skill, beginner-safe language, and calm private-teacher UX.
 
-Review:
-- Whether the interaction teaches the intended listening skill.
-- Whether the UI remains calm and private-teacher-like.
-- Whether labels are beginner-safe.
-- Whether the learner understands what to listen for.
+Reviewer prompts must not turn an unverified checklist, implementation preference, or reviewer assumption into project ground truth.
 
-Output:
-- Approved copy.
-- UX guardrails.
-- Any lesson-flow constraints.
-
-### Step 3: Guardrail Review
-Owner: Claude as risk reviewer, Codex as integrator.
-
-Review:
-- Month 4 baseline behavior remains unchanged.
-- No Month 7-8 exposure in normal production.
-- No new renderer assumptions leak into production.
-- No dependency enters production without explicit approval.
-- No stacked chords or arpeggios are introduced.
-
-Output:
-- Pass/fail notes.
-- Required fixes before integration.
-
-### Step 4: Mobile QA Review
-Owner: Codex as tester, optional reviewer support.
-
-Review:
-- 390px and 430px layouts.
-- Button tap targets.
-- No body-level horizontal overflow.
-- Audio buttons remain reachable.
-- Topbar and metronome remain usable.
-
-Output:
-- Device/viewport checklist.
-- Console status.
-- Known limitations.
-
-### Step 5: Codex Integration
+### Step 2: System CLI Truth
 Owner: Codex.
 
-Only after review approval:
-- Apply the smallest scoped patch.
-- Run validation.
-- Record files changed.
-- Commit on the assigned branch.
-- Push and provide a final report.
+Before calling a reviewer, use deterministic repository evidence to confirm:
+- Repository identity, branch, HEAD SHA, and expected base.
+- Worktree status and exact diff scope.
+- Relevant tests, counts, hashes, and symbol existence.
+- The full source and control flow needed for the review.
+
+Git state, hashes, counts, test results, and symbol existence do not require a model reviewer. System CLI output and repository state remain the source of truth.
+
+### Step 3: Codex Baseline Evidence Packet
+Owner: Codex.
+
+Codex must read the relevant source in full before dispatching a reviewer. The review packet must separate confirmed facts from open questions:
+
+```text
+CURRENT_BASELINE:
+ACTUAL_ACCEPTANCE_REQUIREMENTS:
+KNOWN_INTENTIONAL_BEHAVIOR:
+CODE_WINDOWS:
+MISSING_CONTEXT:
+QUESTION_FOR_REVIEWER:
+```
+
+For Audio Engine work, the baseline must explicitly determine whether cleanup such as `dispose()` is required, whether one-active/one-release-tail covers the intended lifecycle, and whether `onended` is an acceptance requirement or only an implementation option.
+
+### Step 4: One Specialist Review
+Owner: One read-only reviewer, with separate Human Dispatch Authorization.
+
+Use no more than one specialist per review stage. Select by task type:
+
+| Task | First reviewer |
+| --- | --- |
+| Repository code, async behavior, lifecycle, races, and tests | One Qwen or DeepSeek reviewer |
+| A browser API, Web Audio semantics, compatibility, or licensing question isolated by the baseline | Gemini |
+| Architecture still disputed after Codex adjudication | Claude or AGY as an optional second opinion |
+| Git state, hashes, counts, tests, and symbol existence | No model; use System CLI |
+| Visual or listening quality | Product Owner QA |
+
+Do not run a hard-coded multi-model chain by default. The reviewer receives the baseline packet and answers the scoped question without defining its own ground truth.
+
+For Audio Engine work, start with one code reviewer when the question concerns control flow, lifecycle, races, or tests. Codex adjudicates that result first. Gemini may be dispatched afterward only when the remaining dispute depends on Web Audio or browser semantics; this is a conditional second opinion, not a default second stage.
+
+### Step 5: Evidence Integrity Gate
+Owner: Codex.
+
+Preserve provider evidence before evaluating findings. Reports must keep these sections separate:
+
+```text
+A. PROVIDER RAW RESULT
+- execution status
+- requested model
+- provider-reported model
+- raw response
+- timeout, retry, and fallback metadata
+
+B. CODEX ADJUDICATION
+- CONFIRMED
+- ALREADY_HANDLED
+- FALSE_POSITIVE
+- NEEDS_MORE_CONTEXT
+```
+
+Do not label non-Qwen output as `QWEN_VERDICT`. If a request times out, fails, or returns an empty raw response, record that execution state and do not manufacture or import findings from another run.
+
+### Step 6: Codex Adjudication
+Owner: Codex.
+
+Codex checks every reviewer finding against:
+- The full source and control flow.
+- The Product Owner contract.
+- Deterministic tests and repository evidence.
+- Known intentional behavior and guardrails.
+
+Reviewer output is advisory and never self-approves a defect, patch, or scope expansion. Codex presents the adjudicated findings to the Product Owner before implementation.
+
+### Step 7: Optional Second Opinion
+Owner: One additional read-only reviewer.
+
+A second opinion is allowed only when:
+- A finding has high production impact.
+- Codex cannot resolve it from the full source.
+- Reviewer output conflicts with deterministic evidence.
+- The Product Owner requests an independent review.
+
+The second opinion must be recorded as a separate raw result and adjudicated independently. It must not become a default continuation of the first review.
+
+### Step 8: Product Owner Approval
+Owner: ChatGPT/User as Product Owner.
+
+The Product Owner approves which adjudicated defects, if any, Codex may implement. Review findings alone do not authorize file changes, production activation, or scope expansion.
+
+### Step 9: Codex Implementation
+Owner: Codex as sole writer and integrator.
+
+Only after approval:
+- Apply the smallest scoped patch on the assigned branch.
+- Preserve production, curriculum, and Sound Lab guardrails.
+- Record the exact files changed.
+- Do not allow a reviewer or evaluator to auto-repair files.
+
+### Step 10: Deterministic Tests And QA
+Owner: Codex for automated checks; Product Owner for visual and listening QA.
+
+Run the checks required by the approved contract, including as applicable:
+- Automated lifecycle and regression tests.
+- Browser console and interaction checks.
+- 390px and 430px layout checks.
+- Button reachability and body-overflow checks.
+- User-gesture audio unlock and fallback checks.
+- Product Owner browser/audio listening QA.
+
+### Step 11: Optional Post-Change Diff Review
+Owner: One read-only reviewer, with Codex adjudicating.
+
+Use one post-change diff review only for a high-risk patch or when the Product Owner requests it. Review the scoped diff and test evidence, not an unbounded repository snapshot.
+
+### Step 12: Commit, Push, And Merge Gates
+Owner: Product Owner for authorization; Codex for execution.
+
+After validation:
+- Report the branch, exact diff scope, tests, QA, risks, and rollback notes.
+- Commit, push, merge, tag, or activate production only with the corresponding Product Owner authorization.
+- Keep direct edits to `main`, reviewer self-approval, and model-driven auto-repair prohibited.
 
 ## 7. Final Report Template
 
