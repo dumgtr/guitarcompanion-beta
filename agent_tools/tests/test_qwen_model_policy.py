@@ -248,6 +248,43 @@ def test_all_sixteen_new_models_present_and_explicit_only() -> None:
             assert allowed.stdout.strip() == model_id
 
 
+def test_deepseek_and_glm_models_authorized_explicit_only() -> None:
+    target_models = [
+        "deepseek-v4-flash",
+        "deepseek-v4-pro",
+        "glm-5.1",
+        "glm-5.2",
+    ]
+
+    result = run("--list-models", "--json")
+    assert result.returncode == 0
+    models_list = json.loads(result.stdout)["models"]
+    model_names = [m["model"] for m in models_list]
+
+    assert len(model_names) == 30, f"Expected 30 active models, got {len(model_names)}"
+    assert len(model_names) == len(set(model_names)), "Duplicate model IDs found in catalog!"
+
+    policy = json.loads(ROOT.joinpath("qwen_models.json").read_text(encoding="utf-8"))
+    auto_routes = list(policy.get("autoRouting", {}).values())
+
+    for model_id in target_models:
+        assert model_id in model_names, f"Model {model_id} missing from catalog!"
+        item = next(m for m in models_list if m["model"] == model_id)
+        assert item["autoSelectable"] is False, f"Model {model_id} must not be auto-selectable!"
+        assert item["selectionMode"] == "explicit-only", f"Model {model_id} must be explicit-only!"
+        assert model_id not in auto_routes, f"Model {model_id} must not appear in autoRouting!"
+
+        allowed = run("--validate-model", model_id)
+        assert allowed.returncode == 0, f"Explicit model {model_id} validation failed!"
+        assert allowed.stdout.strip() == model_id
+
+
+def test_deepseek_v3_2_is_denied() -> None:
+    result = run("--validate-model", "deepseek-v3.2")
+    assert result.returncode == 2, "deepseek-v3.2 must be denied by policy!"
+    assert "not allowed" in result.stderr, "Error message must state not allowed"
+
+
 def test_qwen3_6_max_preview_lifecycle_deprecation() -> None:
     if str(ROOT) not in sys.path:
         sys.path.insert(0, str(ROOT))

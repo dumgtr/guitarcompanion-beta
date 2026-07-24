@@ -444,6 +444,70 @@
       "doNotUseFor": [
         "normal automatic routing"
       ]
+    },
+    "deepseek-v4-flash": {
+      "status": "allowed",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "hosted-open-source",
+      "family": "deepseek",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "explicit evaluation of hosted deepseek-v4-flash model"
+      ],
+      "doNotUseFor": [
+        "automatic routing"
+      ]
+    },
+    "deepseek-v4-pro": {
+      "status": "allowed",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "hosted-open-source",
+      "family": "deepseek",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "explicit evaluation of hosted deepseek-v4-pro model"
+      ],
+      "doNotUseFor": [
+        "automatic routing"
+      ]
+    },
+    "glm-5.1": {
+      "status": "allowed",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "hosted-open-source",
+      "family": "glm",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "explicit evaluation of hosted glm-5.1 model"
+      ],
+      "doNotUseFor": [
+        "automatic routing"
+      ]
+    },
+    "glm-5.2": {
+      "status": "allowed",
+      "selectionMode": "explicit-only",
+      "autoSelectable": false,
+      "tier": "hosted-open-source",
+      "family": "glm",
+      "requestDefaults": {
+        "enable_thinking": false
+      },
+      "useFor": [
+        "explicit evaluation of hosted glm-5.2 model"
+      ],
+      "doNotUseFor": [
+        "automatic routing"
+      ]
     }
   },
   "defaultDeny": {
