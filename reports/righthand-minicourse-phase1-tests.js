@@ -46,7 +46,7 @@ function assert(condition, message, details = {}) {
   }
 }
 
-function run() {
+async function run() {
   console.log('=== RIGHT-HAND MINI COURSE PLATFORM V1 + PHASE 1 TESTS ===\n');
 
   // ---------- PARSE DATA ----------
@@ -250,7 +250,9 @@ function run() {
       addEventListener: () => {},
       appendChild: () => {}
     }),
-    console: console
+    console: console,
+    Promise: Promise,
+    Error: Error
   };
 
   vm.createContext(sandbox);
@@ -685,52 +687,49 @@ function run() {
     { scriptCount: appendedScripts.length }
   );
 
-  // Test 4: Script error event cleans up script tag and resets pending promise for retry
-  const scriptEl = appendedScripts[0];
-  let rejectedError = null;
-  pLoad1.catch(err => { rejectedError = err; });
-
-  // Trigger error event on script element and clean up DOM
-  if (typeof scriptEl.onerror === 'function') {
-    scriptEl.onerror({ type: 'error' });
-  }
-  if (typeof scriptEl.remove === 'function') {
-    scriptEl.remove();
-  }
-
-  // Restore global data for remaining tests
-  sandbox.window.rightHandMiniCourseData = rhcMiniData;
-
-  const scriptAfterError = mockDocument.head.querySelector('script[data-gc-right-hand-mini-course-data="true"]');
-  assert(
-    scriptAfterError === null,
-    'Failed script load removes broken script tag from document.head'
+  // Test 4: Production error handler removes script and failed Promise rejects (NO manual scriptEl.remove() in test)
+  const scriptElement = mockDocument.head.querySelector('script[data-gc-right-hand-mini-course-data="true"]');
+  const rejectionResult = pLoad1.then(
+    () => ({ resolved: true, error: null }),
+    (error) => ({ resolved: false, error })
   );
 
-  // Test 5: Retry call after failure creates a new promise
-  const pRetryLoad = sandbox.ensureRightHandMiniCourseData();
-  assert(
-    pRetryLoad !== pLoad1,
-    'Failed load clears load promise to allow clean retry'
-  );
-
-  // Test 6: Script load without registering schema causes rejection
-  delete sandbox.window.rightHandMiniCourseData;
-  const pNoSchemaLoad = sandbox.ensureRightHandMiniCourseData();
-  const newScriptEl = mockDocument.head.querySelector('script[data-gc-right-hand-mini-course-data="true"]');
-  let schemaErr = null;
-  pNoSchemaLoad.catch(err => { schemaErr = err; });
-
-  if (newScriptEl && typeof newScriptEl.onload === 'function') {
-    newScriptEl.onload({ type: 'load' });
-  } else if (newScriptEl && newScriptEl._listeners && newScriptEl._listeners['load']) {
-    newScriptEl._listeners['load']({ type: 'load' });
+  // Trigger production error path only
+  if (scriptElement && typeof scriptElement.onerror === 'function') {
+    scriptElement.onerror({ type: 'error' });
   }
 
-  sandbox.window.rightHandMiniCourseData = rhcMiniData;
+  const result = await rejectionResult;
+
   assert(
-    rejectedError !== null || pNoSchemaLoad !== null,
-    'Script load without registering window.rightHandMiniCourseData rejects Promise'
+    result.resolved === false && result.error instanceof Error,
+    'Network failure rejects the loader Promise.'
+  );
+
+  assert(
+    mockDocument.head.querySelector('script[data-gc-right-hand-mini-course-data="true"]') === null,
+    'Production error handler removes the failed script.'
+  );
+
+  // Test 5 & 6: Failed load clears single-flight cache and permits fresh retry script
+  const retryPromise = sandbox.ensureRightHandMiniCourseData();
+  const retryScript = mockDocument.head.querySelector('script[data-gc-right-hand-mini-course-data="true"]');
+
+  assert(
+    retryScript && retryScript !== scriptElement,
+    'A rejected load permits a fresh retry script.'
+  );
+
+  sandbox.window.rightHandMiniCourseData = rhcMiniData;
+  if (retryScript && typeof retryScript.onload === 'function') {
+    retryScript.onload({ type: 'load' });
+  }
+
+  const retryData = await retryPromise;
+
+  assert(
+    retryData === rhcMiniData,
+    'Retry resolves with registered course data.'
   );
 
   assert(
@@ -756,8 +755,8 @@ function run() {
   );
 
   assert(
-    cardHtml.includes('window.hasRegisteredRightHandMiniCourseDelegation'),
-    'Delegation listener is guarded against duplicate registration'
+    cardHtml.includes('handleDelegatedLessonClicks') && cardHtml.includes('data-rh-minicourse-action'),
+    'Right-Hand Mini Course actions integrated into existing central handleDelegatedLessonClicks'
   );
 
   let toggleStateWriteCount = 0;

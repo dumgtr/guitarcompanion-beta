@@ -2481,19 +2481,73 @@ function handleDelegatedLessonClicks(event) {
     return;
   }
 
+  // Right-Hand Mini Course action routing
+  const rhTrigger = target.closest("[data-rh-minicourse-action]");
+  if (rhTrigger) {
+    const action = rhTrigger.dataset.rhMinicourseAction;
+    if (action === "open-course") {
+      openRightHandMiniCourseModal();
+      return;
+    } else if (action === "close-course") {
+      const modal = document.getElementById("rh-minicourse-modal");
+      if (modal) modal.remove();
+      return;
+    } else if (action === "select-week") {
+      const weekId = rhTrigger.dataset.weekId;
+      if (weekId) selectRightHandMiniCourseWeek(weekId);
+      return;
+    } else if (action === "toggle-drill") {
+      const weekId = rhTrigger.dataset.weekId;
+      const drillId = rhTrigger.dataset.drillId;
+      if (weekId && drillId) {
+        toggleRightHandDrillCompletion(weekId, drillId);
+        const modal = document.getElementById("rh-minicourse-modal");
+        const data = window.rightHandMiniCourseData;
+        if (modal && data) {
+          const modalContent = modal.querySelector(".fsl-studio-modal-content");
+          const bodyDiv = modal.querySelector(".rhc-program-body");
+          if (modalContent && bodyDiv) renderRightHandMiniCourseModalContent(modal, modalContent, bodyDiv, data);
+        }
+      }
+      return;
+    } else if (action === "set-bpm") {
+      const drillId = rhTrigger.dataset.drillId;
+      const bpm = Number(rhTrigger.dataset.bpm);
+      if (drillId && !isNaN(bpm)) setRightHandDrillBpm(drillId, bpm);
+      return;
+    } else if (action === "retry-load") {
+      const modal = document.getElementById("rh-minicourse-modal");
+      if (modal) modal.remove();
+      openRightHandMiniCourseModal();
+      return;
+    }
+  }
+
+  // Mnemonic mode delegation (Foundation & Right-Hand Mini Course)
   const modeBtn = target.closest("[data-mnemonic-mode]");
   if (modeBtn) {
-    const card = modeBtn.closest(".rhythm-geometry-card");
-    if (card) {
-      const newMode = modeBtn.getAttribute("data-mnemonic-mode");
-      const allowedModes = ["food_en", "takadimi", "counting", "food_th"];
-      if (newMode && allowedModes.includes(newMode)) {
-        const blockId = card.getAttribute("data-rhythm-geometry-id") || "w2-rhythm-geometry-16th-syncopation";
-        if (blockId === "w2-rhythm-geometry-16th-syncopation") {
+    const newMode = modeBtn.getAttribute("data-mnemonic-mode");
+    const allowedModes = ["food_en", "takadimi", "counting", "food_th"];
+    if (newMode && allowedModes.includes(newMode)) {
+      const rgCard = modeBtn.closest("[data-block-id], .rhythm-geometry-card");
+      if (rgCard) {
+        const blockId = rgCard.getAttribute("data-block-id") || rgCard.getAttribute("data-rhythm-geometry-id");
+        if (blockId && blockId.startsWith("rg-rh-")) {
+          const currentState = getRightHandMiniCourseState();
+          currentState.mnemonicModeByBlock = currentState.mnemonicModeByBlock || {};
+          currentState.mnemonicModeByBlock[blockId] = newMode;
+          saveRightHandMiniCourseState(currentState);
+          setRhythmGeometryCardMode(rgCard, newMode);
+          return;
+        }
+
+        const foundationBlockId = blockId || "w2-rhythm-geometry-16th-syncopation";
+        if (foundationBlockId === "w2-rhythm-geometry-16th-syncopation") {
           currentRhythmGeometryMnemonicMode = newMode;
         }
-        setRhythmGeometryCardMode(card, newMode);
+        setRhythmGeometryCardMode(rgCard, newMode);
         persistContinuePracticeStateV1({ debounce: true });
+        return;
       }
     }
   }
@@ -6283,23 +6337,27 @@ function ensureRightHandMiniCourseData() {
     script.async = true;
     script.dataset.gcRightHandMiniCourseData = "true";
 
-    script.addEventListener("load", () => {
+    script.onload = () => {
       if (!window.rightHandMiniCourseData) {
         reject(new Error("Right-Hand Mini Course data loaded without registering its schema."));
         return;
       }
       resolve(window.rightHandMiniCourseData);
-    }, { once: true });
+    };
 
-    script.addEventListener("error", () => {
+    script.onerror = () => {
       reject(new Error("Unable to load Right-Hand Mini Course data."));
-    }, { once: true });
+    };
 
     document.head.appendChild(script);
   }).catch((error) => {
     rightHandMiniCourseDataLoadPromise = null;
     if (typeof document !== "undefined") {
-      document.querySelector('script[data-gc-right-hand-mini-course-data="true"]')?.remove();
+      const el = document.querySelector('script[data-gc-right-hand-mini-course-data="true"]');
+      if (el) {
+        if (el.parentNode) el.parentNode.removeChild(el);
+        else if (typeof el.remove === "function") el.remove();
+      }
     }
     throw error;
   });
@@ -6661,70 +6719,6 @@ function renderRightHandMiniCourseModalContent(overlay, modalContent, bodyDiv, d
     chSection.append(chHeader, weekList);
     bodyDiv.appendChild(chSection);
   });
-}
-
-function registerRightHandMiniCourseDelegation() {
-  if (typeof window === "undefined" || window.hasRegisteredRightHandMiniCourseDelegation) return;
-  window.hasRegisteredRightHandMiniCourseDelegation = true;
-
-  document.addEventListener("click", (e) => {
-    // 1. Mnemonic mode delegation on Rhythm Geometry cards
-    const modeBtn = e.target.closest("[data-mnemonic-mode]");
-    if (modeBtn) {
-      const rgCard = modeBtn.closest("[data-block-id]");
-      if (rgCard) {
-        const blockId = rgCard.getAttribute("data-block-id");
-        const newMode = modeBtn.getAttribute("data-mnemonic-mode");
-        if (blockId && newMode) {
-          const currentState = getRightHandMiniCourseState();
-          currentState.mnemonicModeByBlock = currentState.mnemonicModeByBlock || {};
-          currentState.mnemonicModeByBlock[blockId] = newMode;
-          saveRightHandMiniCourseState(currentState);
-          setRhythmGeometryCardMode(rgCard, newMode);
-        }
-      }
-    }
-
-    // 2. Action delegation
-    const trigger = e.target.closest("[data-rh-minicourse-action]");
-    if (!trigger) return;
-    const action = trigger.dataset.rhMinicourseAction;
-
-    if (action === "open-course") {
-      openRightHandMiniCourseModal();
-    } else if (action === "close-course") {
-      const modal = document.getElementById("rh-minicourse-modal");
-      if (modal) modal.remove();
-    } else if (action === "select-week") {
-      const weekId = trigger.dataset.weekId;
-      if (weekId) selectRightHandMiniCourseWeek(weekId);
-    } else if (action === "toggle-drill") {
-      const weekId = trigger.dataset.weekId;
-      const drillId = trigger.dataset.drillId;
-      if (weekId && drillId) {
-        toggleRightHandDrillCompletion(weekId, drillId);
-        const modal = document.getElementById("rh-minicourse-modal");
-        const data = window.rightHandMiniCourseData;
-        if (modal && data) {
-          const modalContent = modal.querySelector(".fsl-studio-modal-content");
-          const bodyDiv = modal.querySelector(".rhc-program-body");
-          if (modalContent && bodyDiv) renderRightHandMiniCourseModalContent(modal, modalContent, bodyDiv, data);
-        }
-      }
-    } else if (action === "set-bpm") {
-      const drillId = trigger.dataset.drillId;
-      const bpm = Number(trigger.dataset.bpm);
-      if (drillId && !isNaN(bpm)) setRightHandDrillBpm(drillId, bpm);
-    } else if (action === "retry-load") {
-      const modal = document.getElementById("rh-minicourse-modal");
-      if (modal) modal.remove();
-      openRightHandMiniCourseModal();
-    }
-  });
-}
-
-if (typeof window !== "undefined") {
-  registerRightHandMiniCourseDelegation();
 }
 
 function openFretboardStudioModal() {
