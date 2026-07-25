@@ -204,6 +204,17 @@ function runLessonInteractionDelegationTests() {
   // CASE 12: Failure propagation support
   assert(true, 'CASE 12 — Failure injection support active for GC_LESSON_INTERACTION_SELF_TEST_FAILURE');
 
+  // CASE 13: Continue Practice restores mnemonic mode BEFORE Week 2 render
+  const preRenderRestoreMatch = /const rgState = blockState\["w2-rhythm-geometry-16th-syncopation"\];[\s\S]*?currentRhythmGeometryMnemonicMode = rgState\.mnemonicMode;[\s\S]*?openFocusedWeek\(destination\.week/.test(appJsContent);
+  const bootLoadRestoreMatch = /pendingContinuePracticeRecordV1 = continuePracticeStoreV1\.load\(\);[\s\S]*?currentRhythmGeometryMnemonicMode = savedMode;/.test(appJsContent);
+  assert(preRenderRestoreMatch && bootLoadRestoreMatch, 'Continue Practice restores mnemonic mode before Week 2 render');
+
+  // CASE 14: Initial render with restored mode evaluates initialMode correctly
+  const initialModeCheck = /const initialMode = \(block\.id === "w2-rhythm-geometry-16th-syncopation" && currentRhythmGeometryMnemonicMode\) \? currentRhythmGeometryMnemonicMode :/.test(appJsContent);
+  const initialModeBtnCheck = /rhythm-mode-btn \$\{m\.key === initialMode \? "is-selected" : ""\}/.test(appJsContent);
+  const initialModeTextCheck = /const initialText = mnemonics\[initialMode\] \|\|/.test(appJsContent);
+  assert(initialModeCheck && initialModeBtnCheck && initialModeTextCheck, 'Serialized Rhythm Geometry initially renders persisted Food TH');
+
   // Summary
   console.log(`\n=== SUMMARY ===`);
   console.log(`TOTAL_ASSERTIONS: ${passedCount + failedCount}`);
