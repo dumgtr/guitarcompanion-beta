@@ -2444,7 +2444,38 @@ function getSavedSelectedFocusedMonth() {
   }
 }
 
+let isDelegatedLessonClickListenerBound = false;
+
+function bindDelegatedLessonClickListener() {
+  if (isDelegatedLessonClickListenerBound) return;
+  document.addEventListener("click", handleDelegatedLessonClicks);
+  isDelegatedLessonClickListenerBound = true;
+}
+
+function handleDelegatedLessonClicks(event) {
+  const target = event.target instanceof Element ? event.target : null;
+  if (!target) return;
+
+  const modeBtn = target.closest("[data-mnemonic-mode]");
+  if (modeBtn) {
+    const card = modeBtn.closest(".rhythm-geometry-card");
+    if (card) {
+      const newMode = modeBtn.getAttribute("data-mnemonic-mode");
+      const allowedModes = ["food_en", "takadimi", "counting", "food_th"];
+      if (newMode && allowedModes.includes(newMode)) {
+        const blockId = card.getAttribute("data-rhythm-geometry-id") || "w2-rhythm-geometry-16th-syncopation";
+        if (blockId === "w2-rhythm-geometry-16th-syncopation") {
+          currentRhythmGeometryMnemonicMode = newMode;
+        }
+        setRhythmGeometryCardMode(card, newMode);
+        persistContinuePracticeStateV1({ debounce: true });
+      }
+    }
+  }
+}
+
 function bindFocusedEvents() {
+  bindDelegatedLessonClickListener();
   document.addEventListener("click", handleDataScrollClick);
   bindReferenceShelfToggle();
   bindScrollTopButton();
@@ -4077,19 +4108,6 @@ function renderRhythmGeometryBlock(block = {}) {
       card.appendChild(tipBox);
     }
 
-    modeSelector.addEventListener("click", (event) => {
-      const targetBtn = event.target instanceof Element ? event.target.closest("[data-mnemonic-mode]") : null;
-      if (!targetBtn) return;
-      const newMode = targetBtn.getAttribute("data-mnemonic-mode");
-      if (!newMode) return;
-
-      if (block.id === "w2-rhythm-geometry-16th-syncopation") {
-        currentRhythmGeometryMnemonicMode = newMode;
-      }
-      setRhythmGeometryCardMode(card, newMode);
-      persistContinuePracticeStateV1({ debounce: true });
-    });
-
     return card;
   } catch (err) {
     console.error("[RhythmGeometry] Renderer error:", err);
@@ -4098,7 +4116,8 @@ function renderRhythmGeometryBlock(block = {}) {
 }
 
 function setRhythmGeometryCardMode(card, newMode) {
-  if (!card || !newMode) return;
+  const allowedModes = ["food_en", "takadimi", "counting", "food_th"];
+  if (!card || !newMode || !allowedModes.includes(newMode)) return;
   const modeSelector = card.querySelector(".rhythm-geometry-card__mode-selector");
   if (modeSelector) {
     modeSelector.querySelectorAll("[data-mnemonic-mode]").forEach((b) => {
