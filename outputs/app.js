@@ -2374,6 +2374,7 @@ const dailyPracticePlan = {
 
 const foundationStorage = {
   completedWeeks: "foundationCompletedWeeks",
+  completedDaysByWeek: "foundationCompletedDaysByWeek",
   dayByWeek: "foundationDayByWeek",
   checklistPrefix: "foundationChecklist",
   notes: "foundationPracticeNotes"
@@ -2417,6 +2418,7 @@ function initFocusedApp() {
   updateDebugState({ currentMonth: selectedFocusedMonth, lastAction: "app boot" });
   setDataStatus("Loading companion data...", "info");
   const savedMonth = getSavedSelectedFocusedMonth();
+  recomputeCompletedFoundationWeeks();
   focusedSelectedWeek = getCurrentFoundationWeek();
   bindFocusedEvents();
   renderFocusedApp();
@@ -2466,6 +2468,18 @@ function bindDelegatedLessonClickListener() {
 function handleDelegatedLessonClicks(event) {
   const target = event.target instanceof Element ? event.target : null;
   if (!target) return;
+
+  const dayBtn = target.closest("[data-foundation-day]");
+  if (dayBtn) {
+    switchDay(Number(dayBtn.dataset.foundationDay));
+    return;
+  }
+
+  const markBtn = target.closest("[data-mark-day-complete]");
+  if (markBtn) {
+    markFoundationDayCompleteAndAdvance(focusedSelectedWeek, getPracticeDay(focusedSelectedWeek));
+    return;
+  }
 
   const modeBtn = target.closest("[data-mnemonic-mode]");
   if (modeBtn) {
@@ -2848,7 +2862,132 @@ function getCompletedFoundationWeeks() {
 }
 
 function setCompletedFoundationWeeks(value) {
-  saveJson(foundationStorage.completedWeeks, Array.from(new Set(value)).sort((a, b) => a - b));
+  const sanitizedWeeks = Array.from(new Set(
+    (Array.isArray(value) ? value : [])
+      .map(Number)
+      .filter((week) => Number.isInteger(week) && week >= 1 && week <= 4)
+  )).sort((a, b) => a - b);
+  saveJson(foundationStorage.completedWeeks, sanitizedWeeks);
+  return sanitizedWeeks;
+}
+
+function getCompletedFoundationDaysByWeek() {
+  const rawCompletedDaysByWeek = localStorage.getItem(foundationStorage.completedDaysByWeek);
+  if (rawCompletedDaysByWeek === null) {
+    const legacyWeeks = loadJson(foundationStorage.completedWeeks, []);
+    const validLegacyWeeks = Array.from(new Set(
+      (Array.isArray(legacyWeeks) ? legacyWeeks : [])
+        .filter((week) => Number.isInteger(week) && week >= 1 && week <= 4)
+    )).sort((a, b) => a - b);
+
+    if (validLegacyWeeks.length > 0) {
+      const migrated = {};
+      validLegacyWeeks.forEach((week) => {
+        migrated[week] = [1, 2, 3, 4, 5, 6, 7];
+      });
+      saveJson(foundationStorage.completedDaysByWeek, migrated);
+      return migrated;
+    }
+
+    return {};
+  }
+
+  return loadJson(foundationStorage.completedDaysByWeek, {});
+}
+
+function setCompletedFoundationDaysByWeek(value) {
+  const sanitized = {};
+  if (value && typeof value === "object") {
+    for (let w = 1; w <= 4; w += 1) {
+      if (Array.isArray(value[w])) {
+        const days = Array.from(new Set(value[w].map(Number)))
+          .filter((d) => Number.isInteger(d) && d >= 1 && d <= 7)
+          .sort((a, b) => a - b);
+        if (days.length > 0) sanitized[w] = days;
+      }
+    }
+  }
+  saveJson(foundationStorage.completedDaysByWeek, sanitized);
+  return sanitized;
+}
+
+function getCompletedFoundationDays(weekNumber) {
+  const week = Number(weekNumber);
+  if (!Number.isInteger(week) || week < 1 || week > 4) return [];
+  const completedDaysByWeek = getCompletedFoundationDaysByWeek();
+  return Array.from(new Set(
+    (Array.isArray(completedDaysByWeek[week]) ? completedDaysByWeek[week] : [])
+      .map(Number)
+      .filter((day) => Number.isInteger(day) && day >= 1 && day <= 7)
+  )).sort((a, b) => a - b);
+}
+
+function isFoundationDayCompleted(weekNumber, dayNumber) {
+  const day = Number(dayNumber);
+  return Number.isInteger(day) && getCompletedFoundationDays(weekNumber).includes(day);
+}
+
+function setFoundationDayCompletion(weekNumber, dayNumber, completed) {
+  const week = Number(weekNumber);
+  const day = Number(dayNumber);
+  if (
+    !Number.isInteger(week)
+    || week < 1
+    || week > 4
+    || !Number.isInteger(day)
+    || day < 1
+    || day > 7
+  ) return false;
+
+  const completedDaysByWeek = getCompletedFoundationDaysByWeek();
+  const nextDays = new Set(getCompletedFoundationDays(week));
+  if (completed) {
+    nextDays.add(day);
+  } else {
+    nextDays.delete(day);
+  }
+
+  if (nextDays.size) {
+    completedDaysByWeek[week] = Array.from(nextDays);
+  } else {
+    delete completedDaysByWeek[week];
+  }
+  setCompletedFoundationDaysByWeek(completedDaysByWeek);
+  recomputeCompletedFoundationWeeks();
+  return true;
+}
+
+function getFoundationWeekCompletedDayCount(weekNumber) {
+  return Math.min(7, getCompletedFoundationDays(weekNumber).length);
+}
+
+function recomputeCompletedFoundationWeeks() {
+  const completedWeeks = [];
+  for (let week = 1; week <= 4; week += 1) {
+    if (getFoundationWeekCompletedDayCount(week) === 7) completedWeeks.push(week);
+  }
+  return setCompletedFoundationWeeks(completedWeeks);
+}
+
+function getNextIncompleteFoundationTarget(currentWeek, currentDay) {
+  const week = Number(currentWeek);
+  const day = Number(currentDay);
+  const safeWeek = Number.isInteger(week) && week >= 1 && week <= 4 ? week : 1;
+  const safeDay = Number.isInteger(day) && day >= 1 && day <= 7 ? day : 1;
+  const currentIndex = ((safeWeek - 1) * 7) + (safeDay - 1);
+  const incompleteTargets = [];
+
+  for (let index = 0; index < 28; index += 1) {
+    const targetWeek = Math.floor(index / 7) + 1;
+    const targetDay = (index % 7) + 1;
+    if (!isFoundationDayCompleted(targetWeek, targetDay)) {
+      incompleteTargets.push({ index, week: targetWeek, day: targetDay });
+    }
+  }
+
+  if (!incompleteTargets.length) return { week: 4, day: 7, monthComplete: true };
+  const nextTarget = incompleteTargets.find((target) => target.index > currentIndex) || incompleteTargets[0];
+  return { week: nextTarget.week, day: nextTarget.day, monthComplete: false };
 }
 
 function getCurrentFoundationWeek() {
@@ -2900,12 +3039,74 @@ function switchDay(dayNumber) {
   persistContinuePracticeStateV1();
 }
 
+function ensurePracticeStatusAnnouncer() {
+  let announcer = document.getElementById("practiceStatusAnnouncer");
+  if (announcer) return announcer;
+  const todayMission = document.getElementById("todayMission");
+  if (!todayMission) return null;
+  announcer = month2CreateElement("div", "practice-status-announcer");
+  announcer.id = "practiceStatusAnnouncer";
+  announcer.setAttribute("role", "status");
+  announcer.setAttribute("aria-live", "polite");
+  announcer.setAttribute("aria-atomic", "true");
+  todayMission.appendChild(announcer);
+  return announcer;
+}
+
+function markFoundationDayCompleteAndAdvance(weekNumber, dayNumber) {
+  const week = Number(weekNumber);
+  const day = Number(dayNumber);
+  if (
+    selectedFocusedMonth !== 1
+    || !Number.isInteger(week)
+    || week < 1
+    || week > 4
+    || !Number.isInteger(day)
+    || day < 1
+    || day > 7
+  ) return false;
+
+  const wasCompleted = isFoundationDayCompleted(week, day);
+  restoredContinuePracticeDestinationV1 = null;
+
+  let announcement = "";
+  if (!wasCompleted) {
+    setFoundationDayCompletion(week, day, true);
+    const target = getNextIncompleteFoundationTarget(week, day);
+    focusedSelectedWeek = target.week;
+    selectedWeek = target.week;
+    setPracticeDay(target.week, target.day);
+    announcement = target.monthComplete
+      ? "ซ้อมครบ Month 1 ทั้ง 28 วันแล้ว เก่งมากครับ"
+      : `บันทึกว่าสัปดาห์ที่ ${week} วันที่ ${day} เสร็จแล้ว ไปต่อสัปดาห์ที่ ${target.week} วันที่ ${target.day}`;
+  } else {
+    setFoundationDayCompletion(week, day, false);
+    focusedSelectedWeek = week;
+    selectedWeek = week;
+    setPracticeDay(week, day);
+    announcement = `ยกเลิกสถานะเสร็จของสัปดาห์ที่ ${week} วันที่ ${day} แล้ว`;
+  }
+
+  persistContinuePracticeStateV1();
+  renderFocusedDashboard();
+  renderFocusedWeekTabs();
+  renderFocusedLesson();
+  renderFocusedProgressTracking();
+  const announcer = ensurePracticeStatusAnnouncer();
+  if (announcer) announcer.textContent = announcement;
+  return true;
+}
+
 function renderPracticeDaySelector(weekNumber, activeDay) {
   const todayMission = document.getElementById("todayMission");
   const checklist = document.getElementById("todayChecklist");
+  todayMission?.querySelector("[data-foundation-practice-controls]")?.remove();
   todayMission?.querySelector(".practice-day-selector")?.remove();
   if (!todayMission || !checklist || selectedFocusedMonth !== 1) return;
 
+  ensurePracticeStatusAnnouncer();
+  const controls = month2CreateElement("div", "foundation-practice-controls");
+  controls.dataset.foundationPracticeControls = "true";
   const selector = month2CreateElement("div", "practice-day-selector");
   selector.setAttribute("role", "group");
   selector.setAttribute("aria-label", `เลือกวันซ้อมสำหรับ Week ${weekNumber}`);
@@ -2913,17 +3114,51 @@ function renderPracticeDaySelector(weekNumber, activeDay) {
 
   const dayButtons = month2CreateElement("div", "practice-day-selector-buttons");
   for (let day = 1; day <= 7; day += 1) {
-    const button = month2CreateElement("button", `practice-day${day === activeDay ? " active" : ""}`, String(day));
+    const isCurrent = day === activeDay;
+    const isCompleted = isFoundationDayCompleted(weekNumber, day);
+    const button = month2CreateElement(
+      "button",
+      `practice-day${isCurrent ? " is-current" : ""}${isCompleted ? " is-completed" : ""}`,
+      String(day)
+    );
     button.type = "button";
-    button.dataset.day = String(day);
-    button.setAttribute("aria-label", `วันที่ ${day}`);
-    button.setAttribute("aria-pressed", String(day === activeDay));
-    button.addEventListener("click", () => switchDay(day));
+    button.dataset.foundationDay = String(day);
+    button.setAttribute("aria-label", `วันที่ ${day}${isCompleted ? " เสร็จแล้ว" : ""}${isCurrent ? " วันที่กำลังดู" : ""}`);
+    button.setAttribute("aria-pressed", String(isCurrent));
+    if (isCurrent) button.setAttribute("aria-current", "true");
     dayButtons.appendChild(button);
   }
 
   selector.appendChild(dayButtons);
-  todayMission.insertBefore(selector, checklist);
+  controls.appendChild(selector);
+
+  const activeDayCompleted = isFoundationDayCompleted(weekNumber, activeDay);
+  const completionButton = month2CreateElement(
+    "button",
+    `mark-day-complete-button${activeDayCompleted ? " is-completed" : ""}`,
+    activeDayCompleted
+      ? "✓ วันนี้เสร็จแล้ว · กดเพื่อยกเลิก"
+      : "ทำเครื่องหมายว่าวันนี้เสร็จแล้ว"
+  );
+  completionButton.id = "markDayCompleteButton";
+  completionButton.type = "button";
+  completionButton.dataset.markDayComplete = "true";
+  completionButton.setAttribute("aria-pressed", String(activeDayCompleted));
+  controls.appendChild(completionButton);
+
+  const monthComplete = Array.from({ length: 4 }, (_, index) => index + 1)
+    .every((week) => getFoundationWeekCompletedDayCount(week) === 7);
+  if (monthComplete) {
+    const completeBanner = month2CreateElement(
+      "div",
+      "month-complete-banner",
+      "✓ Month 1 ครบ 28 วันแล้ว — Groove พื้นฐานของเราเริ่มแน่นขึ้นจริง ๆ ครับ"
+    );
+    completeBanner.setAttribute("role", "status");
+    controls.appendChild(completeBanner);
+  }
+
+  todayMission.insertBefore(controls, checklist);
 }
 
 function getMonthPosition(weekNumber, month) {
@@ -2983,6 +3218,7 @@ function renderFocusedDashboard() {
 }
 
 function renderMonth2Dashboard() {
+  document.querySelector("[data-foundation-practice-controls]")?.remove();
   const month = selectedFocusedMonth;
   const monthMeta = getMonthMeta(month);
   const monthWeeks = getFocusedMonthWeeks(month);
@@ -3224,7 +3460,7 @@ function getFocusedMonthWeeks(month = selectedFocusedMonth) {
 }
 
 function renderFocusedWeekTabs() {
-  const completed = getCompletedFoundationWeeks();
+  const completed = recomputeCompletedFoundationWeeks();
   const currentWeekNumber = getCurrentFoundationWeek();
   const tabs = document.getElementById("weekTabs");
   const lessonsTitle = document.getElementById("lessonsTitle");
@@ -3250,12 +3486,15 @@ function renderFocusedWeekTabs() {
     return;
   }
   tabs.innerHTML = foundationWeeks.map((weekItem) => {
-    const status = completed.includes(weekItem.number) ? "done" : weekItem.number === currentWeekNumber ? "current" : "pending";
+    const completedDayCount = getFoundationWeekCompletedDayCount(weekItem.number);
+    const isWeekComplete = completedDayCount === 7;
+    const status = isWeekComplete ? "done" : weekItem.number === currentWeekNumber ? "current" : "pending";
+    const completionText = `${isWeekComplete ? "✓ " : ""}${completedDayCount}/7 วัน`;
     return `
     <button type="button" role="tab" class="card-tab week-card ${status} ${weekItem.number === focusedSelectedWeek ? "active" : ""}" aria-selected="${weekItem.number === focusedSelectedWeek}" data-foundation-week="${weekItem.number}" data-week="${weekItem.number}">
       <span class="tab-kicker"><span aria-hidden="true">🎯</span> Foundation</span>
       <strong>${weekItem.title}</strong>
-      <span class="status ${status}">${status}</span>
+      <span class="status week-progress-badge ${status}">${completionText}</span>
     </button>
   `;
   }).join("");
@@ -3658,13 +3897,25 @@ function renderLessonMedia(weekItem) {
   `;
 }
 function renderLearnSection(weekItem) {
-  const isWeek2 = Number(weekItem?.number || weekItem?.week) === 2;
+  const weekNumber = Number(weekItem?.number || weekItem?.week);
+  const isWeek2 = weekNumber === 2;
   const rhythmBlock = isWeek2 ? (weekItem?.rhythmGeometry || weeks[1]?.lessonBlocks?.find((b) => b.type === "rhythm-geometry") || null) : null;
+  const completedDayCount = getFoundationWeekCompletedDayCount(weekNumber);
+  const isWeekComplete = completedDayCount === 7;
+  const completionLabel = `${isWeekComplete ? "✓ " : ""}${completedDayCount}/7 วัน`;
+  const completionStatus = `
+    <span class="week-progress-badge${isWeekComplete ? " is-complete" : ""}" aria-label="ซ้อมเสร็จ ${completedDayCount} จาก 7 วัน">
+      ${completionLabel}
+    </span>
+  `;
 
   if (weekItem.learn) {
     return `
       <section class="lesson-block learn-block">
-        <h3>2. เห็น + เข้าใจ</h3>
+        <div class="lesson-block-heading">
+          <h3>2. เห็น + เข้าใจ</h3>
+          ${completionStatus}
+        </div>
         <div class="lesson-target">
           <span>Target BPM</span>
           <strong>${weekItem.learn.targetBpm}</strong>
@@ -3709,7 +3960,10 @@ function renderLearnSection(weekItem) {
 
   return `
     <section class="lesson-block learn-block">
-      <h3>2. เห็น + เข้าใจ</h3>
+      <div class="lesson-block-heading">
+        <h3>2. เห็น + เข้าใจ</h3>
+        ${completionStatus}
+      </div>
       <div class="lesson-learn-grid">
         <div>
           <h4>ฟังอะไร</h4>
@@ -5573,7 +5827,7 @@ function checkFocusedQuiz(weekItem) {
 }
 
 function renderFocusedProgressTracking() {
-  const completed = getCompletedFoundationWeeks();
+  const completed = recomputeCompletedFoundationWeeks();
   const list = document.getElementById("weekProgressList");
   if (!list) return;
   if (isDevPreviewActive()) {
@@ -5587,22 +5841,26 @@ function renderFocusedProgressTracking() {
     `;
     return;
   }
-  list.innerHTML = foundationWeeks.map((weekItem) => `
-    <label class="progress-item">
-      <input type="checkbox" data-complete-week="${weekItem.number}" ${completed.includes(weekItem.number) ? "checked" : ""} />
+  list.innerHTML = foundationWeeks.map((weekItem) => {
+    const completedDayCount = getFoundationWeekCompletedDayCount(weekItem.number);
+    const isWeekComplete = completed.includes(weekItem.number);
+    return `
+    <label class="progress-item${isWeekComplete ? " is-complete" : ""}">
+      <input type="checkbox" data-complete-week="${weekItem.number}" ${isWeekComplete ? "checked" : ""} disabled aria-readonly="true" aria-label="สถานะสัปดาห์ที่ ${weekItem.number}: ${completedDayCount} จาก 7 วัน" />
       <span>
         <strong>สัปดาห์ที่ ${weekItem.number}</strong>
         ${weekItem.title}
+        <small>${isWeekComplete ? "✓ " : ""}${completedDayCount}/7 วัน</small>
       </span>
     </label>
-  `).join("");
+  `;
+  }).join("");
 
   document.querySelectorAll("[data-complete-week]").forEach((input) => {
     input.addEventListener("change", () => {
-      const nextCompleted = Array.from(document.querySelectorAll("[data-complete-week]:checked")).map((item) => Number(item.dataset.completeWeek));
-      setCompletedFoundationWeeks(nextCompleted);
-      focusedSelectedWeek = getCurrentFoundationWeek();
-      renderFocusedApp();
+      recomputeCompletedFoundationWeeks();
+      renderFocusedProgressTracking();
+      renderFocusedWeekTabs();
     });
   });
 }
@@ -7064,19 +7322,26 @@ function goToNextPracticeDay() {
 
 function resetFoundationProgress() {
   if (!window.confirm("ล้างความคืบหน้าและบันทึกการซ้อมของเดือนที่ 1 หรือไม่?")) return;
+  localStorage.removeItem(foundationStorage.completedDaysByWeek);
   localStorage.removeItem(foundationStorage.completedWeeks);
   localStorage.removeItem(foundationStorage.dayByWeek);
   localStorage.removeItem(foundationStorage.notes);
   continuePracticeStoreV1?.clear();
   Object.keys(localStorage)
-    .filter((key) => key.startsWith(foundationStorage.checklistPrefix))
+    .filter((key) => key.startsWith(`${foundationStorage.checklistPrefix}_`))
     .forEach((key) => localStorage.removeItem(key));
   Object.keys(localStorage)
-    .filter((key) => key.startsWith("gc_prelude_chk_"))
+    .filter((key) => key.startsWith("preludeChecklist_") || key.startsWith("gc_prelude_chk_"))
     .forEach((key) => localStorage.removeItem(key));
   restoredContinuePracticeDestinationV1 = null;
+  selectedFocusedMonth = 1;
   focusedSelectedWeek = 1;
+  selectedWeek = 1;
+  setPracticeDay(1, 1);
+  safeSetItem(selectedFocusedMonthStorageKey, "1");
+  if (window.history?.replaceState) window.history.replaceState(null, "", "#dashboard");
   renderFocusedApp();
+  persistContinuePracticeStateV1();
 }
 
 window.__GC_MONTH2_ENGINES__ = Object.freeze({

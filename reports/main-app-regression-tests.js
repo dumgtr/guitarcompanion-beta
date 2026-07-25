@@ -92,22 +92,28 @@ function main() {
   {
     assert(checkFileExists('outputs/app.js'), 'outputs/app.js exists in repository', { file: 'outputs/app.js' });
     assert(checkFileExists('outputs/audio-engine.js'), 'outputs/audio-engine.js exists in repository', { file: 'outputs/audio-engine.js' });
+    assert(checkFileExists('outputs/styles.css'), 'outputs/styles.css exists in repository', { file: 'outputs/styles.css' });
     assert(checkFileExists('reports/retrigger-tail-cap-tests.js'), 'reports/retrigger-tail-cap-tests.js exists in repository', { file: 'reports/retrigger-tail-cap-tests.js' });
     assert(checkFileExists('reports/continue-practice-v2-tests.js'), 'reports/continue-practice-v2-tests.js exists in repository', { file: 'reports/continue-practice-v2-tests.js' });
+    assert(checkFileExists('reports/practice-completion-v1-tests.js'), 'reports/practice-completion-v1-tests.js exists in repository', { file: 'reports/practice-completion-v1-tests.js' });
     assert(checkFileExists('reports/dev-preview-server-tests.js'), 'reports/dev-preview-server-tests.js exists in repository', { file: 'reports/dev-preview-server-tests.js' });
 
     const appContent = readFileContent('outputs/app.js');
     const audioContent = readFileContent('outputs/audio-engine.js');
+    const stylesContent = readFileContent('outputs/styles.css');
     const testContent = readFileContent('reports/retrigger-tail-cap-tests.js');
     const cpV2Content = readFileContent('reports/continue-practice-v2-tests.js');
+    const practiceCompletionContent = readFileContent('reports/practice-completion-v1-tests.js');
     const lessonDelegationContent = readFileContent('reports/lesson-interaction-delegation-tests.js');
     const devServerContent = readFileContent('reports/dev-preview-server-tests.js');
 
     const hasConflictMarkers = (content) => /<<<<<<<|=======|>>>>>>>/.test(content);
     assert(!hasConflictMarkers(appContent), 'outputs/app.js contains no Git conflict markers', { file: 'outputs/app.js' });
     assert(!hasConflictMarkers(audioContent), 'outputs/audio-engine.js contains no Git conflict markers', { file: 'outputs/audio-engine.js' });
+    assert(!hasConflictMarkers(stylesContent), 'outputs/styles.css contains no Git conflict markers', { file: 'outputs/styles.css' });
     assert(!hasConflictMarkers(testContent), 'reports/retrigger-tail-cap-tests.js contains no Git conflict markers', { file: 'reports/retrigger-tail-cap-tests.js' });
     assert(!hasConflictMarkers(cpV2Content), 'reports/continue-practice-v2-tests.js contains no Git conflict markers', { file: 'reports/continue-practice-v2-tests.js' });
+    assert(!hasConflictMarkers(practiceCompletionContent), 'reports/practice-completion-v1-tests.js contains no Git conflict markers', { file: 'reports/practice-completion-v1-tests.js' });
     assert(!hasConflictMarkers(lessonDelegationContent), 'reports/lesson-interaction-delegation-tests.js contains no Git conflict markers', { file: 'reports/lesson-interaction-delegation-tests.js' });
     assert(!hasConflictMarkers(devServerContent), 'reports/dev-preview-server-tests.js contains no Git conflict markers', { file: 'reports/dev-preview-server-tests.js' });
 
@@ -115,6 +121,7 @@ function main() {
     assert(!hasAbsoluteMachinePath(appContent), 'outputs/app.js contains no hardcoded absolute machine paths', { file: 'outputs/app.js' });
     assert(!hasAbsoluteMachinePath(audioContent), 'outputs/audio-engine.js contains no hardcoded absolute machine paths', { file: 'outputs/audio-engine.js' });
     assert(!hasAbsoluteMachinePath(cpV2Content), 'reports/continue-practice-v2-tests.js contains no hardcoded absolute machine paths', { file: 'reports/continue-practice-v2-tests.js' });
+    assert(!hasAbsoluteMachinePath(practiceCompletionContent), 'reports/practice-completion-v1-tests.js contains no hardcoded absolute machine paths', { file: 'reports/practice-completion-v1-tests.js' });
     assert(!hasAbsoluteMachinePath(lessonDelegationContent), 'reports/lesson-interaction-delegation-tests.js contains no hardcoded absolute machine paths', { file: 'reports/lesson-interaction-delegation-tests.js' });
     assert(!hasAbsoluteMachinePath(devServerContent), 'reports/dev-preview-server-tests.js contains no hardcoded absolute machine paths', { file: 'reports/dev-preview-server-tests.js' });
   }
@@ -123,6 +130,22 @@ function main() {
   // SUITE B — Production & Test Files Syntax Check
   startSuite('Production & Test Files Syntax Check');
   {
+    const stylesContent = readFileContent('outputs/styles.css');
+    const requiredCssSelectors = [
+      ':root',
+      '.practice-day.is-completed',
+      '#markDayCompleteButton',
+      '.rhythm-geometry-card'
+    ];
+    assert(
+      requiredCssSelectors.every((selector) => stylesContent.includes(selector)),
+      'outputs/styles.css contains required application selectors',
+      {
+        file: 'outputs/styles.css',
+        expected: requiredCssSelectors.join(', ')
+      }
+    );
+
     const checkApp = runNodeCheck('outputs/app.js');
     assert(checkApp.status === 0, 'outputs/app.js parses with node --check', {
       file: 'outputs/app.js',
@@ -155,6 +178,14 @@ function main() {
       error: checkCpV2.stderr.trim()
     });
 
+    const checkPracticeCompletion = runNodeCheck('reports/practice-completion-v1-tests.js');
+    assert(checkPracticeCompletion.status === 0, 'reports/practice-completion-v1-tests.js parses with node --check', {
+      file: 'reports/practice-completion-v1-tests.js',
+      expected: 'exit code 0',
+      actual: `exit code ${checkPracticeCompletion.status}`,
+      error: checkPracticeCompletion.stderr.trim()
+    });
+
     const checkDelegation = runNodeCheck('reports/lesson-interaction-delegation-tests.js');
     assert(checkDelegation.status === 0, 'reports/lesson-interaction-delegation-tests.js parses with node --check', {
       file: 'reports/lesson-interaction-delegation-tests.js',
@@ -174,7 +205,7 @@ function main() {
   endSuite();
 
   // SUITE C — Child Test Suites
-  startSuite('Child Test Suites (Audio Retrigger, Continue Practice V2, Lesson Delegation, & Dev Server)');
+  startSuite('Child Test Suites (Audio Retrigger, Continue Practice V2, Practice Completion V1, Lesson Delegation, & Dev Server)');
   {
     const retriggerRun = runChildSuite('reports/retrigger-tail-cap-tests.js');
     assert(retriggerRun.status === 0, 'reports/retrigger-tail-cap-tests.js exited with exit code 0', {
@@ -190,6 +221,14 @@ function main() {
       expected: 'exit code 0',
       actual: `exit code ${cpV2Run.status}`,
       error: cpV2Run.stderr.trim() || cpV2Run.stdout.trim()
+    });
+
+    const practiceCompletionRun = runChildSuite('reports/practice-completion-v1-tests.js');
+    assert(practiceCompletionRun.status === 0, 'reports/practice-completion-v1-tests.js exited with exit code 0', {
+      file: 'reports/practice-completion-v1-tests.js',
+      expected: 'exit code 0',
+      actual: `exit code ${practiceCompletionRun.status}`,
+      error: practiceCompletionRun.stderr.trim() || practiceCompletionRun.stdout.trim()
     });
 
     const delegationRun = runChildSuite('reports/lesson-interaction-delegation-tests.js');
