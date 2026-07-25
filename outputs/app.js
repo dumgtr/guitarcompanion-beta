@@ -659,6 +659,16 @@ async function applyContinuePracticeLocationV1(location, record = null) {
     throw new Error("CONTINUE_PRACTICE_MONTH_UNAVAILABLE");
   }
 
+  // Restore blockState for Rhythm Geometry BEFORE week rendering
+  const blockState = record?.blockState || {};
+  const rgState = blockState["w2-rhythm-geometry-16th-syncopation"];
+  if (rgState && typeof rgState.mnemonicMode === "string") {
+    const allowedModes = ["food_en", "takadimi", "counting", "food_th"];
+    if (allowedModes.includes(rgState.mnemonicMode)) {
+      currentRhythmGeometryMnemonicMode = rgState.mnemonicMode;
+    }
+  }
+
   selectedFocusedMonth = targetMonth;
   restoredContinuePracticeDestinationV1 = { week: destination.week, day: destination.day };
 
@@ -673,15 +683,9 @@ async function applyContinuePracticeLocationV1(location, record = null) {
   restoredContinuePracticeDestinationV1 = { week: destination.week, day: destination.day };
   renderFocusedDashboard();
 
-  // Restore blockState for Rhythm Geometry if present
-  const blockState = record?.blockState || {};
-  const rgState = blockState["w2-rhythm-geometry-16th-syncopation"];
-  if (rgState && typeof rgState.mnemonicMode === "string") {
-    currentRhythmGeometryMnemonicMode = rgState.mnemonicMode;
-    const cardEl = document.querySelector(".rhythm-geometry-card");
-    if (cardEl && typeof setRhythmGeometryCardMode === "function") {
-      setRhythmGeometryCardMode(cardEl, currentRhythmGeometryMnemonicMode);
-    }
+  const cardEl = document.querySelector(".rhythm-geometry-card");
+  if (cardEl && typeof setRhythmGeometryCardMode === "function") {
+    setRhythmGeometryCardMode(cardEl, currentRhythmGeometryMnemonicMode);
   }
 
   if (window.history?.replaceState) {
@@ -756,6 +760,13 @@ function initializeContinuePracticeStateV1() {
     }
   });
   pendingContinuePracticeRecordV1 = continuePracticeStoreV1.load();
+  if (pendingContinuePracticeRecordV1?.blockState?.["w2-rhythm-geometry-16th-syncopation"]?.mnemonicMode) {
+    const savedMode = pendingContinuePracticeRecordV1.blockState["w2-rhythm-geometry-16th-syncopation"].mnemonicMode;
+    const allowedModes = ["food_en", "takadimi", "counting", "food_th"];
+    if (allowedModes.includes(savedMode)) {
+      currentRhythmGeometryMnemonicMode = savedMode;
+    }
+  }
   continuePracticeStartupDecisionV1 = pendingContinuePracticeRecordV1 ? "pending" : "none";
   renderContinuePracticeEntryV1();
 
