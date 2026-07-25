@@ -6082,14 +6082,12 @@ function renderPracticeRoomIaPreview() {
 
   const rhMiniCourseCard = month2CreateElement("article", "ia-tool-card rhc-minicourse-card");
   rhMiniCourseCard.style.cursor = "pointer";
+  rhMiniCourseCard.dataset.rhMinicourseAction = "open-course";
   rhMiniCourseCard.append(
     month2CreateElement("span", "fsl-badge", "Phase 1 (Week 1–2)"),
     month2CreateElement("h4", "", window.rightHandMiniCourseData?.title || "Right-Hand Control \u2014 8 Weeks"),
     month2CreateElement("p", "", window.rightHandMiniCourseData?.description || "มินิคอร์สเจาะลึกการควบคุมมือขวาสำหรับมือใหม่")
   );
-  rhMiniCourseCard.addEventListener("click", () => {
-    openRightHandMiniCourseModal();
-  });
 
   programsGrid.appendChild(rhProgramCard);
   programsGrid.appendChild(rhMiniCourseCard);
@@ -6264,10 +6262,49 @@ function openRhcProgramModal() {
   document.body.appendChild(overlay);
 }
 
-if (typeof window !== "undefined" && !window.rightHandMiniCourseData && typeof document !== "undefined") {
-  const rhcScript = document.createElement("script");
-  rhcScript.src = "righthand-minicourse-data.js";
-  document.head.appendChild(rhcScript);
+let rightHandMiniCourseDataLoadPromise = null;
+
+function ensureRightHandMiniCourseData() {
+  if (typeof window !== "undefined" && window.rightHandMiniCourseData) {
+    return Promise.resolve(window.rightHandMiniCourseData);
+  }
+
+  if (rightHandMiniCourseDataLoadPromise) {
+    return rightHandMiniCourseDataLoadPromise;
+  }
+
+  if (typeof document === "undefined") {
+    return Promise.reject(new Error("Environment has no document."));
+  }
+
+  rightHandMiniCourseDataLoadPromise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "righthand-minicourse-data.js";
+    script.async = true;
+    script.dataset.gcRightHandMiniCourseData = "true";
+
+    script.addEventListener("load", () => {
+      if (!window.rightHandMiniCourseData) {
+        reject(new Error("Right-Hand Mini Course data loaded without registering its schema."));
+        return;
+      }
+      resolve(window.rightHandMiniCourseData);
+    }, { once: true });
+
+    script.addEventListener("error", () => {
+      reject(new Error("Unable to load Right-Hand Mini Course data."));
+    }, { once: true });
+
+    document.head.appendChild(script);
+  }).catch((error) => {
+    rightHandMiniCourseDataLoadPromise = null;
+    if (typeof document !== "undefined") {
+      document.querySelector('script[data-gc-right-hand-mini-course-data="true"]')?.remove();
+    }
+    throw error;
+  });
+
+  return rightHandMiniCourseDataLoadPromise;
 }
 
 const RIGHT_HAND_MINI_COURSE_STORAGE_KEY = "gc_righthand_minicourse_v1";
@@ -6415,15 +6452,28 @@ function setRightHandDrillBpm(drillId, bpm) {
   return state;
 }
 
-function openRightHandMiniCourseModal() {
-  if (document.getElementById("rh-minicourse-modal")) return;
-  const data = window.rightHandMiniCourseData;
-  if (!data) {
-    alert("Right-Hand Mini Course data not loaded");
-    return;
-  }
+function selectRightHandMiniCourseWeek(weekId) {
+  const state = getRightHandMiniCourseState();
+  state.selectedWeekId = weekId;
+  saveRightHandMiniCourseState(state);
 
-  const overlay = document.createElement("div");
+  const modal = document.getElementById("rh-minicourse-modal");
+  if (!modal) return;
+  const data = window.rightHandMiniCourseData;
+  if (!data) return;
+
+  const modalContent = modal.querySelector(".fsl-studio-modal-content");
+  const bodyDiv = modal.querySelector(".rhc-program-body");
+  if (modalContent && bodyDiv) {
+    renderRightHandMiniCourseModalContent(modal, modalContent, bodyDiv, data);
+  }
+}
+
+async function openRightHandMiniCourseModal() {
+  let overlay = document.getElementById("rh-minicourse-modal");
+  if (overlay) return;
+
+  overlay = document.createElement("div");
   overlay.id = "rh-minicourse-modal";
   overlay.className = "fsl-studio-modal-overlay";
 
@@ -6434,17 +6484,44 @@ function openRightHandMiniCourseModal() {
   headerDiv.className = "fsl-studio-modal-header";
 
   const titleDiv = document.createElement("div");
-  titleDiv.innerHTML = `<span class="fsl-badge">Phase 1 (Week 1–2)</span><h3 class="fsl-studio-modal-title">${data.title}</h3>`;
+  titleDiv.innerHTML = `<span class="fsl-badge">Phase 1 (Week 1–2)</span><h3 class="fsl-studio-modal-title">Right-Hand Control — 8 Weeks</h3>`;
 
   const closeBtn = document.createElement("button");
+  closeBtn.type = "button";
   closeBtn.className = "fsl-studio-close-btn";
   closeBtn.textContent = "ปิดมินิคอร์ส";
-  closeBtn.onclick = () => overlay.remove();
+  closeBtn.dataset.rhMinicourseAction = "close-course";
 
   headerDiv.append(titleDiv, closeBtn);
 
   const bodyDiv = document.createElement("div");
   bodyDiv.className = "rhc-program-body";
+  bodyDiv.innerHTML = `<div class="rhc-loading-spinner" style="padding: 24px; text-align: center;"><p>กำลังโหลดข้อมูลมินิคอร์ส...</p></div>`;
+
+  modalContent.append(headerDiv, bodyDiv);
+  overlay.appendChild(modalContent);
+  document.body.appendChild(overlay);
+
+  try {
+    const data = await ensureRightHandMiniCourseData();
+    if (!data) throw new Error("Right-Hand Mini Course data empty after load");
+    renderRightHandMiniCourseModalContent(overlay, modalContent, bodyDiv, data);
+  } catch (err) {
+    bodyDiv.innerHTML = `
+      <div class="rhc-error-state" style="padding: 24px; text-align: center;">
+        <p style="color: var(--ink); font-weight: bold; margin-bottom: 8px;">ไม่สามารถโหลดข้อมูล Right-Hand Mini Course ได้</p>
+        <p class="rhc-error-detail" style="color: var(--muted); font-size: 0.88rem; margin: 0 0 16px;">${err?.message || "Unable to load Right-Hand Mini Course data."}</p>
+        <button type="button" class="small-button primary" data-rh-minicourse-action="retry-load">ลองอีกครั้ง</button>
+      </div>
+    `;
+  }
+}
+
+function renderRightHandMiniCourseModalContent(overlay, modalContent, bodyDiv, data) {
+  bodyDiv.innerHTML = "";
+
+  const titleEl = modalContent.querySelector(".fsl-studio-modal-title");
+  if (titleEl && data.title) titleEl.textContent = data.title;
 
   const desc = document.createElement("p");
   desc.className = "rhc-program-desc";
@@ -6476,13 +6553,18 @@ function openRightHandMiniCourseModal() {
 
     ch.weeks.forEach(week => {
       const isWeekComplete = completedWeekSet.has(week.id);
+      const isWeekSelected = state.selectedWeekId === week.id;
+
       const wBtn = document.createElement("button");
-      wBtn.className = `rhc-week-btn ${isWeekComplete ? 'is-completed' : ''}`;
+      wBtn.type = "button";
+      wBtn.className = `rhc-week-btn ${isWeekComplete ? 'is-completed' : ''} ${isWeekSelected ? 'active' : ''}`;
+      wBtn.dataset.rhMinicourseAction = "select-week";
+      wBtn.dataset.weekId = week.id;
       wBtn.innerHTML = `<span>${week.title}</span> ${isWeekComplete ? '<span class="week-check-badge">✓ สำเร็จ</span>' : ''}`;
 
       const wDetail = document.createElement("div");
       wDetail.className = "rhc-week-detail";
-      wDetail.hidden = true;
+      wDetail.hidden = !isWeekSelected;
 
       if (week.weeklyGoal) {
         const wGoal = document.createElement("p");
@@ -6498,26 +6580,14 @@ function openRightHandMiniCourseModal() {
         if (typeof renderRhythmGeometryBlock === "function") {
           const blockId = week.rhythmGeometryBlock.id;
           const rgEl = renderRhythmGeometryBlock(week.rhythmGeometryBlock);
-
-          // Restore saved mnemonic mode for this block
-          const savedMode = state.mnemonicModeByBlock && state.mnemonicModeByBlock[blockId];
-          if (savedMode) {
-            const modeBtn = rgEl.querySelector('[data-mnemonic-mode="' + savedMode + '"]');
-            if (modeBtn) modeBtn.click();
+          if (rgEl && typeof rgEl.setAttribute === "function") {
+            rgEl.setAttribute("data-block-id", blockId);
           }
 
-          // Persist mnemonic mode changes per block
-          rgEl.addEventListener("click", function(e) {
-            const modeBtn = e.target.closest("[data-mnemonic-mode]");
-            if (modeBtn) {
-              const newMode = modeBtn.getAttribute("data-mnemonic-mode");
-              const currentState = getRightHandMiniCourseState();
-              currentState.mnemonicModeByBlock = currentState.mnemonicModeByBlock || {};
-              currentState.mnemonicModeByBlock[blockId] = newMode;
-              saveRightHandMiniCourseState(currentState);
-            }
-          });
-
+          const savedMode = state.mnemonicModeByBlock && state.mnemonicModeByBlock[blockId];
+          if (savedMode && rgEl) {
+            setRhythmGeometryCardMode(rgEl, savedMode);
+          }
           rgWrapper.appendChild(rgEl);
         }
         wDetail.appendChild(rgWrapper);
@@ -6536,14 +6606,9 @@ function openRightHandMiniCourseModal() {
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.checked = isDrillComplete;
+        checkbox.dataset.rhMinicourseAction = "toggle-drill";
         checkbox.dataset.drillId = d.id;
         checkbox.dataset.weekId = week.id;
-        checkbox.addEventListener("change", () => {
-          toggleRightHandDrillCompletion(week.id, d.id);
-          // Re-render modal content
-          overlay.remove();
-          openRightHandMiniCourseModal();
-        });
 
         const textSpan = document.createElement("span");
         textSpan.innerHTML = `<strong>${d.dayStr} — ${d.title}</strong>: ${d.desc}`;
@@ -6556,10 +6621,9 @@ function openRightHandMiniCourseModal() {
           bpmBtn.type = "button";
           bpmBtn.className = "small-button rh-bpm-btn";
           bpmBtn.textContent = `Set ${d.suggestedBpm} BPM`;
-          bpmBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            setRightHandDrillBpm(d.id, d.suggestedBpm);
-          });
+          bpmBtn.dataset.rhMinicourseAction = "set-bpm";
+          bpmBtn.dataset.drillId = d.id;
+          bpmBtn.dataset.bpm = String(d.suggestedBpm);
           li.appendChild(bpmBtn);
         }
 
@@ -6590,12 +6654,6 @@ function openRightHandMiniCourseModal() {
       `;
       wDetail.appendChild(persistentBlocks);
 
-      wBtn.onclick = () => {
-        const isHidden = wDetail.hidden;
-        wDetail.hidden = !isHidden;
-        wBtn.classList.toggle("active", !isHidden);
-      };
-
       weekList.appendChild(wBtn);
       weekList.appendChild(wDetail);
     });
@@ -6603,10 +6661,70 @@ function openRightHandMiniCourseModal() {
     chSection.append(chHeader, weekList);
     bodyDiv.appendChild(chSection);
   });
+}
 
-  modalContent.append(headerDiv, bodyDiv);
-  overlay.appendChild(modalContent);
-  document.body.appendChild(overlay);
+function registerRightHandMiniCourseDelegation() {
+  if (typeof window === "undefined" || window.hasRegisteredRightHandMiniCourseDelegation) return;
+  window.hasRegisteredRightHandMiniCourseDelegation = true;
+
+  document.addEventListener("click", (e) => {
+    // 1. Mnemonic mode delegation on Rhythm Geometry cards
+    const modeBtn = e.target.closest("[data-mnemonic-mode]");
+    if (modeBtn) {
+      const rgCard = modeBtn.closest("[data-block-id]");
+      if (rgCard) {
+        const blockId = rgCard.getAttribute("data-block-id");
+        const newMode = modeBtn.getAttribute("data-mnemonic-mode");
+        if (blockId && newMode) {
+          const currentState = getRightHandMiniCourseState();
+          currentState.mnemonicModeByBlock = currentState.mnemonicModeByBlock || {};
+          currentState.mnemonicModeByBlock[blockId] = newMode;
+          saveRightHandMiniCourseState(currentState);
+          setRhythmGeometryCardMode(rgCard, newMode);
+        }
+      }
+    }
+
+    // 2. Action delegation
+    const trigger = e.target.closest("[data-rh-minicourse-action]");
+    if (!trigger) return;
+    const action = trigger.dataset.rhMinicourseAction;
+
+    if (action === "open-course") {
+      openRightHandMiniCourseModal();
+    } else if (action === "close-course") {
+      const modal = document.getElementById("rh-minicourse-modal");
+      if (modal) modal.remove();
+    } else if (action === "select-week") {
+      const weekId = trigger.dataset.weekId;
+      if (weekId) selectRightHandMiniCourseWeek(weekId);
+    } else if (action === "toggle-drill") {
+      const weekId = trigger.dataset.weekId;
+      const drillId = trigger.dataset.drillId;
+      if (weekId && drillId) {
+        toggleRightHandDrillCompletion(weekId, drillId);
+        const modal = document.getElementById("rh-minicourse-modal");
+        const data = window.rightHandMiniCourseData;
+        if (modal && data) {
+          const modalContent = modal.querySelector(".fsl-studio-modal-content");
+          const bodyDiv = modal.querySelector(".rhc-program-body");
+          if (modalContent && bodyDiv) renderRightHandMiniCourseModalContent(modal, modalContent, bodyDiv, data);
+        }
+      }
+    } else if (action === "set-bpm") {
+      const drillId = trigger.dataset.drillId;
+      const bpm = Number(trigger.dataset.bpm);
+      if (drillId && !isNaN(bpm)) setRightHandDrillBpm(drillId, bpm);
+    } else if (action === "retry-load") {
+      const modal = document.getElementById("rh-minicourse-modal");
+      if (modal) modal.remove();
+      openRightHandMiniCourseModal();
+    }
+  });
+}
+
+if (typeof window !== "undefined") {
+  registerRightHandMiniCourseDelegation();
 }
 
 function openFretboardStudioModal() {

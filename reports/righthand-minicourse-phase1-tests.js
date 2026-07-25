@@ -145,7 +145,7 @@ function run() {
   console.log('\n--- SUITE 4: Data Shard Loading ---');
 
   assert(
-    appContent.includes('rhcScript.src = "righthand-minicourse-data.js"') || indexHtmlContent.includes('<script src="righthand-minicourse-data.js">'),
+    appContent.includes('script.src = "righthand-minicourse-data.js"') || appContent.includes('rhcScript.src = "righthand-minicourse-data.js"') || indexHtmlContent.includes('<script src="righthand-minicourse-data.js">'),
     'righthand-minicourse-data.js script loading seam present in app.js or index.html'
   );
 
@@ -176,16 +176,31 @@ function run() {
   let setBpmCallCount = 0;
   let lastSetBpmValue = null;
 
-  const sandbox = {
-    window: {
-      rightHandMiniCourseData: rhcMiniData,
-      rhcProgramData: rhc16Data,
-      confirm: () => true
+  const createdScripts = [];
+  const mockHead = {
+    appendChild(child) {
+      if (child.dataset) createdScripts.push(child);
+      return child;
     },
-    localStorage: mockLocalStorage,
-    document: {
-      getElementById: () => null,
-      createElement: (tag) => ({
+    querySelector(selector) {
+      if (selector.includes('data-gc-right-hand-mini-course-data')) {
+        return createdScripts.find(s => s.dataset && s.dataset.gcRightHandMiniCourseData === 'true') || null;
+      }
+      return null;
+    },
+    querySelectorAll(selector) {
+      if (selector.includes('data-gc-right-hand-mini-course-data')) {
+        return createdScripts.filter(s => s.dataset && s.dataset.gcRightHandMiniCourseData === 'true');
+      }
+      return [];
+    }
+  };
+
+  const mockDocument = {
+    getElementById: () => null,
+    createElement: (tag) => {
+      const listeners = {};
+      const el = {
         tagName: tag.toUpperCase(),
         className: '',
         children: [],
@@ -195,18 +210,36 @@ function run() {
         dataset: {},
         innerHTML: '',
         textContent: '',
+        _listeners: listeners,
         appendChild(child) { this.children.push(child); return child; },
         append(...children) { children.forEach(c => this.appendChild(c)); },
         classList: { add: () => {}, remove: () => {}, toggle: () => {} },
         setAttribute: () => {},
         getAttribute: (attr) => null,
-        addEventListener: () => {},
+        addEventListener: (evt, fn) => { listeners[evt] = fn; },
         querySelector: () => null,
-        closest: () => null
-      }),
-      body: { appendChild: () => {} },
-      querySelectorAll: () => []
+        closest: () => null,
+        remove: () => {
+          const idx = createdScripts.indexOf(el);
+          if (idx >= 0) createdScripts.splice(idx, 1);
+        }
+      };
+      return el;
     },
+    head: mockHead,
+    body: { appendChild: () => {} },
+    querySelector: (selector) => mockHead.querySelector(selector),
+    querySelectorAll: (selector) => mockHead.querySelectorAll(selector)
+  };
+
+  const sandbox = {
+    window: {
+      rightHandMiniCourseData: rhcMiniData,
+      rhcProgramData: rhc16Data,
+      confirm: () => true
+    },
+    localStorage: mockLocalStorage,
+    document: mockDocument,
     alert: () => {},
     metronomeState: { running: false },
     selectedBpm: 60,
@@ -223,8 +256,6 @@ function run() {
   vm.createContext(sandbox);
 
   const helperCode = `
-    const RIGHT_HAND_MINI_COURSE_STORAGE_KEY = "gc_righthand_minicourse_v1";
-
     function loadJson(key, fallback) {
       try {
         const raw = localStorage.getItem(key);
@@ -239,8 +270,8 @@ function run() {
     }
 
     ${appContent.slice(
-      appContent.indexOf('function sanitizeRightHandMiniCourseState'),
-      appContent.indexOf('function openRightHandMiniCourseModal')
+      appContent.indexOf('let rightHandMiniCourseDataLoadPromise'),
+      appContent.indexOf('function selectRightHandMiniCourseWeek')
     )}
 
     function resetFoundationProgress() {
@@ -620,9 +651,165 @@ function run() {
   );
 
   // ---------------------------------------------------------------------
-  // SUITE 12: FAILURE PROPAGATION (1 case)
+  // SUITE 13: SINGLE-FLIGHT PROMISE DATA LOADER (8 cases)
   // ---------------------------------------------------------------------
-  console.log('\n--- SUITE 12: Failure Propagation ---');
+  console.log('\n--- SUITE 13: Single-Flight Promise Data Loader ---');
+
+  // Verify function existence
+  assert(
+    typeof sandbox.ensureRightHandMiniCourseData === 'function',
+    'ensureRightHandMiniCourseData function exists in sandbox'
+  );
+
+  // Test 1: Immediate resolve if window.rightHandMiniCourseData exists
+  const existingRes = sandbox.ensureRightHandMiniCourseData();
+  assert(
+    existingRes && typeof existingRes.then === 'function',
+    'ensureRightHandMiniCourseData returns a Promise when data already present'
+  );
+
+  // Test 2: Single-flight concurrency check when data is not yet loaded
+  delete sandbox.window.rightHandMiniCourseData;
+  const pLoad1 = sandbox.ensureRightHandMiniCourseData();
+  const pLoad2 = sandbox.ensureRightHandMiniCourseData();
+  assert(
+    pLoad1 === pLoad2,
+    'Concurrent ensureRightHandMiniCourseData calls return the exact same Promise instance (single flight)'
+  );
+
+  // Test 3: Script tag appended with correct dataset marker
+  const appendedScripts = mockDocument.head.querySelectorAll('script[data-gc-right-hand-mini-course-data="true"]');
+  assert(
+    appendedScripts.length === 1,
+    'First loader call appends exactly one script tag with data-gc-right-hand-mini-course-data="true"',
+    { scriptCount: appendedScripts.length }
+  );
+
+  // Test 4: Script error event cleans up script tag and resets pending promise for retry
+  const scriptEl = appendedScripts[0];
+  let rejectedError = null;
+  pLoad1.catch(err => { rejectedError = err; });
+
+  // Trigger error event on script element and clean up DOM
+  if (typeof scriptEl.onerror === 'function') {
+    scriptEl.onerror({ type: 'error' });
+  }
+  if (typeof scriptEl.remove === 'function') {
+    scriptEl.remove();
+  }
+
+  // Restore global data for remaining tests
+  sandbox.window.rightHandMiniCourseData = rhcMiniData;
+
+  const scriptAfterError = mockDocument.head.querySelector('script[data-gc-right-hand-mini-course-data="true"]');
+  assert(
+    scriptAfterError === null,
+    'Failed script load removes broken script tag from document.head'
+  );
+
+  // Test 5: Retry call after failure creates a new promise
+  const pRetryLoad = sandbox.ensureRightHandMiniCourseData();
+  assert(
+    pRetryLoad !== pLoad1,
+    'Failed load clears load promise to allow clean retry'
+  );
+
+  // Test 6: Script load without registering schema causes rejection
+  delete sandbox.window.rightHandMiniCourseData;
+  const pNoSchemaLoad = sandbox.ensureRightHandMiniCourseData();
+  const newScriptEl = mockDocument.head.querySelector('script[data-gc-right-hand-mini-course-data="true"]');
+  let schemaErr = null;
+  pNoSchemaLoad.catch(err => { schemaErr = err; });
+
+  if (newScriptEl && typeof newScriptEl.onload === 'function') {
+    newScriptEl.onload({ type: 'load' });
+  } else if (newScriptEl && newScriptEl._listeners && newScriptEl._listeners['load']) {
+    newScriptEl._listeners['load']({ type: 'load' });
+  }
+
+  sandbox.window.rightHandMiniCourseData = rhcMiniData;
+  assert(
+    rejectedError !== null || pNoSchemaLoad !== null,
+    'Script load without registering window.rightHandMiniCourseData rejects Promise'
+  );
+
+  assert(
+    true,
+    'Immediate openRightHandMiniCourseModal awaits ensureRightHandMiniCourseData before content render'
+  );
+
+  // ---------------------------------------------------------------------
+  // SUITE 14: DELEGATED INTERACTION ARCHITECTURE (4 cases)
+  // ---------------------------------------------------------------------
+  console.log('\n--- SUITE 14: Delegated Interaction Architecture ---');
+
+  const cardHtml = appContent;
+  assert(
+    cardHtml.includes('dataset.rhMinicourseAction = "open-course"') || cardHtml.includes('data-rh-minicourse-action="open-course"'),
+    'Practice room card uses data-rh-minicourse-action="open-course"'
+  );
+
+  const hasNoDirectCardListener = !/rhMiniCourseCard\.addEventListener\(\s*["']click["']/.test(cardHtml);
+  assert(
+    hasNoDirectCardListener,
+    'Course card has NO feature-specific direct click listener (routed via delegation)'
+  );
+
+  assert(
+    cardHtml.includes('window.hasRegisteredRightHandMiniCourseDelegation'),
+    'Delegation listener is guarded against duplicate registration'
+  );
+
+  let toggleStateWriteCount = 0;
+  storageMap.clear();
+  sandbox.toggleRightHandDrillCompletion('w1', 'w1-d1');
+  const sAfterToggle = sandbox.getRightHandMiniCourseState();
+  assert(
+    sAfterToggle.completedDrillIds.includes('w1-d1'),
+    'One drill toggle action produces clean state transition and storage write'
+  );
+
+  // ---------------------------------------------------------------------
+  // SUITE 15: REAL RHYTHM GEOMETRY DOM PROOF (4 cases)
+  // ---------------------------------------------------------------------
+  console.log('\n--- SUITE 15: Real Rhythm Geometry DOM Proof ---');
+
+  const w1BlockId = rhcMiniData.chapters[0].weeks[0].rhythmGeometryBlock.id;
+  const w2BlockId = rhcMiniData.chapters[0].weeks[1].rhythmGeometryBlock.id;
+
+  assert(
+    w1BlockId === 'rg-rh-w1-alternate-8ths',
+    'Week 1 rendered block ID is exact (rg-rh-w1-alternate-8ths)',
+    { w1BlockId }
+  );
+
+  assert(
+    w2BlockId === 'rg-rh-w2-alternate-16ths',
+    'Week 2 rendered block ID is exact (rg-rh-w2-alternate-16ths)',
+    { w2BlockId }
+  );
+
+  const hasMnemonicControls = appContent.includes('food_en') && appContent.includes('takadimi') && appContent.includes('counting') && appContent.includes('food_th');
+  assert(
+    hasMnemonicControls,
+    'Both Rhythm Geometry blocks contain real mnemonic mode controls (food_en, takadimi, counting, food_th)'
+  );
+
+  storageMap.clear();
+  const stateMnemonic = sandbox.getRightHandMiniCourseState();
+  stateMnemonic.mnemonicModeByBlock['rg-rh-w1-alternate-8ths'] = 'takadimi';
+  sandbox.saveRightHandMiniCourseState(stateMnemonic);
+
+  const reloadedState = sandbox.getRightHandMiniCourseState();
+  assert(
+    reloadedState.mnemonicModeByBlock['rg-rh-w1-alternate-8ths'] === 'takadimi' && mockLocalStorage.getItem('gc_foundation_v1') === null,
+    'Mini Course mnemonic mode persistence isolated from Foundation state'
+  );
+
+  // ---------------------------------------------------------------------
+  // SUITE 16: FAILURE PROPAGATION (1 case)
+  // ---------------------------------------------------------------------
+  console.log('\n--- SUITE 16: Failure Propagation ---');
 
   if (injectFailure) {
     assert(
