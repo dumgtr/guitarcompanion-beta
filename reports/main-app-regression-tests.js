@@ -97,6 +97,7 @@ function main() {
     assert(checkFileExists('reports/continue-practice-v2-tests.js'), 'reports/continue-practice-v2-tests.js exists in repository', { file: 'reports/continue-practice-v2-tests.js' });
     assert(checkFileExists('reports/practice-completion-v1-tests.js'), 'reports/practice-completion-v1-tests.js exists in repository', { file: 'reports/practice-completion-v1-tests.js' });
     assert(checkFileExists('reports/dev-preview-server-tests.js'), 'reports/dev-preview-server-tests.js exists in repository', { file: 'reports/dev-preview-server-tests.js' });
+    assert(checkFileExists('reports/righthand-minicourse-phase1-tests.js'), 'reports/righthand-minicourse-phase1-tests.js exists in repository', { file: 'reports/righthand-minicourse-phase1-tests.js' });
 
     const appContent = readFileContent('outputs/app.js');
     const audioContent = readFileContent('outputs/audio-engine.js');
@@ -106,6 +107,7 @@ function main() {
     const practiceCompletionContent = readFileContent('reports/practice-completion-v1-tests.js');
     const lessonDelegationContent = readFileContent('reports/lesson-interaction-delegation-tests.js');
     const devServerContent = readFileContent('reports/dev-preview-server-tests.js');
+    const rhcPhase1Content = readFileContent('reports/righthand-minicourse-phase1-tests.js');
 
     const hasConflictMarkers = (content) => /<<<<<<<|=======|>>>>>>>/.test(content);
     assert(!hasConflictMarkers(appContent), 'outputs/app.js contains no Git conflict markers', { file: 'outputs/app.js' });
@@ -116,6 +118,7 @@ function main() {
     assert(!hasConflictMarkers(practiceCompletionContent), 'reports/practice-completion-v1-tests.js contains no Git conflict markers', { file: 'reports/practice-completion-v1-tests.js' });
     assert(!hasConflictMarkers(lessonDelegationContent), 'reports/lesson-interaction-delegation-tests.js contains no Git conflict markers', { file: 'reports/lesson-interaction-delegation-tests.js' });
     assert(!hasConflictMarkers(devServerContent), 'reports/dev-preview-server-tests.js contains no Git conflict markers', { file: 'reports/dev-preview-server-tests.js' });
+    assert(!hasConflictMarkers(rhcPhase1Content), 'reports/righthand-minicourse-phase1-tests.js contains no Git conflict markers', { file: 'reports/righthand-minicourse-phase1-tests.js' });
 
     const hasAbsoluteMachinePath = (content) => /C:\\Users\\|\/Users\/|\/home\//i.test(content);
     assert(!hasAbsoluteMachinePath(appContent), 'outputs/app.js contains no hardcoded absolute machine paths', { file: 'outputs/app.js' });
@@ -124,6 +127,7 @@ function main() {
     assert(!hasAbsoluteMachinePath(practiceCompletionContent), 'reports/practice-completion-v1-tests.js contains no hardcoded absolute machine paths', { file: 'reports/practice-completion-v1-tests.js' });
     assert(!hasAbsoluteMachinePath(lessonDelegationContent), 'reports/lesson-interaction-delegation-tests.js contains no hardcoded absolute machine paths', { file: 'reports/lesson-interaction-delegation-tests.js' });
     assert(!hasAbsoluteMachinePath(devServerContent), 'reports/dev-preview-server-tests.js contains no hardcoded absolute machine paths', { file: 'reports/dev-preview-server-tests.js' });
+    assert(!hasAbsoluteMachinePath(rhcPhase1Content), 'reports/righthand-minicourse-phase1-tests.js contains no hardcoded absolute machine paths', { file: 'reports/righthand-minicourse-phase1-tests.js' });
   }
   endSuite();
 
@@ -201,11 +205,19 @@ function main() {
       actual: `exit code ${checkServer.status}`,
       error: checkServer.stderr.trim()
     });
+
+    const checkRhcPhase1 = runNodeCheck('reports/righthand-minicourse-phase1-tests.js');
+    assert(checkRhcPhase1.status === 0, 'reports/righthand-minicourse-phase1-tests.js parses with node --check', {
+      file: 'reports/righthand-minicourse-phase1-tests.js',
+      expected: 'exit code 0',
+      actual: `exit code ${checkRhcPhase1.status}`,
+      error: checkRhcPhase1.stderr.trim()
+    });
   }
   endSuite();
 
   // SUITE C — Child Test Suites
-  startSuite('Child Test Suites (Audio Retrigger, Continue Practice V2, Practice Completion V1, Lesson Delegation, & Dev Server)');
+  startSuite('Child Test Suites (Audio Retrigger, Continue Practice V2, Practice Completion V1, Lesson Delegation, Dev Server, & RHC Phase 1)');
   {
     const retriggerRun = runChildSuite('reports/retrigger-tail-cap-tests.js');
     assert(retriggerRun.status === 0, 'reports/retrigger-tail-cap-tests.js exited with exit code 0', {
@@ -245,6 +257,14 @@ function main() {
       expected: 'exit code 0',
       actual: `exit code ${serverRun.status}`,
       error: serverRun.stderr.trim() || serverRun.stdout.trim()
+    });
+
+    const rhcPhase1Run = runChildSuite('reports/righthand-minicourse-phase1-tests.js');
+    assert(rhcPhase1Run.status === 0, 'reports/righthand-minicourse-phase1-tests.js exited with exit code 0', {
+      file: 'reports/righthand-minicourse-phase1-tests.js',
+      expected: 'exit code 0',
+      actual: `exit code ${rhcPhase1Run.status}`,
+      error: rhcPhase1Run.stderr.trim() || rhcPhase1Run.stdout.trim()
     });
   }
   endSuite();

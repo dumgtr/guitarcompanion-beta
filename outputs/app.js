@@ -6079,7 +6079,20 @@ function renderPracticeRoomIaPreview() {
   rhProgramCard.addEventListener("click", () => {
     openRhcProgramModal();
   });
+
+  const rhMiniCourseCard = month2CreateElement("article", "ia-tool-card rhc-minicourse-card");
+  rhMiniCourseCard.style.cursor = "pointer";
+  rhMiniCourseCard.append(
+    month2CreateElement("span", "fsl-badge", "Phase 1 (Week 1–2)"),
+    month2CreateElement("h4", "", window.rightHandMiniCourseData?.title || "Right-Hand Control \u2014 8 Weeks"),
+    month2CreateElement("p", "", window.rightHandMiniCourseData?.description || "มินิคอร์สเจาะลึกการควบคุมมือขวาสำหรับมือใหม่")
+  );
+  rhMiniCourseCard.addEventListener("click", () => {
+    openRightHandMiniCourseModal();
+  });
+
   programsGrid.appendChild(rhProgramCard);
+  programsGrid.appendChild(rhMiniCourseCard);
   practicePrograms.appendChild(programsGrid);
 
   const refSection = month2CreateElement("section", "ia-zone ia-reference-library reference-library-compact");
@@ -6215,6 +6228,351 @@ function openRhcProgramModal() {
       const comfortHtml = data.comfortTempo.map(item => `<li>${item}</li>`).join('');
       const rubricHtml = data.rubric.map(item => `<li>${item}</li>`).join('');
       const safetyHtml = data.safety.map(item => `<li>${item}</li>`).join('');
+
+      persistentBlocks.innerHTML = `
+        <div class="rhc-block">
+          <h5>Comfort Tempo</h5>
+          <ul class="rhc-dynamic-list">${comfortHtml}</ul>
+        </div>
+        <div class="rhc-block">
+          <h5>Self-Check Rubric</h5>
+          <ul class="rhc-dynamic-list">${rubricHtml}</ul>
+        </div>
+        <div class="rhc-block">
+          <h5>Safety</h5>
+          <ul class="rhc-dynamic-list">${safetyHtml}</ul>
+        </div>
+      `;
+      wDetail.appendChild(persistentBlocks);
+
+      wBtn.onclick = () => {
+        const isHidden = wDetail.hidden;
+        wDetail.hidden = !isHidden;
+        wBtn.classList.toggle("active", !isHidden);
+      };
+
+      weekList.appendChild(wBtn);
+      weekList.appendChild(wDetail);
+    });
+
+    chSection.append(chHeader, weekList);
+    bodyDiv.appendChild(chSection);
+  });
+
+  modalContent.append(headerDiv, bodyDiv);
+  overlay.appendChild(modalContent);
+  document.body.appendChild(overlay);
+}
+
+if (typeof window !== "undefined" && !window.rightHandMiniCourseData && typeof document !== "undefined") {
+  const rhcScript = document.createElement("script");
+  rhcScript.src = "righthand-minicourse-data.js";
+  document.head.appendChild(rhcScript);
+}
+
+const RIGHT_HAND_MINI_COURSE_STORAGE_KEY = "gc_righthand_minicourse_v1";
+
+function sanitizeRightHandMiniCourseState(raw) {
+  const data = window.rightHandMiniCourseData;
+  const validWeekIds = new Set();
+  const validDrillIds = new Set();
+  const validBlockIds = new Set();
+  const validMnemonicModes = new Set(["food_en", "takadimi", "counting", "food_th"]);
+
+  if (data && data.chapters) {
+    data.chapters.forEach(ch => {
+      (ch.weeks || []).forEach(w => {
+        validWeekIds.add(w.id);
+        (w.drills || []).forEach(d => validDrillIds.add(d.id));
+        if (w.rhythmGeometryBlock) validBlockIds.add(w.rhythmGeometryBlock.id);
+      });
+    });
+  }
+
+  const phase1 = data && data.phases && data.phases[0];
+  const phase1WeekIds = new Set(phase1 ? phase1.weekIds : ["w1", "w2"]);
+
+  const sanitized = {
+    schemaVersion: 1,
+    selectedWeekId: (raw && phase1WeekIds.has(raw.selectedWeekId)) ? raw.selectedWeekId : "w1",
+    completedDrillIds: [],
+    completedWeekIds: [],
+    mnemonicModeByBlock: {},
+    preferredBpmByDrill: {}
+  };
+
+  // Deduplicate and filter completedDrillIds
+  if (raw && Array.isArray(raw.completedDrillIds)) {
+    const seen = new Set();
+    raw.completedDrillIds.forEach(id => {
+      if (typeof id === "string" && validDrillIds.has(id) && !seen.has(id)) {
+        seen.add(id);
+        sanitized.completedDrillIds.push(id);
+      }
+    });
+  }
+
+  // Filter mnemonicModeByBlock
+  if (raw && raw.mnemonicModeByBlock && typeof raw.mnemonicModeByBlock === "object") {
+    Object.keys(raw.mnemonicModeByBlock).forEach(k => {
+      const v = raw.mnemonicModeByBlock[k];
+      if (validBlockIds.has(k) && validMnemonicModes.has(v)) {
+        sanitized.mnemonicModeByBlock[k] = v;
+      }
+    });
+  }
+
+  // Filter preferredBpmByDrill — clamp to 30–300
+  if (raw && raw.preferredBpmByDrill && typeof raw.preferredBpmByDrill === "object") {
+    Object.keys(raw.preferredBpmByDrill).forEach(k => {
+      const v = raw.preferredBpmByDrill[k];
+      if (validDrillIds.has(k) && typeof v === "number" && v >= 30 && v <= 300) {
+        sanitized.preferredBpmByDrill[k] = v;
+      }
+    });
+  }
+
+  // Recompute completedWeekIds from completedDrillIds (never trust stored value)
+  if (data && data.chapters) {
+    const drillSet = new Set(sanitized.completedDrillIds);
+    data.chapters.forEach(ch => {
+      (ch.weeks || []).forEach(w => {
+        const requiredDrills = (w.drills || []).filter(d => d.completionRequired !== false);
+        if (requiredDrills.length > 0 && requiredDrills.every(d => drillSet.has(d.id))) {
+          sanitized.completedWeekIds.push(w.id);
+        }
+      });
+    });
+  }
+
+  return sanitized;
+}
+
+function getRightHandMiniCourseState() {
+  const fallback = {
+    schemaVersion: 1,
+    selectedWeekId: "w1",
+    completedDrillIds: [],
+    completedWeekIds: [],
+    mnemonicModeByBlock: {},
+    preferredBpmByDrill: {}
+  };
+  const raw = loadJson(RIGHT_HAND_MINI_COURSE_STORAGE_KEY, fallback);
+  return sanitizeRightHandMiniCourseState(raw);
+}
+
+function saveRightHandMiniCourseState(state) {
+  saveJson(RIGHT_HAND_MINI_COURSE_STORAGE_KEY, state);
+  return state;
+}
+
+function toggleRightHandDrillCompletion(weekId, drillId) {
+  const state = getRightHandMiniCourseState();
+  const completedSet = new Set(state.completedDrillIds || []);
+  if (completedSet.has(drillId)) {
+    completedSet.delete(drillId);
+  } else {
+    completedSet.add(drillId);
+  }
+  state.completedDrillIds = Array.from(completedSet);
+
+  // Derive completedWeekIds using completionRequired filter
+  const data = window.rightHandMiniCourseData;
+  if (data && data.chapters) {
+    const completedWeeks = [];
+    data.chapters.forEach(ch => {
+      (ch.weeks || []).forEach(w => {
+        const requiredDrills = (w.drills || []).filter(d => d.completionRequired !== false);
+        if (requiredDrills.length > 0 && requiredDrills.every(d => completedSet.has(d.id))) {
+          completedWeeks.push(w.id);
+        }
+      });
+    });
+    state.completedWeekIds = completedWeeks;
+  }
+
+  saveRightHandMiniCourseState(state);
+  return state;
+}
+
+function setRightHandDrillBpm(drillId, bpm) {
+  const state = getRightHandMiniCourseState();
+  state.preferredBpmByDrill = state.preferredBpmByDrill || {};
+  state.preferredBpmByDrill[drillId] = Number(bpm);
+  saveRightHandMiniCourseState(state);
+
+  // Audio Invariant: Update metronome BPM only if running; stopped remains stopped.
+  const isRunning = (typeof metronomeState !== "undefined" && metronomeState && metronomeState.running) || (typeof isPlaying !== "undefined" && isPlaying);
+  if (isRunning) {
+    setBpm(Number(bpm), { persist: true });
+  } else {
+    const slider = document.getElementById("bpmSlider");
+    const input = document.getElementById("bpmValue");
+    if (slider) slider.value = String(bpm);
+    if (input) input.value = String(bpm);
+    if (typeof selectedBpm !== "undefined") selectedBpm = Number(bpm);
+  }
+  return state;
+}
+
+function openRightHandMiniCourseModal() {
+  if (document.getElementById("rh-minicourse-modal")) return;
+  const data = window.rightHandMiniCourseData;
+  if (!data) {
+    alert("Right-Hand Mini Course data not loaded");
+    return;
+  }
+
+  const overlay = document.createElement("div");
+  overlay.id = "rh-minicourse-modal";
+  overlay.className = "fsl-studio-modal-overlay";
+
+  const modalContent = document.createElement("div");
+  modalContent.className = "fsl-studio-modal-content rhc-program-content rh-minicourse-modal-content";
+
+  const headerDiv = document.createElement("div");
+  headerDiv.className = "fsl-studio-modal-header";
+
+  const titleDiv = document.createElement("div");
+  titleDiv.innerHTML = `<span class="fsl-badge">Phase 1 (Week 1–2)</span><h3 class="fsl-studio-modal-title">${data.title}</h3>`;
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "fsl-studio-close-btn";
+  closeBtn.textContent = "ปิดมินิคอร์ส";
+  closeBtn.onclick = () => overlay.remove();
+
+  headerDiv.append(titleDiv, closeBtn);
+
+  const bodyDiv = document.createElement("div");
+  bodyDiv.className = "rhc-program-body";
+
+  const desc = document.createElement("p");
+  desc.className = "rhc-program-desc";
+  desc.textContent = data.description;
+  bodyDiv.appendChild(desc);
+
+  const state = getRightHandMiniCourseState();
+  const completedDrillSet = new Set(state.completedDrillIds || []);
+  const completedWeekSet = new Set(state.completedWeekIds || []);
+
+  // Phase 1 Scope: Render ONLY weeks from phases[0].weekIds. Weeks 3-8 UI is prohibited.
+  const phase1 = data.phases && data.phases[0];
+  const allowedWeekIds = new Set(phase1 ? phase1.weekIds : ["w1", "w2"]);
+  const visibleChapters = (data.chapters || []).map(ch => {
+    const visibleWeeks = (ch.weeks || []).filter(week => allowedWeekIds.has(week.id));
+    return { ...ch, weeks: visibleWeeks };
+  }).filter(ch => ch.weeks.length > 0);
+
+  visibleChapters.forEach(ch => {
+    const chSection = document.createElement("section");
+    chSection.className = "rhc-chapter-card";
+
+    const chHeader = document.createElement("div");
+    chHeader.className = "rhc-chapter-header";
+    chHeader.innerHTML = `<h4>${ch.title}</h4>`;
+
+    const weekList = document.createElement("div");
+    weekList.className = "rhc-week-list";
+
+    ch.weeks.forEach(week => {
+      const isWeekComplete = completedWeekSet.has(week.id);
+      const wBtn = document.createElement("button");
+      wBtn.className = `rhc-week-btn ${isWeekComplete ? 'is-completed' : ''}`;
+      wBtn.innerHTML = `<span>${week.title}</span> ${isWeekComplete ? '<span class="week-check-badge">✓ สำเร็จ</span>' : ''}`;
+
+      const wDetail = document.createElement("div");
+      wDetail.className = "rhc-week-detail";
+      wDetail.hidden = true;
+
+      if (week.weeklyGoal) {
+        const wGoal = document.createElement("p");
+        wGoal.className = "rhc-weekly-goal";
+        wGoal.innerHTML = `<strong>เป้าหมายประจำสัปดาห์:</strong> ${week.weeklyGoal}`;
+        wDetail.appendChild(wGoal);
+      }
+
+      // Reuse Rhythm Geometry Block if available (Week 1: 8ths, Week 2: 16ths)
+      if (week.rhythmGeometryBlock) {
+        const rgWrapper = document.createElement("div");
+        rgWrapper.className = "rhc-rhythm-geometry-wrapper";
+        if (typeof renderRhythmGeometryBlock === "function") {
+          const blockId = week.rhythmGeometryBlock.id;
+          const rgEl = renderRhythmGeometryBlock(week.rhythmGeometryBlock);
+
+          // Restore saved mnemonic mode for this block
+          const savedMode = state.mnemonicModeByBlock && state.mnemonicModeByBlock[blockId];
+          if (savedMode) {
+            const modeBtn = rgEl.querySelector('[data-mnemonic-mode="' + savedMode + '"]');
+            if (modeBtn) modeBtn.click();
+          }
+
+          // Persist mnemonic mode changes per block
+          rgEl.addEventListener("click", function(e) {
+            const modeBtn = e.target.closest("[data-mnemonic-mode]");
+            if (modeBtn) {
+              const newMode = modeBtn.getAttribute("data-mnemonic-mode");
+              const currentState = getRightHandMiniCourseState();
+              currentState.mnemonicModeByBlock = currentState.mnemonicModeByBlock || {};
+              currentState.mnemonicModeByBlock[blockId] = newMode;
+              saveRightHandMiniCourseState(currentState);
+            }
+          });
+
+          rgWrapper.appendChild(rgEl);
+        }
+        wDetail.appendChild(rgWrapper);
+      }
+
+      const daysUl = document.createElement("ul");
+      daysUl.className = "rhc-days-list rh-drill-list";
+      (week.drills || []).forEach(d => {
+        const isDrillComplete = completedDrillSet.has(d.id);
+        const li = document.createElement("li");
+        li.className = `rh-drill-item ${isDrillComplete ? 'is-completed' : ''}`;
+
+        const label = document.createElement("label");
+        label.className = "rh-drill-label";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = isDrillComplete;
+        checkbox.dataset.drillId = d.id;
+        checkbox.dataset.weekId = week.id;
+        checkbox.addEventListener("change", () => {
+          toggleRightHandDrillCompletion(week.id, d.id);
+          // Re-render modal content
+          overlay.remove();
+          openRightHandMiniCourseModal();
+        });
+
+        const textSpan = document.createElement("span");
+        textSpan.innerHTML = `<strong>${d.dayStr} — ${d.title}</strong>: ${d.desc}`;
+
+        label.append(checkbox, textSpan);
+        li.appendChild(label);
+
+        if (d.suggestedBpm && d.suggestedBpm > 0) {
+          const bpmBtn = document.createElement("button");
+          bpmBtn.type = "button";
+          bpmBtn.className = "small-button rh-bpm-btn";
+          bpmBtn.textContent = `Set ${d.suggestedBpm} BPM`;
+          bpmBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            setRightHandDrillBpm(d.id, d.suggestedBpm);
+          });
+          li.appendChild(bpmBtn);
+        }
+
+        daysUl.appendChild(li);
+      });
+      wDetail.appendChild(daysUl);
+
+      const persistentBlocks = document.createElement("div");
+      persistentBlocks.className = "rhc-persistent-blocks";
+
+      const comfortHtml = (data.comfortTempo || []).map(item => `<li>${item}</li>`).join('');
+      const rubricHtml = (data.rubric || []).map(item => `<li>${item}</li>`).join('');
+      const safetyHtml = (data.safety || []).map(item => `<li>${item}</li>`).join('');
 
       persistentBlocks.innerHTML = `
         <div class="rhc-block">

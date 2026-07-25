@@ -7667,3 +7667,64 @@ body {
   font-size: 0.9rem;
   color: #f1f5f9;
 }
+
+.rhc-minicourse-card {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 12%, transparent), var(--surface));
+}
+
+.rh-drill-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rh-drill-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.rh-drill-item.is-completed {
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  border-color: var(--accent);
+}
+
+.rh-drill-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  flex: 1;
+  margin: 0;
+}
+
+.rh-drill-label input[type="checkbox"] {
+  margin-top: 3px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.rh-bpm-btn {
+  font-size: 0.78rem;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.week-check-badge {
+  color: var(--accent);
+  font-weight: bold;
+  font-size: 0.85rem;
+  margin-left: 8px;
+}
