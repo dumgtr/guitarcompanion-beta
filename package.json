@@ -1,6 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "serve": "node tools/static-server.mjs 5173"
+    "serve": "node tools/static-server.mjs 5173",
+    "serve:identity": "node tools/static-server.mjs 5173 --identity",
+    "serve:stop": "node tools/static-server.mjs 5173 --stop"
   }
 }
