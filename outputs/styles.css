@@ -7728,3 +7728,1211 @@ body {
   font-size: 0.85rem;
   margin-left: 8px;
 }
+
+/* FSL VARIANT B SCOPED STYLES */
+.gc-fsl-variant-b,
+.fsl-studio-modal-overlay {
+  /* Candidate V4 derives all shell tokens from the host application. */
+  --fsl-surface: var(--surface);
+  --fsl-surface-card: var(--surface-soft);
+  --fsl-surface-elevated: color-mix(in srgb, var(--surface-soft), var(--paper) 28%);
+  --fsl-surface-active: color-mix(in srgb, var(--accent-soft), var(--surface) 70%);
+  --fsl-accent: var(--accent);
+  --fsl-accent-hover: var(--warm);
+  --fsl-accent-alpha: var(--accent-soft);
+  --fsl-ink: var(--ink);
+  --fsl-ink-muted: var(--muted);
+  --fsl-line: var(--line);
+  --fsl-line-strong: color-mix(in srgb, var(--line), var(--accent) 42%);
+  --fsl-root-highlight: var(--warm);
+  --fsl-note-highlight: var(--accent);
+  --fsl-radius-sm: 6px;
+  --fsl-radius-md: 10px;
+  --fsl-radius-lg: 14px;
+  --fsl-min-touch-target: 44px;
+  --fsl-type-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --fsl-type-scale: 1.125;
+}
+
+.gc-fsl-variant-b {
+  font-family: var(--fsl-type-family);
+  font-size: calc(16px * var(--fsl-type-scale));
+  line-height: 1.6;
+  color: var(--fsl-ink);
+  background-color: var(--fsl-surface);
+  border-radius: var(--fsl-radius-lg);
+  padding: 10px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.gc-fsl-variant-b *, .gc-fsl-variant-b *::before, .gc-fsl-variant-b *::after {
+  box-sizing: border-box;
+}
+
+.gc-fsl-variant-b .variant-b {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.gc-fsl-variant-b .top-control-bar {
+  display: block;
+  width: 100%;
+}
+
+.gc-fsl-variant-b .compact-focus-bar {
+  background-color: var(--fsl-surface-card);
+  border: 1px solid var(--fsl-line);
+  border-radius: var(--fsl-radius-md);
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.gc-fsl-variant-b .accordion-header#accHeaderChallenge {
+  background-color: var(--fsl-accent-alpha);
+  border: 1px solid var(--fsl-accent);
+  color: var(--fsl-accent);
+  padding: 6px 12px;
+  min-height: var(--fsl-min-touch-target);
+  border-radius: var(--fsl-radius-md);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+  width: auto;
+}
+
+.gc-fsl-variant-b .accordion-header#accHeaderChallenge:hover {
+  background-color: var(--fsl-surface-active);
+  border-color: var(--fsl-accent-hover);
+}
+
+.gc-fsl-variant-b .accordion-header#accHeaderChallenge[aria-expanded="true"],
+.gc-fsl-variant-b .accordion-header#accHeaderChallenge[data-challenge-mode="true"] {
+  background-color: var(--fsl-surface-active);
+  color: var(--fsl-accent);
+  border-color: var(--fsl-accent);
+}
+
+.gc-fsl-variant-b .challenge-cluster-control {
+  flex: 0 0 auto;
+  margin-left: 2px;
+  width: auto;
+  min-height: var(--fsl-min-touch-target);
+  padding: 6px 12px;
+  border: 1px solid var(--fsl-accent);
+  border-radius: var(--fsl-radius-md);
+  background-color: var(--fsl-accent-alpha);
+  color: var(--fsl-accent);
+  font-size: calc(12px * var(--fsl-type-scale));
+  white-space: nowrap;
+}
+
+.gc-fsl-variant-b .challenge-cluster-control:hover {
+  background-color: var(--fsl-surface-active);
+  border-color: var(--fsl-accent-hover);
+}
+
+.gc-fsl-variant-b .main-workspace-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .gc-fsl-variant-b .main-workspace-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 68fr) minmax(280px, 32fr);
+    gap: 12px;
+    align-items: start;
+  }
+}
+
+.gc-fsl-variant-b .fretboard-column,
+.gc-fsl-variant-b .inspector-column {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gc-fsl-variant-b .focus-label {
+  font-size: 0.85em;
+  color: var(--fsl-ink-muted);
+  font-weight: 700;
+}
+
+.gc-fsl-variant-b .interval-btn-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.gc-fsl-variant-b .interval-btn {
+  background-color: var(--fsl-surface-elevated);
+  border: 1px solid var(--fsl-line);
+  color: var(--fsl-ink-muted);
+  padding: 4px 8px;
+  min-height: var(--fsl-min-touch-target);
+  min-width: 44px;
+  border-radius: var(--fsl-radius-sm);
+  font-size: 0.85em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gc-fsl-variant-b .interval-btn:hover {
+  color: var(--fsl-ink);
+  border-color: var(--fsl-accent);
+}
+
+.gc-fsl-variant-b .interval-btn.active {
+  background-color: var(--fsl-surface-active);
+  color: var(--fsl-accent);
+  border-color: var(--fsl-accent);
+}
+
+.gc-fsl-variant-b .fretboard-section {
+  background-color: var(--fsl-surface-card);
+  border: 1px solid var(--fsl-line);
+  border-radius: var(--fsl-radius-md);
+  padding: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.gc-fsl-variant-b .section-header {
+  margin-bottom: 6px;
+}
+
+.gc-fsl-variant-b .section-title {
+  font-size: 0.9em;
+  font-weight: 800;
+  color: var(--fsl-accent);
+}
+
+.gc-fsl-variant-b .section-subtitle {
+  font-size: 0.8em;
+  font-weight: 500;
+  color: var(--fsl-ink-muted);
+}
+
+.gc-fsl-variant-b .fretboard-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+  width: 100%;
+}
+
+.gc-fsl-variant-b .fretboard-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 608px;
+  user-select: none;
+}
+
+.gc-fsl-variant-b .fret-header-row,
+.gc-fsl-variant-b .string-row {
+  display: grid;
+  grid-template-columns: 80px repeat(12, minmax(44px, 1fr));
+  align-items: center;
+  width: 100%;
+  min-width: 608px;
+}
+
+.gc-fsl-variant-b .fret-header-row {
+  font-size: 0.75em;
+  font-weight: 700;
+  color: var(--fsl-ink-muted);
+  border-bottom: 1px solid var(--fsl-line);
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.gc-fsl-variant-b .string-label-head {
+  font-weight: 800;
+  color: var(--fsl-ink-muted);
+  text-align: center;
+  width: 80px;
+}
+
+.gc-fsl-variant-b .fret-num {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--fsl-ink-muted);
+  font-weight: 700;
+}
+
+.gc-fsl-variant-b .string-row {
+  height: 44px;
+  border-bottom: 1px solid var(--fsl-line);
+}
+
+.gc-fsl-variant-b .string-row:last-child {
+  border-bottom: none;
+}
+
+.gc-fsl-variant-b .string-label-combined {
+  font-weight: 800;
+  font-size: 0.85em;
+  color: var(--fsl-accent);
+  background-color: var(--fsl-surface-card);
+  height: 100%;
+  width: 80px;
+  min-width: 80px;
+  max-width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  border-right: 2px solid var(--fsl-line-strong);
+  box-sizing: border-box;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.gc-fsl-variant-b .string-title {
+  font-size: 0.85em;
+  font-weight: 800;
+  color: var(--fsl-ink);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.gc-fsl-variant-b .fret-cell {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid var(--fsl-line);
+  box-sizing: border-box;
+}
+
+.gc-fsl-variant-b .fret-cell:last-child {
+  border-right: none;
+}
+
+.gc-fsl-variant-b .note-hit-target {
+  appearance: none;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  cursor: pointer;
+  outline: none;
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  touch-action: manipulation;
+}
+
+.gc-fsl-variant-b .note-marker {
+  border-radius: 50%;
+  background-color: var(--fsl-surface-elevated);
+  border: 1px solid var(--fsl-line-strong);
+  color: var(--fsl-ink-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.gc-fsl-variant-b .open-note-target .note-marker {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+}
+
+.gc-fsl-variant-b .fretted-note-target .note-marker {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  min-height: 26px;
+  font-weight: 700;
+}
+
+.gc-fsl-variant-b .note-hit-target:hover .note-marker {
+  transform: scale(1.1);
+}
+
+.gc-fsl-variant-b .note-hit-target:focus-visible .note-marker {
+  outline: 2px solid var(--fsl-note-highlight);
+  outline-offset: 2px;
+}
+
+.gc-fsl-variant-b .note-marker.in-scale {
+  background-color: var(--fsl-surface-active);
+  color: var(--fsl-ink);
+  border-color: var(--fsl-accent);
+}
+
+.gc-fsl-variant-b .note-marker.root-note {
+  background-color: var(--fsl-root-highlight);
+  color: #ffffff;
+  border-color: #ff9d85;
+}
+
+.gc-fsl-variant-b .note-marker.active-selected,
+.gc-fsl-variant-b [data-note-button].is-selected .note-marker {
+  background-color: var(--fsl-note-highlight) !important;
+  color: #000000 !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 0 8px rgba(74,198,255,0.85) !important;
+  transform: scale(1.15) !important;
+  opacity: 1 !important;
+}
+
+.gc-fsl-variant-b .note-marker.dimmed {
+  opacity: 0.2;
+}
+
+.gc-fsl-variant-b .compact-legend-bar {
+  background-color: var(--fsl-surface-card);
+  border: 1px solid var(--fsl-line);
+  border-radius: var(--fsl-radius-md);
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.85em;
+  color: var(--fsl-ink-muted);
+  width: 100%;
+}
+
+.gc-fsl-variant-b .legend-title {
+  font-weight: 800;
+  color: var(--fsl-accent);
+}
+
+.gc-fsl-variant-b .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+
+.gc-fsl-variant-b .dot-root {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--fsl-root-highlight);
+}
+
+.gc-fsl-variant-b .dot-scale {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--fsl-accent);
+}
+
+.gc-fsl-variant-b .dot-other {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--fsl-ink-muted);
+}
+
+.gc-fsl-variant-b .star-selected {
+  color: var(--fsl-note-highlight);
+  font-size: 0.9em;
+}
+
+.gc-fsl-variant-b .inspector-section {
+  background-color: var(--fsl-surface-card);
+  border: 1px solid var(--fsl-line);
+  border-radius: var(--fsl-radius-md);
+  overflow: hidden;
+  width: 100%;
+}
+
+.gc-fsl-variant-b .inspector-summary-bar {
+  padding: 6px 10px;
+  min-height: 52px;
+  background-color: var(--fsl-surface-elevated);
+}
+
+.gc-fsl-variant-b .inspector-summary-row {
+  display: grid;
+  grid-template-columns: minmax(42px, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.gc-fsl-variant-b .note-pill {
+  background-color: var(--fsl-accent);
+  color: var(--fsl-surface);
+  font-weight: 800;
+  font-size: 0.95em;
+  padding: 2px 8px;
+  border-radius: var(--fsl-radius-sm);
+  min-width: 42px;
+  text-align: center;
+}
+
+.gc-fsl-variant-b .inspector-summary-content {
+  font-size: 0.96em;
+  line-height: 1.5;
+}
+
+.gc-fsl-variant-b .inspector-role-line,
+.gc-fsl-variant-b .inspector-support-line {
+  display: block;
+}
+
+.gc-fsl-variant-b .inspector-support-line {
+  color: var(--fsl-ink-muted);
+  white-space: nowrap;
+}
+
+.gc-fsl-variant-b .inspector-toggle {
+  width: 100%;
+  min-height: var(--fsl-min-touch-target);
+  padding: 8px 10px;
+  border: 0;
+  border-top: 1px solid var(--fsl-line);
+  background-color: var(--fsl-surface-elevated);
+  color: var(--fsl-ink);
+  cursor: pointer;
+  text-align: left;
+  font-size: calc(12px * var(--fsl-type-scale));
+  font-weight: 750;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.gc-fsl-variant-b .inspector-toggle:hover {
+  background-color: var(--fsl-surface-active);
+  color: var(--fsl-accent);
+}
+
+.gc-fsl-variant-b .inspector-toggle:focus-visible,
+.gc-fsl-variant-b .challenge-cluster-control:focus-visible {
+  outline: 3px solid var(--fsl-accent);
+  outline-offset: 2px;
+}
+
+.gc-fsl-variant-b .inspector-card-body {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gc-fsl-variant-b .collapsible-panel.hidden {
+  display: none;
+}
+
+.gc-fsl-variant-b .metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.gc-fsl-variant-b .metric-box {
+  background-color: var(--fsl-surface);
+  border: 1px solid var(--fsl-line);
+  padding: 4px 6px;
+  border-radius: var(--fsl-radius-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.gc-fsl-variant-b .metric-label {
+  font-size: 0.75em;
+  font-weight: 800;
+  color: var(--fsl-ink-muted);
+}
+
+.gc-fsl-variant-b .metric-value {
+  font-size: 0.95em;
+  font-weight: 800;
+  color: var(--fsl-accent);
+}
+
+.gc-fsl-variant-b .formula-block {
+  background-color: var(--fsl-surface);
+  border-left: 3px solid var(--fsl-accent);
+  padding: 6px 8px;
+  border-radius: 0 var(--fsl-radius-sm) var(--fsl-radius-sm) 0;
+}
+
+.gc-fsl-variant-b .formula-label {
+  font-size: 0.8em;
+  font-weight: 800;
+}
+
+.gc-fsl-variant-b .formula-text {
+  font-size: 0.9em;
+  line-height: 1.55;
+  min-height: 3.1em;
+  margin: 0;
+  color: var(--fsl-ink);
+}
+
+.gc-fsl-variant-b .accordions-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.gc-fsl-variant-b .accordion-item {
+  background-color: var(--fsl-surface-card);
+  border: 1px solid var(--fsl-line);
+  border-radius: var(--fsl-radius-md);
+  overflow: hidden;
+  width: 100%;
+}
+
+.gc-fsl-variant-b .accordion-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  min-height: var(--fsl-min-touch-target);
+  background-color: var(--fsl-surface-card);
+  border: none;
+  color: var(--fsl-ink);
+  font-weight: 800;
+  font-size: 1.0em;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s ease;
+}
+
+.gc-fsl-variant-b .accordion-header:hover {
+  background-color: var(--fsl-surface-elevated);
+}
+
+.gc-fsl-variant-b [data-challenge-primary-control][aria-expanded="true"],
+.gc-fsl-variant-b [data-challenge-primary-control][data-challenge-mode="true"] {
+  background-color: var(--fsl-surface-active);
+  color: var(--fsl-accent);
+  border-color: var(--fsl-accent);
+}
+
+.gc-fsl-variant-b .accordion-body {
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 600px;
+}
+
+.gc-fsl-variant-b .accordion-body.hidden {
+  max-height: 0;
+  pointer-events: none;
+}
+
+.gc-fsl-variant-b .acc-content {
+  padding: 8px 10px;
+  background-color: var(--fsl-surface);
+  font-size: 0.95em;
+  line-height: 1.55;
+}
+
+.gc-fsl-variant-b .challenge-status-banner {
+  font-size: 1.0em;
+  line-height: 1.5;
+  color: var(--fsl-ink);
+  background-color: var(--fsl-surface);
+  border: 1px solid var(--fsl-line);
+  padding: 6px 12px;
+  border-radius: 14px;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.gc-fsl-variant-b .challenge-target-highlight {
+  font-size: 1.12em;
+  font-weight: 900;
+  color: var(--fsl-accent);
+}
+
+/* Modal Overlay Styles (Theme Reactive) */
+.fsl-studio-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.fsl-studio-modal-content {
+  background-color: var(--fsl-surface, #181511);
+  border: 1px solid var(--fsl-line-strong, #3a2f23);
+  border-radius: 14px;
+  max-width: 1200px;
+  width: 100%;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 16px;
+  color: var(--fsl-ink, #ede5dd);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+  box-sizing: border-box;
+}
+
+.fsl-studio-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--fsl-line, #3a2f23);
+  padding-bottom: 8px;
+}
+
+.fsl-studio-modal-header h3 {
+  margin: 0;
+  color: var(--fsl-accent, #d8a866);
+  font-size: 1.1rem;
+}
+
+.fsl-studio-close-btn {
+  background-color: var(--fsl-surface-elevated, #2c241c);
+  color: var(--fsl-ink, #ede5dd);
+  border: 1px solid var(--fsl-line-strong, #544434);
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.fsl-studio-close-btn:hover {
+  background-color: var(--fsl-accent, #d8a866);
+  color: var(--fsl-surface, #181511);
+}
+
+/* Restored FSL Educational Accordions & Comparison Table */
+.gc-fsl-variant-b .accordions-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  width: 100%;
+}
+
+.gc-fsl-variant-b .accordion-item {
+  background-color: var(--fsl-surface-card);
+  border: 1px solid var(--fsl-line);
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.gc-fsl-variant-b .accordion-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  min-height: 44px;
+  background-color: var(--fsl-surface-card);
+  border: none;
+  color: var(--fsl-ink);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.gc-fsl-variant-b .accordion-header:hover {
+  background-color: var(--fsl-surface-elevated);
+}
+
+.gc-fsl-variant-b .accordion-header[aria-expanded="true"] {
+  border-bottom: 1px solid var(--fsl-line);
+  color: var(--fsl-accent);
+}
+
+.gc-fsl-variant-b .accordion-body {
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 800px;
+}
+
+.gc-fsl-variant-b .accordion-body.hidden {
+  max-height: 0;
+  pointer-events: none;
+}
+
+.gc-fsl-variant-b .acc-content {
+  padding: 10px 12px;
+  background-color: var(--fsl-surface);
+  font-size: 0.8rem;
+}
+
+.gc-fsl-variant-b .comparison-table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.gc-fsl-variant-b .comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.gc-fsl-variant-b .comparison-table th,
+.gc-fsl-variant-b .comparison-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--fsl-line);
+  font-size: 0.82rem;
+}
+
+.gc-fsl-variant-b .comparison-table th {
+  color: var(--fsl-accent);
+  font-weight: 700;
+}
+
+.gc-fsl-variant-b .comparison-table td {
+  color: var(--fsl-ink);
+}
+
+.gc-fsl-variant-b .tips-list {
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.gc-fsl-variant-b .tips-list li {
+  color: var(--fsl-ink-muted);
+}
+
+.gc-fsl-variant-b .tips-list strong {
+  color: var(--fsl-ink);
+  font-weight: 700;
+}
+
+/* Candidate V4: scoped 112.5% Sandbox typography and stable responsive controls. */
+.gc-fsl-variant-b {
+  font-size: calc(16px * var(--fsl-type-scale));
+  line-height: 1.6;
+  container-type: inline-size;
+  container-name: fsl-stage;
+  overflow-x: hidden;
+}
+
+.gc-fsl-variant-b .focus-label,
+.gc-fsl-variant-b .interval-btn,
+.gc-fsl-variant-b .challenge-cluster-control,
+.gc-fsl-variant-b .inspector-toggle,
+.gc-fsl-variant-b .accordion-header {
+  font-size: calc(12px * var(--fsl-type-scale));
+  line-height: 1.35;
+}
+
+.gc-fsl-variant-b .section-title {
+  font-size: calc(14px * var(--fsl-type-scale));
+  line-height: 1.35;
+}
+
+.gc-fsl-variant-b .section-subtitle,
+.gc-fsl-variant-b .fret-header-row,
+.gc-fsl-variant-b .fret-num,
+.gc-fsl-variant-b .string-label-head,
+.gc-fsl-variant-b .string-title,
+.gc-fsl-variant-b .compact-legend-bar,
+.gc-fsl-variant-b .inspector-summary-content,
+.gc-fsl-variant-b .metric-label,
+.gc-fsl-variant-b .formula-label,
+.gc-fsl-variant-b .comparison-table,
+.gc-fsl-variant-b .tips-list {
+  font-size: calc(12px * var(--fsl-type-scale));
+}
+
+.gc-fsl-variant-b .metric-value,
+.gc-fsl-variant-b .formula-text,
+.gc-fsl-variant-b .challenge-status-banner,
+.gc-fsl-variant-b .acc-content {
+  font-size: calc(13px * var(--fsl-type-scale));
+}
+
+@media (max-width: 767px) {
+  .gc-fsl-variant-b .compact-focus-bar {
+    align-items: stretch;
+  }
+
+  .gc-fsl-variant-b .interval-btn-group {
+    width: 100%;
+  }
+
+  .gc-fsl-variant-b .challenge-cluster-control {
+    margin-left: 0;
+    align-self: flex-start;
+  }
+
+  .gc-fsl-variant-b .inspector-summary-content {
+    min-width: 0;
+  }
+}
+
+@media (min-width: 768px) {
+  .gc-fsl-variant-b .inspector-support-line {
+    white-space: nowrap;
+  }
+}
+
+/* Targeted V4.3 Fix: Top Challenge Body directly beneath button */
+.top-challenge-body {
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px 12px;
+  background-color: var(--fsl-surface);
+  border: 1px solid var(--fsl-accent);
+  border-radius: var(--fsl-radius-md);
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.top-challenge-body.hidden,
+.top-challenge-body[hidden] {
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+.compact-focus-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.challenge-card-body {
+  padding: 4px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  min-height: 60px;
+  box-sizing: border-box;
+}
+
+.challenge-prompt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  min-height: 1.2em;
+}
+
+.challenge-target-label {
+  font-size: 0.95em;
+  color: var(--fsl-ink);
+  font-weight: 600;
+}
+
+.challenge-target-highlight {
+  color: var(--fsl-accent);
+  font-weight: 700;
+  font-size: 1.05em;
+}
+
+.challenge-score-label {
+  font-size: 0.9em;
+  color: var(--fsl-ink);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.challenge-subtext {
+  font-size: 0.825em;
+  line-height: 1.2;
+  min-height: 1.2em;
+  color: var(--fsl-ink-muted);
+}
+
+.challenge-status-tag.correct-tag {
+  color: var(--success, #467a3f);
+  font-weight: 700;
+  font-size: 0.95em;
+}
+
+.challenge-status-tag.wrong-tag {
+  color: var(--fsl-root-highlight, #e0533c);
+  font-weight: 700;
+  font-size: 0.95em;
+}
+
+
+
+
+/* --------------------------------------------------
+   V4.3.7 MOBILE LANDSCAPE RIGHT-COLUMN VISUAL REPAIR
+   CSS-only correction; portrait/tablet/desktop remain unchanged.
+   -------------------------------------------------- */
+@media (orientation: landscape) and (max-height: 600px) {
+  .gc-fsl-variant-b .fsl-studio-modal-overlay {
+    padding: 4px !important;
+  }
+
+  .gc-fsl-variant-b .fsl-studio-modal-content {
+    padding: 6px 10px !important;
+    max-height: 98vh !important;
+    border-radius: 8px !important;
+    overflow-y: auto !important;
+  }
+
+  .gc-fsl-variant-b .fsl-studio-modal-header {
+    margin-bottom: 4px !important;
+    padding-bottom: 4px !important;
+  }
+
+  .gc-fsl-variant-b .fsl-studio-modal-header h3 {
+    font-size: 0.9rem !important;
+  }
+
+  .gc-fsl-variant-b .fsl-studio-close-btn {
+    padding: 3px 8px !important;
+    font-size: 0.78rem !important;
+  }
+
+  /* Master Grid for Variant-B in Mobile Landscape */
+  .gc-fsl-variant-b .variant-b {
+    display: grid !important;
+    grid-template-columns: minmax(0, 66fr) minmax(250px, 34fr) !important;
+    grid-template-rows: auto auto 1fr !important;
+    grid-template-areas:
+      "top-left top-right"
+      "left-col right-body"
+      "left-col right-inspector" !important;
+    align-items: start !important;
+    column-gap: 12px !important;
+    row-gap: 6px !important;
+  }
+
+  /* Flatten layout wrappers so children map directly to named grid areas */
+  .gc-fsl-variant-b .top-control-bar,
+  .gc-fsl-variant-b .compact-focus-bar,
+  .gc-fsl-variant-b .main-workspace-layout {
+    display: contents !important;
+  }
+
+  .gc-fsl-variant-b .focus-label {
+    display: none !important;
+  }
+
+  .gc-fsl-variant-b #intervalBtnGroup {
+    grid-area: top-left !important;
+    display: flex !important;
+    gap: 4px !important;
+    align-self: center !important;
+  }
+
+  .gc-fsl-variant-b .interval-btn {
+    padding: 3px 8px !important;
+    font-size: 0.78rem !important;
+    min-height: 30px !important;
+  }
+
+  .gc-fsl-variant-b #accHeaderChallenge {
+    grid-area: top-right !important;
+    padding: 3px 10px !important;
+    min-height: 30px !important;
+    font-size: 0.78rem !important;
+    margin-left: 0 !important;
+    align-self: center !important;
+    justify-self: end !important;
+  }
+
+  /* Challenge Card in Right Column */
+  .gc-fsl-variant-b #accBodyChallenge:not(.hidden) {
+    grid-area: right-body !important;
+    display: block !important;
+    width: 100% !important;
+    margin: 0 0 4px 0 !important;
+    padding: 6px 10px !important;
+    max-height: 76px !important;
+    background-color: var(--fsl-surface) !important;
+    border: 1px solid var(--fsl-accent) !important;
+    border-radius: var(--fsl-radius-md) !important;
+    box-sizing: border-box !important;
+  }
+
+  .gc-fsl-variant-b #accBodyChallenge.hidden {
+    display: none !important;
+  }
+
+  .gc-fsl-variant-b #accBodyChallenge:not(.hidden) .challenge-card-body {
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+  }
+
+  .gc-fsl-variant-b #accBodyChallenge:not(.hidden) .challenge-header-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+  }
+
+  .gc-fsl-variant-b #accBodyChallenge:not(.hidden) .challenge-instruction-text {
+    font-size: 0.75rem !important;
+    opacity: 0.85 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .gc-fsl-variant-b #accBodyChallenge:not(.hidden) .challenge-feedback-row {
+    font-size: 0.78rem !important;
+    line-height: 1.2 !important;
+    margin-top: 2px !important;
+  }
+
+  /* Left Column (Fretboard & Compact Legend) */
+  .gc-fsl-variant-b .fretboard-column {
+    grid-area: left-col !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    width: 100% !important;
+  }
+
+  .gc-fsl-variant-b .fretboard-section {
+    padding: 4px 6px !important;
+  }
+
+  .gc-fsl-variant-b .section-header {
+    margin-bottom: 2px !important;
+  }
+
+  .gc-fsl-variant-b .section-title {
+    font-size: 0.85rem !important;
+  }
+
+  .gc-fsl-variant-b .section-subtitle {
+    display: none !important;
+  }
+
+  .gc-fsl-variant-b .compact-legend-bar {
+    padding: 4px 6px !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Right Information Column (Role Card & Accordion Panels) */
+  .gc-fsl-variant-b .inspector-column {
+    grid-area: right-inspector !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    align-self: start !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  .gc-fsl-variant-b .inspector-card,
+  .gc-fsl-variant-b .role-card,
+  .gc-fsl-variant-b .inspector-section,
+  .gc-fsl-variant-b .inspector-summary-bar {
+    margin-top: 0 !important;
+    padding: 8px 10px !important;
+    border-radius: var(--fsl-radius-md) !important;
+  }
+}
+
+/* --------------------------------------------------
+   V4.3.8 MOBILE LANDSCAPE CHALLENGE CARD POLISH
+   CSS-only; app.js remains byte-identical.
+   -------------------------------------------------- */
+@media (orientation: landscape) and (max-height: 600px) {
+  .gc-fsl-variant-b #accBodyChallenge:not(.hidden) {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden !important;
+    padding: 6px 8px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .gc-fsl-variant-b #accBodyChallenge:not(.hidden) .challenge-card-body {
+    gap: 2px !important;
+    line-height: 1.2 !important;
+  }
+
+  .gc-fsl-variant-b #accBodyChallenge:not(.hidden) .challenge-prompt-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 0 !important;
+    line-height: 1.2 !important;
+  }
+
+  .gc-fsl-variant-b #accBodyChallenge:not(.hidden) .challenge-target-label,
+  .gc-fsl-variant-b #accBodyChallenge:not(.hidden) .challenge-score-label {
+    display: block !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+  }
+
+  /* Keep the instruction in the accessibility tree while hiding it visually. */
+  .gc-fsl-variant-b #accBodyChallenge:not(.hidden) .challenge-subtext {
+    visibility: hidden !important;
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
+  }
+}

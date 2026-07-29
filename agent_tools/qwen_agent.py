@@ -10,13 +10,15 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import http.client
 import json
 import os
+import re
+import ssl
 from pathlib import Path
 import sys
 import time
-import urllib.request
-import urllib.error
+from urllib.parse import urlsplit
 from typing import Any, Dict, List, Optional
 
 # Configure sys.path so we can import from same directory
@@ -24,6 +26,50 @@ sys.path.append(str(Path(__file__).parent))
 from qwen_model_policy import validate_model, PolicyError, choose_model, TASK_ROUTES
 
 DEFAULT_MODEL = "qwen3.7-plus"
+
+
+DASHSCOPE_SHARED_HOSTS = frozenset({
+    "dashscope.aliyuncs.com",
+    "dashscope-intl.aliyuncs.com",
+    "dashscope-us.aliyuncs.com",
+    "cn-hongkong.dashscope.aliyuncs.com",
+    "coding-intl.dashscope.aliyuncs.com",
+})
+DASHSCOPE_MAAS_HOST_RE = re.compile(
+    r"^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\."
+    r"(?:cn-beijing|ap-southeast-1|ap-northeast-1|eu-central-1|cn-hongkong)"
+    r"\.maas\.aliyuncs\.com$"
+)
+DASHSCOPE_OPENAI_BASE_PATHS = frozenset({"/compatible-mode/v1", "/v1"})
+
+
+def validate_dashscope_base_url(base_url: str) -> tuple[str, str]:
+    """Return a validated HTTPS host and OpenAI-compatible chat path.
+
+    The environment may choose among documented Alibaba Model Studio regions,
+    but it cannot redirect this reviewer CLI to local files, private hosts,
+    arbitrary ports, credentials-in-URL, or an unexpected API path.
+    """
+    parsed = urlsplit(base_url)
+    if parsed.scheme.lower() != "https":
+        raise ValueError("DASHSCOPE_BASE_URL must use https")
+    if parsed.username is not None or parsed.password is not None:
+        raise ValueError("DASHSCOPE_BASE_URL must not contain credentials")
+    if parsed.query or parsed.fragment:
+        raise ValueError("DASHSCOPE_BASE_URL must not contain a query or fragment")
+    if parsed.port not in (None, 443):
+        raise ValueError("DASHSCOPE_BASE_URL must use the default HTTPS port")
+
+    host = parsed.hostname
+    if not host or host != host.lower() or host.endswith("."):
+        raise ValueError("DASHSCOPE_BASE_URL contains an invalid hostname")
+    if host not in DASHSCOPE_SHARED_HOSTS and not DASHSCOPE_MAAS_HOST_RE.fullmatch(host):
+        raise ValueError("DASHSCOPE_BASE_URL host is not an approved Alibaba Model Studio endpoint")
+
+    base_path = parsed.path.rstrip("/")
+    if base_path not in DASHSCOPE_OPENAI_BASE_PATHS:
+        raise ValueError("DASHSCOPE_BASE_URL path is not an approved OpenAI-compatible API base")
+    return host, f"{base_path}/chat/completions"
 
 
 class ExitCode:
@@ -205,7 +251,11 @@ def main() -> int:
         safe_print_unicode("MISSING_DASHSCOPE_BASE_URL\n", sys.stderr)
         return ExitCode.AUTH_OR_TRANSPORT_ERROR
 
-    endpoint = f"{base_url.rstrip('/')}/chat/completions"
+    try:
+        endpoint_host, endpoint_path = validate_dashscope_base_url(base_url)
+    except ValueError as error:
+        safe_print_unicode(f"INVALID_DASHSCOPE_BASE_URL: {error}\n", sys.stderr)
+        return ExitCode.AUTH_OR_TRANSPORT_ERROR
 
     # Step 3: Input file checks and truncation assembly
     prompt_len = len(args.prompt)
@@ -312,16 +362,19 @@ def main() -> int:
         payload[key] = val
 
     data = json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(
-        endpoint,
-        data=data,
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
-        }
-    )
+    request_headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
 
-    # Step 5: Send API request with retry transport
+    # Step 5: Send API request with retry transport. HTTPSConnection does not
+    # follow redirects, so an approved provider endpoint cannot redirect the
+    # reviewer to a local file or private-network service.
+    # Use an explicit client context so certificate and hostname validation are
+    # auditable rather than relying only on the interpreter's implicit defaults.
+    tls_context = ssl.create_default_context()
+    tls_context.minimum_version = ssl.TLSVersion.TLSv1_2
     api_transport_status = "started"
     response_body = ""
     max_attempts = int(os.environ.get("AGENT_RETRIES", "1")) + 1
@@ -330,24 +383,34 @@ def main() -> int:
         if attempt > 1:
             retry_count += 1
             time.sleep(1) # simple backoff
+        connection: Optional[http.client.HTTPSConnection] = None
         try:
-            with urllib.request.urlopen(req, timeout=args.timeout) as response:
-                response_body = response.read().decode("utf-8")
+            connection = http.client.HTTPSConnection(  # nosemgrep: python.lang.security.audit.httpsconnection-detected.httpsconnection-detected
+                endpoint_host,
+                port=443,
+                timeout=args.timeout,
+                context=tls_context,
+            )
+            connection.request("POST", endpoint_path, body=data, headers=request_headers)
+            response = connection.getresponse()
+            response_body = response.read().decode("utf-8")
+            if 200 <= response.status < 300:
                 api_transport_status = "success"
                 break
-        except urllib.error.HTTPError as error:
-            try:
-                error_body = error.read().decode("utf-8")
-            except Exception:
-                error_body = ""
-            safe_print_unicode(f"qwen_agent: HTTP {error.code} {error.reason}\n{error_body}\n", sys.stderr)
-            api_transport_status = f"http_error_{error.code}"
-        except urllib.error.URLError as error:
-            safe_print_unicode(f"qwen_agent: Network error: {error.reason}\n", sys.stderr)
+            safe_print_unicode(
+                f"qwen_agent: HTTP {response.status} {response.reason}\n{response_body}\n",
+                sys.stderr,
+            )
+            api_transport_status = f"http_error_{response.status}"
+        except (OSError, http.client.HTTPException) as error:
+            safe_print_unicode(f"qwen_agent: Network error: {error}\n", sys.stderr)
             api_transport_status = "network_error"
         except Exception as error:
             safe_print_unicode(f"qwen_agent: Unexpected transport error: {error}\n", sys.stderr)
             api_transport_status = "unexpected_error"
+        finally:
+            if connection is not None:
+                connection.close()
 
     if api_transport_status != "success":
         exit_classification = "AUTH_OR_TRANSPORT_ERROR"

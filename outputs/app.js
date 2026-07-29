@@ -261,7 +261,7 @@ async function loadJsonShard(url) {
     if (!res.ok) throw new Error(`Status ${res.status}`);
     return await res.json();
   } catch (e) {
-    console.warn(`Shard failed: ${url}`, e);
+    console.warn("Shard failed:", url, e);
     return null;
   }
 }
@@ -6775,7 +6775,7 @@ function openFretboardStudioModal() {
 }
 
 function mountFretboardStudioLite(containerElement) {
-  if (!containerElement || containerElement.dataset.fslMounted === "true") return;
+  if (!containerElement || containerElement.dataset.fslMounted === "true") return () => {};
   containerElement.dataset.fslMounted = "true";
 
   function getFslAudioEngine() {
@@ -6791,485 +6791,806 @@ function mountFretboardStudioLite(containerElement) {
     return engine;
   }
 
+  // --- CHROMATIC NOTES & CANONICAL TUNINGS DATA ---
+  const CHROMATIC_NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+  const FLAT_TO_SHARP = { "Db": "C#", "Eb": "D#", "Gb": "F#", "Ab": "G#", "Bb": "A#" };
+
+  const TUNINGS = {
+    standard: [64, 59, 55, 50, 45, 40], // E4, B3, G3, D3, A2, E2
+    dropd:    [64, 59, 55, 50, 45, 38], // E4, B3, G3, D3, A2, D2
+    halfstep: [63, 58, 54, 49, 44, 39]  // D#4, A#3, F#3, C#3, G#2, D#2
+  };
   const FSL_OPEN_STRING_MIDI = Object.freeze([64, 59, 55, 50, 45, 40]);
 
-  function fslMidiToScientificPitch(midi) {
-    const oct = Math.floor(midi / 12) - 1;
-    const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-    return notes[midi % 12] + oct;
-  }
+  const SCALE_DEGREE_DEFS = [
+    { semitones: 0, role: "Root", roleLabel: "รากเสียง", focusTag: "Root", degree: "1st (Root)", interval: "Perfect Unison", formula: "โน้ตรากของคอร์ดสามเสียง เป็นศูนย์กลางของโทนเสียง" },
+    { semitones: 2, role: "Major 2nd", roleLabel: "เมเจอร์ 2nd", focusTag: "2", degree: "2nd", interval: "Major 2nd", formula: "โน้ตขั้นที่ 2 ช่วยเชื่อมทำนองไปยังขั้นที่ 3" },
+    { semitones: 3, role: "Minor 3rd", roleLabel: "ไมเนอร์ 3rd", focusTag: "b3", degree: "♭3rd", interval: "Minor 3rd", formula: "โน้ตขั้นที่ 3 ลดครึ่งเสียงใน Minor scale" },
+    { semitones: 4, role: "Major 3rd", roleLabel: "เมเจอร์ 3rd", focusTag: "3", degree: "3rd", interval: "Major 3rd", formula: "โน้ตขั้นที่ 3 ซึ่งกำหนดคุณภาพของคอร์ดเมเจอร์" },
+    { semitones: 5, role: "Perfect 4th", roleLabel: "Perfect 4th", focusTag: "4", degree: "4th", interval: "Perfect 4th", formula: "โน้ตขั้นที่ 4 ดึงกลับเข้าหาเมเจอร์ 3rd" },
+    { semitones: 7, role: "Perfect 5th", roleLabel: "Perfect 5th", focusTag: "5", degree: "5th", interval: "Perfect 5th", formula: "โน้ตขั้นที่ 5 ให้ความมั่นคงและทำงานคู่กับรากเสียง" },
+    { semitones: 9, role: "Major 6th", roleLabel: "เมเจอร์ 6th", focusTag: "6", degree: "6th", interval: "Major 6th", formula: "โน้ตขั้นที่ 6 ให้สีเสียงอบอุ่นในแนว pentatonic" },
+    { semitones: 10, role: "Minor 7th", roleLabel: "ไมเนอร์ 7th", focusTag: "b7", degree: "♭7th", interval: "Minor 7th", formula: "โน้ตขั้นที่ 7 ลดครึ่งเสียงใน Minor scale" },
+    { semitones: 11, role: "Major 7th", roleLabel: "เมเจอร์ 7th", focusTag: "7", degree: "7th", interval: "Major 7th", formula: "โน้ตนำที่สร้างแรงตึงกลับไปยังรากเสียงในอ็อกเทฟถัดไป" }
+  ];
 
-  async function fslPlayNotePreview(playbackNote) {
-    const engine = getFslAudioEngine();
-    if (!engine || !playbackNote) return;
 
-    try {
-      if (typeof engine.unlock === "function") {
-        const unlocked = await engine.unlock();
-        if (!unlocked || !containerElement.isConnected) return;
-      }
 
-      await engine.playNote({
-        channel: "fsl",
-        profile: "fsl-fretboard-position",
-        note: playbackNote,
-        velocity: 0.7,
-        instrument: getSelectedAudioInstrument()
-      });
-    } catch {
-      // Audio failure must never break FSL interaction.
-    }
-  }
-
-  const fslSharpNotes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-  const fslFlatNotes = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
-  const fslStringBases = [4, 11, 7, 2, 9, 4];
-  const fslFlatKeys = ["F", "Bb", "Eb"];
-  const fslOverlayIntervals = {
-    notes: [0, 2, 4, 5, 7, 9, 11],
-    intervals: [0, 2, 4, 5, 7, 9, 11],
-    triad: [0, 4, 7],
-    "guide-tones": [4, 10],
-    "minor-pentatonic": [0, 3, 5, 7, 10],
-    "major-pentatonic": [0, 2, 4, 7, 9]
-  };
-  const fslIntervalRoles = {
-    0: "บ้านของคีย์ จุดพัก จุดเริ่ม และจุดจบ phrase",
-    2: "Passing tone / Color tone ที่ช่วยให้ phrase เดินต่อ",
-    3: "สี minor / blues sadness",
-    4: "สี major / bright resolution",
-    5: "เสียง 4 ที่ช่วยพาไปหา 3 หรือ 5",
-    7: "เสียง 5 โครงคอร์ดที่มั่นคง",
-    9: "Passing tone / Color tone",
-    10: "blues / dominant tension",
-    11: "Major 7th tension"
-  };
-  const fslIntervalNames = {
-    0: "1 (Root)",
-    1: "b2",
-    2: "2",
-    3: "b3",
-    4: "3",
-    5: "4",
-    6: "b5",
-    7: "5",
-    8: "#5",
-    9: "6",
-    10: "b7",
-    11: "7"
-  };
-  const fslState = {
-    key: "A",
-    overlay: "minor-pentatonic",
-    position: "0-12",
-    selectedNoteName: null,
-    focusInterval: "all",
-    challenge: "",
-    challengeFound: []
+  const activeState = {
+    selectedPosition: { stringNumber: 5, fretNumber: 3 },
+    activeNote: "C3",
+    freq: 130.81,
+    role: "Root",
+    key: "C",
+    tuning: "standard",
+    challengeMode: false,
+    challengeTargetPos: { stringNum: 4, fretNum: 2 },
+    challengeTarget: "E3",
+    challengeTargetMidi: 52,
+    challengeScore: 0,
+    intervalFocus: "all",
+    challengeTransitioning: false,
+    challengeTimerId: null,
+    challengeDeferredWorkId: null,
+    challengeDeferredWorkKind: null,
+    challengeBag: [],
+    challengeLastMidi: null
   };
 
-  containerElement.innerHTML = `
-    <div class="fsl-app">
-      <div class="fsl-card fsl-hero-card">
-        <div class="fsl-hero-copy">
-          <span class="fsl-preview-badge">PREVIEW</span>
-          <h4 class="fsl-app-title">Fretboard Studio Lite</h4>
-          <p class="fsl-app-copy">เครื่องมือฝึกจำคอกีตาร์แบบโต้ตอบ: เริ่มจาก root แล้วค่อยเห็นสีของ b3, 3, 5 และ b7 ในพื้นที่เดียวกัน</p>
-        </div>
-        <p class="fsl-status-line">Preview-only · ไม่มีการบันทึก progress</p>
-      </div>
+  const root = document.createElement("div");
+  root.className = "gc-fsl-variant-b";
+  containerElement.innerHTML = "";
+  containerElement.appendChild(root);
 
-      <div class="fsl-teaching-panel">
-        <p><strong>คำแนะนำ:</strong> วันนี้ให้หาเสียงบ้าน (Root) ก่อน จากนั้นหา b3/3 เพื่อฟังสี minor/major ส่วน b7 คือกลิ่น blues/dominant tension.</p>
-      </div>
-
-      <div class="fsl-dashboard-grid">
-        <div class="fsl-panel-card">
-          <h5 class="fsl-panel-title">ตั้งค่า Fretboard</h5>
-          <label class="fsl-control-group">
-            <span class="fsl-control-label">Key</span>
-            <select class="fsl-select" data-fsl-key-select>
-              <option value="C">C</option>
-              <option value="G">G</option>
-              <option value="D">D</option>
-              <option value="A" selected>A</option>
-              <option value="E">E</option>
-              <option value="F">F</option>
-              <option value="Bb">Bb</option>
-              <option value="Eb">Eb</option>
-            </select>
-          </label>
-          <label class="fsl-control-group">
-            <span class="fsl-control-label">Overlay</span>
-            <select class="fsl-select" data-fsl-overlay-select>
-              <option value="notes">Diatonic Notes</option>
-              <option value="intervals">Intervals</option>
-              <option value="triad">Triad (1-3-5)</option>
-              <option value="guide-tones">7th Guide Tones (3, b7)</option>
-              <option value="minor-pentatonic" selected>Minor Pentatonic</option>
-              <option value="major-pentatonic">Major Pentatonic</option>
-            </select>
-          </label>
-          <label class="fsl-control-group">
-            <span class="fsl-control-label">Position</span>
-            <select class="fsl-select" data-fsl-position-select>
-              <option value="0-12" selected>Full (0-12)</option>
-              <option value="0-4">Open (0-4)</option>
-              <option value="5-9">Mid (5-9)</option>
-            </select>
-          </label>
-        </div>
-
-        <div class="fsl-panel-card fsl-inspector-card">
-          <h5 class="fsl-panel-title">โน้ตที่เลือก (Inspector)</h5>
-          <div class="fsl-inspector-empty" data-fsl-inspector-content>จิ้มที่โน้ตบนคอกีตาร์เพื่อดูรายละเอียด</div>
-        </div>
-
-        <div class="fsl-panel-card">
-          <h5 class="fsl-panel-title">สี Major vs Minor</h5>
-          <div class="fsl-compare-content" data-fsl-compare-content></div>
-        </div>
-
-        <div class="fsl-panel-card">
-          <h5 class="fsl-panel-title">โหมดท้าทาย (Challenge)</h5>
-          <div class="fsl-challenge-controls">
-            <select class="fsl-select" data-fsl-challenge-select>
-              <option value="">เลือกบททดสอบ...</option>
-              <option value="0">หา Root ให้ครบ</option>
-              <option value="3">หา b3 ให้ครบ</option>
-              <option value="4">หา 3 ให้ครบ</option>
-              <option value="10">หา b7 ให้ครบ</option>
-            </select>
-            <button type="button" class="fsl-btn" data-fsl-challenge-reset>Reset</button>
-          </div>
-          <div class="fsl-challenge-feedback" data-fsl-challenge-feedback>เลือกบททดสอบเพื่อเริ่ม</div>
-        </div>
-      </div>
-
-      <div class="fsl-focus-bar">
-        <strong>Interval Focus:</strong>
-        <button type="button" class="fsl-focus-chip" data-fsl-interval="0">Root</button>
-        <button type="button" class="fsl-focus-chip" data-fsl-interval="3">b3</button>
-        <button type="button" class="fsl-focus-chip" data-fsl-interval="4">3</button>
-        <button type="button" class="fsl-focus-chip" data-fsl-interval="7">5</button>
-        <button type="button" class="fsl-focus-chip" data-fsl-interval="10">b7</button>
-        <button type="button" class="fsl-focus-chip fsl-active" data-fsl-interval="all">Show All</button>
-      </div>
-
-      <div class="fsl-fretboard-wrapper">
-        <div class="fsl-fretboard" data-fsl-fretboard></div>
-        <div class="fsl-fret-markers" data-fsl-fret-markers></div>
-      </div>
-
-      <div class="fsl-panel-card">
-        <h5 class="fsl-panel-title">สัญลักษณ์ (Legend)</h5>
-        <ul class="fsl-legend-list">
-          <li><span class="fsl-legend-dot fsl-root"></span> <strong>Root (1)</strong> = บ้าน (Home)</li>
-          <li><span class="fsl-legend-dot fsl-major-3"></span> <strong>3</strong> = สี Major</li>
-          <li><span class="fsl-legend-dot fsl-minor-3"></span> <strong>b3</strong> = สี Minor</li>
-          <li><span class="fsl-legend-dot fsl-fifth"></span> <strong>5</strong> = โครงคอร์ด (Power)</li>
-          <li><span class="fsl-legend-dot fsl-flat-7"></span> <strong>b7</strong> = Blues / Dominant Tension</li>
-          <li><span class="fsl-legend-dot fsl-pentatonic"></span> <strong>Pentatonic</strong> = Safe note</li>
-        </ul>
-      </div>
-    </div>
-  `;
-
-  const fslRefs = {
-    keySelect: containerElement.querySelector("[data-fsl-key-select]"),
-    overlaySelect: containerElement.querySelector("[data-fsl-overlay-select]"),
-    positionSelect: containerElement.querySelector("[data-fsl-position-select]"),
-    challengeSelect: containerElement.querySelector("[data-fsl-challenge-select]"),
-    challengeReset: containerElement.querySelector("[data-fsl-challenge-reset]"),
-    challengeFeedback: containerElement.querySelector("[data-fsl-challenge-feedback]"),
-    compareContent: containerElement.querySelector("[data-fsl-compare-content]"),
-    inspectorContent: containerElement.querySelector("[data-fsl-inspector-content]"),
-    fretboard: containerElement.querySelector("[data-fsl-fretboard]"),
-    fretMarkers: containerElement.querySelector("[data-fsl-fret-markers]")
-  };
-
-  fslRefs.keySelect?.addEventListener("change", (event) => {
-    fslState.key = event.target.value;
-    fslState.challengeFound = [];
-    fslResetSelection();
-    fslRender();
-  });
-
-  fslRefs.overlaySelect?.addEventListener("change", (event) => {
-    fslState.overlay = event.target.value;
-    fslResetSelection();
-    fslRender();
-  });
-
-  fslRefs.positionSelect?.addEventListener("change", (event) => {
-    fslState.position = event.target.value;
-    fslState.challengeFound = [];
-    fslRender();
-  });
-
-  containerElement.querySelectorAll(".fsl-focus-chip").forEach((chip) => {
-    chip.addEventListener("click", (event) => {
-      containerElement.querySelectorAll(".fsl-focus-chip").forEach((item) => item.classList.remove("fsl-active"));
-      event.currentTarget.classList.add("fsl-active");
-      fslState.focusInterval = event.currentTarget.dataset.fslInterval || "all";
-      fslRender();
-    });
-  });
-
-  fslRefs.challengeSelect?.addEventListener("change", (event) => {
-    fslState.challenge = event.target.value;
-    fslState.challengeFound = [];
-    fslResetSelection();
-    fslUpdateChallengeFeedback();
-    fslRender();
-  });
-
-  fslRefs.challengeReset?.addEventListener("click", () => {
-    fslState.challengeFound = [];
-    fslResetSelection();
-    fslUpdateChallengeFeedback();
-    fslRender();
-  });
-
-  function fslResetSelection() {
-    fslState.selectedNoteName = null;
-    fslRenderInspectorEmpty();
-  }
-
-  function fslGetNoteName(index) {
-    const notes = fslFlatKeys.includes(fslState.key) ? fslFlatNotes : fslSharpNotes;
-    return notes[index % 12];
-  }
-
-  function fslGetRootIndex() {
-    const notes = fslFlatKeys.includes(fslState.key) ? fslFlatNotes : fslSharpNotes;
-    return notes.indexOf(fslState.key);
-  }
-
-  function fslGetIntervalClass(interval) {
-    switch (interval) {
-      case 0: return "fsl-root";
-      case 4: return "fsl-major-3";
-      case 3: return "fsl-minor-3";
-      case 7: return "fsl-fifth";
-      case 10: return "fsl-flat-7";
-      case 2:
-      case 5:
-      case 9:
-        return "fsl-pentatonic";
-      default:
-        return "";
-    }
-  }
-
-  function fslGetIntervalName(interval) {
-    return fslIntervalNames[interval] || String(interval);
-  }
-
-  function fslUpdateComparePanel() {
-    if (!fslRefs.compareContent) return;
-    const rootIndex = fslGetRootIndex();
-    const minorThirdName = fslGetNoteName((rootIndex + 3) % 12);
-    const majorThirdName = fslGetNoteName((rootIndex + 4) % 12);
-
-    fslRefs.compareContent.innerHTML = `
-      <div class="fsl-compare-item">
-        <div class="fsl-compare-note fsl-minor">${minorThirdName}</div>
-        <div class="fsl-compare-label">b3 (Minor)</div>
-      </div>
-      <div class="fsl-compare-item">
-        <div class="fsl-compare-note fsl-major">${majorThirdName}</div>
-        <div class="fsl-compare-label">3 (Major)</div>
-      </div>
-    `;
-  }
-
-  function fslUpdateChallengeFeedback() {
-    if (!fslRefs.challengeFeedback) return;
-    if (!fslState.challenge) {
-      fslRefs.challengeFeedback.className = "fsl-challenge-feedback";
-      fslRefs.challengeFeedback.textContent = "เลือกบททดสอบเพื่อเริ่ม";
-      return;
-    }
-
-    const rootIndex = fslGetRootIndex();
-    let totalTargets = 0;
-    const startFret = fslState.position === "5-9" ? 5 : 0;
-    let endFret = 12;
-    if (fslState.position === "0-4") endFret = 4;
-    if (fslState.position === "5-9") endFret = 9;
-
-    for (let stringIndex = 0; stringIndex < 6; stringIndex += 1) {
-      for (let fret = startFret; fret <= endFret; fret += 1) {
-        const noteIndex = (fslStringBases[stringIndex] + fret) % 12;
-        const interval = (noteIndex - rootIndex + 12) % 12;
-        if (String(interval) === fslState.challenge) totalTargets += 1;
-      }
-    }
-
-    const found = fslState.challengeFound.length;
-    if (found >= totalTargets && totalTargets > 0) {
-      fslRefs.challengeFeedback.className = "fsl-challenge-feedback fsl-feedback-correct";
-      fslRefs.challengeFeedback.textContent = `ยอดเยี่ยม! หาครบทั้งหมด ${totalTargets} ตัวแล้ว`;
+  function syncContainerTheme() {
+    const isLight = document.documentElement.getAttribute("data-theme") === "light" ||
+                    document.body.classList.contains("light-mode");
+    if (isLight) {
+      root.setAttribute("data-theme", "light");
     } else {
-      fslRefs.challengeFeedback.className = "fsl-challenge-feedback";
-      fslRefs.challengeFeedback.textContent = `พบแล้ว ${found} / ${totalTargets}`;
+      root.removeAttribute("data-theme");
+    }
+  }
+  syncContainerTheme();
+
+  function clearChallengeDeferredWork() {
+    if (activeState.challengeDeferredWorkId === null) return;
+
+    if (
+      activeState.challengeDeferredWorkKind === "raf" &&
+      typeof window !== "undefined" &&
+      typeof window.cancelAnimationFrame === "function"
+    ) {
+      window.cancelAnimationFrame(activeState.challengeDeferredWorkId);
+    } else {
+      clearTimeout(activeState.challengeDeferredWorkId);
+    }
+
+    activeState.challengeDeferredWorkId = null;
+    activeState.challengeDeferredWorkKind = null;
+  }
+
+  function clearChallengeTimer() {
+    if (activeState.challengeTimerId !== null) {
+      clearTimeout(activeState.challengeTimerId);
+      activeState.challengeTimerId = null;
+    }
+    clearChallengeDeferredWork();
+    activeState.challengeTransitioning = false;
+  }
+
+  function getNoteAccessibleLabel(stringNumber, fretNumber, noteFull, challengeHidden) {
+    const sNum = Number(stringNumber);
+    const fNum = Number(fretNumber);
+
+    if (challengeHidden) {
+      return fNum === 0
+        ? 'สาย ' + sNum + ' โน้ตสายเปิด ไม่แสดงชื่อโน้ต'
+        : 'สาย ' + sNum + ' เฟรต ' + fNum + ' ไม่แสดงชื่อโน้ต';
+    }
+
+    return fNum === 0
+      ? 'สาย ' + sNum + ' สายเปิด โน้ต ' + noteFull
+      : 'สาย ' + sNum + ' เฟรต ' + fNum + ' โน้ต ' + noteFull;
+  }
+
+  function maskInspectorForChallenge() {
+    const liveNoteName = root.querySelector('#liveNoteName');
+    const liveRoleLine = root.querySelector('#liveRoleLine');
+    const liveSupportMeta = root.querySelector('#liveSupportMeta');
+
+    if (liveNoteName) liveNoteName.textContent = "?";
+    if (liveRoleLine) liveRoleLine.hidden = true;
+    if (liveSupportMeta) liveSupportMeta.hidden = true;
+
+    const detailDegree = root.querySelector('#detailDegree');
+    const detailInterval = root.querySelector('#detailInterval');
+    const detailFreq = root.querySelector('#detailFreq');
+    const detailMidi = root.querySelector('#detailMidi');
+    const detailFormula = root.querySelector('#detailFormula');
+
+    if (detailDegree) detailDegree.textContent = "Hidden";
+    if (detailInterval) detailInterval.textContent = "Hidden";
+    if (detailFreq) detailFreq.textContent = "Hidden";
+    if (detailMidi) detailMidi.textContent = "Hidden";
+    if (detailFormula) detailFormula.textContent = "ซ่อนระหว่างโหมดท้าทาย กดตำแหน่งบนฟิงเกอร์บอร์ดเพื่อทดสอบความจำโน้ต";
+  }
+
+  function setState(updates) {
+    if ('challengeMode' in updates) {
+      clearChallengeTimer();
+      if (updates.challengeMode) {
+        updates.selectedPosition = null;
+      } else if (activeState.challengeMode && updates.challengeMode === false) {
+        activeState.selectedPosition = { stringNumber: 5, fretNumber: 3 };
+      }
+    }
+
+    if ('tuning' in updates) {
+      clearChallengeTimer();
+    }
+
+    Object.assign(activeState, updates);
+
+    if ('intervalFocus' in updates || 'key' in updates || 'tuning' in updates || 'challengeMode' in updates) {
+      renderFretboard();
+    }
+
+    if ('selectedPosition' in updates || 'key' in updates || 'tuning' in updates || 'challengeMode' in updates) {
+      syncSelectedPositionAndInspector();
+    }
+
+    if ('tuning' in updates || 'challengeMode' in updates) {
+      syncChallengeForCurrentTuning();
     }
   }
 
-  function fslHandleNoteClick(noteData, noteNode) {
-    fslPlayNotePreview(noteData.playbackNote);
-
-    if (fslState.challenge) {
-      fslHandleChallengeClick(noteData, noteNode);
-      return;
-    }
-
-    fslState.selectedNoteName = noteData.noteName;
-    fslUpdateInspector(noteData);
-    fslRender();
+  function isExactSelectedPosition(stringNumber, fretNumber) {
+    return (
+      activeState.selectedPosition &&
+      activeState.selectedPosition.stringNumber === Number(stringNumber) &&
+      activeState.selectedPosition.fretNumber === Number(fretNumber)
+    );
   }
 
-  function fslHandleChallengeClick(noteData, noteNode) {
-    const isCorrect = String(noteData.interval) === fslState.challenge;
-    const noteId = `${noteData.stringIndex}-${noteData.fret}`;
+  function midiToNoteName(midiNum) {
+    const pitchIndex = midiNum % 12;
+    const octave = Math.floor(midiNum / 12) - 1;
+    return CHROMATIC_NOTES[pitchIndex] + octave;
+  }
 
+  function midiToFreq(midiNum) {
+    return Math.round((440 * Math.pow(2, (midiNum - 69) / 12) + Number.EPSILON) * 100) / 100;
+  }
+
+  function getPitchClass(pitchOrNote) {
+    const raw = pitchOrNote.replace(/[0-9]/g, '');
+    return FLAT_TO_SHARP[raw] || raw;
+  }
+
+  function getPositionNote(stringNumber, fretNumber, tuningId = activeState.tuning) {
+    const stringIdx = Number(stringNumber) - 1;
+    const tuningMidiArray = TUNINGS[tuningId] || TUNINGS.standard;
+    const openMidi = tuningMidiArray[stringIdx];
+    const midiNum = openMidi + Number(fretNumber);
+    return deriveNoteDataFromMidi(midiNum, activeState.key);
+  }
+
+  function getNoteDetailsAt(stringNum, fretNum) {
+    return getPositionNote(stringNum, fretNum, activeState.tuning);
+  }
+
+  function deriveNoteDataFromMidi(midiNum, key = activeState.key) {
+    const noteFull = midiToNoteName(midiNum);
+    const freq = midiToFreq(midiNum);
+    const pitchClass = getPitchClass(noteFull);
+
+    const rootPitchClass = getPitchClass(key);
+    const rootIndex = CHROMATIC_NOTES.indexOf(rootPitchClass);
+    const pitchIndex = CHROMATIC_NOTES.indexOf(pitchClass);
+    const semitonesFromRoot = (pitchIndex - rootIndex + 12) % 12;
+
+    const degreeDef = SCALE_DEGREE_DEFS.find(d => d.semitones === semitonesFromRoot);
+
+    return {
+      noteFull,
+      pitchClass,
+      midiNum,
+      freq,
+      isRoot: semitonesFromRoot === 0,
+      inScale: Boolean(degreeDef),
+      role: degreeDef ? degreeDef.role : "Chromatic",
+      roleLabel: degreeDef ? degreeDef.roleLabel : "โครมาติก",
+      focusTag: degreeDef ? degreeDef.focusTag : "other",
+      degree: degreeDef ? degreeDef.degree : "Chromatic",
+      interval: degreeDef ? degreeDef.interval : "Chromatic",
+      formula: degreeDef ? degreeDef.formula : 'โน้ตโครมาติก ' + noteFull + ' อยู่นอก Major scale ของคีย์ ' + key
+    };
+  }
+
+  function renderFslWorkspace() {
+    root.innerHTML = [
+      '<div class="variant-b">',
+      '  <div class="top-control-bar">',
+      '    <div class="compact-focus-bar" id="focusBarBlock">',
+      '      <span class="focus-label">เลือกช่วงเสียง:</span>',
+      '      <div class="interval-btn-group" id="intervalBtnGroup">',
+      '        <button type="button" class="interval-btn ' + (activeState.intervalFocus === "all" ? "active" : "") + '" data-focus="all">แสดงทั้งหมด</button>',
+      '        <button type="button" class="interval-btn ' + (activeState.intervalFocus === "Root" ? "active" : "") + '" data-focus="Root">รากเสียง</button>',
+      '        <button type="button" class="interval-btn ' + (activeState.intervalFocus === "b3" ? "active" : "") + '" data-focus="b3">♭3</button>',
+      '        <button type="button" class="interval-btn ' + (activeState.intervalFocus === "3" ? "active" : "") + '" data-focus="3">3</button>',
+      '        <button type="button" class="interval-btn ' + (activeState.intervalFocus === "5" ? "active" : "") + '" data-focus="5">5</button>',
+      '        <button type="button" class="interval-btn ' + (activeState.intervalFocus === "b7" ? "active" : "") + '" data-focus="b7">♭7</button>',
+      '      </div>',
+      '      <button type="button" class="accordion-header challenge-cluster-control" id="accHeaderChallenge" aria-expanded="false" aria-controls="accBodyChallenge" data-challenge-primary-control data-challenge-mode="false" data-open-label="🎯 เปิดโหมดท้าทาย ▼" data-close-label="🎯 ปิดโหมดท้าทาย ▲">',
+      '        <span class="acc-title" data-action-label>🎯 เปิดโหมดท้าทาย ▼</span>',
+      '      </button>',
+      '      <div class="top-challenge-body hidden" id="accBodyChallenge" aria-hidden="true">',
+      '        <div class="challenge-card-body" id="challengeBanner" aria-live="polite" aria-atomic="true"></div>',
+      '      </div>',
+      '    </div>',
+      '  </div>',
+      '  <div class="main-workspace-layout">',
+      '    <div class="fretboard-column">',
+      '      <section class="fretboard-section">',
+      '        <div class="section-header">',
+      '          <h2 class="section-title">🎸 แผนผังฟิงเกอร์บอร์ด</h2>',
+      '          <span class="section-subtitle">คอลัมน์สาย/สายเปิด × เฟรต 1–12</span>',
+      '        </div>',
+      '        <div class="fretboard-wrapper">',
+      '          <div class="fretboard-grid" id="fretboardGrid">',
+      '            <div class="fret-header-row">',
+      '              <div class="string-label-head">สาย/เปิด</div>',
+      '              <div class="fret-num">1</div><div class="fret-num">2</div><div class="fret-num">3</div><div class="fret-num">4</div><div class="fret-num">5</div><div class="fret-num">6</div><div class="fret-num">7</div><div class="fret-num">8</div><div class="fret-num">9</div><div class="fret-num">10</div><div class="fret-num">11</div><div class="fret-num">12</div>',
+      '            </div>',
+      '          </div>',
+      '        </div>',
+      '      </section>',
+      '      <div class="compact-legend-bar">',
+      '        <span class="legend-title">สัญลักษณ์:</span>',
+      '        <span class="legend-item"><span class="dot-root"></span> รากเสียง</span>',
+      '        <span class="legend-item"><span class="dot-scale"></span> ในสเกล</span>',
+      '        <span class="legend-item"><span class="dot-other"></span> อื่น ๆ</span>',
+      '        <span class="legend-item"><span class="star-selected">★</span> ตำแหน่งที่เลือก</span>',
+      '      </div>',
+      '    </div>',
+      '    <div class="inspector-column">',
+      '      <section class="inspector-section">',
+      '        <div class="inspector-summary-bar inspector-summary-row" id="inspectorBarTrigger">',
+      '          <span class="note-pill inspector-note-pill" id="liveNoteName">C3</span>',
+      '          <span class="live-meta inspector-summary-content" id="liveNoteMeta">',
+      '            <span class="inspector-role-line" id="liveRoleLine">บทบาท: <strong id="liveRole">รากเสียง</strong></span>',
+      '            <span class="inspector-support-line" id="liveSupportMeta"><span id="liveFrequency">130.81 Hz</span><span aria-hidden="true"> · </span><span>สาย <span id="liveString">5</span></span><span aria-hidden="true"> · </span><span>เฟรต <span id="liveFret">3</span></span></span>',
+      '            <span class="inspector-challenge-copy" id="liveChallengeMeta" hidden>โหมดท้าทายกำลังทำงาน — เลือกตำแหน่งเพื่อหาคำตอบ</span>',
+      '          </span>',
+      '        </div>',
+      '        <button type="button" class="toggle-btn inspector-toggle" id="toggleInspectorBtn" aria-expanded="false" aria-controls="inspectorDetailsPanel" data-open-label="เปิดรายละเอียด ▼" data-close-label="ปิดรายละเอียด ▲">',
+      '          <span data-action-label>เปิดรายละเอียด ▼</span>',
+      '        </button>',
+      '        <div class="collapsible-panel hidden" id="inspectorDetailsPanel">',
+      '          <div class="inspector-card-body">',
+      '            <div class="metrics-grid">',
+      '              <div class="metric-box"><span class="metric-label">ลำดับขั้นเสียง</span><span class="metric-value" id="detailDegree">1st (Root)</span></div>',
+      '              <div class="metric-box"><span class="metric-label">ชื่อช่วงเสียง</span><span class="metric-value" id="detailInterval">Perfect Unison</span></div>',
+      '              <div class="metric-box"><span class="metric-label">ความถี่</span><span class="metric-value" id="detailFreq">130.81 Hz</span></div>',
+      '              <div class="metric-box"><span class="metric-label">หมายเลขโน้ต MIDI</span><span class="metric-value" id="detailMidi">48</span></div>',
+      '            </div>',
+      '            <div class="formula-block"><span class="formula-label">บทบาทในฮาร์โมนี:</span><p class="formula-text" id="detailFormula">โน้ตรากของคอร์ด C เมเจอร์ (C - E - G) เป็นศูนย์กลางของโทนเสียง</p></div>',
+      '          </div>',
+      '        </div>',
+      '      </section>',
+      '      <section class="accordions-section">',
+      '        <!-- Major vs Minor Accordion (SALVAGED FROM SUBAGENT B TRANSCRIPT LOG) -->',
+      '        <div class="accordion-item" id="accMajorMinor">',
+      '          <button type="button" class="accordion-header" id="accHeaderMajorMinor" aria-expanded="false" aria-controls="accBodyMajorMinor" data-open-label="เมเจอร์เทียบไมเนอร์" data-close-label="ปิดเมเจอร์เทียบไมเนอร์">',
+      '            <span class="acc-title" data-action-label>เมเจอร์เทียบไมเนอร์</span>',
+      '            <span class="chevron" data-chevron>▼</span>',
+      '          </button>',
+      '          <div class="accordion-body hidden" id="accBodyMajorMinor" aria-hidden="true">',
+      '            <div class="acc-content">',
+      '              <div class="comparison-table-wrapper">',
+      '                <table class="comparison-table">',
+      '                  <thead><tr><th>คุณสมบัติ</th><th>C เมเจอร์สเกล</th><th>C ไมเนอร์สเกล</th></tr></thead>',
+      '                  <tbody>',
+      '                    <tr><td>สูตร</td><td>1 - 2 - 3 - 4 - 5 - 6 - 7</td><td>1 - 2 - ♭3 - 4 - 5 - ♭6 - ♭7</td></tr>',
+      '                    <tr><td>โน้ต</td><td>C - D - E - F - G - A - B</td><td>C - D - E♭ - F - G - A♭ - B♭</td></tr>',
+      '                    <tr><td>อารมณ์เสียง</td><td>สว่าง ลงตัว สดใส</td><td>หม่น เศร้า ตึงเครียด</td></tr>',
+      '                  </tbody>',
+      '                </table>',
+      '              </div>',
+      '            </div>',
+      '          </div>',
+      '        </div>',
+      '        <!-- Practice Recommendations Accordion (SALVAGED FROM SUBAGENT B TRANSCRIPT LOG) -->',
+      '        <div class="accordion-item" id="accTips">',
+      '          <button type="button" class="accordion-header" id="accHeaderTips" aria-expanded="false" aria-controls="accBodyTips" data-open-label="ข้อแนะนำการซ้อม" data-close-label="ปิดข้อแนะนำการซ้อม">',
+      '            <span class="acc-title" data-action-label>ข้อแนะนำการซ้อม</span>',
+      '            <span class="chevron" data-chevron>▼</span>',
+      '          </button>',
+      '          <div class="accordion-body hidden" id="accBodyTips" aria-hidden="true">',
+      '            <div class="acc-content">',
+      '              <ul class="tips-list">',
+      '                <li><strong>นิ้วชี้ (1):</strong> กดโน้ตเฟรต 1 และวางนิ้วโป้งไว้ด้านหลังคอกีตาร์</li>',
+      '                <li><strong>นิ้วกลาง (2):</strong> กดโน้ตเฟรต 2 และรักษาทรงนิ้วให้โค้ง</li>',
+      '                <li><strong>นิ้วนาง (3):</strong> กดโน้ตเฟรต 3 ใกล้ลวดเฟรตเพื่อเสียงใส</li>',
+      '                <li><strong>Economy Picking:</strong> ใช้ Downstroke เมื่อต้องเปลี่ยนสาย</li>',
+      '              </ul>',
+      '            </div>',
+      '          </div>',
+      '        </div>',
+      '        <div class="accordion-item" id="accFullLegend">',
+      '          <button type="button" class="accordion-header" id="accHeaderLegend" aria-expanded="false" aria-controls="accBodyLegend" data-open-label="เปิดสัญลักษณ์และสี" data-close-label="ปิดสัญลักษณ์และสี">',
+      '            <span class="acc-title" data-action-label>เปิดสัญลักษณ์และสี</span>',
+      '            <span class="chevron" data-chevron>▼</span>',
+      '          </button>',
+      '          <div class="accordion-body hidden" id="accBodyLegend" aria-hidden="true">',
+      '            <div class="acc-content">',
+      '              <div class="comparison-table-wrapper">',
+      '                <table class="comparison-table">',
+      '                  <thead><tr><th>สัญลักษณ์</th><th>รหัสสี</th><th>ความหมายและบทบาท</th></tr></thead>',
+      '                  <tbody>',
+      '                    <tr><td>🔴 ● รากเสียง</td><td>#ff6b4a (แดง)</td><td>โน้ตรากของคีย์ที่กำลังใช้ เช่น C ใน C เมเจอร์</td></tr>',
+      '                    <tr><td>🟡 ● ในสเกล</td><td>#d8a866 (ทอง)</td><td>โน้ตไดอะโทนิกที่อยู่ใน Major/Minor scale</td></tr>',
+      '                    <tr><td>⚪ ● อื่น ๆ</td><td>#a69888 (หม่น)</td><td>โน้ตโครมาติกที่อยู่นอกสเกล</td></tr>',
+      '                    <tr><td>★ ตำแหน่งที่เลือก</td><td>#4ac6ff (ฟ้า)</td><td>ตำแหน่งที่เลือกอยู่บนฟิงเกอร์บอร์ด</td></tr>',
+      '                  </tbody>',
+      '                </table>',
+      '              </div>',
+      '            </div>',
+      '          </div>',
+      '        </div>',
+      '      </section>',
+      '    </div>',
+      '  </div>',
+      '</div>'
+    ].join('\n');
+
+    renderFretboard();
+    initFretboardEventDelegation();
+    initIntervalFocus();
+    initChallengeMode();
+    initAccordions();
+    syncSelectedPositionAndInspector();
+  }
+
+  function initFretboardEventDelegation() {
+    const grid = root.querySelector('#fretboardGrid');
+    if (!grid) return;
+
+    grid.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-note-button]');
+      if (!btn) return;
+
+      const sNum = Number(btn.dataset.string);
+      const fNum = Number(btn.dataset.fret);
+      const clickedNoteFull = btn.dataset.noteFull;
+
+      if (activeState.challengeMode) {
+        if (activeState.challengeTransitioning) return;
+
+        const clickedMidi = getPositionNote(sNum, fNum, activeState.tuning).midiNum;
+        const isCorrect = (clickedMidi === activeState.challengeTargetMidi);
+
+        showChallengeFeedback(isCorrect, activeState.challengeTarget, clickedNoteFull, sNum, fNum);
+
+        if (isCorrect) {
+          activeState.challengeScore += 1;
+          activeState.challengeTransitioning = true;
+          activeState.challengeTimerId = setTimeout(() => {
+            activeState.challengeTimerId = null;
+            if (!activeState.challengeMode) return;
+
+            chooseNextChallengeTarget();
+            updateChallengeBanner();
+
+            const deferredRender = () => {
+              activeState.challengeDeferredWorkId = null;
+              activeState.challengeDeferredWorkKind = null;
+
+              if (!activeState.challengeMode) {
+                activeState.challengeTransitioning = false;
+                return;
+              }
+
+              renderFretboard();
+              syncSelectedPositionAndInspector();
+              activeState.challengeTransitioning = false;
+            };
+
+            if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+              activeState.challengeDeferredWorkKind = "raf";
+              activeState.challengeDeferredWorkId = window.requestAnimationFrame(deferredRender);
+            } else {
+              activeState.challengeDeferredWorkKind = "task";
+              activeState.challengeDeferredWorkId = setTimeout(deferredRender, 0);
+            }
+          }, 750); // MANDATED 750ms DWELL TIMEOUT
+        } else {
+          clearChallengeTimer(); // cancel any previous wrong-feedback timer (prevents stacking)
+          activeState.challengeTransitioning = true;
+          activeState.challengeTimerId = setTimeout(() => {
+            activeState.challengeTimerId = null;
+            if (!activeState.challengeMode) return;
+            activeState.challengeTransitioning = false;
+            updateChallengeBanner(); // restore question prompt
+          }, 750);
+        }
+
+        renderFretboard();
+        syncSelectedPositionAndInspector();
+        return;
+      }
+
+      selectFretboardPosition(sNum, fNum);
+    });
+  }
+
+  function showChallengeFeedback(isCorrect, targetNote, chosenNote, stringNum, fretNum) {
+    const banner = root.querySelector('#challengeBanner');
+    if (!banner) return;
+
+    const sStr = stringNum ? ' · สาย ' + stringNum + ' · เฟรต ' + fretNum : '';
     if (isCorrect) {
-      if (!fslState.challengeFound.includes(noteId)) {
-        fslState.challengeFound.push(noteId);
-        noteNode.classList.add("fsl-anim-correct");
-        setTimeout(() => noteNode.classList.remove("fsl-anim-correct"), 300);
-        fslUpdateChallengeFeedback();
-        fslRender();
+      banner.innerHTML = '<div class="challenge-prompt-header"><span class="challenge-status-tag correct-tag">✅ ถูกต้อง — ' + targetNote + sStr + '</span><span class="challenge-score-label">คะแนน: <strong>' + (activeState.challengeScore + 1) + '</strong></span></div><div class="challenge-subtext">เตรียมโจทย์ถัดไป — รักษาจังหวะให้มั่นคง</div>';
+    } else {
+      banner.innerHTML = '<div class="challenge-prompt-header"><span class="challenge-status-tag wrong-tag">❌ ยังไม่ถูก — คุณเลือก ' + chosenNote + '</span><span class="challenge-score-label">คะแนน: <strong>' + activeState.challengeScore + '</strong></span></div><div class="challenge-subtext">ลองอีกครั้ง — โจทย์เดิมยังไม่เปลี่ยน</div>';
+    }
+  }
+
+  function buildChallengeMidiPool(tuningId) {
+    const midiMap = {};
+    const tuningMidiArray = TUNINGS[tuningId] || TUNINGS.standard;
+    for (let s = 1; s <= 6; s++) {
+      const openMidi = tuningMidiArray[s - 1];
+      for (let f = 0; f <= 12; f++) {
+        const midi = openMidi + f;
+        if (!(midi in midiMap)) {
+          midiMap[midi] = { stringNum: s, fretNum: f };
+        }
       }
-      return;
+    }
+    return Object.keys(midiMap)
+      .map(Number)
+      .sort(function(a, b) { return a - b; })
+      .map(function(midi) { return { midi: midi, stringNum: midiMap[midi].stringNum, fretNum: midiMap[midi].fretNum }; });
+  }
+
+  function refillChallengeBag(pool, lastMidi) {
+    const bag = pool.slice();
+    for (let i = bag.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = bag[i]; bag[i] = bag[j]; bag[j] = tmp;
+    }
+    // prevent immediate repeat across bag refill
+    if (bag.length > 1 && bag[0].midi === lastMidi) {
+      const tmp = bag[0]; bag[0] = bag[1]; bag[1] = tmp;
+    }
+    return bag;
+  }
+
+  function chooseNextChallengeTarget() {
+    const pool = buildChallengeMidiPool(activeState.tuning);
+    if (pool.length === 0) return;
+
+    if (activeState.challengeBag.length === 0) {
+      activeState.challengeBag = refillChallengeBag(pool, activeState.challengeLastMidi);
     }
 
-    noteNode.classList.add("fsl-anim-wrong");
-    setTimeout(() => noteNode.classList.remove("fsl-anim-wrong"), 300);
+    const next = activeState.challengeBag.shift();
+    if (!next) return;
+
+    activeState.challengeLastMidi = next.midi;
+    activeState.challengeTargetMidi = next.midi;
+    activeState.challengeTargetPos = { stringNum: next.stringNum, fretNum: next.fretNum };
+    activeState.challengeTarget = midiToNoteName(next.midi);
   }
 
-  function fslRenderInspectorEmpty() {
-    if (!fslRefs.inspectorContent) return;
-    fslRefs.inspectorContent.innerHTML = "จิ้มที่โน้ตบนคอกีตาร์เพื่อดูรายละเอียด";
-    fslRefs.inspectorContent.className = "fsl-inspector-empty";
+  function setChallengeOpen(open) {
+    const bodyEl = root.querySelector('#accBodyChallenge');
+    const headerBtn = root.querySelector('#accHeaderChallenge');
+    if (!headerBtn) return;
+
+    if (open) {
+      activeState.challengeBag = [];
+      activeState.challengeLastMidi = null;
+      chooseNextChallengeTarget();
+      setState({ challengeMode: true, challengeScore: 0 });
+      if (bodyEl) {
+        bodyEl.classList.remove('hidden');
+        bodyEl.setAttribute('aria-hidden', 'false');
+      }
+      headerBtn.setAttribute('aria-expanded', 'true');
+      headerBtn.setAttribute('data-challenge-mode', 'true');
+    } else {
+      clearChallengeTimer();
+      const _closeEngine = getFslAudioEngine();
+      if (_closeEngine) _closeEngine.stopChannel('fsl');
+      setState({ challengeMode: false });
+
+      if (bodyEl) {
+        bodyEl.classList.add('hidden');
+        bodyEl.setAttribute('aria-hidden', 'true');
+      }
+      headerBtn.setAttribute('aria-expanded', 'false');
+      headerBtn.setAttribute('data-challenge-mode', 'false');
+    }
+    syncAccordionTrigger(headerBtn, open);
+    updateChallengeBanner();
   }
 
-  function fslUpdateInspector(noteData) {
-    if (!fslRefs.inspectorContent) return;
-    const roleText = fslIntervalRoles[noteData.interval] || "Passing tone";
-    fslRefs.inspectorContent.className = "fsl-inspector-data";
-    fslRefs.inspectorContent.innerHTML = `
-      <div class="fsl-ins-row">
-        <span class="fsl-ins-label">Note:</span>
-        <span class="fsl-ins-val">${noteData.noteName}</span>
-      </div>
-      <div class="fsl-ins-row">
-        <span class="fsl-ins-label">Position:</span>
-        <span class="fsl-ins-val">สาย ${noteData.stringNumber} เฟรต ${noteData.fret}</span>
-      </div>
-      <div class="fsl-ins-row">
-        <span class="fsl-ins-label">Interval:</span>
-        <span class="fsl-ins-val">${fslGetIntervalName(noteData.interval)}</span>
-      </div>
-      <div class="fsl-ins-desc">${roleText}</div>
-    `;
+  function initChallengeMode() {
+    const headerBtn = root.querySelector('#accHeaderChallenge');
+    if (!headerBtn) return;
+
+    headerBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const isCurrentlyOpen = activeState.challengeMode;
+      setChallengeOpen(!isCurrentlyOpen);
+    });
   }
 
-  function fslRender() {
-    if (!fslRefs.fretboard || !fslRefs.fretMarkers) return;
-    const rootIndex = fslGetRootIndex();
-    const activeIntervals = fslOverlayIntervals[fslState.overlay] || [];
-    const startFret = fslState.position === "5-9" ? 5 : 0;
-    let endFret = 12;
-    if (fslState.position === "0-4") endFret = 4;
-    if (fslState.position === "5-9") endFret = 9;
+  function syncChallengeForCurrentTuning() {
+    if (!activeState.challengeMode) return;
+    // The FSL UI has no tuning selector; activeState.tuning is always "standard".
+    // This path is only reached when challengeMode changes via setState.
+    // Refresh display name from the stored MIDI and update the banner.
+    activeState.challengeTarget = midiToNoteName(activeState.challengeTargetMidi);
+    updateChallengeBanner();
+  }
 
-    fslRefs.fretboard.innerHTML = "";
-    fslRefs.fretMarkers.innerHTML = "";
-    fslRefs.fretboard.className = fslState.focusInterval !== "all" ? "fsl-fretboard fsl-focus-mode" : "fsl-fretboard";
+  function updateChallengeBanner() {
+    const banner = root.querySelector('#challengeBanner');
+    if (!banner) return;
 
-    fslStringBases.forEach((base, stringIndex) => {
-      const stringRow = document.createElement("div");
-      stringRow.className = "fsl-string-row";
-      const stringNumber = stringIndex + 1;
+    if (activeState.challengeMode) {
+      banner.innerHTML = '<div class="challenge-prompt-header"><span class="challenge-target-label">🎯 โจทย์: หาโน้ต <strong class="challenge-target-highlight">' + activeState.challengeTarget + '</strong></span><span class="challenge-score-label">คะแนน: <strong>' + activeState.challengeScore + '</strong></span></div><div class="challenge-subtext">เลือกตำแหน่งบนฟิงเกอร์บอร์ด</div>';
+    } else {
+      banner.innerHTML = '';
+    }
+  }
 
-      for (let fret = startFret; fret <= endFret; fret += 1) {
-        const fretCell = document.createElement("div");
-        fretCell.className = `fsl-fret-cell fsl-fret-${fret}`;
+  function initIntervalFocus() {
+    const group = root.querySelector('#intervalBtnGroup');
+    if (!group) return;
 
-        const noteIndex = (base + fret) % 12;
-        const interval = (noteIndex - rootIndex + 12) % 12;
-        const isActive = activeIntervals.includes(interval);
-        const noteName = fslGetNoteName(noteIndex);
-        const intervalClass = fslGetIntervalClass(interval);
-        const noteNode = document.createElement("button");
-        noteNode.type = "button";
-        noteNode.className = intervalClass ? `fsl-note-node ${intervalClass}` : "fsl-note-node";
-        noteNode.dataset.active = String(isActive);
-        noteNode.setAttribute("aria-label", `String ${stringNumber} fret ${fret} note ${noteName} interval ${fslGetIntervalName(interval)}`);
+    group.addEventListener('click', (e) => {
+      const btn = e.target.closest('.interval-btn');
+      if (!btn) return;
 
-        if (fslState.focusInterval !== "all") {
-          noteNode.dataset.focus = String(String(interval) === fslState.focusInterval);
+      const focusTag = btn.dataset.focus;
+      group.querySelectorAll('.interval-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      setState({ intervalFocus: focusTag });
+    });
+  }
+
+  function renderFretboard() {
+    const grid = root.querySelector('#fretboardGrid');
+    if (!grid) return;
+
+    const rows = grid.querySelectorAll('.string-row');
+    rows.forEach(r => r.remove());
+
+    const isChallengeHidden = activeState.challengeMode;
+
+    for (let s = 1; s <= 6; s++) {
+      const row = document.createElement('div');
+      row.className = 'string-row';
+      row.dataset.string = String(s);
+
+      const openNoteDetails = getPositionNote(s, 0, activeState.tuning);
+      const isOpenSelected = isExactSelectedPosition(s, 0);
+      const openLabel = getNoteAccessibleLabel(s, 0, openNoteDetails.noteFull, isChallengeHidden);
+
+      const openCol = document.createElement('div');
+      openCol.className = 'string-label-combined';
+      openCol.innerHTML = '<span class="string-title">สาย ' + s + '</span><button type="button" class="note-hit-target open-note-target ' + (isOpenSelected ? 'is-selected' : '') + '" data-note-button data-string="' + s + '" data-fret="0" data-note-full="' + openNoteDetails.noteFull + '" aria-label="' + openLabel + '"><span class="note-marker open-badge ' + (isOpenSelected ? 'active-selected' : '') + '">' + (isChallengeHidden ? '?' : openNoteDetails.pitchClass) + '</span></button>';
+      row.appendChild(openCol);
+
+      for (let f = 1; f <= 12; f++) {
+        const fretCell = document.createElement('div');
+        fretCell.className = 'fret-cell';
+        fretCell.dataset.fret = String(f);
+
+        const noteDetails = getPositionNote(s, f, activeState.tuning);
+        const isSelected = isExactSelectedPosition(s, f);
+        const isDimmed = shouldDimMarker(noteDetails.pitchClass);
+        const cellLabel = getNoteAccessibleLabel(s, f, noteDetails.noteFull, isChallengeHidden);
+
+        let markerClass = 'note-marker';
+        if (isSelected) {
+          markerClass += ' active-selected';
+        } else if (noteDetails.isRoot) {
+          markerClass += ' root-note';
+        } else if (noteDetails.inScale) {
+          markerClass += ' in-scale';
         }
+        if (isDimmed) markerClass += ' dimmed';
 
-        if (fslState.challenge) {
-          const noteId = `${stringIndex}-${fret}`;
-          if (fslState.challengeFound.includes(noteId)) {
-            noteNode.dataset.active = "true";
-            noteNode.classList.add("fsl-is-selected");
-          } else {
-            noteNode.dataset.active = "false";
-          }
-        }
-
-        if (!fslState.challenge && fslState.selectedNoteName && noteName === fslState.selectedNoteName) {
-          noteNode.classList.add("fsl-is-family");
-        }
-
-        noteNode.textContent = fslState.overlay === "intervals" ? fslGetIntervalName(interval) : noteName;
-        const midi = FSL_OPEN_STRING_MIDI[stringIndex] + fret;
-        const playbackNote = fslMidiToScientificPitch(midi);
-        const noteData = { noteName, stringIndex, stringNumber, fret, interval, midi, playbackNote };
-        noteNode.addEventListener("click", () => {
-          containerElement.querySelectorAll(".fsl-note-node").forEach((node) => node.classList.remove("fsl-is-selected"));
-          if (!fslState.challenge) noteNode.classList.add("fsl-is-selected");
-          fslHandleNoteClick(noteData, noteNode);
-        });
-
-        fretCell.appendChild(noteNode);
-
-        if (stringIndex === 2 && [3, 5, 7, 9, 12].includes(fret)) {
-          const inlay = document.createElement("div");
-          inlay.className = "fsl-inlay-dot";
-          fretCell.appendChild(inlay);
-        }
-
-        stringRow.appendChild(fretCell);
+        fretCell.innerHTML = '<button type="button" class="note-hit-target fretted-note-target ' + (isSelected ? 'is-selected' : '') + '" data-note-button data-string="' + s + '" data-fret="' + f + '" data-note-full="' + noteDetails.noteFull + '" aria-label="' + cellLabel + '"><span class="' + markerClass + '">' + (isChallengeHidden ? '?' : noteDetails.pitchClass) + '</span></button>';
+        row.appendChild(fretCell);
       }
 
-      fslRefs.fretboard.appendChild(stringRow);
+      grid.appendChild(row);
+    }
+  }
+
+  function shouldDimMarker(pitchClass) {
+    if (activeState.intervalFocus === 'all') return false;
+
+    const rootPitchClass = getPitchClass(activeState.key);
+    const rootIndex = CHROMATIC_NOTES.indexOf(rootPitchClass);
+    const pitchIndex = CHROMATIC_NOTES.indexOf(pitchClass);
+    const semitonesFromRoot = (pitchIndex - rootIndex + 12) % 12;
+
+    const degreeDef = SCALE_DEGREE_DEFS.find(d => d.semitones === semitonesFromRoot);
+    if (!degreeDef) return true;
+
+    return degreeDef.focusTag !== activeState.intervalFocus;
+  }
+
+  function selectFretboardPosition(stringNumber, fretNumber) {
+    const sNum = Number(stringNumber);
+    const fNum = Number(fretNumber);
+
+    activeState.selectedPosition = { stringNumber: sNum, fretNumber: fNum };
+
+    root.querySelectorAll('[data-note-button]').forEach(btn => {
+      const bString = Number(btn.dataset.string);
+      const bFret = Number(btn.dataset.fret);
+      const isSel = (bString === sNum && bFret === fNum);
+
+      btn.classList.toggle('is-selected', isSel);
+      const marker = btn.querySelector('.note-marker');
+      if (marker) {
+        marker.classList.toggle('active-selected', isSel);
+      }
     });
 
-    for (let fret = startFret; fret <= endFret; fret += 1) {
-      const marker = document.createElement("div");
-      marker.className = `fsl-fret-marker-cell fsl-fret-${fret}`;
-      marker.textContent = fret === 0 ? "Nut" : String(fret);
-      fslRefs.fretMarkers.appendChild(marker);
-    }
-
-    fslUpdateComparePanel();
-    fslUpdateChallengeFeedback();
-  }
-
-  fslRender();
-
-  return () => {
     const engine = getFslAudioEngine();
     if (engine) {
-      engine.stopChannel("fsl");
+      const noteDetails = getNoteDetailsAt(sNum, fNum);
+      engine.playNote({ channel: 'fsl', profile: 'fsl-fretboard-position', note: noteDetails.noteFull, velocity: 0.8 });
+
     }
+
+    syncSelectedPositionAndInspector();
+  }
+
+  function syncSelectedPositionAndInspector() {
+    if (activeState.challengeMode) {
+      maskInspectorForChallenge();
+      return;
+    }
+
+    const pos = activeState.selectedPosition || { stringNumber: 5, fretNumber: 3 };
+    const noteDetails = getNoteDetailsAt(pos.stringNumber, pos.fretNumber);
+    updateInspector(noteDetails);
+  }
+
+  function updateInspector(noteDetails) {
+    const pos = activeState.selectedPosition || { stringNumber: 5, fretNumber: 3 };
+
+    const liveNoteName = root.querySelector('#liveNoteName');
+    const liveRole = root.querySelector('#liveRole');
+    const liveRoleLine = root.querySelector('#liveRoleLine');
+    const liveSupportMeta = root.querySelector('#liveSupportMeta');
+    const liveChallengeMeta = root.querySelector('#liveChallengeMeta');
+    const liveFrequency = root.querySelector('#liveFrequency');
+    const liveString = root.querySelector('#liveString');
+    const liveFret = root.querySelector('#liveFret');
+
+    if (liveNoteName) liveNoteName.textContent = noteDetails.noteFull;
+    if (liveRole) liveRole.textContent = noteDetails.roleLabel || noteDetails.role;
+    if (liveRoleLine) liveRoleLine.hidden = false;
+    if (liveSupportMeta) liveSupportMeta.hidden = false;
+
+    if (liveFrequency) liveFrequency.textContent = noteDetails.freq + ' Hz';
+    if (liveString) liveString.textContent = String(pos.stringNumber);
+    if (liveFret) liveFret.textContent = String(pos.fretNumber);
+
+    const detailDegree = root.querySelector('#detailDegree');
+    const detailInterval = root.querySelector('#detailInterval');
+    const detailFreq = root.querySelector('#detailFreq');
+    const detailMidi = root.querySelector('#detailMidi');
+    const detailFormula = root.querySelector('#detailFormula');
+
+    if (detailDegree) detailDegree.textContent = noteDetails.degree;
+    if (detailInterval) detailInterval.textContent = noteDetails.interval;
+    if (detailFreq) detailFreq.textContent = noteDetails.freq + ' Hz';
+    if (detailMidi) detailMidi.textContent = String(noteDetails.midiNum);
+    if (detailFormula) detailFormula.textContent = noteDetails.formula;
+  }
+
+  function syncAccordionTrigger(headerBtn, isOpen) {
+    if (!headerBtn) return;
+    const actionSpan = headerBtn.querySelector('[data-action-label]');
+    const chevronSpan = headerBtn.querySelector('[data-chevron]');
+
+    const openLabel = headerBtn.dataset.openLabel || "เปิดรายละเอียด";
+    const closeLabel = headerBtn.dataset.closeLabel || "ปิดรายละเอียด";
+
+    if (actionSpan) {
+      actionSpan.textContent = isOpen ? closeLabel : openLabel;
+    }
+    if (chevronSpan) {
+      chevronSpan.textContent = isOpen ? "▲" : "▼";
+    }
+    headerBtn.setAttribute('aria-expanded', String(isOpen));
+  }
+
+  function syncInspectorToggle(toggleBtn, panel, isOpen) {
+    if (!toggleBtn || !panel) return;
+    const actionSpan = toggleBtn.querySelector('[data-action-label]');
+    const openLabel = toggleBtn.dataset.openLabel || "เปิดรายละเอียด ▼";
+    const closeLabel = toggleBtn.dataset.closeLabel || "ปิดรายละเอียด ▲";
+    panel.classList.toggle('hidden', !isOpen);
+    panel.setAttribute('aria-hidden', String(!isOpen));
+    toggleBtn.setAttribute('aria-expanded', String(isOpen));
+    if (actionSpan) actionSpan.textContent = isOpen ? closeLabel : openLabel;
+  }
+
+  function initAccordions() {
+    const items = root.querySelectorAll('.accordion-item');
+    items.forEach(item => {
+      const header = item.querySelector('.accordion-header');
+      const body = item.querySelector('.accordion-body');
+      if (header && body) {
+        setupAccordionItem(header, body);
+      }
+    });
+
+    const toggleInspectorBtn = root.querySelector('#toggleInspectorBtn');
+    const inspectorPanel = root.querySelector('#inspectorDetailsPanel');
+
+    if (toggleInspectorBtn && inspectorPanel) {
+      const toggleInspector = () => {
+        const isOpen = inspectorPanel.classList.contains('hidden');
+        syncInspectorToggle(toggleInspectorBtn, inspectorPanel, isOpen);
+      };
+      toggleInspectorBtn.addEventListener('click', () => {
+        toggleInspector();
+      });
+      toggleInspectorBtn.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        toggleInspector();
+      });
+      syncInspectorToggle(toggleInspectorBtn, inspectorPanel, !inspectorPanel.classList.contains('hidden'));
+    }
+  }
+
+  function setupAccordionItem(headerBtn, bodyEl) {
+    headerBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const isHidden = bodyEl.classList.contains('hidden');
+      bodyEl.classList.toggle('hidden', !isHidden);
+      bodyEl.setAttribute('aria-hidden', String(!isHidden));
+      syncAccordionTrigger(headerBtn, isHidden);
+    });
+
+    headerBtn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        // Delegate to click so all click handlers (including initChallengeMode's
+        // setChallengeOpen) fire correctly. Do NOT manually toggle CSS here.
+        headerBtn.click();
+      }
+    });
+
+  }
+
+  renderFslWorkspace();
+
+  return () => {
+    clearChallengeTimer();
+    const _unmountEngine = getFslAudioEngine();
+    if (_unmountEngine) _unmountEngine.stopChannel('fsl');
+    containerElement.innerHTML = "";
+    delete containerElement.dataset.fslMounted;
   };
+
 }
 
 function getMiniCourses() {

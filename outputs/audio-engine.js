@@ -721,7 +721,7 @@
     } catch (error) {
       soundLabFailedSamples.add(sample.note);
       failedSampleCount = soundLabFailedSamples.size;
-      console.warn(`[AudioEngine] Nylon sample ${sample.note} failed to load.`, error);
+      console.warn("[AudioEngine] Nylon sample failed to load.", sample.note, error);
     }
   }
 
@@ -836,7 +836,7 @@
             electricSampleBuffers.set(url, decodedAudio);
           } catch (error) {
             electricFailedSamples.add(url);
-            console.warn(`[AudioEngine] Electric sample ${url} failed to load.`, error);
+            console.warn("[AudioEngine] Electric sample failed to load.", url, error);
           }
         }));
 
@@ -934,7 +934,7 @@
              fslSynthSampleBuffers.set(url, decodedAudio);
           } catch (error) {
              fslSynthFailedSamples.add(url);
-             console.warn(`[AudioEngine] FSL Synth sample ${url} failed to load.`, error);
+             console.warn("[AudioEngine] FSL Synth sample failed to load.", url, error);
           }
         }));
 
@@ -970,7 +970,7 @@
 
     let startDelay = 0;
     if (activeSet.size >= 2) {
-      startDelay = 0.005; // 5ms fade window for smooth retirement
+      startDelay = 0.012; // 12ms fade-out window for smooth retirement
     }
     const retireTime = currentTime + startDelay;
 
@@ -1000,8 +1000,10 @@
     source.buffer = buffer;
     source.playbackRate.setValueAtTime(1.0, startNow);
 
-    voiceGain.gain.setValueAtTime(1.0, startNow);
+    voiceGain.gain.setValueAtTime(0.0001, startNow);
+    voiceGain.gain.linearRampToValueAtTime(1.0, startNow + 0.008);
     source.connect(voiceGain);
+
     voiceGain.connect(channelGains[channel]);
 
     const entry = { source, voiceGain };
@@ -1020,7 +1022,7 @@
       channel,
       profile: channel === "soundlab" ? "soundlab-guide-tone" : "fsl-fretboard-position",
       sources: [], // leave empty so cleanupVoice does not stop it during transition overlaps!
-      nodes: [voiceGain],
+      nodes: [], // voiceGain cleanup delegated to source.onended — prevents abrupt disconnect on retrigger
       timerId: null,
       endTime: startNow + buffer.duration
     };
