@@ -22,6 +22,9 @@ const path = require('path');
 
 const APP_SRC = fs.readFileSync(path.join(__dirname, '..', 'outputs', 'app.js'), 'utf8');
 const AUDIO_SRC = fs.readFileSync(path.join(__dirname, '..', 'outputs', 'audio-engine.js'), 'utf8');
+const CALIBRATION_PATH = path.join(__dirname, 'fsl-audio-calibration-v1.json');
+const CALIBRATION_REPORT_PATH = path.join(__dirname, 'FSL_AUDIO_CALIBRATION_V1.md');
+const CALIBRATION = JSON.parse(fs.readFileSync(CALIBRATION_PATH, 'utf8'));
 
 let passed = 0, failed = 0;
 
@@ -60,6 +63,8 @@ console.log('\nPILLAR A - Structural source checks');
     /window\.(buildChallengeMidiPool|refillChallengeBag|chooseNextChallengeTarget|challengeBag)/g
   ) || []).length;
   assert(hooks === 0, 'A4: No window test hooks (' + hooks + ' found)');
+  assert(!/window\.__gc_/.test(APP_SRC) && !/window\.__gc_/.test(AUDIO_SRC),
+    'A4b: No verifier-only window.__gc_* hooks');
 
   // A5. syncChallengeForCurrentTuning is minimal (no clearChallengeTimer or bag discard inside it)
   // - The FSL UI has no tuning selector, so the tuning branch is unreachable.
@@ -97,6 +102,170 @@ console.log('\nPILLAR A - Structural source checks');
   // A10. Accordion keydown delegates to headerBtn.click()
   assert(/headerBtn\.click\(\)/.test(APP_SRC),
     'A10: setupAccordionItem keydown handler delegates via headerBtn.click()');
+
+  // A11. FSL reuses the single existing global selector
+  const globalSelectorIds = (APP_SRC.match(/id="globalInstrumentSelector"/g) || []).length;
+  assert(globalSelectorIds === 1,
+    'A11a: Exactly one globalInstrumentSelector is rendered');
+  assert(!/id="fslInstrumentSelector"/.test(APP_SRC),
+    'A11b: No duplicate FSL-only instrument selector is introduced');
+
+  // A12. Central FSL capability contract
+  assert(/synth:\s*Object\.freeze\(\{[\s\S]*?status:\s*"AVAILABLE"[\s\S]*?minMidi:\s*40[\s\S]*?maxMidi:\s*76/.test(AUDIO_SRC),
+    'A12a: FSL Synth is AVAILABLE for MIDI 40-76');
+  assert(/nylon:\s*Object\.freeze\(\{[\s\S]*?status:\s*"AVAILABLE"[\s\S]*?minMidi:\s*40[\s\S]*?maxMidi:\s*76/.test(AUDIO_SRC),
+    'A12b: FSL Nylon is AVAILABLE for MIDI 40-76');
+  assert(/electric:\s*Object\.freeze\(\{[\s\S]*?status:\s*"AVAILABLE"[\s\S]*?minMidi:\s*40[\s\S]*?maxMidi:\s*76/.test(AUDIO_SRC),
+    'A12c: FSL Electric is AVAILABLE for MIDI 40-76');
+  assert(/nylon:\s*Object\.freeze\(\{\s*available:\s*true,\s*reason:\s*null\s*\}\)/.test(AUDIO_SRC),
+    'A12d: Nylon remains globally available outside FSL');
+  assert(/const isFslRequest = channel === "fsl"/.test(AUDIO_SRC),
+    'A12e: FSL no-fallback boundary remains scoped by channel');
+
+  // A15. Electric Provenance
+  const electricProvPath = path.join(__dirname, '..', 'outputs', 'assets', 'audio', 'electric', 'PROVENANCE.md');
+  const electricProvExists = fs.existsSync(electricProvPath);
+  const electricProvText = electricProvExists ? fs.readFileSync(electricProvPath, 'utf8') : '';
+  assert(electricProvExists, 'A15a: outputs/assets/audio/electric/PROVENANCE.md exists');
+  assert(/CC0/i.test(electricProvText) && /FreePats/i.test(electricProvText) && /FSBS Electric Guitar Clean #1/i.test(electricProvText),
+    'A15b: Electric PROVENANCE.md cites CC0 FreePats FSBS Electric Guitar Clean #1');
+
+  // A15c-A15h. Nylon provenance, coverage, and measured calibration
+  const nylonAssetDir = path.join(__dirname, '..', 'outputs', 'assets', 'audio', 'nylon-guitar');
+  const nylonAttribution = fs.readFileSync(path.join(nylonAssetDir, 'ATTRIBUTION.md'), 'utf8');
+  assert(/quartertone/i.test(nylonAttribution) && /CC BY 3\.0/i.test(nylonAttribution)
+      && /622c2f1c32c8cfce4158ddc3eb26e518ddef37e5/.test(nylonAttribution),
+    'A15c: Nylon attribution records author, CC BY 3.0, and verified upstream revision');
+  const approvedNylonAnchors = CALIBRATION.provenance.anchors;
+  assert(approvedNylonAnchors.length === 11
+      && approvedNylonAnchors.every((anchor) =>
+        fs.existsSync(path.join(__dirname, '..', 'outputs', anchor.path))),
+    'A15d: All 11 approved Nylon anchor files exist locally');
+  assert(CALIBRATION.rows.length === 37
+      && CALIBRATION.rows.every((row, index) => row.midi === 40 + index),
+    'A15e: Calibration dataset covers exactly MIDI 40-76');
+  assert(CALIBRATION.summary.maxNylonAnchorDistanceSemitones <= 3
+      && CALIBRATION.rows.every((row) => row.nylon.anchorDistanceSemitones <= 3),
+    'A15f: Every Nylon target is within the ±3 semitone policy');
+  assert(fs.existsSync(CALIBRATION_REPORT_PATH)
+      && /ffmpeg astats/i.test(fs.readFileSync(CALIBRATION_REPORT_PATH, 'utf8')),
+    'A15g: Concise measured peak/RMS calibration report exists');
+
+  const gainBlock = AUDIO_SRC.match(/const APPROVED_NYLON_MIDI_GAINS = Object\.freeze\(\{([\s\S]*?)\n  \}\);/)?.[1] || '';
+  const productionNylonGains = Object.fromEntries(
+    [...gainBlock.matchAll(/^\s*(\d+):\s*([0-9.]+)/gm)]
+      .map((match) => [Number(match[1]), Number(match[2])])
+  );
+  assert(Object.keys(productionNylonGains).length === 37
+      && CALIBRATION.rows.every((row) =>
+        Math.abs(productionNylonGains[row.midi] - row.nylon.perMidiGain) < 1e-12),
+    'A15h: Every production Nylon gain matches the measured calibration dataset');
+  assert(CALIBRATION.rows.every((row) =>
+      Number.isFinite(row.synth.rawPeakDbfs)
+      && Number.isFinite(row.synth.rawRmsDbfs)
+      && Number.isFinite(row.nylon.rawPeakDbfs)
+      && Number.isFinite(row.nylon.rawRmsDbfs)
+      && Number.isFinite(row.electric.rawPeakDbfs)
+      && Number.isFinite(row.electric.rawRmsDbfs)
+      && row.nylon.totalCorrectionDb >= -3
+      && row.nylon.totalCorrectionDb <= 3
+      && row.nylon.calibratedPeakDbfs <= -1),
+    'A15i: Calibration uses finite measured values, conservative ±3 dB corrections, and peak headroom');
+  assert(CALIBRATION.rows.every((row) => {
+    const derivedGain = 10 ** (row.nylon.perMidiCorrectionDb / 20);
+    const combinedCorrection = row.nylon.perMidiCorrectionDb
+      + CALIBRATION.method.nylonLegacyMakeupDb;
+    return Math.abs(derivedGain - row.nylon.perMidiGain) < 1e-12
+      && Math.abs(combinedCorrection - row.nylon.totalCorrectionDb) < 1e-12;
+  }), 'A15j: Every gain is mathematically derived from the recorded measured correction');
+
+  // A16. Electric Schema v2 & anchor distance check
+  const electricMapPath = path.join(__dirname, '..', 'outputs', 'assets', 'audio', 'electric', 'APPROVED_SAMPLE_MAP.json');
+  const electricMap = JSON.parse(fs.readFileSync(electricMapPath, 'utf8'));
+  assert(electricMap.schemaVersion === 2, 'A16a: Electric sample map preserves Schema v2');
+  const electricNotes = Object.keys(electricMap.notes || {});
+  assert(electricNotes.length === 37, 'A16b: Electric sample map covers exactly 37 MIDI entries (40-76)');
+  let maxDistance = 0;
+  for (let midi = 40; midi <= 76; midi++) {
+    const entry = electricMap.notes[midi.toString()];
+    if (entry && typeof entry.sourceMidi === 'number') {
+      const dist = Math.abs(midi - entry.sourceMidi);
+      if (dist > maxDistance) maxDistance = dist;
+    }
+  }
+  assert(maxDistance <= 2, 'A16c: Electric maximum anchor distance <= 2 semitones (' + maxDistance + ' found)');
+
+  // A17. Direct internal helper/source contract for all FSL sample envelopes and cleanup.
+  const managedFslVoiceFn = AUDIO_SRC.match(/function createManagedFslSampleVoice[\s\S]*?\n  \}/)?.[0] || '';
+  const cleanupFslEntryFn = AUDIO_SRC.match(/function cleanupFslSampleEntry[\s\S]*?\n  \}/)?.[0] || '';
+  const nylonVoiceFn = AUDIO_SRC.match(/function createSampleVoice[\s\S]*?\n  \}/)?.[0] || '';
+  const electricVoiceFn = AUDIO_SRC.match(/function createElectricSampleVoice[\s\S]*?\n  \}/)?.[0] || '';
+  const releaseChannelFn = AUDIO_SRC.match(/function releaseChannel[\s\S]*?\n  \}/)?.[0] || '';
+  assert(/audioCtx\.createBufferSource\(\)/.test(managedFslVoiceFn)
+      && /audioCtx\.createGain\(\)/.test(managedFslVoiceFn),
+    'A17a: Managed FSL helper owns one BufferSource and per-voice GainNode');
+  assert(/startNow \+ 0\.012/.test(managedFslVoiceFn)
+      && /startNow \+ 0\.008/.test(managedFslVoiceFn),
+    'A17b: Managed FSL helper applies 12 ms fade-out and 8 ms fade-in');
+  assert(/filter\(\(entry\) => entry\.retiring\)/.test(managedFslVoiceFn)
+      && /find\(\(entry\) => !entry\.retiring\)/.test(managedFslVoiceFn),
+    'A17c: Managed FSL helper caps lifecycle to one active voice and one release tail');
+  assert(/source\.onended = \(\) => cleanupFslSampleEntry\(entry\)/.test(managedFslVoiceFn)
+      && /entry\.source\.disconnect\(\)/.test(cleanupFslEntryFn)
+      && /entry\.voiceGain\.disconnect\(\)/.test(cleanupFslEntryFn),
+    'A17d: Source end disconnects both BufferSource and GainNode');
+  assert(/cleanupFslSampleEntry\(entry\)/.test(releaseChannelFn),
+    'A17e: stopChannel("fsl") routes every managed entry through node cleanup');
+  assert(/channel === "fsl"[\s\S]*?createManagedFslSampleVoice\(buffer,[\s\S]*?voiceLevel: effectiveGain/.test(nylonVoiceFn),
+    'A17f: Nylon 12/8 ms behavior is verified through the internal managed helper contract');
+  assert(/channel === "fsl"[\s\S]*?createManagedFslSampleVoice\(buffer,[\s\S]*?outputGain: electricGain/.test(electricVoiceFn),
+    'A17g: Electric uses the same bounded FSL voice lifecycle');
+
+  // A18. No silent fallback to synth on channel "fsl"
+  const playNotesFn = AUDIO_SRC.match(/async function playInstrumentNotes[\s\S]*?\n  \}/)?.[0] || '';
+  assert(/if \(isFslRequest\) \{\s*throw new Error\(lastFallbackReason \|\| "electric-playback-failed"\)/.test(playNotesFn)
+      && /if \(isFslRequest\) \{\s*throw new Error\(lastFallbackReason \|\| "fsl-synth-playback-failed"\)/.test(playNotesFn),
+    'A18a: FSL Electric and Synth sample failures explicitly abort instead of falling back');
+  assert(/if \(isFslRequest\) \{\s*throw new Error\(lastFallbackReason \|\| "nylon-playback-failed"\)/.test(playNotesFn),
+    'A18b: Any internal FSL Nylon sample failure also aborts without fallback');
+
+  // A13. All three selector options remain available while FSL keeps its no-fallback boundary
+  const selectorFn = APP_SRC.match(/function setSelectedAudioInstrument[\s\S]*?\n\}/)?.[0] || '';
+  assert(/<option value="synth">Synth<\/option>[\s\S]*?<option value="nylon">Nylon<\/option>[\s\S]*?<option value="electric">Electric<\/option>/.test(APP_SRC)
+      && !/<option value="(?:synth|nylon|electric)"[^>]*disabled/.test(APP_SRC),
+    'A13a: Synth, Nylon, and Electric remain selectable in the shared global selector');
+  const audioPlayFn = AUDIO_SRC.match(/async function playInstrumentNotes[\s\S]*?\n  \}/)?.[0] || '';
+  const fslBoundaryIndex = audioPlayFn.indexOf('const isFslRequest');
+  const samplerAvailabilityIndex = audioPlayFn.indexOf('const availability = getInstrumentAvailability');
+  assert(
+    fslBoundaryIndex >= 0
+      && /getFslInstrumentCapability\(requestedInstrument\)/.test(audioPlayFn)
+      && fslBoundaryIndex < samplerAvailabilityIndex,
+    'A13b: FSL capability boundary is evaluated before sampler/fallback handling'
+  );
+  assert(/if \(isFslRequest\) \{[\s\S]*?throw new Error/.test(audioPlayFn)
+      && /usedSynth = true[\s\S]*?createVoice/.test(audioPlayFn),
+    'A13c: Native synth fallback remains outside the explicitly failing FSL sample paths');
+
+  // A14. Accepted FSL changes stop the FSL channel before selected instrument mutation
+  assert(
+    /if \(instrument !== selectedAudioInstrument\) \{[\s\S]*?stopChannel\?\.\("fsl"\)[\s\S]*?selectedAudioInstrument = instrument/.test(selectorFn),
+    'A14: Accepted FSL instrument change stops channel before switching'
+  );
+
+  // A15. Mount disables only FSL-invalid options; unmount restores global state
+  const guardFn = APP_SRC.match(/function activateFslInstrumentSelectorGuard[\s\S]*?\n\}/)?.[0] || '';
+  assert(/getFslInstrumentCapability\(option\.value\)[\s\S]*?option\.disabled = true/.test(guardFn),
+    'A15a: FSL mount disables only options rejected by the FSL capability contract');
+  assert(/option\.disabled = disabled/.test(guardFn) && /setSelectedAudioInstrument\(previousInstrument/.test(guardFn),
+    'A15b: FSL unmount restores selector options and previous instrument');
+  assert(/const restoreFslInstrumentSelector = activateFslInstrumentSelectorGuard\(\)/.test(APP_SRC)
+      && /stopChannel\('fsl'\)[\s\S]*?restoreFslInstrumentSelector\(\)/.test(APP_SRC),
+    'A15c: FSL mount activates guard and unmount stops audio before restoration');
+
+  // A16. FSL playback keeps the approved channel/profile contract
+  assert(/engine\.playNote\(\{\s*channel:\s*['"]fsl['"],\s*profile:\s*['"]fsl-fretboard-position['"]/.test(APP_SRC),
+    'A16: FSL playback preserves channel and profile');
 }
 
 // ================================================================
@@ -110,6 +279,9 @@ const TUNINGS = {
   dropd:    [64, 59, 55, 50, 45, 38],
   halfstep: [63, 58, 54, 49, 44, 39]
 };
+
+assert([40, 52, 64, 76].every((midi) => midi >= 40 && midi <= 76),
+  'B0: Required Synth smoke notes MIDI 40, 52, 64 and 76 are inside the FSL capability range');
 
 function midiToNoteName(midi) {
   return CHROMATIC_NOTES[midi % 12] + (Math.floor(midi / 12) - 1);

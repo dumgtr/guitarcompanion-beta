@@ -215,6 +215,7 @@ let activeNodes = [];
 let sequenceTimers = [];
 let soundLabAudioSession = 0;
 let selectedAudioInstrument = "synth";
+let fslInstrumentSelectorGuardActive = false;
 let metronomeTimer;
 let nextBeatTime = 0;
 let beatCount = 0;
@@ -4786,8 +4787,29 @@ function getSelectedAudioInstrument() {
   return selectedAudioInstrument;
 }
 
+function getFslInstrumentCapability(instrument) {
+  return window.AudioEngine?.getFslInstrumentCapability?.(instrument) || {
+    status: "UNAVAILABLE_ENGINE",
+    available: false,
+    minMidi: null,
+    maxMidi: null,
+    reason: "ระบบเสียง FSL ยังไม่พร้อม"
+  };
+}
+
 function setSelectedAudioInstrument(instrument, options = {}) {
   const engine = window.AudioEngine;
+  const fslCapability = getFslInstrumentCapability(instrument);
+  if (fslInstrumentSelectorGuardActive && !fslCapability.available) {
+    engine?.stopChannel?.("fsl");
+    syncGlobalInstrumentSelector();
+    showToast(
+      fslCapability.message || "Nylon ยังไม่พร้อมสำหรับ FSL ช่วงโน้ตเต็ม 40–76",
+      "info"
+    );
+    return selectedAudioInstrument;
+  }
+
   const availability = typeof engine?.getInstrumentAvailability === "function"
     ? engine.getInstrumentAvailability(instrument)
     : { available: instrument === "synth" || instrument === "nylon" };
@@ -4798,6 +4820,7 @@ function setSelectedAudioInstrument(instrument, options = {}) {
   }
 
   if (instrument !== selectedAudioInstrument) {
+    if (fslInstrumentSelectorGuardActive) engine?.stopChannel?.("fsl");
     soundLabAudioSession += 1;
     clearSequenceTimers();
     stopAllSounds();
@@ -4842,6 +4865,47 @@ function renderGlobalInstrumentSelector() {
 function syncGlobalInstrumentSelector() {
   const selector = document.getElementById("globalInstrumentSelector");
   if (selector) selector.value = getSelectedAudioInstrument();
+}
+
+function activateFslInstrumentSelectorGuard() {
+  const selector = document.getElementById("globalInstrumentSelector");
+  const previousInstrument = getSelectedAudioInstrument();
+  const optionState = selector
+    ? Array.from(selector.options).map((option) => ({
+        option,
+        disabled: option.disabled,
+        title: option.title
+      }))
+    : [];
+
+  fslInstrumentSelectorGuardActive = true;
+  optionState.forEach(({ option }) => {
+    const capability = getFslInstrumentCapability(option.value);
+    if (!capability.available) {
+      option.disabled = true;
+      option.title = capability.message || capability.reason;
+    }
+  });
+
+  if (!getFslInstrumentCapability(previousInstrument).available) {
+    setSelectedAudioInstrument("synth", { persist: false });
+  } else {
+    syncGlobalInstrumentSelector();
+  }
+
+  return () => {
+    fslInstrumentSelectorGuardActive = false;
+    optionState.forEach(({ option, disabled, title }) => {
+      option.disabled = disabled;
+      option.title = title;
+    });
+
+    if (previousInstrument !== getSelectedAudioInstrument()) {
+      setSelectedAudioInstrument(previousInstrument, { persist: false });
+    } else {
+      syncGlobalInstrumentSelector();
+    }
+  };
 }
 
 function renderChordSoundLab(lab, block = {}, labRef = "") {
@@ -6777,6 +6841,7 @@ function openFretboardStudioModal() {
 function mountFretboardStudioLite(containerElement) {
   if (!containerElement || containerElement.dataset.fslMounted === "true") return () => {};
   containerElement.dataset.fslMounted = "true";
+  const restoreFslInstrumentSelector = activateFslInstrumentSelectorGuard();
 
   function getFslAudioEngine() {
     const engine = window.AudioEngine;
@@ -7587,6 +7652,7 @@ function mountFretboardStudioLite(containerElement) {
     clearChallengeTimer();
     const _unmountEngine = getFslAudioEngine();
     if (_unmountEngine) _unmountEngine.stopChannel('fsl');
+    restoreFslInstrumentSelector();
     containerElement.innerHTML = "";
     delete containerElement.dataset.fslMounted;
   };

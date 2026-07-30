@@ -1,0 +1,1491 @@
+{
+  "schemaVersion": 1,
+  "scope": {
+    "midiMin": 40,
+    "midiMax": 76,
+    "noteCount": 37,
+    "instruments": [
+      "synth",
+      "nylon",
+      "electric"
+    ]
+  },
+  "method": {
+    "ffmpegVersion": "ffmpeg version 8.1.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "analysisWindowSeconds": 0.24,
+    "playbackRateEmulation": "asetrate + aresample",
+    "measurement": "ffmpeg astats Overall peak and RMS",
+    "reference": "per-MIDI median of routed Synth, base Nylon, and routed Electric RMS",
+    "synthRouteGain": 1,
+    "electricRouteGain": 0.25,
+    "nylonTestVelocity": 0.8,
+    "nylonLegacyMakeupDb": 0.5,
+    "totalCorrectionLimitDb": 3,
+    "correctionStepDb": 0.25,
+    "peakCeilingDbfs": -1
+  },
+  "provenance": {
+    "family": "tonejs-instruments guitar-nylon",
+    "originalAuthor": "quartertone",
+    "license": "CC BY 3.0",
+    "upstreamRevision": "622c2f1c32c8cfce4158ddc3eb26e518ddef37e5",
+    "anchors": [
+      {
+        "note": "F#2",
+        "midi": 42,
+        "path": "assets/audio/nylon-guitar/Fs2.ogg"
+      },
+      {
+        "note": "A2",
+        "midi": 45,
+        "path": "assets/audio/nylon-guitar/A2.ogg"
+      },
+      {
+        "note": "C#3",
+        "midi": 49,
+        "path": "assets/audio/nylon-guitar/Cs3.ogg"
+      },
+      {
+        "note": "E3",
+        "midi": 52,
+        "path": "assets/audio/nylon-guitar/E3.ogg"
+      },
+      {
+        "note": "A3",
+        "midi": 57,
+        "path": "assets/audio/nylon-guitar/A3.ogg"
+      },
+      {
+        "note": "C#4",
+        "midi": 61,
+        "path": "assets/audio/nylon-guitar/Cs4.ogg"
+      },
+      {
+        "note": "E4",
+        "midi": 64,
+        "path": "assets/audio/nylon-guitar/E4.ogg"
+      },
+      {
+        "note": "G#4",
+        "midi": 68,
+        "path": "assets/audio/nylon-guitar/Gs4.ogg"
+      },
+      {
+        "note": "A4",
+        "midi": 69,
+        "path": "assets/audio/nylon-guitar/A4.ogg"
+      },
+      {
+        "note": "C#5",
+        "midi": 73,
+        "path": "assets/audio/nylon-guitar/Cs5.ogg"
+      },
+      {
+        "note": "E5",
+        "midi": 76,
+        "path": "assets/audio/nylon-guitar/E5.ogg"
+      }
+    ]
+  },
+  "summary": {
+    "maxNylonAnchorDistanceSemitones": 2,
+    "synthRoutedRmsDbfs": {
+      "min": -22.664,
+      "median": -15.102,
+      "max": -10.91
+    },
+    "nylonBaseRmsDbfs": {
+      "min": -22.239,
+      "median": -15.873,
+      "max": -11.623
+    },
+    "nylonCalibratedRmsDbfs": {
+      "min": -22.239,
+      "median": -16.523,
+      "max": -13.311
+    },
+    "electricRoutedRmsDbfs": {
+      "min": -24.606,
+      "median": -22.54,
+      "max": -19.107
+    },
+    "medianAbsoluteReferenceErrorBeforeDb": 0.934,
+    "medianAbsoluteReferenceErrorAfterDb": 0.012,
+    "totalCorrectionDb": {
+      "min": -3,
+      "median": -1,
+      "max": 0
+    }
+  },
+  "rows": [
+    {
+      "midi": 40,
+      "synth": {
+        "sourceMidi": 40,
+        "path": "assets/audio/fsl-synth/samples/40.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -9.564986,
+        "rawRmsDbfs": -16.811736,
+        "routedRmsDbfs": -16.812
+      },
+      "nylon": {
+        "sourceMidi": 42,
+        "sourceNote": "F#2",
+        "path": "assets/audio/nylon-guitar/Fs2.ogg",
+        "anchorDistanceSemitones": 2,
+        "playbackRate": 0.89089871814,
+        "rawPeakDbfs": -2.980648,
+        "rawRmsDbfs": -9.68462,
+        "basePeakDbfs": -4.919,
+        "baseRmsDbfs": -11.623,
+        "referenceRmsDbfs": -16.812,
+        "requiredCorrectionDb": -5.189,
+        "totalCorrectionDb": -3,
+        "perMidiCorrectionDb": -3.5,
+        "perMidiGain": 0.668343917569,
+        "calibratedPeakDbfs": -7.919,
+        "calibratedRmsDbfs": -14.623
+      },
+      "electric": {
+        "sourceMidi": 41,
+        "path": "assets/audio/electric/F2.ogg",
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": -1.089274,
+        "rawRmsDbfs": -8.722116,
+        "routedRmsDbfs": -20.763
+      }
+    },
+    {
+      "midi": 41,
+      "synth": {
+        "sourceMidi": 41,
+        "path": "assets/audio/fsl-synth/samples/41.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -7.559752,
+        "rawRmsDbfs": -15.128125,
+        "routedRmsDbfs": -15.128
+      },
+      "nylon": {
+        "sourceMidi": 42,
+        "sourceNote": "F#2",
+        "path": "assets/audio/nylon-guitar/Fs2.ogg",
+        "anchorDistanceSemitones": 1,
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": -2.980648,
+        "rawRmsDbfs": -9.78494,
+        "basePeakDbfs": -4.919,
+        "baseRmsDbfs": -11.723,
+        "referenceRmsDbfs": -15.128,
+        "requiredCorrectionDb": -3.405,
+        "totalCorrectionDb": -3,
+        "perMidiCorrectionDb": -3.5,
+        "perMidiGain": 0.668343917569,
+        "calibratedPeakDbfs": -7.919,
+        "calibratedRmsDbfs": -14.723
+      },
+      "electric": {
+        "sourceMidi": 41,
+        "path": "assets/audio/electric/F2.ogg",
+        "playbackRate": 1,
+        "rawPeakDbfs": -1.089575,
+        "rawRmsDbfs": -8.676465,
+        "routedRmsDbfs": -20.718
+      }
+    },
+    {
+      "midi": 42,
+      "synth": {
+        "sourceMidi": 42,
+        "path": "assets/audio/fsl-synth/samples/42.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -6.203563,
+        "rawRmsDbfs": -13.289836,
+        "routedRmsDbfs": -13.29
+      },
+      "nylon": {
+        "sourceMidi": 42,
+        "sourceNote": "F#2",
+        "path": "assets/audio/nylon-guitar/Fs2.ogg",
+        "anchorDistanceSemitones": 0,
+        "playbackRate": 1,
+        "rawPeakDbfs": -2.980648,
+        "rawRmsDbfs": -9.872725,
+        "basePeakDbfs": -4.919,
+        "baseRmsDbfs": -11.811,
+        "referenceRmsDbfs": -13.29,
+        "requiredCorrectionDb": -1.479,
+        "totalCorrectionDb": -1.5,
+        "perMidiCorrectionDb": -2,
+        "perMidiGain": 0.794328234724,
+        "calibratedPeakDbfs": -6.419,
+        "calibratedRmsDbfs": -13.311
+      },
+      "electric": {
+        "sourceMidi": 41,
+        "path": "assets/audio/electric/F2.ogg",
+        "playbackRate": 1.059463094359,
+        "rawPeakDbfs": -0.896702,
+        "rawRmsDbfs": -8.590809,
+        "routedRmsDbfs": -20.632
+      }
+    },
+    {
+      "midi": 43,
+      "synth": {
+        "sourceMidi": 43,
+        "path": "assets/audio/fsl-synth/samples/43.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -9.321272,
+        "rawRmsDbfs": -16.781669,
+        "routedRmsDbfs": -16.782
+      },
+      "nylon": {
+        "sourceMidi": 42,
+        "sourceNote": "F#2",
+        "path": "assets/audio/nylon-guitar/Fs2.ogg",
+        "anchorDistanceSemitones": 1,
+        "playbackRate": 1.059463094359,
+        "rawPeakDbfs": -2.980648,
+        "rawRmsDbfs": -9.941931,
+        "basePeakDbfs": -4.919,
+        "baseRmsDbfs": -11.88,
+        "referenceRmsDbfs": -16.782,
+        "requiredCorrectionDb": -4.902,
+        "totalCorrectionDb": -3,
+        "perMidiCorrectionDb": -3.5,
+        "perMidiGain": 0.668343917569,
+        "calibratedPeakDbfs": -7.919,
+        "calibratedRmsDbfs": -14.88
+      },
+      "electric": {
+        "sourceMidi": 45,
+        "path": "assets/audio/electric/A2.ogg",
+        "playbackRate": 0.89089871814,
+        "rawPeakDbfs": 0.000265,
+        "rawRmsDbfs": -8.503409,
+        "routedRmsDbfs": -20.545
+      }
+    },
+    {
+      "midi": 44,
+      "synth": {
+        "sourceMidi": 44,
+        "path": "assets/audio/fsl-synth/samples/44.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -7.475976,
+        "rawRmsDbfs": -14.981469,
+        "routedRmsDbfs": -14.981
+      },
+      "nylon": {
+        "sourceMidi": 45,
+        "sourceNote": "A2",
+        "path": "assets/audio/nylon-guitar/A2.ogg",
+        "anchorDistanceSemitones": 1,
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": -2.981395,
+        "rawRmsDbfs": -12.108341,
+        "basePeakDbfs": -4.92,
+        "baseRmsDbfs": -14.047,
+        "referenceRmsDbfs": -14.981,
+        "requiredCorrectionDb": -0.935,
+        "totalCorrectionDb": -1,
+        "perMidiCorrectionDb": -1.5,
+        "perMidiGain": 0.841395141645,
+        "calibratedPeakDbfs": -5.92,
+        "calibratedRmsDbfs": -15.047
+      },
+      "electric": {
+        "sourceMidi": 45,
+        "path": "assets/audio/electric/A2.ogg",
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": 0.000265,
+        "rawRmsDbfs": -8.508638,
+        "routedRmsDbfs": -20.55
+      }
+    },
+    {
+      "midi": 45,
+      "synth": {
+        "sourceMidi": 45,
+        "path": "assets/audio/fsl-synth/samples/45.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -6.175993,
+        "rawRmsDbfs": -13.125075,
+        "routedRmsDbfs": -13.125
+      },
+      "nylon": {
+        "sourceMidi": 45,
+        "sourceNote": "A2",
+        "path": "assets/audio/nylon-guitar/A2.ogg",
+        "anchorDistanceSemitones": 0,
+        "playbackRate": 1,
+        "rawPeakDbfs": -2.978033,
+        "rawRmsDbfs": -12.190085,
+        "basePeakDbfs": -4.916,
+        "baseRmsDbfs": -14.128,
+        "referenceRmsDbfs": -14.128,
+        "requiredCorrectionDb": 0,
+        "totalCorrectionDb": 0,
+        "perMidiCorrectionDb": -0.5,
+        "perMidiGain": 0.944060876286,
+        "calibratedPeakDbfs": -4.916,
+        "calibratedRmsDbfs": -14.128
+      },
+      "electric": {
+        "sourceMidi": 45,
+        "path": "assets/audio/electric/A2.ogg",
+        "playbackRate": 1,
+        "rawPeakDbfs": 0.000265,
+        "rawRmsDbfs": -8.519921,
+        "routedRmsDbfs": -20.561
+      }
+    },
+    {
+      "midi": 46,
+      "synth": {
+        "sourceMidi": 46,
+        "path": "assets/audio/fsl-synth/samples/46.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -6.061785,
+        "rawRmsDbfs": -12.721304,
+        "routedRmsDbfs": -12.721
+      },
+      "nylon": {
+        "sourceMidi": 45,
+        "sourceNote": "A2",
+        "path": "assets/audio/nylon-guitar/A2.ogg",
+        "anchorDistanceSemitones": 1,
+        "playbackRate": 1.059463094359,
+        "rawPeakDbfs": -2.982516,
+        "rawRmsDbfs": -12.221076,
+        "basePeakDbfs": -4.921,
+        "baseRmsDbfs": -14.159,
+        "referenceRmsDbfs": -14.159,
+        "requiredCorrectionDb": 0,
+        "totalCorrectionDb": 0,
+        "perMidiCorrectionDb": -0.5,
+        "perMidiGain": 0.944060876286,
+        "calibratedPeakDbfs": -4.921,
+        "calibratedRmsDbfs": -14.159
+      },
+      "electric": {
+        "sourceMidi": 45,
+        "path": "assets/audio/electric/A2.ogg",
+        "playbackRate": 1.059463094359,
+        "rawPeakDbfs": 0.000265,
+        "rawRmsDbfs": -8.512198,
+        "routedRmsDbfs": -20.553
+      }
+    },
+    {
+      "midi": 47,
+      "synth": {
+        "sourceMidi": 47,
+        "path": "assets/audio/fsl-synth/samples/47.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -5.862209,
+        "rawRmsDbfs": -12.801547,
+        "routedRmsDbfs": -12.802
+      },
+      "nylon": {
+        "sourceMidi": 45,
+        "sourceNote": "A2",
+        "path": "assets/audio/nylon-guitar/A2.ogg",
+        "anchorDistanceSemitones": 2,
+        "playbackRate": 1.122462048309,
+        "rawPeakDbfs": -2.981769,
+        "rawRmsDbfs": -12.290985,
+        "basePeakDbfs": -4.92,
+        "baseRmsDbfs": -14.229,
+        "referenceRmsDbfs": -14.229,
+        "requiredCorrectionDb": 0,
+        "totalCorrectionDb": 0,
+        "perMidiCorrectionDb": -0.5,
+        "perMidiGain": 0.944060876286,
+        "calibratedPeakDbfs": -4.92,
+        "calibratedRmsDbfs": -14.229
+      },
+      "electric": {
+        "sourceMidi": 48,
+        "path": "assets/audio/electric/C3.ogg",
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": 0.000265,
+        "rawRmsDbfs": -7.267203,
+        "routedRmsDbfs": -19.308
+      }
+    },
+    {
+      "midi": 48,
+      "synth": {
+        "sourceMidi": 48,
+        "path": "assets/audio/fsl-synth/samples/48.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -7.847389,
+        "rawRmsDbfs": -15.01593,
+        "routedRmsDbfs": -15.016
+      },
+      "nylon": {
+        "sourceMidi": 49,
+        "sourceNote": "C#3",
+        "path": "assets/audio/nylon-guitar/Cs3.ogg",
+        "anchorDistanceSemitones": 1,
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": -2.927387,
+        "rawRmsDbfs": -11.245731,
+        "basePeakDbfs": -4.866,
+        "baseRmsDbfs": -13.184,
+        "referenceRmsDbfs": -15.016,
+        "requiredCorrectionDb": -1.832,
+        "totalCorrectionDb": -1.75,
+        "perMidiCorrectionDb": -2.25,
+        "perMidiGain": 0.771791515585,
+        "calibratedPeakDbfs": -6.616,
+        "calibratedRmsDbfs": -14.934
+      },
+      "electric": {
+        "sourceMidi": 48,
+        "path": "assets/audio/electric/C3.ogg",
+        "playbackRate": 1,
+        "rawPeakDbfs": 0.000265,
+        "rawRmsDbfs": -7.172495,
+        "routedRmsDbfs": -19.214
+      }
+    },
+    {
+      "midi": 49,
+      "synth": {
+        "sourceMidi": 49,
+        "path": "assets/audio/fsl-synth/samples/49.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -7.278272,
+        "rawRmsDbfs": -14.57643,
+        "routedRmsDbfs": -14.576
+      },
+      "nylon": {
+        "sourceMidi": 49,
+        "sourceNote": "C#3",
+        "path": "assets/audio/nylon-guitar/Cs3.ogg",
+        "anchorDistanceSemitones": 0,
+        "playbackRate": 1,
+        "rawPeakDbfs": -2.916625,
+        "rawRmsDbfs": -11.332146,
+        "basePeakDbfs": -4.855,
+        "baseRmsDbfs": -13.27,
+        "referenceRmsDbfs": -14.576,
+        "requiredCorrectionDb": -1.306,
+        "totalCorrectionDb": -1.25,
+        "perMidiCorrectionDb": -1.75,
+        "perMidiGain": 0.817523037944,
+        "calibratedPeakDbfs": -6.105,
+        "calibratedRmsDbfs": -14.52
+      },
+      "electric": {
+        "sourceMidi": 48,
+        "path": "assets/audio/electric/C3.ogg",
+        "playbackRate": 1.059463094359,
+        "rawPeakDbfs": 0.000265,
+        "rawRmsDbfs": -7.06553,
+        "routedRmsDbfs": -19.107
+      }
+    },
+    {
+      "midi": 50,
+      "synth": {
+        "sourceMidi": 50,
+        "path": "assets/audio/fsl-synth/samples/50.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -7.340383,
+        "rawRmsDbfs": -14.35382,
+        "routedRmsDbfs": -14.354
+      },
+      "nylon": {
+        "sourceMidi": 49,
+        "sourceNote": "C#3",
+        "path": "assets/audio/nylon-guitar/Cs3.ogg",
+        "anchorDistanceSemitones": 1,
+        "playbackRate": 1.059463094359,
+        "rawPeakDbfs": -2.916625,
+        "rawRmsDbfs": -11.422467,
+        "basePeakDbfs": -4.855,
+        "baseRmsDbfs": -13.361,
+        "referenceRmsDbfs": -14.354,
+        "requiredCorrectionDb": -0.993,
+        "totalCorrectionDb": -1,
+        "perMidiCorrectionDb": -1.5,
+        "perMidiGain": 0.841395141645,
+        "calibratedPeakDbfs": -5.855,
+        "calibratedRmsDbfs": -14.361
+      },
+      "electric": {
+        "sourceMidi": 52,
+        "path": "assets/audio/electric/E3.ogg",
+        "playbackRate": 0.89089871814,
+        "rawPeakDbfs": 0,
+        "rawRmsDbfs": -10.835243,
+        "routedRmsDbfs": -22.876
+      }
+    },
+    {
+      "midi": 51,
+      "synth": {
+        "sourceMidi": 51,
+        "path": "assets/audio/fsl-synth/samples/51.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -6.509388,
+        "rawRmsDbfs": -12.857697,
+        "routedRmsDbfs": -12.858
+      },
+      "nylon": {
+        "sourceMidi": 52,
+        "sourceNote": "E3",
+        "path": "assets/audio/nylon-guitar/E3.ogg",
+        "anchorDistanceSemitones": 1,
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": -2.9456,
+        "rawRmsDbfs": -13.703451,
+        "basePeakDbfs": -4.884,
+        "baseRmsDbfs": -15.642,
+        "referenceRmsDbfs": -15.642,
+        "requiredCorrectionDb": 0,
+        "totalCorrectionDb": 0,
+        "perMidiCorrectionDb": -0.5,
+        "perMidiGain": 0.944060876286,
+        "calibratedPeakDbfs": -4.884,
+        "calibratedRmsDbfs": -15.642
+      },
+      "electric": {
+        "sourceMidi": 52,
+        "path": "assets/audio/electric/E3.ogg",
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": 0,
+        "rawRmsDbfs": -10.788756,
+        "routedRmsDbfs": -22.83
+      }
+    },
+    {
+      "midi": 52,
+      "synth": {
+        "sourceMidi": 52,
+        "path": "assets/audio/fsl-synth/samples/52.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -6.203022,
+        "rawRmsDbfs": -11.051243,
+        "routedRmsDbfs": -11.051
+      },
+      "nylon": {
+        "sourceMidi": 52,
+        "sourceNote": "E3",
+        "path": "assets/audio/nylon-guitar/E3.ogg",
+        "anchorDistanceSemitones": 0,
+        "playbackRate": 1,
+        "rawPeakDbfs": -2.951183,
+        "rawRmsDbfs": -13.814035,
+        "basePeakDbfs": -4.889,
+        "baseRmsDbfs": -15.752,
+        "referenceRmsDbfs": -15.752,
+        "requiredCorrectionDb": 0,
+        "totalCorrectionDb": 0,
+        "perMidiCorrectionDb": -0.5,
+        "perMidiGain": 0.944060876286,
+        "calibratedPeakDbfs": -4.889,
+        "calibratedRmsDbfs": -15.752
+      },
+      "electric": {
+        "sourceMidi": 52,
+        "path": "assets/audio/electric/E3.ogg",
+        "playbackRate": 1,
+        "rawPeakDbfs": 0,
+        "rawRmsDbfs": -10.710546,
+        "routedRmsDbfs": -22.752
+      }
+    },
+    {
+      "midi": 53,
+      "synth": {
+        "sourceMidi": 53,
+        "path": "assets/audio/fsl-synth/samples/53.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -5.919139,
+        "rawRmsDbfs": -10.910181,
+        "routedRmsDbfs": -10.91
+      },
+      "nylon": {
+        "sourceMidi": 52,
+        "sourceNote": "E3",
+        "path": "assets/audio/nylon-guitar/E3.ogg",
+        "anchorDistanceSemitones": 1,
+        "playbackRate": 1.059463094359,
+        "rawPeakDbfs": -2.945972,
+        "rawRmsDbfs": -13.934719,
+        "basePeakDbfs": -4.884,
+        "baseRmsDbfs": -15.873,
+        "referenceRmsDbfs": -15.873,
+        "requiredCorrectionDb": 0,
+        "totalCorrectionDb": 0,
+        "perMidiCorrectionDb": -0.5,
+        "perMidiGain": 0.944060876286,
+        "calibratedPeakDbfs": -4.884,
+        "calibratedRmsDbfs": -15.873
+      },
+      "electric": {
+        "sourceMidi": 52,
+        "path": "assets/audio/electric/E3.ogg",
+        "playbackRate": 1.059463094359,
+        "rawPeakDbfs": 0,
+        "rawRmsDbfs": -10.698274,
+        "routedRmsDbfs": -22.739
+      }
+    },
+    {
+      "midi": 54,
+      "synth": {
+        "sourceMidi": 54,
+        "path": "assets/audio/fsl-synth/samples/54.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -8.053283,
+        "rawRmsDbfs": -13.359476,
+        "routedRmsDbfs": -13.359
+      },
+      "nylon": {
+        "sourceMidi": 52,
+        "sourceNote": "E3",
+        "path": "assets/audio/nylon-guitar/E3.ogg",
+        "anchorDistanceSemitones": 2,
+        "playbackRate": 1.122462048309,
+        "rawPeakDbfs": -2.951928,
+        "rawRmsDbfs": -14.043067,
+        "basePeakDbfs": -4.89,
+        "baseRmsDbfs": -15.981,
+        "referenceRmsDbfs": -15.981,
+        "requiredCorrectionDb": 0,
+        "totalCorrectionDb": 0,
+        "perMidiCorrectionDb": -0.5,
+        "perMidiGain": 0.944060876286,
+        "calibratedPeakDbfs": -4.89,
+        "calibratedRmsDbfs": -15.981
+      },
+      "electric": {
+        "sourceMidi": 55,
+        "path": "assets/audio/electric/G3.ogg",
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": -0.024156,
+        "rawRmsDbfs": -11.736481,
+        "routedRmsDbfs": -23.778
+      }
+    },
+    {
+      "midi": 55,
+      "synth": {
+        "sourceMidi": 55,
+        "path": "assets/audio/fsl-synth/samples/55.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -7.840195,
+        "rawRmsDbfs": -14.790739,
+        "routedRmsDbfs": -14.791
+      },
+      "nylon": {
+        "sourceMidi": 57,
+        "sourceNote": "A3",
+        "path": "assets/audio/nylon-guitar/A3.ogg",
+        "anchorDistanceSemitones": 2,
+        "playbackRate": 0.89089871814,
+        "rawPeakDbfs": -2.940392,
+        "rawRmsDbfs": -13.679886,
+        "basePeakDbfs": -4.879,
+        "baseRmsDbfs": -15.618,
+        "referenceRmsDbfs": -15.618,
+        "requiredCorrectionDb": 0,
+        "totalCorrectionDb": 0,
+        "perMidiCorrectionDb": -0.5,
+        "perMidiGain": 0.944060876286,
+        "calibratedPeakDbfs": -4.879,
+        "calibratedRmsDbfs": -15.618
+      },
+      "electric": {
+        "sourceMidi": 55,
+        "path": "assets/audio/electric/G3.ogg",
+        "playbackRate": 1,
+        "rawPeakDbfs": -0.082299,
+        "rawRmsDbfs": -11.761359,
+        "routedRmsDbfs": -23.803
+      }
+    },
+    {
+      "midi": 56,
+      "synth": {
+        "sourceMidi": 56,
+        "path": "assets/audio/fsl-synth/samples/56.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -9.064617,
+        "rawRmsDbfs": -17.204255,
+        "routedRmsDbfs": -17.204
+      },
+      "nylon": {
+        "sourceMidi": 57,
+        "sourceNote": "A3",
+        "path": "assets/audio/nylon-guitar/A3.ogg",
+        "anchorDistanceSemitones": 1,
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": -2.968701,
+        "rawRmsDbfs": -13.830645,
+        "basePeakDbfs": -4.907,
+        "baseRmsDbfs": -15.769,
+        "referenceRmsDbfs": -17.204,
+        "requiredCorrectionDb": -1.435,
+        "totalCorrectionDb": -1.5,
+        "perMidiCorrectionDb": -2,
+        "perMidiGain": 0.794328234724,
+        "calibratedPeakDbfs": -6.407,
+        "calibratedRmsDbfs": -17.269
+      },
+      "electric": {
+        "sourceMidi": 55,
+        "path": "assets/audio/electric/G3.ogg",
+        "playbackRate": 1.059463094359,
+        "rawPeakDbfs": -0.079088,
+        "rawRmsDbfs": -11.764129,
+        "routedRmsDbfs": -23.805
+      }
+    },
+    {
+      "midi": 57,
+      "synth": {
+        "sourceMidi": 57,
+        "path": "assets/audio/fsl-synth/samples/57.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -10.538446,
+        "rawRmsDbfs": -18.850308,
+        "routedRmsDbfs": -18.85
+      },
+      "nylon": {
+        "sourceMidi": 57,
+        "sourceNote": "A3",
+        "path": "assets/audio/nylon-guitar/A3.ogg",
+        "anchorDistanceSemitones": 0,
+        "playbackRate": 1,
+        "rawPeakDbfs": -2.947833,
+        "rawRmsDbfs": -13.992958,
+        "basePeakDbfs": -4.886,
+        "baseRmsDbfs": -15.931,
+        "referenceRmsDbfs": -18.85,
+        "requiredCorrectionDb": -2.919,
+        "totalCorrectionDb": -3,
+        "perMidiCorrectionDb": -3.5,
+        "perMidiGain": 0.668343917569,
+        "calibratedPeakDbfs": -7.886,
+        "calibratedRmsDbfs": -18.931
+      },
+      "electric": {
+        "sourceMidi": 59,
+        "path": "assets/audio/electric/B3.ogg",
+        "playbackRate": 0.89089871814,
+        "rawPeakDbfs": 0,
+        "rawRmsDbfs": -12.273942,
+        "routedRmsDbfs": -24.315
+      }
+    },
+    {
+      "midi": 58,
+      "synth": {
+        "sourceMidi": 58,
+        "path": "assets/audio/fsl-synth/samples/58.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -11.861492,
+        "rawRmsDbfs": -19.889142,
+        "routedRmsDbfs": -19.889
+      },
+      "nylon": {
+        "sourceMidi": 57,
+        "sourceNote": "A3",
+        "path": "assets/audio/nylon-guitar/A3.ogg",
+        "anchorDistanceSemitones": 1,
+        "playbackRate": 1.059463094359,
+        "rawPeakDbfs": -2.941508,
+        "rawRmsDbfs": -14.160788,
+        "basePeakDbfs": -4.88,
+        "baseRmsDbfs": -16.099,
+        "referenceRmsDbfs": -19.889,
+        "requiredCorrectionDb": -3.79,
+        "totalCorrectionDb": -3,
+        "perMidiCorrectionDb": -3.5,
+        "perMidiGain": 0.668343917569,
+        "calibratedPeakDbfs": -7.88,
+        "calibratedRmsDbfs": -19.099
+      },
+      "electric": {
+        "sourceMidi": 59,
+        "path": "assets/audio/electric/B3.ogg",
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": 0,
+        "rawRmsDbfs": -12.338325,
+        "routedRmsDbfs": -24.38
+      }
+    },
+    {
+      "midi": 59,
+      "synth": {
+        "sourceMidi": 59,
+        "path": "assets/audio/fsl-synth/samples/59.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -12.808667,
+        "rawRmsDbfs": -20.428103,
+        "routedRmsDbfs": -20.428
+      },
+      "nylon": {
+        "sourceMidi": 57,
+        "sourceNote": "A3",
+        "path": "assets/audio/nylon-guitar/A3.ogg",
+        "anchorDistanceSemitones": 2,
+        "playbackRate": 1.122462048309,
+        "rawPeakDbfs": -2.94374,
+        "rawRmsDbfs": -14.331422,
+        "basePeakDbfs": -4.882,
+        "baseRmsDbfs": -16.27,
+        "referenceRmsDbfs": -20.428,
+        "requiredCorrectionDb": -4.158,
+        "totalCorrectionDb": -3,
+        "perMidiCorrectionDb": -3.5,
+        "perMidiGain": 0.668343917569,
+        "calibratedPeakDbfs": -7.882,
+        "calibratedRmsDbfs": -19.27
+      },
+      "electric": {
+        "sourceMidi": 59,
+        "path": "assets/audio/electric/B3.ogg",
+        "playbackRate": 1,
+        "rawPeakDbfs": 0,
+        "rawRmsDbfs": -12.403585,
+        "routedRmsDbfs": -24.445
+      }
+    },
+    {
+      "midi": 60,
+      "synth": {
+        "sourceMidi": 60,
+        "path": "assets/audio/fsl-synth/samples/60.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -13.720085,
+        "rawRmsDbfs": -20.645211,
+        "routedRmsDbfs": -20.645
+      },
+      "nylon": {
+        "sourceMidi": 61,
+        "sourceNote": "C#4",
+        "path": "assets/audio/nylon-guitar/Cs4.ogg",
+        "anchorDistanceSemitones": 1,
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": -2.935931,
+        "rawRmsDbfs": -11.584754,
+        "basePeakDbfs": -4.874,
+        "baseRmsDbfs": -13.523,
+        "referenceRmsDbfs": -20.645,
+        "requiredCorrectionDb": -7.122,
+        "totalCorrectionDb": -3,
+        "perMidiCorrectionDb": -3.5,
+        "perMidiGain": 0.668343917569,
+        "calibratedPeakDbfs": -7.874,
+        "calibratedRmsDbfs": -16.523
+      },
+      "electric": {
+        "sourceMidi": 59,
+        "path": "assets/audio/electric/B3.ogg",
+        "playbackRate": 1.059463094359,
+        "rawPeakDbfs": 0,
+        "rawRmsDbfs": -12.483973,
+        "routedRmsDbfs": -24.525
+      }
+    },
+    {
+      "midi": 61,
+      "synth": {
+        "sourceMidi": 61,
+        "path": "assets/audio/fsl-synth/samples/61.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -9.040565,
+        "rawRmsDbfs": -16.38992,
+        "routedRmsDbfs": -16.39
+      },
+      "nylon": {
+        "sourceMidi": 61,
+        "sourceNote": "C#4",
+        "path": "assets/audio/nylon-guitar/Cs4.ogg",
+        "anchorDistanceSemitones": 0,
+        "playbackRate": 1,
+        "rawPeakDbfs": -2.952673,
+        "rawRmsDbfs": -11.714116,
+        "basePeakDbfs": -4.891,
+        "baseRmsDbfs": -13.652,
+        "referenceRmsDbfs": -16.39,
+        "requiredCorrectionDb": -2.738,
+        "totalCorrectionDb": -2.75,
+        "perMidiCorrectionDb": -3.25,
+        "perMidiGain": 0.687859912309,
+        "calibratedPeakDbfs": -7.641,
+        "calibratedRmsDbfs": -16.402
+      },
+      "electric": {
+        "sourceMidi": 59,
+        "path": "assets/audio/electric/B3.ogg",
+        "playbackRate": 1.122462048309,
+        "rawPeakDbfs": 0,
+        "rawRmsDbfs": -12.564958,
+        "routedRmsDbfs": -24.606
+      }
+    },
+    {
+      "midi": 62,
+      "synth": {
+        "sourceMidi": 62,
+        "path": "assets/audio/fsl-synth/samples/62.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -8.840966,
+        "rawRmsDbfs": -15.102408,
+        "routedRmsDbfs": -15.102
+      },
+      "nylon": {
+        "sourceMidi": 61,
+        "sourceNote": "C#4",
+        "path": "assets/audio/nylon-guitar/Cs4.ogg",
+        "anchorDistanceSemitones": 1,
+        "playbackRate": 1.059463094359,
+        "rawPeakDbfs": -2.957143,
+        "rawRmsDbfs": -11.859118,
+        "basePeakDbfs": -4.895,
+        "baseRmsDbfs": -13.797,
+        "referenceRmsDbfs": -15.102,
+        "requiredCorrectionDb": -1.305,
+        "totalCorrectionDb": -1.25,
+        "perMidiCorrectionDb": -1.75,
+        "perMidiGain": 0.817523037944,
+        "calibratedPeakDbfs": -6.145,
+        "calibratedRmsDbfs": -15.047
+      },
+      "electric": {
+        "sourceMidi": 64,
+        "path": "assets/audio/electric/E4.ogg",
+        "playbackRate": 0.89089871814,
+        "rawPeakDbfs": 0.000265,
+        "rawRmsDbfs": -10.495611,
+        "routedRmsDbfs": -22.537
+      }
+    },
+    {
+      "midi": 63,
+      "synth": {
+        "sourceMidi": 63,
+        "path": "assets/audio/fsl-synth/samples/63.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -7.765341,
+        "rawRmsDbfs": -13.358965,
+        "routedRmsDbfs": -13.359
+      },
+      "nylon": {
+        "sourceMidi": 64,
+        "sourceNote": "E4",
+        "path": "assets/audio/nylon-guitar/E4.ogg",
+        "anchorDistanceSemitones": 1,
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": -2.919963,
+        "rawRmsDbfs": -14.715723,
+        "basePeakDbfs": -4.858,
+        "baseRmsDbfs": -16.654,
+        "referenceRmsDbfs": -16.654,
+        "requiredCorrectionDb": 0,
+        "totalCorrectionDb": 0,
+        "perMidiCorrectionDb": -0.5,
+        "perMidiGain": 0.944060876286,
+        "calibratedPeakDbfs": -4.858,
+        "calibratedRmsDbfs": -16.654
+      },
+      "electric": {
+        "sourceMidi": 64,
+        "path": "assets/audio/electric/E4.ogg",
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": 0.000265,
+        "rawRmsDbfs": -10.556388,
+        "routedRmsDbfs": -22.598
+      }
+    },
+    {
+      "midi": 64,
+      "synth": {
+        "sourceMidi": 64,
+        "path": "assets/audio/fsl-synth/samples/64.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -6.925241,
+        "rawRmsDbfs": -11.466307,
+        "routedRmsDbfs": -11.466
+      },
+      "nylon": {
+        "sourceMidi": 64,
+        "sourceNote": "E4",
+        "path": "assets/audio/nylon-guitar/E4.ogg",
+        "anchorDistanceSemitones": 0,
+        "playbackRate": 1,
+        "rawPeakDbfs": -2.925159,
+        "rawRmsDbfs": -14.842757,
+        "basePeakDbfs": -4.863,
+        "baseRmsDbfs": -16.781,
+        "referenceRmsDbfs": -16.781,
+        "requiredCorrectionDb": 0,
+        "totalCorrectionDb": 0,
+        "perMidiCorrectionDb": -0.5,
+        "perMidiGain": 0.944060876286,
+        "calibratedPeakDbfs": -4.863,
+        "calibratedRmsDbfs": -16.781
+      },
+      "electric": {
+        "sourceMidi": 64,
+        "path": "assets/audio/electric/E4.ogg",
+        "playbackRate": 1,
+        "rawPeakDbfs": -0.029474,
+        "rawRmsDbfs": -10.607428,
+        "routedRmsDbfs": -22.649
+      }
+    },
+    {
+      "midi": 65,
+      "synth": {
+        "sourceMidi": 65,
+        "path": "assets/audio/fsl-synth/samples/65.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -6.094874,
+        "rawRmsDbfs": -11.051793,
+        "routedRmsDbfs": -11.052
+      },
+      "nylon": {
+        "sourceMidi": 64,
+        "sourceNote": "E4",
+        "path": "assets/audio/nylon-guitar/E4.ogg",
+        "anchorDistanceSemitones": 1,
+        "playbackRate": 1.059463094359,
+        "rawPeakDbfs": -3.060215,
+        "rawRmsDbfs": -14.977186,
+        "basePeakDbfs": -4.998,
+        "baseRmsDbfs": -16.915,
+        "referenceRmsDbfs": -16.915,
+        "requiredCorrectionDb": 0,
+        "totalCorrectionDb": 0,
+        "perMidiCorrectionDb": -0.5,
+        "perMidiGain": 0.944060876286,
+        "calibratedPeakDbfs": -4.998,
+        "calibratedRmsDbfs": -16.915
+      },
+      "electric": {
+        "sourceMidi": 64,
+        "path": "assets/audio/electric/E4.ogg",
+        "playbackRate": 1.059463094359,
+        "rawPeakDbfs": 0.000265,
+        "rawRmsDbfs": -10.649567,
+        "routedRmsDbfs": -22.691
+      }
+    },
+    {
+      "midi": 66,
+      "synth": {
+        "sourceMidi": 66,
+        "path": "assets/audio/fsl-synth/samples/66.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -8.264863,
+        "rawRmsDbfs": -13.264779,
+        "routedRmsDbfs": -13.265
+      },
+      "nylon": {
+        "sourceMidi": 64,
+        "sourceNote": "E4",
+        "path": "assets/audio/nylon-guitar/E4.ogg",
+        "anchorDistanceSemitones": 2,
+        "playbackRate": 1.122462048309,
+        "rawPeakDbfs": -3.073422,
+        "rawRmsDbfs": -15.117416,
+        "basePeakDbfs": -5.012,
+        "baseRmsDbfs": -17.056,
+        "referenceRmsDbfs": -17.056,
+        "requiredCorrectionDb": 0,
+        "totalCorrectionDb": 0,
+        "perMidiCorrectionDb": -0.5,
+        "perMidiGain": 0.944060876286,
+        "calibratedPeakDbfs": -5.012,
+        "calibratedRmsDbfs": -17.056
+      },
+      "electric": {
+        "sourceMidi": 67,
+        "path": "assets/audio/electric/G4.ogg",
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": 0,
+        "rawRmsDbfs": -10.264223,
+        "routedRmsDbfs": -22.305
+      }
+    },
+    {
+      "midi": 67,
+      "synth": {
+        "sourceMidi": 67,
+        "path": "assets/audio/fsl-synth/samples/67.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -8.850507,
+        "rawRmsDbfs": -14.170972,
+        "routedRmsDbfs": -14.171
+      },
+      "nylon": {
+        "sourceMidi": 68,
+        "sourceNote": "G#4",
+        "path": "assets/audio/nylon-guitar/Gs4.ogg",
+        "anchorDistanceSemitones": 1,
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": -2.965717,
+        "rawRmsDbfs": -17.85227,
+        "basePeakDbfs": -4.904,
+        "baseRmsDbfs": -19.79,
+        "referenceRmsDbfs": -19.79,
+        "requiredCorrectionDb": 0,
+        "totalCorrectionDb": 0,
+        "perMidiCorrectionDb": -0.5,
+        "perMidiGain": 0.944060876286,
+        "calibratedPeakDbfs": -4.904,
+        "calibratedRmsDbfs": -19.79
+      },
+      "electric": {
+        "sourceMidi": 67,
+        "path": "assets/audio/electric/G4.ogg",
+        "playbackRate": 1,
+        "rawPeakDbfs": 0,
+        "rawRmsDbfs": -10.317184,
+        "routedRmsDbfs": -22.358
+      }
+    },
+    {
+      "midi": 68,
+      "synth": {
+        "sourceMidi": 68,
+        "path": "assets/audio/fsl-synth/samples/68.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -9.898193,
+        "rawRmsDbfs": -16.480099,
+        "routedRmsDbfs": -16.48
+      },
+      "nylon": {
+        "sourceMidi": 68,
+        "sourceNote": "G#4",
+        "path": "assets/audio/nylon-guitar/Gs4.ogg",
+        "anchorDistanceSemitones": 0,
+        "playbackRate": 1,
+        "rawPeakDbfs": -2.970193,
+        "rawRmsDbfs": -18.070034,
+        "basePeakDbfs": -4.908,
+        "baseRmsDbfs": -20.008,
+        "referenceRmsDbfs": -20.008,
+        "requiredCorrectionDb": 0,
+        "totalCorrectionDb": 0,
+        "perMidiCorrectionDb": -0.5,
+        "perMidiGain": 0.944060876286,
+        "calibratedPeakDbfs": -4.908,
+        "calibratedRmsDbfs": -20.008
+      },
+      "electric": {
+        "sourceMidi": 67,
+        "path": "assets/audio/electric/G4.ogg",
+        "playbackRate": 1.059463094359,
+        "rawPeakDbfs": 0,
+        "rawRmsDbfs": -10.392976,
+        "routedRmsDbfs": -22.434
+      }
+    },
+    {
+      "midi": 69,
+      "synth": {
+        "sourceMidi": 69,
+        "path": "assets/audio/fsl-synth/samples/69.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -11.999682,
+        "rawRmsDbfs": -19.143398,
+        "routedRmsDbfs": -19.143
+      },
+      "nylon": {
+        "sourceMidi": 69,
+        "sourceNote": "A4",
+        "path": "assets/audio/nylon-guitar/A4.ogg",
+        "anchorDistanceSemitones": 0,
+        "playbackRate": 1,
+        "rawPeakDbfs": -2.964598,
+        "rawRmsDbfs": -19.868098,
+        "basePeakDbfs": -4.903,
+        "baseRmsDbfs": -21.806,
+        "referenceRmsDbfs": -21.806,
+        "requiredCorrectionDb": 0,
+        "totalCorrectionDb": 0,
+        "perMidiCorrectionDb": -0.5,
+        "perMidiGain": 0.944060876286,
+        "calibratedPeakDbfs": -4.903,
+        "calibratedRmsDbfs": -21.806
+      },
+      "electric": {
+        "sourceMidi": 67,
+        "path": "assets/audio/electric/G4.ogg",
+        "playbackRate": 1.122462048309,
+        "rawPeakDbfs": -0.06412,
+        "rawRmsDbfs": -10.49849,
+        "routedRmsDbfs": -22.54
+      }
+    },
+    {
+      "midi": 70,
+      "synth": {
+        "sourceMidi": 70,
+        "path": "assets/audio/fsl-synth/samples/70.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -12.678758,
+        "rawRmsDbfs": -20.930474,
+        "routedRmsDbfs": -20.93
+      },
+      "nylon": {
+        "sourceMidi": 69,
+        "sourceNote": "A4",
+        "path": "assets/audio/nylon-guitar/A4.ogg",
+        "anchorDistanceSemitones": 1,
+        "playbackRate": 1.059463094359,
+        "rawPeakDbfs": -2.963852,
+        "rawRmsDbfs": -20.082499,
+        "basePeakDbfs": -4.902,
+        "baseRmsDbfs": -22.021,
+        "referenceRmsDbfs": -22.021,
+        "requiredCorrectionDb": 0,
+        "totalCorrectionDb": 0,
+        "perMidiCorrectionDb": -0.5,
+        "perMidiGain": 0.944060876286,
+        "calibratedPeakDbfs": -4.902,
+        "calibratedRmsDbfs": -22.021
+      },
+      "electric": {
+        "sourceMidi": 71,
+        "path": "assets/audio/electric/B4.ogg",
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": 0,
+        "rawRmsDbfs": -10.965881,
+        "routedRmsDbfs": -23.007
+      }
+    },
+    {
+      "midi": 71,
+      "synth": {
+        "sourceMidi": 71,
+        "path": "assets/audio/fsl-synth/samples/71.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -14.425947,
+        "rawRmsDbfs": -22.064775,
+        "routedRmsDbfs": -22.065
+      },
+      "nylon": {
+        "sourceMidi": 69,
+        "sourceNote": "A4",
+        "path": "assets/audio/nylon-guitar/A4.ogg",
+        "anchorDistanceSemitones": 2,
+        "playbackRate": 1.122462048309,
+        "rawPeakDbfs": -2.969447,
+        "rawRmsDbfs": -20.301228,
+        "basePeakDbfs": -4.908,
+        "baseRmsDbfs": -22.239,
+        "referenceRmsDbfs": -22.239,
+        "requiredCorrectionDb": 0,
+        "totalCorrectionDb": 0,
+        "perMidiCorrectionDb": -0.5,
+        "perMidiGain": 0.944060876286,
+        "calibratedPeakDbfs": -4.908,
+        "calibratedRmsDbfs": -22.239
+      },
+      "electric": {
+        "sourceMidi": 71,
+        "path": "assets/audio/electric/B4.ogg",
+        "playbackRate": 1,
+        "rawPeakDbfs": 0,
+        "rawRmsDbfs": -11.103114,
+        "routedRmsDbfs": -23.144
+      }
+    },
+    {
+      "midi": 72,
+      "synth": {
+        "sourceMidi": 72,
+        "path": "assets/audio/fsl-synth/samples/72.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -14.437116,
+        "rawRmsDbfs": -22.664133,
+        "routedRmsDbfs": -22.664
+      },
+      "nylon": {
+        "sourceMidi": 73,
+        "sourceNote": "C#5",
+        "path": "assets/audio/nylon-guitar/Cs5.ogg",
+        "anchorDistanceSemitones": 1,
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": -2.891443,
+        "rawRmsDbfs": -15.756978,
+        "basePeakDbfs": -4.83,
+        "baseRmsDbfs": -17.695,
+        "referenceRmsDbfs": -22.664,
+        "requiredCorrectionDb": -4.969,
+        "totalCorrectionDb": -3,
+        "perMidiCorrectionDb": -3.5,
+        "perMidiGain": 0.668343917569,
+        "calibratedPeakDbfs": -7.83,
+        "calibratedRmsDbfs": -20.695
+      },
+      "electric": {
+        "sourceMidi": 71,
+        "path": "assets/audio/electric/B4.ogg",
+        "playbackRate": 1.059463094359,
+        "rawPeakDbfs": 0,
+        "rawRmsDbfs": -11.247284,
+        "routedRmsDbfs": -23.288
+      }
+    },
+    {
+      "midi": 73,
+      "synth": {
+        "sourceMidi": 73,
+        "path": "assets/audio/fsl-synth/samples/73.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -14.405042,
+        "rawRmsDbfs": -21.028558,
+        "routedRmsDbfs": -21.029
+      },
+      "nylon": {
+        "sourceMidi": 73,
+        "sourceNote": "C#5",
+        "path": "assets/audio/nylon-guitar/Cs5.ogg",
+        "anchorDistanceSemitones": 0,
+        "playbackRate": 1,
+        "rawPeakDbfs": -2.931843,
+        "rawRmsDbfs": -15.904419,
+        "basePeakDbfs": -4.87,
+        "baseRmsDbfs": -17.843,
+        "referenceRmsDbfs": -21.029,
+        "requiredCorrectionDb": -3.186,
+        "totalCorrectionDb": -3,
+        "perMidiCorrectionDb": -3.5,
+        "perMidiGain": 0.668343917569,
+        "calibratedPeakDbfs": -7.87,
+        "calibratedRmsDbfs": -20.843
+      },
+      "electric": {
+        "sourceMidi": 74,
+        "path": "assets/audio/electric/D5.ogg",
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": 0,
+        "rawRmsDbfs": -10.323464,
+        "routedRmsDbfs": -22.365
+      }
+    },
+    {
+      "midi": 74,
+      "synth": {
+        "sourceMidi": 74,
+        "path": "assets/audio/fsl-synth/samples/74.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -14.432926,
+        "rawRmsDbfs": -20.41618,
+        "routedRmsDbfs": -20.416
+      },
+      "nylon": {
+        "sourceMidi": 73,
+        "sourceNote": "C#5",
+        "path": "assets/audio/nylon-guitar/Cs5.ogg",
+        "anchorDistanceSemitones": 1,
+        "playbackRate": 1.059463094359,
+        "rawPeakDbfs": -2.911805,
+        "rawRmsDbfs": -16.056222,
+        "basePeakDbfs": -4.85,
+        "baseRmsDbfs": -17.994,
+        "referenceRmsDbfs": -20.416,
+        "requiredCorrectionDb": -2.422,
+        "totalCorrectionDb": -2.5,
+        "perMidiCorrectionDb": -3,
+        "perMidiGain": 0.707945784384,
+        "calibratedPeakDbfs": -7.35,
+        "calibratedRmsDbfs": -20.494
+      },
+      "electric": {
+        "sourceMidi": 74,
+        "path": "assets/audio/electric/D5.ogg",
+        "playbackRate": 1,
+        "rawPeakDbfs": -0.055046,
+        "rawRmsDbfs": -10.410306,
+        "routedRmsDbfs": -22.452
+      }
+    },
+    {
+      "midi": 75,
+      "synth": {
+        "sourceMidi": 75,
+        "path": "assets/audio/fsl-synth/samples/75.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -13.751014,
+        "rawRmsDbfs": -19.360134,
+        "routedRmsDbfs": -19.36
+      },
+      "nylon": {
+        "sourceMidi": 76,
+        "sourceNote": "E5",
+        "path": "assets/audio/nylon-guitar/E5.ogg",
+        "anchorDistanceSemitones": 1,
+        "playbackRate": 0.943874312682,
+        "rawPeakDbfs": -2.995979,
+        "rawRmsDbfs": -15.06255,
+        "basePeakDbfs": -4.934,
+        "baseRmsDbfs": -17.001,
+        "referenceRmsDbfs": -19.36,
+        "requiredCorrectionDb": -2.359,
+        "totalCorrectionDb": -2.25,
+        "perMidiCorrectionDb": -2.75,
+        "perMidiGain": 0.728618174513,
+        "calibratedPeakDbfs": -7.184,
+        "calibratedRmsDbfs": -19.251
+      },
+      "electric": {
+        "sourceMidi": 74,
+        "path": "assets/audio/electric/D5.ogg",
+        "playbackRate": 1.059463094359,
+        "rawPeakDbfs": 0,
+        "rawRmsDbfs": -10.469328,
+        "routedRmsDbfs": -22.511
+      }
+    },
+    {
+      "midi": 76,
+      "synth": {
+        "sourceMidi": 76,
+        "path": "assets/audio/fsl-synth/samples/76.wav",
+        "playbackRate": 1,
+        "rawPeakDbfs": -12.577791,
+        "rawRmsDbfs": -17.590711,
+        "routedRmsDbfs": -17.591
+      },
+      "nylon": {
+        "sourceMidi": 76,
+        "sourceNote": "E5",
+        "path": "assets/audio/nylon-guitar/E5.ogg",
+        "anchorDistanceSemitones": 0,
+        "playbackRate": 1,
+        "rawPeakDbfs": -2.997476,
+        "rawRmsDbfs": -15.29508,
+        "basePeakDbfs": -4.936,
+        "baseRmsDbfs": -17.233,
+        "referenceRmsDbfs": -17.591,
+        "requiredCorrectionDb": -0.357,
+        "totalCorrectionDb": -0.25,
+        "perMidiCorrectionDb": -0.75,
+        "perMidiGain": 0.91727593539,
+        "calibratedPeakDbfs": -5.186,
+        "calibratedRmsDbfs": -17.483
+      },
+      "electric": {
+        "sourceMidi": 74,
+        "path": "assets/audio/electric/D5.ogg",
+        "playbackRate": 1.122462048309,
+        "rawPeakDbfs": 0,
+        "rawRmsDbfs": -10.494241,
+        "routedRmsDbfs": -22.535
+      }
+    }
+  ]
+}

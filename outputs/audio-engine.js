@@ -55,7 +55,37 @@
     electric: Object.freeze({ available: true, reason: null }),
     none: Object.freeze({ available: false, reason: "not-requested" })
   });
+  const FSL_INSTRUMENT_CAPABILITIES = Object.freeze({
+    synth: Object.freeze({
+      status: "AVAILABLE",
+      available: true,
+      minMidi: 40,
+      maxMidi: 76,
+      reason: null,
+      message: "พร้อมใช้ครบช่วง MIDI 40–76"
+    }),
+    nylon: Object.freeze({
+      status: "AVAILABLE",
+      available: true,
+      minMidi: 40,
+      maxMidi: 76,
+      reason: null,
+      message: "พร้อมใช้ครบช่วง MIDI 40–76"
+    }),
+    electric: Object.freeze({
+      status: "AVAILABLE",
+      available: true,
+      minMidi: 40,
+      maxMidi: 76,
+      reason: null,
+      message: "พร้อมใช้ครบช่วง MIDI 40–76"
+    })
+  });
   const APPROVED_SOUNDLAB_SAMPLES = Object.freeze([
+    { note: "F#2", midi: 42, url: "assets/audio/nylon-guitar/Fs2.ogg" },
+    { note: "A2", midi: 45, url: "assets/audio/nylon-guitar/A2.ogg" },
+    { note: "C#3", midi: 49, url: "assets/audio/nylon-guitar/Cs3.ogg" },
+    { note: "E3", midi: 52, url: "assets/audio/nylon-guitar/E3.ogg" },
     { note: "A3", midi: 57, url: "assets/audio/nylon-guitar/A3.ogg" },
     { note: "C#4", midi: 61, url: "assets/audio/nylon-guitar/Cs4.ogg" },
     { note: "E4", midi: 64, url: "assets/audio/nylon-guitar/E4.ogg" },
@@ -64,46 +94,47 @@
     { note: "C#5", midi: 73, url: "assets/audio/nylon-guitar/Cs5.ogg" },
     { note: "E5", midi: 76, url: "assets/audio/nylon-guitar/E5.ogg" }
   ]);
+  const NYLON_MAX_PITCH_SHIFT_SEMITONES = 3;
   const NYLON_GLOBAL_MAKEUP_DB = 0.5;
   const NYLON_GLOBAL_MAKEUP_GAIN = 10 ** (NYLON_GLOBAL_MAKEUP_DB / 20);
   const APPROVED_NYLON_MIDI_GAINS = Object.freeze({
-    40: 0.63095734448,
-    41: 0.63095734448,
-    42: 0.63095734448,
-    43: 0.63095734448,
-    44: 0.63095734448,
-    45: 0.63095734448,
-    46: 0.649844447464,
-    47: 0.677989471876,
-    48: 0.708277394901,
-    49: 0.741918573881,
-    50: 0.779794389623,
-    51: 0.82206727367,
-    52: 0.868578962435,
-    53: 0.920036756249,
-    54: 0.977373365836,
-    55: 1.040504813738,
-    56: 1.109677582277,
-    57: 1.186236375824,
-    58: 1.222481855446,
-    59: 1.12154298133,
-    60: 0.999576234268,
-    61: 0.890873256527,
-    62: 0.902721860131,
-    63: 0.981273891302,
-    64: 1.059012777228,
-    65: 1.188231879391,
-    66: 1.333218096667,
-    67: 1.49589530807,
-    68: 1.584893192461,
-    69: 1.584893192461,
-    70: 1.584893192461,
-    71: 1.584893192461,
-    72: 1.584893192461,
-    73: 1.584893192461,
-    74: 1.584893192461,
-    75: 1.584893192461,
-    76: 1.584893192461
+    40: 0.668343917569,
+    41: 0.668343917569,
+    42: 0.794328234724,
+    43: 0.668343917569,
+    44: 0.841395141645,
+    45: 0.944060876286,
+    46: 0.944060876286,
+    47: 0.944060876286,
+    48: 0.771791515585,
+    49: 0.817523037944,
+    50: 0.841395141645,
+    51: 0.944060876286,
+    52: 0.944060876286,
+    53: 0.944060876286,
+    54: 0.944060876286,
+    55: 0.944060876286,
+    56: 0.794328234724,
+    57: 0.668343917569,
+    58: 0.668343917569,
+    59: 0.668343917569,
+    60: 0.668343917569,
+    61: 0.687859912309,
+    62: 0.817523037944,
+    63: 0.944060876286,
+    64: 0.944060876286,
+    65: 0.944060876286,
+    66: 0.944060876286,
+    67: 0.944060876286,
+    68: 0.944060876286,
+    69: 0.944060876286,
+    70: 0.944060876286,
+    71: 0.944060876286,
+    72: 0.668343917569,
+    73: 0.668343917569,
+    74: 0.707945784384,
+    75: 0.728618174513,
+    76: 0.91727593539
   });
 
   // Nylon sample attribution:
@@ -185,6 +216,21 @@
     return { ...INSTRUMENT_AVAILABILITY[normalized] };
   }
 
+  function getFslInstrumentCapability(instrument) {
+    const normalized = String(instrument || "").trim().toLowerCase();
+    const capability = FSL_INSTRUMENT_CAPABILITIES[normalized];
+    return capability
+      ? { ...capability }
+      : {
+          status: "UNAVAILABLE_UNKNOWN",
+          available: false,
+          minMidi: null,
+          maxMidi: null,
+          reason: "fsl-instrument-unsupported",
+          message: "ไม่รองรับเครื่องดนตรีนี้ใน FSL"
+        };
+  }
+
   function setSelectedInstrument(instrument) {
     const normalized = normalizeInstrument(instrument);
     if (normalized !== selectedInstrument) {
@@ -198,6 +244,18 @@
     const parsed = Number(value);
     if (!Number.isFinite(parsed)) return 0.7;
     return Math.min(1, Math.max(0, parsed));
+  }
+
+  function validateApprovedNylonCoverage() {
+    for (let midi = 40; midi <= 76; midi += 1) {
+      const nearestDistance = Math.min(
+        ...APPROVED_SOUNDLAB_SAMPLES.map((sample) => Math.abs(sample.midi - midi))
+      );
+      if (nearestDistance > NYLON_MAX_PITCH_SHIFT_SEMITONES) {
+        throw new Error(`Approved Nylon sample coverage exceeds ±${NYLON_MAX_PITCH_SHIFT_SEMITONES} semitones at MIDI ${midi}.`);
+      }
+    }
+    return true;
   }
 
   function validateApprovedNylonCalibration() {
@@ -217,6 +275,7 @@
     return true;
   }
 
+  const APPROVED_NYLON_FULL_RANGE_VALID = validateApprovedNylonCoverage();
   const APPROVED_NYLON_CALIBRATION_VALID = validateApprovedNylonCalibration();
 
   function usesApprovedNylonCalibration(channel, profile) {
@@ -348,10 +407,8 @@
     if (channel === "fsl" && !isPlaybackTrigger) {
       fslSynthActiveSources.forEach((entry) => {
         const src = entry.source || entry;
-        const gain = entry.voiceGain;
         try { src.stop(); } catch {}
-        try { src.disconnect(); } catch {}
-        if (gain) try { gain.disconnect(); } catch {}
+        cleanupFslSampleEntry(entry);
       });
       fslSynthActiveSources.clear();
     }
@@ -534,6 +591,18 @@
         return { played: false, requestGeneration, reason: "out-of-range" };
       }
 
+      const isFslRequest = channel === "fsl";
+      const fslCapability = isFslRequest ? getFslInstrumentCapability(requestedInstrument) : null;
+      if (fslCapability && !fslCapability.available) {
+        lastFallbackReason = fslCapability.reason;
+        releaseChannel(channel);
+        return {
+          played: false,
+          requestGeneration,
+          reason: fslCapability.status.toLowerCase().replaceAll("_", "-")
+        };
+      }
+
       const availability = getInstrumentAvailability(requestedInstrument);
       if (!availability.available) {
         lastFallbackReason = availability.reason;
@@ -565,7 +634,7 @@
         }
       }
 
-      const isFslSynth = channel === "fsl" && profile === "fsl-fretboard-position";
+      const isFslSynth = isFslRequest;
       const isSoundLabSynth = channel === "soundlab" && profile === "soundlab-guide-tone";
       if ((isFslSynth || isSoundLabSynth) && requestedInstrument === "synth") {
         await prepareFslSynthSampler();
@@ -578,103 +647,119 @@
       let usedElectric = false;
       let usedFslSynth = false;
       let usedSynth = false;
-      const voices = parsedPitches.map((parsedPitch, index) => {
-        const timeOffset = Number(options.timeOffsets?.[index] ?? options.timeOffset ?? 0);
-        const duration = Number(options.durations?.[index] ?? options.duration);
-        const velocity = clampVelocity(options.velocities?.[index] ?? options.velocity);
+      let voices;
+      try {
+        voices = parsedPitches.map((parsedPitch, index) => {
+          const timeOffset = Number(options.timeOffsets?.[index] ?? options.timeOffset ?? 0);
+          const duration = Number(options.durations?.[index] ?? options.duration);
+          const velocity = clampVelocity(options.velocities?.[index] ?? options.velocity);
 
-        if (requestedInstrument === "nylon") {
-          const resolvedSample = resolveNearestApprovedSample(parsedPitch);
-          lastResolvedSample = resolvedSample?.note || null;
-          if (
-            resolvedSample
-            && (soundLabSamplerState === "ready" || soundLabSamplerState === "partial")
-            && soundLabSampleBuffers.has(resolvedSample.note)
-          ) {
-            try {
-              const sampleVoice = createSampleVoice(parsedPitch, velocity, resolvedSample, {
-                channel,
-                profile,
-                timeOffset,
-                duration
-              });
-              usedNylon = true;
-              return sampleVoice;
-            } catch {
-              lastFallbackReason = "sample-playback-failed";
+          if (requestedInstrument === "nylon") {
+            const resolvedSample = resolveNearestApprovedSample(parsedPitch);
+            lastResolvedSample = resolvedSample?.note || null;
+            if (
+              resolvedSample
+              && (soundLabSamplerState === "ready" || soundLabSamplerState === "partial")
+              && soundLabSampleBuffers.has(resolvedSample.note)
+            ) {
+              try {
+                const sampleVoice = createSampleVoice(parsedPitch, velocity, resolvedSample, {
+                  channel,
+                  profile,
+                  timeOffset,
+                  duration
+                });
+                usedNylon = true;
+                return sampleVoice;
+              } catch {
+                lastFallbackReason = "sample-playback-failed";
+              }
+            } else {
+              lastFallbackReason = soundLabFailedSamples.has(resolvedSample?.note)
+                ? "resolved-sample-failed"
+                : "sampler-unavailable";
             }
-          } else {
-            lastFallbackReason = soundLabFailedSamples.has(resolvedSample?.note)
-              ? "resolved-sample-failed"
-              : "sampler-unavailable";
+            if (isFslRequest) {
+              throw new Error(lastFallbackReason || "nylon-playback-failed");
+            }
           }
-        }
 
-        if (requestedInstrument === "electric") {
-          const mapping = parsedPitch.midi >= 40 && parsedPitch.midi <= 76
-            ? approvedElectricMap?.notes?.[parsedPitch.midi.toString()]
-            : null;
-          const sampleUrl = mapping ? mapping.path : null;
-          lastResolvedSample = sampleUrl || null;
-          if (
-            sampleUrl
-            && (electricSamplerState === "ready" || electricSamplerState === "partial")
-            && electricSampleBuffers.has(sampleUrl)
-          ) {
-            try {
-              const playbackRate = 2 ** ((parsedPitch.midi - mapping.sourceMidi) / 12);
-              lastElectricSourceMidi = mapping.sourceMidi;
-              lastElectricPlaybackRate = playbackRate;
-              const sampleVoice = createElectricSampleVoice(sampleUrl, {
-                channel,
-                profile,
-                timeOffset,
-                duration,
-                playbackRate
-              });
-              usedElectric = true;
-              return sampleVoice;
-            } catch {
-              lastFallbackReason = "electric-sample-playback-failed";
+          if (requestedInstrument === "electric") {
+            const mapping = parsedPitch.midi >= 40 && parsedPitch.midi <= 76
+              ? approvedElectricMap?.notes?.[parsedPitch.midi.toString()]
+              : null;
+            const sampleUrl = mapping ? mapping.path : null;
+            lastResolvedSample = sampleUrl || null;
+            if (
+              sampleUrl
+              && (electricSamplerState === "ready" || electricSamplerState === "partial")
+              && electricSampleBuffers.has(sampleUrl)
+            ) {
+              try {
+                const playbackRate = 2 ** ((parsedPitch.midi - mapping.sourceMidi) / 12);
+                lastElectricSourceMidi = mapping.sourceMidi;
+                lastElectricPlaybackRate = playbackRate;
+                const sampleVoice = createElectricSampleVoice(sampleUrl, {
+                  channel,
+                  profile,
+                  timeOffset,
+                  duration,
+                  playbackRate
+                });
+                usedElectric = true;
+                return sampleVoice;
+              } catch {
+                lastFallbackReason = "electric-sample-playback-failed";
+              }
+            } else if (!lastFallbackReason) {
+              lastFallbackReason = electricFailedSamples.has(sampleUrl)
+                ? "electric-sample-failed"
+                : "electric-note-unavailable";
             }
-          } else if (!lastFallbackReason) {
-            lastFallbackReason = electricFailedSamples.has(sampleUrl)
-              ? "electric-sample-failed"
-              : "electric-note-unavailable";
-          }
-        }
-        if ((isFslSynth || isSoundLabSynth) && requestedInstrument === "synth") {
-          const mapping = parsedPitch.midi >= 40 && parsedPitch.midi <= 76
-            ? approvedFslSynthMap?.notes?.[parsedPitch.midi.toString()]
-            : null;
-          const sampleUrl = mapping ? mapping.path : null;
-          lastResolvedSample = sampleUrl || null;
-          if (
-            sampleUrl
-            && (fslSynthSamplerState === "ready" || fslSynthSamplerState === "partial")
-            && fslSynthSampleBuffers.has(sampleUrl)
-          ) {
-            try {
-              const sampleVoice = createFslSynthVoice(sampleUrl, {
-                channel,
-                timeOffset,
-                duration
-              });
-              usedFslSynth = true;
-              return sampleVoice;
-            } catch {
-              lastFallbackReason = `${channel}-synth-sample-playback-failed`;
+            if (isFslRequest) {
+              throw new Error(lastFallbackReason || "electric-playback-failed");
             }
-          } else if (!lastFallbackReason) {
-            lastFallbackReason = fslSynthFailedSamples.has(sampleUrl)
-              ? "fsl-synth-sample-failed"
-              : "fsl-synth-sampler-unavailable";
           }
-        }
 
-        usedSynth = true;
-        return createVoice(channel, profile, parsedPitch, velocity, { timeOffset, duration });
-      });
+          if ((isFslSynth || isSoundLabSynth) && requestedInstrument === "synth") {
+            const mapping = parsedPitch.midi >= 40 && parsedPitch.midi <= 76
+              ? approvedFslSynthMap?.notes?.[parsedPitch.midi.toString()]
+              : null;
+            const sampleUrl = mapping ? mapping.path : null;
+            lastResolvedSample = sampleUrl || null;
+            if (
+              sampleUrl
+              && (fslSynthSamplerState === "ready" || fslSynthSamplerState === "partial")
+              && fslSynthSampleBuffers.has(sampleUrl)
+            ) {
+              try {
+                const sampleVoice = createFslSynthVoice(sampleUrl, {
+                  channel,
+                  timeOffset,
+                  duration
+                });
+                usedFslSynth = true;
+                return sampleVoice;
+              } catch {
+                lastFallbackReason = `${channel}-synth-sample-playback-failed`;
+              }
+            } else if (!lastFallbackReason) {
+              lastFallbackReason = fslSynthFailedSamples.has(sampleUrl)
+                ? "fsl-synth-sample-failed"
+                : "fsl-synth-sampler-unavailable";
+            }
+            if (isFslRequest) {
+              throw new Error(lastFallbackReason || "fsl-synth-playback-failed");
+            }
+          }
+
+          usedSynth = true;
+          return createVoice(channel, profile, parsedPitch, velocity, { timeOffset, duration });
+        });
+      } catch (err) {
+        releaseChannel(channel);
+        return { played: false, requestGeneration, reason: lastFallbackReason || "playback-failed" };
+      }
 
       if (requestGeneration !== channelRequestGenerations.get(channel)) {
         voices.forEach(cleanupVoice);
@@ -958,15 +1043,121 @@
     return fslSynthSamplerLoadPromise;
   }
 
+  function cleanupFslSampleEntry(entry) {
+    if (!entry || entry.cleanedUp) return;
+    entry.cleanedUp = true;
+    fslSynthActiveSources.delete(entry);
+    if (entry.retireTimerId !== null) {
+      window.clearTimeout(entry.retireTimerId);
+      entry.retireTimerId = null;
+    }
+    try { entry.source.onended = null; } catch {}
+    try { entry.source.disconnect(); } catch {}
+    try { entry.voiceGain.disconnect(); } catch {}
+  }
+
+  function createManagedFslSampleVoice(buffer, playback = {}) {
+    if (!buffer) throw new Error("FSL sample buffer is unavailable.");
+
+    const profile = isSupportedProfile(playback.profile)
+      ? playback.profile
+      : "fsl-fretboard-position";
+    const outputGain = playback.outputGain || channelGains.fsl;
+    const playbackRate = Number.isFinite(playback.playbackRate) ? playback.playbackRate : 1.0;
+    const voiceLevel = Number.isFinite(playback.voiceLevel) ? playback.voiceLevel : 1.0;
+    const timeOffset = Math.max(0, Number(playback.timeOffset) || 0);
+    const currentTime = audioCtx.currentTime;
+    const startNow = currentTime + timeOffset;
+    const naturalDuration = buffer.duration / playbackRate;
+    const requestedDuration = Number(playback.duration);
+    const duration = Number.isFinite(requestedDuration) && requestedDuration > 0
+      ? Math.min(requestedDuration, naturalDuration)
+      : naturalDuration;
+
+    const entries = Array.from(fslSynthActiveSources);
+    entries
+      .filter((entry) => entry.retiring)
+      .forEach((entry) => {
+        try { entry.source.stop(currentTime); } catch {}
+        cleanupFslSampleEntry(entry);
+      });
+
+    const activeEntry = Array.from(fslSynthActiveSources)
+      .find((entry) => !entry.retiring);
+    if (activeEntry) {
+      activeEntry.retiring = true;
+      const retireTime = startNow + 0.012;
+      try {
+        activeEntry.voiceGain.gain.cancelScheduledValues(startNow);
+        activeEntry.voiceGain.gain.setValueAtTime(activeEntry.voiceGain.gain.value, startNow);
+        activeEntry.voiceGain.gain.linearRampToValueAtTime(0.0001, retireTime);
+      } catch {}
+      const retireDelayMs = Math.max(0, Math.ceil((retireTime - currentTime) * 1000));
+      activeEntry.retireTimerId = window.setTimeout(() => {
+        activeEntry.retireTimerId = null;
+        try {
+          activeEntry.source.stop(retireTime);
+        } catch {
+          cleanupFslSampleEntry(activeEntry);
+        }
+      }, retireDelayMs);
+    }
+
+    const source = audioCtx.createBufferSource();
+    const voiceGain = audioCtx.createGain();
+    source.buffer = buffer;
+    source.playbackRate.setValueAtTime(playbackRate, startNow);
+    voiceGain.gain.setValueAtTime(0.0001, startNow);
+    voiceGain.gain.linearRampToValueAtTime(voiceLevel, startNow + 0.008);
+    source.connect(voiceGain);
+    voiceGain.connect(outputGain);
+
+    const entry = {
+      source,
+      voiceGain,
+      retiring: false,
+      cleanedUp: false,
+      retireTimerId: null
+    };
+    fslSynthActiveSources.add(entry);
+
+    source.onended = () => cleanupFslSampleEntry(entry);
+    source.start(startNow);
+    if (playback.stopAtEnd !== false) {
+      source.stop(startNow + duration);
+    }
+
+    return {
+      channel: "fsl",
+      profile,
+      sources: [],
+      nodes: [],
+      timerId: null,
+      endTime: startNow + duration
+    };
+  }
+
   function createFslSynthVoice(sampleUrl, playback = {}) {
     const buffer = fslSynthSampleBuffers.get(sampleUrl);
     if (!buffer) throw new Error(`FSL Synth sample ${sampleUrl} is unavailable.`);
 
     const channel = playback.channel === "soundlab" ? "soundlab" : "fsl";
+    if (channel === "fsl") {
+      return createManagedFslSampleVoice(buffer, {
+        profile: "fsl-fretboard-position",
+        timeOffset: playback.timeOffset,
+        duration: playback.duration,
+        playbackRate: 1.0,
+        voiceLevel: 1.0,
+        outputGain: channelGains.fsl,
+        stopAtEnd: false
+      });
+    }
+
     const timeOffset = Math.max(0, Number(playback.timeOffset) || 0);
     const currentTime = audioCtx.currentTime;
 
-    const activeSet = channel === "soundlab" ? soundlabSynthActiveSources : fslSynthActiveSources;
+    const activeSet = soundlabSynthActiveSources;
 
     let startDelay = 0;
     if (activeSet.size >= 2) {
@@ -1044,9 +1235,7 @@
     const channel = isSupportedChannel(playback.channel) ? playback.channel : "soundlab";
     const profile = isSupportedProfile(playback.profile) ? playback.profile : "soundlab-guide-tone";
     const timeOffset = Math.max(0, Number(playback.timeOffset) || 0);
-    const now = audioCtx.currentTime + timeOffset;
-    const source = audioCtx.createBufferSource();
-    const voiceGain = audioCtx.createGain();
+    const currentTime = audioCtx.currentTime;
     const playbackRate = 2 ** ((parsedPitch.midi - sample.midi) / 12);
     const naturalDuration = buffer.duration / playbackRate;
     const requestedDuration = Number(playback.duration);
@@ -1054,6 +1243,21 @@
     const duration = Number.isFinite(requestedDuration) && requestedDuration > 0
       ? Math.min(requestedDuration, naturalDuration)
       : naturalDuration;
+
+    if (channel === "fsl") {
+      return createManagedFslSampleVoice(buffer, {
+        profile,
+        timeOffset,
+        duration,
+        playbackRate,
+        voiceLevel: effectiveGain,
+        outputGain: channelGains.fsl
+      });
+    }
+
+    const now = currentTime + timeOffset;
+    const source = audioCtx.createBufferSource();
+    const voiceGain = audioCtx.createGain();
 
     source.buffer = buffer;
     source.playbackRate.setValueAtTime(playbackRate, now);
@@ -1082,17 +1286,34 @@
     const channel = isSupportedChannel(playback.channel) ? playback.channel : "soundlab";
     const profile = isSupportedProfile(playback.profile) ? playback.profile : "soundlab-guide-tone";
     const timeOffset = Math.max(0, Number(playback.timeOffset) || 0);
-    const now = audioCtx.currentTime + timeOffset;
-    const source = audioCtx.createBufferSource();
+    const currentTime = audioCtx.currentTime;
+    const rate = Number.isFinite(playback.playbackRate) ? playback.playbackRate : 1.0;
+    const naturalDuration = buffer.duration / rate;
     const requestedDuration = Number(playback.duration);
     const duration = Number.isFinite(requestedDuration) && requestedDuration > 0
-      ? Math.min(requestedDuration, buffer.duration)
-      : buffer.duration;
+      ? Math.min(requestedDuration, naturalDuration)
+      : naturalDuration;
+
+    if (channel === "fsl") {
+      return createManagedFslSampleVoice(buffer, {
+        profile,
+        timeOffset,
+        duration,
+        playbackRate: rate,
+        voiceLevel: 1.0,
+        outputGain: electricGain
+      });
+    }
+
+    const now = currentTime + timeOffset;
+    const source = audioCtx.createBufferSource();
+    const voiceGain = audioCtx.createGain();
 
     source.buffer = buffer;
-    const rate = Number.isFinite(playback.playbackRate) ? playback.playbackRate : 1.0;
     source.playbackRate.setValueAtTime(rate, now);
-    source.connect(electricGain);
+    voiceGain.gain.setValueAtTime(1.0, now);
+    source.connect(voiceGain);
+    voiceGain.connect(electricGain);
     source.start(now);
     source.stop(now + duration + 0.02);
 
@@ -1100,7 +1321,7 @@
       channel,
       profile,
       sources: [source],
-      nodes: [source],
+      nodes: [source, voiceGain],
       timerId: null,
       endTime: now + duration
     };
@@ -1140,6 +1361,8 @@
       failedSampleCount,
       nylonCalibrationNoteCount: Object.keys(APPROVED_NYLON_MIDI_GAINS).length,
       nylonGlobalMakeupDb: NYLON_GLOBAL_MAKEUP_DB,
+      nylonFullRangeAvailable: APPROVED_NYLON_FULL_RANGE_VALID && APPROVED_NYLON_CALIBRATION_VALID,
+      nylonMaxPitchShiftSemitones: NYLON_MAX_PITCH_SHIFT_SEMITONES,
       electricSamplerState,
       loadedElectricSampleCount,
       failedElectricSampleCount,
@@ -1167,6 +1390,7 @@
     unlock,
     isReady,
     getInstrumentAvailability,
+    getFslInstrumentCapability,
     setSelectedInstrument,
     playNote,
     prepareSoundLabSampler,
