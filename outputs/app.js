@@ -391,7 +391,7 @@ async function loadFutureData() {
 
 async function ensureFutureCourseData(month) {
   const selectedMonth = Number(month);
-  if (!selectedMonth || selectedMonth < 2 || weeks.some((item) => item.month === selectedMonth)) return;
+  if (!selectedMonth || selectedMonth < 2 || weeks.some((item) => item.month === selectedMonth) || !canOpenMonth(selectedMonth)) return;
   await loadFutureData();
 }
 
@@ -837,6 +837,9 @@ function isMiniCoursePreviewActive() {
   if (FEATURE_MINI_COURSE_SHELF || Boolean(miniCoursePreviewMode)) {
     return true;
   }
+  if (!isDevPreviewActive()) {
+    return false;
+  }
 
   const loaded = month2AsArray(courseData?.miniCourses || miniCourses);
 
@@ -860,7 +863,7 @@ function getLoadedMonths() {
 
 function getVisibleMonths() {
   const loadedMonths = getLoadedMonths();
-  if (!isDevPreviewActive()) return loadedMonths.filter((month) => month <= 6);
+  if (!isDevPreviewActive()) return [1];
 
   const mode = getDevPreviewMode();
   if (mode === "m3") return loadedMonths.filter((month) => month <= 4);
@@ -1090,16 +1093,22 @@ function renderProgress() {
   const total = weeks.length;
   const done = completedWeeks.length;
   const percent = Math.round((done / total) * 100);
-  document.getElementById("progressBar").style.width = `${percent}%`;
-  document.getElementById("progressText").textContent = `${done}/${total} สัปดาห์`;
+  const progressBar = document.getElementById("progressBar");
+  if (progressBar) progressBar.style.width = `${percent}%`;
+  const progressText = document.getElementById("progressText");
+  if (progressText) progressText.textContent = `${done}/${total} สัปดาห์`;
   const activeNumber = Math.min(done + 1, total);
   const activeWeek = weeks.find((item) => item.number === activeNumber) || weeks[weeks.length - 1];
-  document.getElementById("monthText").textContent = `Month ${activeWeek.month}`;
-  document.getElementById("currentWeekCard").innerHTML = `
-    <span>Week ${activeWeek.number} / Month ${activeWeek.month}</span>
-    <strong>${activeWeek.title}</strong>
-    <p>${activeWeek.goal}</p>
-  `;
+  const monthText = document.getElementById("monthText");
+  if (monthText) monthText.textContent = `Month ${activeWeek.month}`;
+  const currentWeekCard = document.getElementById("currentWeekCard");
+  if (currentWeekCard) {
+    currentWeekCard.innerHTML = `
+      <span>Week ${activeWeek.number} / Month ${activeWeek.month}</span>
+      <strong>${activeWeek.title}</strong>
+      <p>${activeWeek.goal}</p>
+    `;
+  }
 }
 
 function getModuleDisplayName(moduleIdOrTitle) {
@@ -1108,7 +1117,7 @@ function getModuleDisplayName(moduleIdOrTitle) {
 }
 
 async function renderWeeks() {
-  const selectedMonth = Number(document.getElementById("monthFilter").value || 0);
+  const selectedMonth = Number(document.getElementById("monthFilter")?.value || 0);
   await ensureFutureCourseData(selectedMonth);
   const list = selectedMonth ? weeks.filter((item) => item.month === selectedMonth) : weeks;
   const grid = document.getElementById("weekGrid");
@@ -1539,7 +1548,7 @@ const foundationWeeks = [
   {
     number: 1,
     title: "Pulse & 16th Grid",
-    summary: "ฝึกให้หู มือ และเท้าอยู่กับจังหวะหลักเดียวกันก่อนเริ่มเล่น Pattern ที่ซับซ้อนขึ้น",
+    summary: "ฝึกให้หู มือ และเท้าอยู่กับจังหวะหลักเดียวกันก่อนเริ่มเล่นรูปแบบที่ซับซ้อนขึ้น",
     youtube: {
       title: "ฟังตัวอย่าง Pulse และ 16th Grid ก่อนเริ่มอ่าน",
       embedUrl: "https://www.youtube.com/embed?listType=search&list=guitar%20rhythm%2016th%20note%20pulse"
@@ -1708,7 +1717,7 @@ const foundationWeeks = [
     quiz: [
       {
         question: "Pulse คืออะไร?",
-        options: ["จังหวะหลักที่เดินอยู่ตลอดเพลง", "Pattern ตีคอร์ดเร็ว ๆ", "ชื่อรูปคอร์ดแบบหนึ่ง"],
+        options: ["จังหวะหลักที่เดินอยู่ตลอดเพลง", "รูปแบบตีคอร์ดเร็ว ๆ", "ชื่อรูปคอร์ดแบบหนึ่ง"],
         answer: 0
       },
       {
@@ -1748,12 +1757,12 @@ const foundationWeeks = [
     rhythmGeometry: {
       id: "w2-rhythm-geometry-16th-syncopation",
       type: "rhythm-geometry",
-      title: "Off-Beat Syncopation Geometry (16th Grid)",
+      title: "16th Grid Syncopation (Variation: Subbeat a)",
       subdivision: "16th Grid",
       pickingStyle: "Alternate (D U D U)",
       bpmRecommended: "50-80",
       defaultMnemonicMode: "food_en",
-      teacherTip: "เน้นลงน้ำหนัก (Accent) ที่ subbeat ที่ 4 (a หลัง 2 และ a หลัง 4) โดยให้เท้านิ่งเคาะอยู่ที่ 1 2 3 4",
+      teacherTip: "รูปแบบย่อย (Variation): เน้นลงน้ำหนัก (Accent) ที่ subbeat ที่ 4 (a หลัง 2 และ a หลัง 4) โดยให้เท้านิ่งเคาะอยู่ที่ 1 2 3 4",
       pattern: [
         {
           beat: 1,
@@ -1897,7 +1906,7 @@ const foundationWeeks = [
           description: "คอร์ดบน \"&\" รออยู่ในช่องของมัน และกลับมาเจอ beat ถัดไปพอดี"
         }
       ],
-      question: "ตัวอย่างไหนวิ่งนำ Metronome (rush)?",
+      question: "ตัวอย่างไหนวิ่งนำ Metronome?",
       hint: "ถ้าฟังแล้วรู้สึกว่าเท้าต้องรีบตามมือ นั่นคือตัวอย่างที่เร่งจังหวะ"
     },
     hear: [
@@ -1911,8 +1920,8 @@ const foundationWeeks = [
       "ถ้ารู้สึกว่าตัวกำลังวิ่งตามมือ ให้กลับไปอุดสายแล้วตบเฉพาะ off-beat ก่อน"
     ],
     visual: {
-      title: "เห็น Accent บน off-beat",
-      instruction: "ช่องสีส้มคือ Accent บน a หลัง 2 และ a หลัง 4 ส่วนช่องเทาคือ ghost/อุดสาย เบา ๆ",
+      title: "เห็น Accent บน off-beat (& หลัง 2 และ 4)",
+      instruction: "ช่องสีส้มคือ Accent บน & หลัง 2 และ & หลัง 4 ส่วนช่องเทาคือ ghost/อุดสาย เบา ๆ",
       duration: 4,
       steps: [
         { count: "1", action: "ghost", kind: "ghost" },
@@ -2002,11 +2011,11 @@ const foundationWeeks = [
       guitarApplication: [
         "ใช้คอร์ด Em คอร์ดเดียว เพื่อให้หูโฟกัสที่มือขวา",
         "เปรียบเทียบเสียงเปิดกับ Palm Mute ที่ tempo เดียวกัน",
-        "วาง Accent บน beat 2 และ 4 โดย strum อื่นยังเบา"
+        "วาง Accent บน beat 2 และ 4 โดยการตีจังหวะอื่นยังเบา"
       ],
       guidedSteps: [
         "ตั้ง Metronome 60 BPM จับ Em แล้วตี 1 & 2 & 3 & 4 & แบบเบา",
-        "เล่นซ้ำแบบดังขึ้น แต่รักษาระยะห่างของทุก strum ให้เท่าเดิม",
+        "เล่นซ้ำแบบดังขึ้น แต่รักษาระยะห่างของการตีทุกครั้งให้เท่าเดิม",
         "กลับมาเล่นเบา แล้วเน้นเฉพาะ beat 2 และ 4 ให้ดังเท่ากัน",
         "แตะ Palm Mute ใกล้ bridge แล้วทำ drill 4 ห้องด้านล่าง"
       ],
@@ -2053,7 +2062,7 @@ const foundationWeeks = [
       examples: [
         {
           label: "ตัวอย่าง A",
-          description: "ทุก strum ดังเท่ากัน จึงไม่มีจุดเด่น"
+          description: "ตีคอร์ดดังเท่ากันทุกครั้ง จึงไม่มีจุดเด่น"
         },
         {
           label: "ตัวอย่าง B",
@@ -2113,7 +2122,7 @@ const foundationWeeks = [
       },
       {
         question: "เวลาเปลี่ยน Dynamics สิ่งที่ควรนิ่งเหมือนเดิมคืออะไร?",
-        options: ["Tempo", "คีย์เพลงเท่านั้น", "สีของ pick"],
+        options: ["Tempo", "คีย์เพลงเท่านั้น", "สีของปิ๊ก"],
         answer: 0
       },
       {
@@ -2130,203 +2139,196 @@ const foundationWeeks = [
   {
     number: 4,
     title: "Groove Integration",
-    summary: "รวม Pulse, Syncopation, Dynamics และ Palm Mute ให้กลายเป็น Groove ที่เล่นได้จริง",
+    summary: "รวม Pulse, 16th Grid, Syncopation, Dynamics และ Palm Mute ใน Groove เดียว",
     youtube: {
-      title: "ฟังตัวอย่าง Groove ก่อนรวมทุกอย่างเข้าด้วยกัน",
+      title: "ฟัง Groove ที่มีทั้งเสียงอุดและ Accent",
       embedUrl: "https://www.youtube.com/embed?listType=search&list=guitar%20rhythm%20groove%20integration%20backing%20track"
     },
     learn: {
-      targetBpm: "70-75 BPM",
+      targetBpm: "60-70 BPM",
       diagram: {
-        title: "Groove Pattern: รวม mute, open และ Accent",
-        caption: "ให้ Pulse เดินก่อน แล้วค่อยเติม texture ทีละจุด อย่าใส่ทุกอย่างจน Groove หนักเกิน",
+        title: "1 ห้อง: Muted Pulse + Open Syncopation",
+        caption: "เท้าเหยียบเลข มือขวาแกว่งผ่าน 16th Grid แล้วเปิด Accent ที่ & หลัง 2 และ 4",
         cells: [
           { label: "1", note: "Mute", kind: "mute" },
-          { label: "e", note: "นับ", kind: "rest" },
+          { label: "e", note: "ผ่าน", kind: "rest" },
           { label: "&", note: "Mute", kind: "mute" },
-          { label: "a", note: "นับ", kind: "rest" },
+          { label: "a", note: "ผ่าน", kind: "rest" },
           { label: "2", note: "Mute", kind: "mute" },
-          { label: "e", note: "นับ", kind: "rest" },
-          { label: "&", note: "Accent", kind: "accent" },
-          { label: "a", note: "นับ", kind: "rest" },
-          { label: "3", note: "เปิด", kind: "open" },
-          { label: "e", note: "นับ", kind: "rest" },
-          { label: "&", note: "เปิด", kind: "open" },
-          { label: "a", note: "นับ", kind: "rest" },
-          { label: "4", note: "เปิด", kind: "open" },
-          { label: "e", note: "นับ", kind: "rest" },
-          { label: "&", note: "Accent", kind: "accent" },
-          { label: "a", note: "จบ", kind: "hit" }
+          { label: "e", note: "ผ่าน", kind: "rest" },
+          { label: "&", note: "เปิด", kind: "accent" },
+          { label: "a", note: "ผ่าน", kind: "rest" },
+          { label: "3", note: "Mute", kind: "mute" },
+          { label: "e", note: "ผ่าน", kind: "rest" },
+          { label: "&", note: "Mute", kind: "mute" },
+          { label: "a", note: "ผ่าน", kind: "rest" },
+          { label: "4", note: "Mute", kind: "mute" },
+          { label: "e", note: "ผ่าน", kind: "rest" },
+          { label: "&", note: "เปิด", kind: "accent" },
+          { label: "a", note: "ผ่าน", kind: "rest" }
         ]
       },
       paragraphs: [
-        "หลังดูวิดีโอ ให้ฟังภาพรวมก่อนว่า Groove เดินไหม อย่าเพิ่งจับผิดทุกโน้ต เพราะเป้าหมายของสัปดาห์นี้คือรวมทุกอย่างให้เล่นเป็นเพลง ไม่ใช่โชว์เทคนิคแยกชิ้น",
-        "Groove Integration คือการเอา Pulse, Syncopation, Dynamics และ Palm Mute มาอยู่ใน Pattern เดียวกัน Pulse เป็นพื้น Syncopation เป็นแรงเด้ง Dynamics เป็นอารมณ์ และ Palm Mute เป็นตัวคุมความแน่น",
-        "เวลาฟัง drum ให้เริ่มจาก kick และ snare ก่อน โดยมาก snare จะช่วยบอก backbeat บน 2 และ 4 ถ้ากีตาร์ของเราวางตัวกับ snare ได้ดี เพลงจะรู้สึกแน่นขึ้นทันที",
-        "ถ้ามี Backing Track ให้ฟังว่ากีตาร์เราอยู่กับวงหรือแยกออกมาเอง ถ้าเสียงคอร์ดเหมือนลอยนำหรือช้ากว่ากลองบ่อย ๆ ให้ลด Pattern ลงก่อนแล้วกลับไปจับ Pulse",
-        "การเล่นแน่นไม่ได้แปลว่าเล่นเยอะ แต่แปลว่าเล่นในจุดที่ตั้งใจและกลับเข้า beat ได้ทุกครั้ง บางทีตีคอร์ดน้อยกว่าเดิมแต่ตรงกว่าเดิม เพลงจะฟังมืออาชีพขึ้นมาก",
-        "เวลารวมทุกอย่าง ให้เริ่มจาก 1 ห้องที่ง่ายก่อน เช่น Palm Mute บน beat หลัก แล้วเติม Accent บน off-beat แค่จุดเดียว ถ้ายังนิ่งค่อยเพิ่ม Dynamics หรือเปิดเสียงเต็มในห้องถัดไป",
-        "Final assessment ของสัปดาห์นี้ให้ซ้อมเหมือนเล่นจริง 3 นาที เปิด Metronome หรือ Backing Track แล้วเล่น Groove เดิมให้เดินต่อ ไม่หยุดกลางทาง แม้พลาดเล็กน้อยก็กลับเข้า Pulse ให้ได้"
+        "Pulse คือพื้นของ Groove: เคาะเท้าบน 1 2 3 4 และให้ click อยู่ที่เดิมตลอด",
+        "16th Grid คือแผนที่ของมือขวา: นับ 1 e & a และแกว่งลง–ขึ้นต่อเนื่อง แม้บางช่องจะไม่โดนสาย",
+        "Syncopation อยู่ที่ & หลัง 2 และ 4 ให้เปิดเสียงคอร์ดตรงนั้น แล้วกลับเข้า beat ถัดไปโดยไม่รีบ",
+        "ใช้ Palm Mute เบาเป็นพื้น แล้วเปิด Accent ให้ดังขึ้นเล็กน้อย ความต่างของเสียงต้องชัดแต่ tempo ต้องไม่เปลี่ยน"
       ],
       listenFor: [
-        "กีตาร์ของเรานั่งอยู่กับ kick/snare หรือเหมือนเล่นคนละทางกับกลอง",
-        "Palm Mute ทำให้ท่อนแน่นขึ้น และ Accent ทำให้ท่อนเด้งขึ้นโดยไม่ทำให้ Pulse หาย",
-        "ตลอด 3 นาที Groove ยังเดินต่อได้ไหม หรือเริ่มรีบและหลุดเมื่อเหนื่อย"
+        "Muted Pulse สั้นและสม่ำเสมอทุกห้อง",
+        "Accent บน & เด่นขึ้น แต่ไม่กระแทกหรือเร่ง tempo",
+        "เมื่อวนกลับ beat 1 Groove ยังต่อเนื่องและไม่สะดุด"
       ],
       physicalFeel: [
-        "เท้ายังรู้สึกถึง Pulse ตลอด แม้มือจะเปลี่ยน texture หลายแบบ",
-        "ตัวโยกไปกับ Groove แบบสบาย ไม่ใช่เกร็งไล่ตาม Pattern",
-        "มือขวาเปลี่ยนจาก mute เป็น open และ Accent ได้โดยการแกว่งยังต่อเนื่อง"
+        "เท้าอยู่บนเลข 1 2 3 4 ตลอด",
+        "ข้อมือแกว่งลง–ขึ้นสม่ำเสมอตาม 16th Grid",
+        "สันมือยกออกเล็กน้อยตรง Accent แล้วกลับมา Palm Mute โดยไม่เกร็ง"
       ],
       guitarApplication: [
-        "สร้าง Pattern 8 ห้องที่มีช่วง Palm Mute, ช่วงเปิดเสียง และ Accent บน off-beat อย่างน้อยหนึ่งจุด",
-        "เปิด Backing Track แล้วลองลดจำนวน strum ลงครึ่งหนึ่ง ฟังว่ากีตาร์ยังพาวงเดินได้ไหม",
-        "ซ้อม final assessment 3 นาทีแบบ take เดียว ห้ามหยุดแก้กลางทาง ให้ฝึกกลับเข้า Pulse แทน"
+        "ใช้คอร์ด Em คอร์ดเดียวเพื่อโฟกัสมือขวา",
+        "เล่น Muted Pulse เป็นพื้น แล้วเปิดคอร์ดเฉพาะ & หลัง 2 และ 4",
+        "วน Groove 4 ห้องเดิม 3 รอบกับ Metronome โดยไม่หยุด"
       ],
       guidedSteps: [
-        "รอบแรก เล่นแค่ Pulse กับคอร์ดเดียว 1 นาที ให้มั่นก่อนว่าวงในหัวไม่สั่น",
-        "รอบสอง เติม Palm Mute บน beat หลัก ฟังว่ากีตาร์เริ่มแน่นขึ้นแต่ยังไม่รก",
-        "รอบสาม เติม Accent บน off-beat แค่จุดเดียว ถ้าจุดนี้ทำให้หลุด ให้เอา Accent ออกแล้วกลับไป Palm Mute ก่อน",
-        "รอบสี่ เปิดเสียงคอร์ดเต็มในช่วงท้าย Pattern เหมือนกำลังดันจาก verse ไป chorus แต่ห้ามดัน tempo",
-        "รอบสุดท้าย เปิด Metronome หรือ Backing Track แล้วเล่น 3 นาทีแบบ take เดียว เป้าหมายคือกลับเข้า Pulse ให้ได้ทุกครั้ง ไม่ใช่เล่นไร้พลาด"
+        "ตั้ง Metronome 60 BPM จับ Em แล้วนับ 1 e & a ให้ครบทุกช่อง",
+        "ห้อง 1: Palm Mute เบาเฉพาะ 1 2 3 4 เพื่อยึด Pulse",
+        "ห้อง 2: แกว่งมือครบ 16th Grid และเพิ่มการตีแบบ Mute ที่ & ทุก beat",
+        "ห้อง 3: เปิด Accent ที่ & หลัง 2 เพียงจุดเดียว แล้วกลับเข้า 3 ให้ตรง",
+        "ห้อง 4: เปิด Accent ที่ & หลัง 2 และ 4 ส่วนเสียงอื่นยัง Palm Mute เบา จากนั้นวนทั้ง 4 ห้อง 3 รอบ"
       ],
       correctionSteps: [
-        "ถ้า Pattern รกจนฟัง Pulse ไม่ออก ให้ตัดโน้ตออกครึ่งหนึ่งแล้วเหลือเฉพาะจุดที่สำคัญ",
-        "ถ้าเล่นกับ Backing Track แล้วกีตาร์ลอย ให้ฟัง snare บน 2 และ 4 ก่อน แล้ววางคอร์ดให้ไม่ชนมั่ว",
-        "ถ้าพลาดแล้วหยุด ให้ซ้อมพลาดแบบตั้งใจหนึ่งจุด แล้วฝึกกลับเข้า beat ถัดไป เพื่อสร้างนิสัยเล่นต่อในเพลงจริง"
+        "ถ้า Pulse หาย ให้กลับไปห้อง 1 และเคาะเท้าพร้อม click",
+        "ถ้า Accent มาก่อนเวลา ให้พูด & หลังเลข 2 ให้ชัดก่อนเปิดเสียง",
+        "ถ้าสลับ Mute/Open แล้วเกร็ง ให้ลด BPM ลง 10 และขยับสันมือให้น้อยลง"
       ],
       dailySelfCheck: [
-        "รักษา Groove ได้ 3 นาทีโดยไม่หยุดกลางทาง",
-        "ตาม Metronome ที่ 70-75 BPM ได้ แม้มีพลาดเล็กน้อยก็เล่นต่อ",
-        "เล่น mini-song ทั้ง 8 ห้องได้สม่ำเสมอจนรู้สึกเหมือนเป็นเพลง"
+        "นับ 16th Grid และเคาะ Pulse พร้อมกันได้",
+        "Accent บน & ดังชัดโดย Muted Pulse ยังนิ่ง",
+        "เล่น Groove 4 ห้องครบ 3 รอบโดยไม่หยุด"
       ],
       troubleshooting: [
         {
-          problem: "Groove หลุดหลังเล่นไปประมาณ 1 นาที",
-          advice: "ลดจำนวน strum ลงก่อน เหลือแค่ Pulse, Palm Mute บน beat หลัก และ Accent หนึ่งจุด อย่าพยายามเล่นเยอะเพื่อกลบความไม่นิ่ง"
+          problem: "มือขวาหยุดในช่องที่ไม่ตี",
+          advice: "อุดสายด้วยมือซ้ายแล้วแกว่งลง–ขึ้นครบ 1 e & a ก่อนกลับมาเล่นคอร์ด"
         },
         {
-          problem: "เล่นกับ Metronome แล้วกีตาร์ลอยออกจาก click",
-          advice: "ฟัง click เหมือน snare ของวง แล้ววางคอร์ดให้กลับมาเจอ beat 2 และ 4 ก่อนค่อยเติมรายละเอียด"
+          problem: "Accent บน & ทำให้รีบ",
+          advice: "เหลือ Accent แค่ & หลัง 2 แล้วเช็กว่า beat 3 ยังตรง click ก่อนเพิ่มจุดที่สอง"
         },
         {
-          problem: "พลาดแล้วหยุดทั้งเพลง",
-          advice: "ฝึกเล่นต่อจาก beat ถัดไปทันที ตั้งเป้าว่า take นี้ต้องจบ 3 นาที ไม่ใช่ต้องไร้พลาด"
+          problem: "Palm Mute ทึบจนคอร์ดไม่ชัด",
+          advice: "ลดแรงกดและเลื่อนสันมือเข้าใกล้ bridge จนเสียงสั้นแต่ยังได้ยิน pitch"
         }
       ],
-      miniExample: "เริ่ม 2 ห้องแรกด้วย Palm Mute บน 1 และ 3 เติม Accent ที่ & หลัง 2 ในห้องที่ 3 แล้วเปิดเสียงคอร์ดเต็มในห้องที่ 4 เพื่อให้ Groove มีทิศทาง",
+      miniExample: "Em ที่ 60 BPM: Palm Mute เบาบนเลขและ & ทุก beat แล้วเปิด Accent ที่ & หลัง 2 และ 4",
       commonMistakes: [
-        "ใส่ทุกอย่างพร้อมกันตั้งแต่ต้นจน Pattern แน่นเกินและฟังไม่ออกว่า Pulse อยู่ตรงไหน",
-        "สนใจมือขวามากจนลืมฟัง drum หรือ snare ทำให้กีตาร์ลอยออกจากวง",
-        "พอพลาดหนึ่งจุดแล้วหยุดทั้ง take แทนที่จะกลับเข้า beat ถัดไป"
+        "เริ่มจากรูปแบบเต็มก่อน Pulse จะนิ่ง",
+        "หยุดมือขวาในช่อง e หรือ a ทำให้ 16th Grid ขาด",
+        "เปิด Accent แรงเกินจน tempo เร็วขึ้น"
       ],
       selfCheck: [
-        "เล่น 3 นาทีแล้ว Metronome หรือ Backing Track ยังรู้สึกเหมือนอยู่กลาง Groove ไม่ใช่ไล่ตามเรา",
-        "ฟังย้อนแล้วแยกได้ว่าจุดไหนเป็น Pulse, จุดไหนเป็น Syncopation, จุดไหนใช้ Dynamics หรือ Palm Mute",
-        "ถ้าลดจำนวน strum ลง เพลงยังรู้สึกเดินอยู่ แปลว่า time และการวางจังหวะเริ่มแน่น"
+        "เท้ายังตรง click แม้มือเล่น Syncopation",
+        "ฟังแยก Muted Pulse กับ Open Accent ได้ชัด",
+        "จบห้อง 4 แล้ววนกลับห้อง 1 ได้โดย Groove ไม่สะดุด"
       ],
-      teacherNote: "ครูแนะนำให้คิดแบบนักดนตรีในวง เล่นให้นักร้องและกลองสบายก่อน อย่าเพิ่งเล่นให้มือขวาดูยุ่ง เพราะ Groove ที่ดีมักเริ่มจากการเว้นที่เป็น"
+      teacherNote: "ประกอบ Groove ทีละชั้น ถ้าชั้นใหม่ทำให้ Pulse สั่น ให้ถอยหนึ่งขั้น ไม่ต้องฝืนเล่นรูปแบบเต็ม"
     },
     earTraining: {
-      title: "ฟังว่า Groove ไหน steady กว่า",
-      instruction: "ฟังความนิ่งของจังหวะและการเล่นต่อเนื่อง ไม่ต้องฟังชื่อคอร์ดหรือทฤษฎี",
+      title: "ฟังว่า Groove ไหนรวมองค์ประกอบได้พอดี",
+      instruction: "ฟัง Pulse, ตำแหน่ง Accent และความต่างระหว่างเสียงอุดกับเสียงเปิด",
       examples: [
         {
           label: "ตัวอย่าง A",
-          description: "เริ่มดี แต่พอมี Accent มากขึ้น tempo เริ่มเร่งและมีหยุดแก้กลางทาง"
+          description: "Palm Mute นิ่ง แต่ Accent บน & ทำให้มือรีบและ beat ถัดไปมาก่อน click"
         },
         {
           label: "ตัวอย่าง B",
-          description: "Pattern เรียบกว่า แต่ Pulse อยู่กับ Metronome ต่อเนื่อง และพลาดเล็กน้อยก็ยังเล่นต่อ"
+          description: "Muted Pulse อยู่กับ click และ Open Accent เด่นขึ้นโดย tempo ไม่เปลี่ยน"
         }
       ],
-      question: "ตัวอย่างไหน feels steadier?",
-      hint: "Groove ที่ steady อาจเล่นน้อยกว่า แต่ทำให้เท้าเราเคาะตามได้สบายกว่า"
+      question: "ตัวอย่างไหนเป็น Groove ที่นิ่งและมี contrast ชัดกว่า?",
+      hint: "เลือกตัวอย่างที่ Accent เด่น แต่เท้ายังเคาะตามได้สบาย"
     },
     miniSong: {
-      title: "8-Bar Groove: ให้แบบฝึกกลายเป็นเพลง",
-      purpose: "ใช้ open chords ง่าย ๆ เพื่อรวม Pulse, Syncopation, Dynamics และ Palm Mute โดยไม่ต้องคิดทฤษฎีเพิ่ม",
+      title: "แบบฝึกเดียว: Em Groove 4 ห้อง",
+      purpose: "ประกอบ Groove ทีละชั้นจนรวม Pulse, 16th Grid, Syncopation, Dynamics และ Palm Mute",
       bars: [
-        { bar: 1, chord: "Em", direction: "Palm Mute เบา ๆ บน beat 1 และ 3 ให้ Pulse ตั้งหลัก" },
-        { bar: 2, chord: "Em", direction: "คง Palm Mute แล้วเติม ghost strum เบา ๆ ให้มือขวาเดินต่อ" },
-        { bar: 3, chord: "G", direction: "เปิดเสียงมากขึ้นเล็กน้อย และวาง Accent ที่ & หลัง 2" },
-        { bar: 4, chord: "G", direction: "ลดจำนวน strum ให้ Groove โล่ง แต่เท้ายังอยู่กับ Metronome" },
-        { bar: 5, chord: "D", direction: "กลับมา Palm Mute เพื่อให้ท่อนรู้สึกแน่นขึ้น" },
-        { bar: 6, chord: "D", direction: "เปิด Accent ที่ & หลัง 4 เพื่อส่งเข้าช่วงท้าย" },
-        { bar: 7, chord: "C", direction: "เปิดเสียงคอร์ดเต็มขึ้น เหมือนท่อนเพลงเริ่มยก" },
-        { bar: 8, chord: "C", direction: "เล่นให้จบ take เดียว แล้วปล่อยคอร์ดสุดท้ายให้หายใจ" }
+        { bar: 1, chord: "Em", direction: "Palm Mute เบาบน 1 2 3 4 ให้ Pulse ตั้งหลัก" },
+        { bar: 2, chord: "Em", direction: "แกว่งครบ 16th Grid และเพิ่มการตีแบบ Mute ที่ & ทุก beat" },
+        { bar: 3, chord: "Em", direction: "เปิด Accent ที่ & หลัง 2 แล้วกลับเข้า beat 3 ให้ตรง" },
+        { bar: 4, chord: "Em", direction: "เปิด Accent ที่ & หลัง 2 และ 4 ส่วนเสียงอื่นยัง Palm Mute เบา" }
       ],
-      feel: "นี่ไม่ใช่แค่ exercise แล้ว ให้เล่นเหมือนกำลังพาวงเล็ก ๆ เดินไปข้างหน้า"
+      feel: "Muted Pulse เป็นพื้น ส่วน Open Accent ทำให้ Groove เด้งโดยไม่ดัน tempo"
     },
     hear: [
-      "ฟังภาพรวมก่อน อย่าเพิ่งจับผิดทีละโน้ต: Groove ต้องเดินต่อได้และไม่สะดุด",
-      "ฟังว่า Palm Mute ช่วยทำให้ห้องแรก ๆ แน่นขึ้น แล้ว Accent ช่วยดันช่วงท้ายให้มีพลังขึ้นหรือไม่",
-      "ถ้าเปิด Backing Track ให้ฟังว่ากีตาร์วางตัวอยู่กับ kick/snare หรือเล่นลอยแยกออกมา"
+      "ฟัง click เป็นแกน แล้วเช็กว่า Muted Pulse ไม่ลอยไปข้างหน้าหรือข้างหลัง",
+      "Open Accent ควรเด่นจากทั้งความดังและความยาวของเสียง",
+      "ห้อง 4 ต้องต่อกลับห้อง 1 ได้เหมือนเป็น Groove เดียว"
     ],
     feel: [
-      "ให้เท้ารู้สึกถึง Pulse ตลอด ส่วนมือขวาเปลี่ยน texture ระหว่าง mute, open และ Accent",
-      "Groove ที่ดีควรรู้สึกเหมือนตัวเราโยกไปข้างหน้าแบบไม่รีบ",
-      "ถ้าร่างกายตึงหรือรีบ ให้ลดจำนวน Accent ลงก่อน แล้วค่อยเพิ่มทีละจุด"
+      "เท้ายึด Pulse ส่วนข้อมือแบ่ง 16th Grid",
+      "มือขวาเปิด–ปิด Palm Mute ด้วยการขยับสั้น ๆ ใกล้ bridge",
+      "Accent รู้สึกเหมือนยก Groove ขึ้น ไม่ใช่กระชากให้เร็วขึ้น"
     ],
     visual: {
-      title: "เห็น Groove ทั้ง 8 ห้องแบบย่อ",
-      instruction: "ดู playhead วิ่งผ่าน Pattern: เริ่มจาก Pulse, เติม Syncopation, ใช้ Palm Mute แล้วเปิด Accent ช่วงท้าย",
-      duration: 6,
+      title: "เห็น Groove 1 ห้องบน 16th Grid",
+      instruction: "Mute เบาเป็นพื้น ช่องเปิดคือ Syncopation ที่ & หลัง 2 และ 4",
+      duration: 4,
       steps: [
         { count: "1", action: "Mute", kind: "mute" },
-        { count: "e", action: "นับ", kind: "rest" },
+        { count: "e", action: "ผ่าน", kind: "rest" },
         { count: "&", action: "Mute", kind: "mute" },
-        { count: "a", action: "นับ", kind: "rest" },
+        { count: "a", action: "ผ่าน", kind: "rest" },
         { count: "2", action: "Mute", kind: "mute" },
-        { count: "e", action: "นับ", kind: "rest" },
-        { count: "&", action: "Accent", kind: "accent" },
-        { count: "a", action: "นับ", kind: "rest" },
-        { count: "3", action: "เปิด", kind: "open" },
-        { count: "e", action: "นับ", kind: "rest" },
-        { count: "&", action: "เปิด", kind: "open" },
-        { count: "a", action: "นับ", kind: "rest" },
-        { count: "4", action: "เปิด", kind: "open" },
-        { count: "e", action: "นับ", kind: "rest" },
-        { count: "&", action: "Accent", kind: "accent" },
-        { count: "a", action: "จบ", kind: "hit" }
+        { count: "e", action: "ผ่าน", kind: "rest" },
+        { count: "&", action: "เปิด", kind: "accent" },
+        { count: "a", action: "ผ่าน", kind: "rest" },
+        { count: "3", action: "Mute", kind: "mute" },
+        { count: "e", action: "ผ่าน", kind: "rest" },
+        { count: "&", action: "Mute", kind: "mute" },
+        { count: "a", action: "ผ่าน", kind: "rest" },
+        { count: "4", action: "Mute", kind: "mute" },
+        { count: "e", action: "ผ่าน", kind: "rest" },
+        { count: "&", action: "เปิด", kind: "accent" },
+        { count: "a", action: "ผ่าน", kind: "rest" }
       ]
     },
     practice: [
-      "สร้าง Groove 8 ห้องด้วยคอร์ดเดียวหรือสองคอร์ดก็ได้",
-      "ต้องมี Accent บน off-beat อย่างน้อย 1 จุด",
-      "ต้องมีช่วงที่ใช้ Palm Mute และช่วงที่เปิดเสียงคอร์ดเต็ม",
-      "อัดเป็น take เดียวให้จบ แม้จะมีพลาดเล็กน้อยก็อย่าหยุดกลางทาง"
+      "ตั้ง Metronome 60 BPM ใช้ Em และนับ 1 e & a ตลอด",
+      "เล่นห้อง 1–4 ตามลำดับ โดยเพิ่มเพียงหนึ่งชั้นในแต่ละห้อง",
+      "ให้การตีแบบ Mute เบา และ Open Accent ที่ & หลัง 2 กับ 4 ดังขึ้นเล็กน้อย",
+      "วน 4 ห้องครบ 3 รอบ ถ้าพลาดให้กลับเข้า beat ถัดไปโดยไม่หยุด"
     ],
     quiz: [
       {
-        question: "ตอนรวม Groove สิ่งที่ต้องนิ่งที่สุดคืออะไร?",
-        options: ["Pulse", "Every accent", "Only the volume"],
+        question: "ตอนรวม Groove สิ่งใดต้องนิ่งที่สุด?",
+        options: ["Pulse", "แรง Accent", "จำนวนคอร์ด"],
         answer: 0
       },
       {
-        question: "Syncopation ช่วยเพิ่มอะไรให้ Pattern?",
-        options: ["ความเคลื่อนไหวและแรงผลัก", "Tuning ใหม่", "กีตาร์ตัวใหม่"],
+        question: "16th Grid ช่วยเรื่องใด?",
+        options: ["กำหนดตำแหน่งการแกว่งมือ", "เปลี่ยนคีย์เพลง", "ทำให้ทุกช่องต้องดัง"],
         answer: 0
       },
       {
-        question: "Dynamics ช่วยจัดการอะไรในเพลง?",
-        options: ["พลังและ contrast", "หมายเลข fret", "ขนาดสาย"],
+        question: "จุด Syncopation ในแบบฝึกนี้อยู่ตรงไหน?",
+        options: ["& หลัง 2 และ 4", "เฉพาะ beat 1", "ทุกช่อง e และ a"],
         answer: 0
       },
       {
-        question: "แบบประเมินท้ายเดือนที่ดีควรเป็นแบบไหน?",
-        options: ["เล่น Groove 8 ห้องให้จบโดยไม่หยุด", "ตีให้เร็วที่สุดเท่าที่ทำได้", "เล่น scale position ใหม่"],
+        question: "เสียงพื้นและเสียง Accent ควรต่างกันอย่างไร?",
+        options: ["พื้น Palm Mute เบา ส่วน Accent เปิดและดังขึ้น", "ทุกเสียงดังเท่ากัน", "Accent ต้อง Palm Mute มากกว่า"],
         answer: 0
       },
       {
-        question: "เป้าหมายของเดือนที่ 1 คืออะไร?",
-        options: ["มีพื้นฐาน Rhythm ที่นิ่งและฟังเป็นเพลง", "เรียนทฤษฎีทั้งหมด", "เล่นทุก module พร้อมกัน"],
+        question: "ถ้าเพิ่ม Accent แล้ว Pulse เริ่มสั่น ควรทำอย่างไร?",
+        options: ["ถอยหนึ่งขั้นและลด BPM", "เพิ่ม Accent อีก", "หยุดฟัง Metronome"],
         answer: 0
       }
     ],
     homework: [
-      "อัด Final Groove 8 ห้องแบบ take เดียวให้จบ แม้จะพลาดเล็กน้อยก็ไม่หยุดกลางทาง",
-      "ฟังย้อนแล้วเลือก 1 จุดที่ Groove ดี และ 1 จุดที่ต้องเอากลับไปซ้อมต่อ"
+      "อัด Em Groove 4 ห้องครบ 3 รอบแบบ take เดียว",
+      "ฟังย้อนแล้วจดว่าจุด Accent เด่นชัดโดย Pulse และ tempo ยังนิ่งหรือไม่"
     ]
   }
 ];
@@ -2343,9 +2345,9 @@ const dailyPracticePlan = {
   ],
   2: [
     ["Metronome 5 นาที", "นับ off-beat 5 นาที", "ฝึก Syncopation 5 นาที", "ทำแบบทดสอบ"],
-    ["Metronome 6 นาที", "วาง Accent ที่ & 5 นาที", "Muted strum 6 นาที", "ทำแบบทดสอบ"],
-    ["ทบทวน Pulse 5 นาที", "ตบมือบน off-beat 6 นาที", "เล่น Chord Pattern 6 นาที", "ทำแบบทดสอบ"],
-    ["Metronome 6 นาที", "เล่น Syncopated Pattern 6 นาที", "อัด 4 ห้อง 5 นาที", "ทำแบบทดสอบ"],
+    ["Metronome 6 นาที", "วาง Accent ที่ & 5 นาที", "ตีคอร์ดแบบ Mute 6 นาที", "ทำแบบทดสอบ"],
+    ["ทบทวน Pulse 5 นาที", "ตบมือบน off-beat 6 นาที", "เล่นคอร์ดตามรูปแบบ 6 นาที", "ทำแบบทดสอบ"],
+    ["Metronome 6 นาที", "เล่น Syncopation 6 นาที", "อัด 4 ห้อง 5 นาที", "ทำแบบทดสอบ"],
     ["นับจังหวะ 5 นาที", "Upstroke บน off-beat 7 นาที", "ตีคอร์ด 6 นาที", "ทำแบบทดสอบ"],
     ["Metronome 8 นาที", "เล่น Groove loop 6 นาที", "ฟังย้อนกลับ 6 นาที", "ทำแบบทดสอบ"],
     ["ทบทวน 5 นาที", "อัด Syncopation 10 นาที", "จดบันทึก 5 นาที", "ทำแบบทดสอบ"]
@@ -2360,13 +2362,13 @@ const dailyPracticePlan = {
     ["ทบทวน 5 นาที", "อัด 3 แบบ 10 นาที", "ฟังย้อนกลับ 5 นาที", "ทำแบบทดสอบ"]
   ],
   4: [
-    ["Metronome 5 นาที", "ทบทวน Pulse 5 นาที", "Groove 8 ห้อง 8 นาที", "ทำแบบทดสอบ"],
-    ["Metronome 6 นาที", "ทบทวน Syncopation 6 นาที", "ร่าง Groove 8 นาที", "ทำแบบทดสอบ"],
-    ["นับจังหวะ 5 นาที", "ทบทวน Dynamics 6 นาที", "Groove แบบ Muted/Open 8 นาที", "ทำแบบทดสอบ"],
-    ["Metronome 6 นาที", "Groove 8 ห้อง 10 นาที", "จดบันทึก 5 นาที", "ทำแบบทดสอบ"],
-    ["ทบทวน 5 นาที", "ซ้อม Final Groove 10 นาที", "อัด 1 take 5 นาที", "ทำแบบทดสอบ"],
-    ["Metronome 8 นาที", "อัดแบบประเมินท้ายเดือน 10 นาที", "ฟังย้อนกลับ 5 นาที", "ทำแบบทดสอบ"],
-    ["Warmup 5 นาที", "อัด Final Recording 15 นาที", "สรุปสิ่งที่ได้เรียน 5 นาที", "ทำแบบทดสอบ"]
+    ["Metronome 5 นาที", "ห้อง 1: Muted Pulse 5 นาที", "นับ 16th Grid 5 นาที", "ทำแบบทดสอบ"],
+    ["Metronome 5 นาที", "ห้อง 2: Muted Eighths 7 นาที", "วนห้อง 1–2 5 นาที", "ทำแบบทดสอบ"],
+    ["Metronome 5 นาที", "ห้อง 3: Accent หลัง 2 7 นาที", "กลับเข้า beat 3 5 นาที", "ทำแบบทดสอบ"],
+    ["Metronome 5 นาที", "ห้อง 4: Accent หลัง 2 และ 4 8 นาที", "วนห้อง 3–4 5 นาที", "ทำแบบทดสอบ"],
+    ["ทบทวน 5 นาที", "วน Groove 4 ห้อง 10 นาที", "เช็ก Muted/Open 5 นาที", "ทำแบบทดสอบ"],
+    ["Metronome 8 นาที", "Groove 4 ห้องครบ 3 รอบ 10 นาที", "อัด 1 take 5 นาที", "ทำแบบทดสอบ"],
+    ["Warmup 5 นาที", "อัด Final Groove 15 นาที", "ฟังย้อนและจด 5 นาที", "ทำแบบทดสอบ"]
   ]
 };
 
@@ -2423,27 +2425,32 @@ function initFocusedApp() {
   renderPreludeEntry();
   renderMiniCourseShelf();
   setBpm(bpm, { persist: false });
-  loadFutureData().then(() => {
+  if (isDevPreviewActive() || isPreludePreviewActive()) {
+    loadFutureData().then(() => {
+      renderPreludeEntry();
+      if (isPreludePreviewActive()) {
+        renderMonthSwitcher();
+        return;
+      }
+      if (["pending", "continue", "fresh"].includes(continuePracticeStartupDecisionV1)) {
+        renderMonthSwitcher();
+        return;
+      }
+      const previewMonth = getDevPreviewAutoMonth();
+      if (previewMonth && getFocusedMonthWeeks(previewMonth).length) {
+        openFocusedMonth(previewMonth);
+        return;
+      }
+      if (savedMonth > 1 && canOpenMonth(savedMonth) && getFocusedMonthWeeks(savedMonth).length) {
+        openFocusedMonth(savedMonth);
+        return;
+      }
+      renderMonthSwitcher();
+    });
+  } else {
     renderPreludeEntry();
-    if (isPreludePreviewActive()) {
-      renderMonthSwitcher();
-      return;
-    }
-    if (["pending", "continue", "fresh"].includes(continuePracticeStartupDecisionV1)) {
-      renderMonthSwitcher();
-      return;
-    }
-    const previewMonth = getDevPreviewAutoMonth();
-    if (previewMonth && getFocusedMonthWeeks(previewMonth).length) {
-      openFocusedMonth(previewMonth);
-      return;
-    }
-    if (savedMonth > 1 && canOpenMonth(savedMonth) && getFocusedMonthWeeks(savedMonth).length) {
-      openFocusedMonth(savedMonth);
-      return;
-    }
     renderMonthSwitcher();
-  });
+  }
 }
 
 function getSavedSelectedFocusedMonth() {
@@ -2795,7 +2802,8 @@ function getPreludeLessonBlocksWithRhythmSurvival(blocks = []) {
 function renderPreludeEntry() {
   const section = document.getElementById("preludeSection");
   if (!section) return;
-  section.style.display = !isViewingPrelude ? "block" : "none";
+  const isPreviewAllowed = isPreludePreviewActive() || isDevPreviewActive();
+  section.style.display = isPreviewAllowed && !isViewingPrelude ? "block" : "none";
 }
 
 function setElementHidden(selector, hidden) {
@@ -2830,6 +2838,10 @@ function setPreludeViewChrome(viewing) {
 }
 
 async function openPreludeView() {
+  if (!isPreludePreviewActive() && !isDevPreviewActive()) {
+    setDataStatus("Foundation Reset is not available in normal mode.", "error");
+    return;
+  }
   if (!courseData) await loadFutureData();
   const prelude = getPreludeWeekData();
   if (!prelude) {
@@ -3468,15 +3480,15 @@ async function openFocusedMonth(month) {
     isViewingPrelude = false;
     setPreludeViewChrome(false);
   }
-  if (month > 1 && !window.__GC_DEBUG__?.dataJsonLoaded) {
-    setDataStatus(`Opening Month ${month}...`, "info");
-    showToast(`Opening Month ${month}...`, "info", 1800);
-    await loadFutureData();
-  }
   if (!canOpenMonth(month)) {
     updateDebugState({ currentMonth: selectedFocusedMonth, lastAction: `Month ${month} blocked` });
     setDataStatus("Month นี้ยังไม่เปิดให้ใช้งานครับ", "error");
     return;
+  }
+  if (month > 1 && !window.__GC_DEBUG__?.dataJsonLoaded) {
+    setDataStatus(`Opening Month ${month}...`, "info");
+    showToast(`Opening Month ${month}...`, "info", 1800);
+    await loadFutureData();
   }
   updateDebugState({ currentMonth: month, lastAction: `opening Month ${month}` });
   const monthWeeks = getFocusedMonthWeeks(month);

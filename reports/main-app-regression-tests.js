@@ -354,6 +354,31 @@ function main() {
     const hasMetronomeStepEmitter = appContent.includes('emitMetronomeStep(') && appContent.includes('new CustomEvent("gc:metronome-step"');
     const hasMetronomeStopEmitter = appContent.includes('new CustomEvent("gc:metronome-stop")');
     assert(hasMetronomeStepEmitter && hasMetronomeStopEmitter, 'Metronome dispatches gc:metronome-step and gc:metronome-stop events', { file: 'outputs/app.js' });
+
+    // D.13 Week 2 Syncopation Text/Visual Match & Variation Labeling Invariant
+    const hasW2VisualAmpersandMatch = appContent.includes('title: "เห็น Accent บน off-beat (& หลัง 2 และ 4)"') && appContent.includes('instruction: "ช่องสีส้มคือ Accent บน & หลัง 2 และ & หลัง 4 ส่วนช่องเทาคือ ghost/อุดสาย เบา ๆ"');
+    const hasW2GeometryVariationLabel = appContent.includes('title: "16th Grid Syncopation (Variation: Subbeat a)"') && appContent.includes('teacherTip: "รูปแบบย่อย (Variation):');
+    assert(hasW2VisualAmpersandMatch && hasW2GeometryVariationLabel, 'Week 2 visual text matches & steps and 16th geometry is explicitly labeled as variation', { file: 'outputs/app.js' });
+
+    // D.14 Future Content Lock & Visible Months Invariant (Dev Preview Gate only)
+    const hasDevPreviewOnlyMonthLock = appContent.includes('if (!isDevPreviewActive()) return [1];');
+    const hasGatedBootLoad = appContent.includes('if (isDevPreviewActive() || isPreludePreviewActive())') && appContent.includes('loadFutureData()');
+    const hasCanOpenCheckBeforeLoad = appContent.includes('if (!canOpenMonth(month))') && (appContent.indexOf('if (!canOpenMonth(month))') < appContent.indexOf('await loadFutureData();', appContent.indexOf('async function openFocusedMonth')));
+    assert(hasDevPreviewOnlyMonthLock && hasGatedBootLoad && hasCanOpenCheckBeforeLoad, 'Visible months locked to Month 1 unless isDevPreviewActive is true', { file: 'outputs/app.js' });
+
+    // D.15 Prelude Entry HTML Default Hidden & JS Preview Gate Invariant
+    const htmlContent = readFileContent('outputs/index.html');
+    const hasHtmlPreludeDefaultHidden = htmlContent.includes('<section id="preludeSection" class="prelude-card" style="display: none;">');
+    const hasPreludeEntryPreviewGate = appContent.includes('const isPreviewAllowed = isPreludePreviewActive() || isDevPreviewActive();') && appContent.includes('section.style.display = isPreviewAllowed && !isViewingPrelude ? "block" : "none";');
+    assert(hasHtmlPreludeDefaultHidden && hasPreludeEntryPreviewGate, 'preludeSection is hidden by default in index.html and gated by JS preview check', { file: 'outputs/index.html' });
+
+    // D.16 Open Prelude View Normal Mode Guard Invariant
+    const hasOpenPreludeGuard = appContent.includes('if (!isPreludePreviewActive() && !isDevPreviewActive())');
+    assert(hasOpenPreludeGuard, 'openPreludeView aborts in normal mode if preview parameters are absent', { file: 'outputs/app.js' });
+
+    // D.17 Mini Course Shelf Preview Isolation Invariant
+    const hasMiniCourseDevPreviewGate = appContent.includes('if (!isDevPreviewActive()) {\n    return false;\n  }') || (appContent.includes('if (!isDevPreviewActive())') && appContent.includes('function isMiniCoursePreviewActive()'));
+    assert(hasMiniCourseDevPreviewGate, 'isMiniCoursePreviewActive returns false in prelude preview and normal mode', { file: 'outputs/app.js' });
   }
   endSuite();
 
