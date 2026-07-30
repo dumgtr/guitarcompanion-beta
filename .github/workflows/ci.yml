@@ -1,0 +1,35 @@
+name: CI Gate
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Check JS Syntax
+        run: |
+          node --check outputs/app.js
+          node --check outputs/audio-engine.js
+
+      - name: Run FSL Focused Suite
+        run: node reports/fsl-challenge.test.js
+
+      - name: Run Main Regression Test Harness
+        run: node reports/main-app-regression-tests.js
+
+      - name: Run git diff whitespace check
+        run: git diff --check
