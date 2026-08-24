@@ -121,11 +121,10 @@ function spawnTestServer(port, options = {}) {
 
     child.stdout.on('data', d => {
       stdout += d.toString();
-      if (stdout.includes('Deterministic Preview Server V1') && !resolved) {
-        const portMatch = stdout.match(/Port:\s+(\d+)/);
-        const actualPort = portMatch ? Number(portMatch[1]) : port;
+      const portMatch = stdout.match(/Port:\s+(\d+)/);
+      if (portMatch && !resolved) {
         resolved = true;
-        resolve({ child, stdout, stderr, port: actualPort });
+        resolve({ child, stdout, stderr, port: Number(portMatch[1]) });
       }
     });
 
