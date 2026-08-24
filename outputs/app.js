@@ -2334,44 +2334,44 @@ const month1V2Overrides = {
         pillar: "Chromatic",
         duration: "3–4 นาที",
         title: "1-2-3-4 บนสายเดียว",
-        focus: "Single-string mechanics, alternate picking, finger independence และ controlled finger height",
+        focus: "เดินนิ้วทีละช่อง (1-Fret Walk) บนสาย 6 และสาย 1 เน้นนิ้วตั้งฉาก ไม่บอด",
         steps: [
-          "เล่น 1-2-3-4 บนสาย 6 ช้า ๆ ด้วย alternate picking",
-          "ย้ายไปสาย 1 โดยรักษาความสูงของนิ้วให้พอดีและไม่เกร็ง",
-          "ให้ทุกโน้ตลงบน Pulse เดียวกันก่อนคิดเรื่องความเร็ว"
+          "นิ้วชี้ (1) กดสาย 6 ช่อง 1 (ชิดหลังแท่งลวดเฟรต) → ดีดสาย 6 ลง 1 ครั้ง",
+          "นิ้วกลาง (2) กดสาย 6 ช่อง 2 → ดีดสาย 6 ลง 1 ครั้ง",
+          "นิ้วนาง (3) กดสาย 6 ช่อง 3 → นิ้วก้อย (4) กดสาย 6 ช่อง 4 ดีดตรงคลิก 60 BPM"
         ]
       },
       {
         pillar: "Scale",
         duration: "3–4 นาที",
-        title: "E minor pentatonic partial · 4 โน้ต",
-        focus: "ใช้เพียง partial ในพื้นที่เปิด ไม่ใช่ full shape",
+        title: "4 โน้ตเริ่มต้นสร้างทำนอง (E minor pentatonic partial)",
+        focus: "4 โน้ตเริ่มต้นในพื้นที่เปิด: E - G - A - B",
         steps: [
-          "6th string: 0(E), 3(G)",
-          "5th string: 0(A), 2(B)",
-          "จำว่า E minor pentatonic เต็มคือ E–G–A–B–D; W1 ใช้แค่ 4 โน้ตแรกนี้"
+          "สาย 6: ดีดสายเปล่า (E) แล้วใช้นิ้วนาง (3) กดช่อง 3 (G)",
+          "สาย 5: ดีดสายเปล่า (A) แล้วใช้นิ้วกลาง (2) กดช่อง 2 (B)",
+          "ดีดเรียง สาย 6 (0 → 3) → สาย 5 (0 → 2) ตรงคลิก 1 2 3 4"
         ]
       },
       {
         pillar: "Arpeggio",
         duration: "3–4 นาที",
-        title: "Em triad · E → B → E → G",
-        focus: "Em = E–G–B = 1–♭3–5; ลำดับ physical pattern คือ 1 → 5 → 1 → ♭3",
+        title: "กระจายเสียงคอร์ด Em ทีละสาย",
+        focus: "จับ Em ค้างไว้ แล้วดีดแยกทีละสาย: 1 → 5 → 1 → ♭3 (E → B → E → G)",
         steps: [
-          "6th string open = E",
-          "5th string fret 2 = B",
-          "4th string fret 2 = E; 3rd string open = G"
+          "มือซ้ายจับ Em: นิ้วกลาง (2) สาย 5 ช่อง 2, นิ้วนาง (3) สาย 4 ช่อง 2",
+          "มือขวาดีดเรียง: คลิก 1 สาย 6 (E) → คลิก 2 สาย 5 (B) → คลิก 3 สาย 4 (E) → คลิก 4 สาย 3 (G)",
+          "ฟังเสียงใสก้องครบทั้ง 4 สาย ไม่มีสายไหนบอดสนิท"
         ]
       },
       {
         pillar: "Rhythm + Application",
         duration: "6–8 นาที",
         title: "Em pulse groove",
-        focus: "Quarter-note pulse ที่ 60 BPM และ chord pulse + arpeggio landing",
+        focus: "Quarter-note pulse 1 2 3 4 ที่ 60 BPM และ chord pulse + arpeggio landing",
         steps: [
-          "เล่น Em pulse ให้ตรงกับ Metronome 60 BPM",
-          "สลับ chord pulse กับโน้ตจาก Em arpeggio โดยให้ Beat 1 ชัด",
-          "ฟังว่าโน้ตทุกตัวอยู่บน pulse เดียวกัน ไม่ใช่เร่งตามความยากของมือซ้าย"
+          "เคาะเท้าและดีดคอร์ด Em บน 1 2 3 4 ต่อเนื่อง 15 วิ → 30 วิ → 60 วินาที",
+          "สลับคอร์ด Em เต็มคอร์ดกับการกระจายสาย 6 → 5 → 4 → 3 โดย Beat 1 ชัด",
+          "เล่น 4 โน้ตสเกล สาย 6 (0-3) → สาย 5 (0-2) แล้วกลับมาลง Em ตรง Beat 1"
         ]
       }
     ],
@@ -2388,65 +2388,74 @@ const month1V2Overrides = {
         ]
       },
       paragraphs: [
-        "สัปดาห์นี้ Rhythm คือพื้นของทุกอย่าง เปิด Metronome 60 BPM แล้วให้เท้าได้ยิน quarter-note pulse ก่อน",
-        "Chromatic, E minor pentatonic partial และ Em arpeggio ไม่ได้เป็นแบบฝึกแยกจากกัน ทุกโน้ตต้องรู้ว่ากำลังลงตรงไหนของ pulse",
-        "เป้าหมายไม่ใช่เล่นเร็ว แต่คือกดโน้ตสะอาด รักษา pulse และเชื่อม chord pulse กับ arpeggio landing ให้เป็นเสียงดนตรี"
+        "Pulse คือชีพจรของเพลงที่เดินสม่ำเสมอ 1 - 2 - 3 - 4 เท่ากันตลอดเวลา ไม่ว่ากีตาร์จะดีดหรือหยุดร้อง Pulse ก็ยังเดินอยู่ใต้เท้าเราเสมอ",
+        "คนที่เล่นกีตาร์น่าฟังคือคนที่ Timekeeping นิ่ง การเคาะเท้า 1 2 3 4 ช่วยยืนยันว่าเราคุมเวลา ไม่ได้ปล่อยให้มือพาเวลาไป",
+        "Chromatic, Scale (E-G-A-B) และ Em Arpeggio ไม่ใช่วิชาแยกส่วน แต่เป็นวัตถุดิบที่ต้องเล่นลงบนคลิก Metronome 60 BPM เดียวกัน"
       ],
       listenFor: [
-        "เสียงเท้าและ click สม่ำเสมอที่ 60 BPM",
-        "โน้ตจากทั้งสาม pillar ลงพร้อม pulse ไม่มาก่อนหรือช้ากว่า",
-        "Beat 1 รู้สึกเป็นจุดเริ่มรอบใหม่อย่างชัดเจน"
+        "เสียงคอร์ดและโน้ตชนกับ click Metronome พอดี ไม่มาก่อนหรือมาช้า",
+        "นิ้วกดยกตั้งฉากชิดหลังแท่งลวดเฟรต เสียงใสกังวาน ไม่มีเสียงแป๊กหรือเสียงบอด",
+        "Beat 1 รู้สึกเป็นจุดเริ่มรอบใหม่อย่างมั่นคง"
       ],
       physicalFeel: [
-        "นิ้วซ้ายยกต่ำและผ่อนคลาย ไม่ยกสูงเกินจำเป็น",
-        "มือขวา alternate picking เบาและสม่ำเสมอ",
-        "เท้าเคาะเฉพาะ quarter-note pulse 1 2 3 4"
+        "นิ้วซ้ายตั้งฉากกับฟิงเกอร์บอร์ด ใช้ปลายนิ้วส่วนติดเล็บกดชิดหลังแท่งลวดเฟรต",
+        "ไหล่และแขนผ่อนคลาย ข้อมือขวาขยับสบาย ๆ เหมือนสะบัดน้ำออกจากปลายนิ้ว",
+        "เท้าเคาะเฉพาะเลข 1 2 3 4 อย่างสม่ำเสมอ"
       ],
       guitarApplication: [
-        "จับ Em แล้วเล่น chord pulse 1 2 3 4 ที่ 60 BPM",
-        "แทรก E → B → E → G เป็น arpeggio landing สั้น ๆ โดยไม่หยุด pulse",
-        "ตอบด้วย 4 โน้ต E–G–A–B จาก partial pentatonic แล้วกลับ Em"
+        "Bar 1: ตีคอร์ด Em เต็มคอร์ดลงตรง 1 2 3 4",
+        "Bar 2: กระจายสาย Arpeggio สาย 6 → 5 → 4 → 3",
+        "Bar 3: เล่น 4 โน้ตสเกล สาย 6 (0-3) → สาย 5 (0-2)",
+        "Bar 4: จบลงที่คอร์ด Em เต็มคอร์ดบนจังหวะ 1 ค้างเสียงยาว 4 จังหวะ"
       ],
       guidedSteps: [
-        "รอบแรก เปิด Metronome 60 BPM เคาะเท้าและพูด 1 2 3 4 โดยยังไม่หยิบกีตาร์",
-        "รอบสอง เล่น 1-2-3-4 บนสาย 6 แล้วสาย 1 ด้วย alternate picking ช้า ๆ",
-        "รอบสาม เล่น E–G–A–B ตามตำแหน่ง partial โดยให้แต่ละโน้ตลงตรง pulse",
-        "รอบสี่ เล่น Em arpeggio E → B → E → G แล้วกลับไป chord pulse",
-        "รอบสุดท้าย รวมทั้งสาม pillar เป็น Em pulse groove สั้น ๆ"
+        "รอบแรก วางกีตาร์ไว้ก่อน เปิด Metronome 60 BPM เคาะเท้าและพูด 1 2 3 4 ให้ตรง click",
+        "รอบสอง หยิบกีตาร์ เล่น Chromatic 1-2-3-4 บนสาย 6 และสาย 1 ช้า ๆ ให้นิ้วตั้งฉาก เสียงใสทุกโน้ต",
+        "รอบสาม เล่น 4 โน้ตสเกล สาย 6 (0-3) และสาย 5 (0-2) ให้ตรงคลิก 1 2 3 4",
+        "รอบสี่ จับคอร์ด Em แล้วกระจายสาย 6 → 5 → 4 → 3 ฟังเสียงแยกทีละเส้น",
+        "รอบสุดท้าย รวมทั้งสามส่วนเป็น Em pulse groove ต่อเนื่อง 60 วินาที"
       ],
       correctionSteps: [
-        "ถ้ามือเร่ง ให้ลดเหลือการเคาะเท้ากับ click และเล่นโน้ตเดียวต่อ pulse",
-        "ถ้านิ้วยกสูงหรือเกร็ง ให้ลดแรงกดจนเสียงยังชัด แล้วค่อยเล่นต่อ",
-        "ถ้า arpeggio ทำให้หลุด ให้กลับไปเล่น Em chord pulse แล้วใส่ทีละ chord tone"
+        "ถ้าเสียงแตกหรือบอด: ตั้งข้อนิ้วให้ตั้งฉาก และเลื่อนปลายนิ้วไปกดชิดหลังแท่งลวดเฟรตด้านขวา",
+        "ถ้าเท้าเคาะรัวตามมือ/ปาก: วางกีตาร์ลง กลับมาตบมือและเคาะเท้าตามคลิก 60 BPM ให้ตรงก่อน 1 นาที",
+        "ถ้าเจ็บปลายนิ้ว: เป็นเรื่องปกติในสัปดาห์แรก ให้ซ้อมวันละ 15–20 นาที ผิวปลายนิ้วจะเริ่มหนาขึ้นเองใน 3–5 วัน"
       ],
       dailySelfCheck: [
-        "Chromatic 3–4 นาที, Scale 3–4 นาที, Arpeggio 3–4 นาที",
-        "Rhythm + Application 6–8 นาที รวมทั้งหมด 15–20 นาที",
-        "เล่น Em pulse groove ได้โดยไม่เร่งหรือหยุด pulse"
+        "15 วินาที → 30 วินาที → 60 วินาที",
+        "เคาะเท้าและดีดคอร์ด Em ตรงกับ Metronome 60 BPM ต่อเนื่อง 60 วินาที",
+        "กระจายสายคอร์ด Em ได้ยินเสียงชัดครบทั้ง 4 สาย ไม่มีสายไหนบอด"
       ],
       troubleshooting: [
-        { problem: "นิ้วขยับเร็วกว่า click", advice: "ลดจำนวนโน้ตเหลือ 1 ตัวต่อ click แล้วค่อยกลับไป 1-2-3-4" },
-        { problem: "จำ pattern ได้แต่ไม่รู้สึก pulse", advice: "เคาะเท้าและพูด 1 2 3 4 ก่อน แล้วค่อยเพิ่ม Scale หรือ Arpeggio" },
-        { problem: "Em arpeggio ฟังไม่เป็นคอร์ด", advice: "หยุดที่ E และ B ให้ได้ยิน root กับ fifth ก่อนเติม E และ G"
+        {
+          problem: "เสียงแตกหรือบอด (Buzzing/Dead Note)",
+          advice: "ตั้งข้อนิ้วให้ตั้งฉาก เลื่อนปลายนิ้วไปกดชิดหลังแท่งลวดเฟรตด้านขวา อย่ากดทับแท่งเหล็ก"
+        },
+        {
+          problem: "เท้าเคาะรัวตามมือหรือคำพูด",
+          advice: "วางกีตาร์ลง ตบมือและเคาะเท้าเฉพาะเลข 1 2 3 4 ตาม Metronome ให้ตรงก่อน 1 นาที"
+        },
+        {
+          problem: "เจ็บปลายนิ้วมือซ้าย",
+          advice: "ซ้อมวันละ 15–20 นาทีแล้วพักมือ อย่าบีบคอกีตาร์แรงเกินไป ใช้แรงดึงจากแขนช่วย"
         }
       ],
-      miniExample: "60 BPM: Em chord pulse 1 2 3 4 แล้วเล่น E → B → E → G หนึ่งรอบโดย Beat 1 ชัด",
+      miniExample: "60 BPM: เคาะเท้า 1 2 3 4 ดีด Em บนคลิก แล้วกระจายสาย 6 → 5 → 4 → 3 โดย Beat 1 ชัดเจน",
       commonMistakes: [
-        "เรียก E minor pentatonic partial ว่า full shape",
-        "ใส่ F บนสาย 6 fret 1 ในแบบฝึก pentatonic นี้",
-        "เรียก physical pattern E → B → E → G ว่า 1–3–5"
+        "นับ 1 e & a แล้วเท้าเผลอเคาะทุกพยางค์ ทำให้ Pulse หลักเสีย",
+        "กดนิ้วไกลจากแท่งลวดเฟรต ทำให้ต้องออกแรงบีบมากและเสียงแตก",
+        "รีบเปลี่ยนคอร์ดเร็วเกินไปทั้งที่จังหวะยังไม่นิ่ง"
       ],
       selfCheck: [
-        "เล่น 1-2-3-4 บนสาย 6 และสาย 1 ด้วย alternate picking ได้สะอาด",
-        "ชี้ E–G–A–B partial ได้โดยไม่เพิ่ม F",
-        "เล่น Em pulse + arpeggio landing ที่ 60 BPM ได้"
+        "เท้าเคาะตรงคลิก 60 BPM ได้ต่อเนื่อง 60 วินาทีโดยไม่หลุดหรือเร่ง",
+        "นิ้วมือกดสาย Chromatic ใกล้แท่งเฟรต ไม่มีเสียงแป๊ก",
+        "กระจายสายคอร์ด Em ได้ยินเสียงชัดครบทั้ง 4 สาย ไม่มีสายไหนบอด"
       ],
-      teacherNote: "ให้ Rhythm เป็นพื้นของทุก block ถ้า 60 BPM ยังไม่นิ่ง ให้ลดจำนวนโน้ต ไม่ต้องเพิ่มความเร็ว"
+      teacherNote: "ครูแนะนำให้ซ้อมช้าแบบไม่อายความช้า ถ้า 60 BPM ยังไม่นิ่ง ให้ลดลงมาอีก เพราะ time ที่ดีเริ่มจากความนิ่ง ไม่ได้เริ่มจากความเร็ว"
     },
     practice: [
-      "Chromatic · 1-2-3-4 บนสาย 6 และสาย 1 ด้วย alternate picking",
-      "Scale · E minor pentatonic partial: 6th 0/3 และ 5th 0/2",
-      "Arpeggio · Em: E → B → E → G = 1 → 5 → 1 → ♭3",
+      "Chromatic · 1-2-3-4 บนสาย 6 และสาย 1 ช้า ๆ 60 BPM",
+      "Scale · 4 โน้ตเริ่มต้น E minor pentatonic: สาย 6 (0-3) และสาย 5 (0-2)",
+      "Arpeggio · Em กระจายสาย 6 → 5 → 4 → 3 (1 → 5 → 1 → ♭3)",
       "Rhythm + Application · Em pulse groove ที่ 60 BPM และ chord pulse + arpeggio landing"
     ],
     quiz: [
@@ -2468,47 +2477,146 @@ const month1V2Overrides = {
     rhythmSpine: "Off-beat",
     estimatedMinutesPerDay: "15–20 นาที",
     coreBlocks: [
-      { pillar: "Chromatic", duration: "3–4 นาที", title: "String crossing 6 → 5", focus: "1-2-3-4 ข้ามสายโดยรักษา alternate picking", steps: ["เล่น 1-2-3-4 บนสาย 6", "ข้ามไปสาย 5 โดยไม่เปลี่ยนความสูงนิ้ว", "วาง pickup สั้น ๆ ก่อน target บน &"] },
-      { pillar: "Scale", duration: "3–4 นาที", title: "E minor pentatonic partial · off-beat accent", focus: "ขยายจาก partial เดิมเป็น fragment 2–4 โน้ต ไม่เปลี่ยนเป็น full shape", steps: ["ทบทวน 6th 0/3 และ 5th 0/2", "เลือก 2–4 โน้ตทำ off-beat response phrase", "เน้นโน้ตบน & โดยเท้ายังอยู่บน 1 2 3 4"] },
-      { pillar: "Arpeggio", duration: "3–4 นาที", title: "E Major vs E Minor", focus: "เปรียบเทียบ root E เดิม: G# = Major 3rd กับ G = Minor 3rd", steps: ["เล่น E–G#–B แล้วฟังสี Major", "เล่น E–G–B แล้วฟังสี Minor", "สลับสอง triad โดยไม่เปลี่ยน root และวาง tone บน &"] },
-      { pillar: "Rhythm + Application", duration: "6–8 นาที", title: "Syncopated fill", focus: "นับ 1 & 2 & 3 & 4 & และ accent หลัง beats 2 และ 4", steps: ["ให้เท้าอยู่บน 1 2 3 4", "เปิด accent ที่ & หลัง 2 และ 4", "ตอบด้วย short scale/arpeggio fill บน & โดยไม่หลุด tempo"] }
+      {
+        pillar: "Chromatic",
+        duration: "3–4 นาที",
+        title: "ก้าวข้ามสาย (String crossing 6 → 5)",
+        focus: "เดินนิ้ว 1-2-3-4 บนสาย 6 แล้วย้ายมาสาย 5 โดยข้อมือผ่อนคลาย",
+        steps: [
+          "เดินนิ้ว 1-2-3-4 บนสาย 6",
+          "ยกนิ้วลอยข้ามมาเดินต่อ 1-2-3-4 บนสาย 5",
+          "เล่นสาย 6 ไปสาย 5 แล้วย้อนกลับสาย 5 มาสาย 6 ที่ 60 BPM"
+        ]
+      },
+      {
+        pillar: "Scale",
+        duration: "3–4 นาที",
+        title: "ทำนองเด้งบนจังหวะยก (Off-beat accent)",
+        focus: "เล่น 4 โน้ตเพนทาทอนิก (E-G-A-B) วางบนจังหวะยก &",
+        steps: [
+          "จังหวะ 1 พักเงียบ → จังหวะ 1 & ดีดสาย 6 เปล่า (E)",
+          "จังหวะ 2 พักเงียบ → จังหวะ 2 & ดีดสาย 6 ช่อง 3 (G)",
+          "เน้นโน้ตบน & ให้ตรงกับคำว่า 'และ' โดยเท้ายังเคาะ 1 2 3 4"
+        ]
+      },
+      {
+        pillar: "Arpeggio",
+        duration: "3–4 นาที",
+        title: "ฟังความต่าง Major (สดใส) vs Minor (หม่น)",
+        focus: "เปรียบเทียบ root E เดิม: E Minor (สาย 3 เปล่า - G) vs E Major (สาย 3 ช่อง 1 - G#)",
+        steps: [
+          "เล่น E Minor (สาย 6 เปล่า → 5 ช่อง 2 → 4 ช่อง 2 → 3 เปล่า) ฟังเสียงหม่น",
+          "เล่น E Major (กดสาย 3 ช่อง 1 ด้วยนิ้วชี้) แล้วดีดสาย 6 → 5 → 4 → 3 ฟังเสียงสดใส",
+          "สลับสองคอร์ดโดยคง Root E เดิมไว้ เพื่อให้หูจับความต่างของ Major 3rd (G#) vs Minor 3rd (G)"
+        ]
+      },
+      {
+        pillar: "Rhythm + Application",
+        duration: "6–8 นาที",
+        title: "Syncopated groove",
+        focus: "นับ 1 & 2 & 3 & 4 & และวาง Accent บน & หลังจังหวะ 2 และ 4",
+        steps: [
+          "เคาะเท้าบน 1 2 3 4 ปากนับ 1 และ 2 และ 3 และ 4 และ",
+          "ดีดคอร์ด Em วาง Accent (เน้นเสียง) บน 2 & และ 4 &",
+          "ทิศทางการดีด (Down/Up) เป็นทางเลือกเสริมตามความถนัด ไม่คิดคะแนน"
+        ]
+      }
     ],
     learn: {
       targetBpm: "60 BPM",
-      diagram: { title: "Off-beat: 1 & 2 & 3 & 4 &", caption: "เท้าอยู่บนเลข ส่วน Scale และ Arpeggio ตอบกลับบน &", cells: [
-        { label: "1", note: "พื้น", kind: "ghost" }, { label: "&", note: "ผ่าน", kind: "rest" },
-        { label: "2", note: "พื้น", kind: "ghost" }, { label: "&", note: "Accent", kind: "accent" },
-        { label: "3", note: "พื้น", kind: "ghost" }, { label: "&", note: "ผ่าน", kind: "rest" },
-        { label: "4", note: "พื้น", kind: "ghost" }, { label: "&", note: "Accent", kind: "accent" }
-      ]},
+      diagram: {
+        title: "Off-beat: 1 & 2 & 3 & 4 &",
+        caption: "เท้าอยู่บนเลข 1 2 3 4 ส่วนเสียง Accent วางบน & หลัง 2 และ 4",
+        cells: [
+          { label: "1", note: "พื้น", kind: "ghost" },
+          { label: "&", note: "ผ่าน", kind: "rest" },
+          { label: "2", note: "พื้น", kind: "ghost" },
+          { label: "&", note: "Accent", kind: "accent" },
+          { label: "3", note: "พื้น", kind: "ghost" },
+          { label: "&", note: "ผ่าน", kind: "rest" },
+          { label: "4", note: "พื้น", kind: "ghost" },
+          { label: "&", note: "Accent", kind: "accent" }
+        ]
+      },
       paragraphs: [
-        "W2 เพิ่มความยากด้วย Off-beat แต่ Pulse ยังเป็นแกนเดิม ให้เท้าเคาะ 1 2 3 4 ขณะนับ 1 & 2 & 3 & 4 &",
-        "Scale fragment และ arpeggio tone จะมีความหมายเมื่อวางบนเวลา ไม่ใช่เมื่อเล่นครบจำนวนโน้ต",
-        "E Major กับ E Minor ใช้ root E เดิมเพื่อให้หูจับจุดต่างที่ G# กับ G ได้ชัด"
+        "Beat หลัก 1 2 3 4 คือ 'บ้าน' (จังหวะตก) ส่วน & (และ) คือ 'การออกไปเที่ยว' (จังหวะยก)",
+        "Syncopation (ซิงโคเพชัน) คือการจงใจดีดเน้นเสียง (Accent) ตรงจังหวะยก & แทนที่จะดีดตรงตัวเลข ทำให้เพลงมีกรูฟและขยับเด้ง",
+        "E Major กับ E Minor ใช้ Root E เดิมเพื่อให้หูจับจุดต่างที่สาย 3 (G# ช่อง 1 สดใส vs G สายเปล่า หม่น) ได้ชัดเจน"
       ],
-      listenFor: ["เท้าไม่ย้ายไปตาม &", "Accent หลัง 2 และ 4 เด่นแต่ไม่เร่ง", "G# กับ G เปลี่ยนสีโดย E ยังเป็นบ้านเดิม"],
-      physicalFeel: ["มือขวาผ่อนคลายตอนข้ามสาย", "เท้าหนักแน่นบนเลขและมือเบาบน &", "นิ้วซ้ายไม่ยกสูงตอน string crossing"],
-      guitarApplication: ["อุดสายและนับ 1 & 2 & 3 & 4 &", "เล่น chord pulse แล้วตอบด้วย 2–4 โน้ตจาก partial บน &", "สลับ E Major/E Minor แล้วฟัง G# vs G"],
-      guidedSteps: ["เคาะเท้าและนับ 1 & 2 & 3 & 4 &", "เล่น 1-2-3-4 บนสาย 6 แล้วข้ามสาย 5", "วาง scale fragment บน & หลัง 2 และ 4", "เล่น E Major แล้ว E Minor โดย root E คงเดิม", "รวม syncopated rhythm กับ short scale/arpeggio fill"],
-      correctionSteps: ["ถ้า & เร็ว ให้พูดเลขกับ & สลับกันช้าลง", "ถ้าข้ามสายแล้วสะดุด ให้เล่นสายละ 2 โน้ตก่อน", "ถ้า Major/Minor ฟังเหมือนกัน ให้เล่น E ค้างแล้วสลับเฉพาะ G# กับ G"],
-      dailySelfCheck: ["Chromatic 3–4 นาที, Scale 3–4 นาที, Arpeggio 3–4 นาที", "Rhythm + Application 6–8 นาที รวม 15–20 นาที", "accent หลัง 2 และ 4 ลงบน & โดย Pulse ไม่สั่น"],
+      listenFor: [
+        "เท้ายังเคาะ 1 2 3 4 นิ่งสนิท ไม่เต้นตามจังหวะ &",
+        "Accent บน & หลัง 2 และ 4 คมชัด แต่ไม่เร่งชนจังหวะถัดไป",
+        "หูแยกออกทันทีว่า E Major ให้เสียงสดใส ส่วน E Minor ให้เสียงเศร้าหม่น"
+      ],
+      physicalFeel: [
+        "ข้อมือขวาแกว่งสบาย ๆ เหมือนลูกตุ้มนาฬิกา ไม่หยุดชะงัก",
+        "เท้าหนักแน่นบนเลข 1 2 3 4 และมือสะกิดเบาบน &",
+        "Accent รู้สึกเหมือนสะกิดหยดน้ำออกจากปลายนิ้ว ไม่ใช่การฟาดแขนลงไปทั้งท่อน"
+      ],
+      guitarApplication: [
+        "ดีดคอร์ด Em เบาบน 1 2 3 4 แต่วาง Accent คมชัดบน 2 & และ 4 &",
+        "สลับ E Minor กับ E Major ฟังความต่างของเสียง",
+        "เล่น 4 โน้ตสเกลบนจังหวะ & แล้วกลับมาลง Em ตรง Beat 1"
+      ],
+      guidedSteps: [
+        "รอบแรก เปิด Metronome 60 BPM เคาะเท้า 1 2 3 4 ปากนับ 1 และ 2 และ 3 และ 4 และ",
+        "รอบสอง ตบมือเฉพาะตอนพูดคำว่า 'และ' หลังเลข 2 (2 &) และหลังเลข 4 (4 &)",
+        "รอบสาม เล่น Chromatic 1-2-3-4 ข้ามสาย 6 ไปสาย 5 ให้นิ้วขยับคล่องตัว",
+        "รอบสี่ ดีดคอร์ด Em วาง Accent บน 2 & และ 4 & โดยเท้าไม่หลุดคลิก",
+        "รอบสุดท้าย ดีดสลับ E Minor กับ E Major เพื่อฝึกหูแยกแยะอารมณ์เสียง"
+      ],
+      correctionSteps: [
+        "ถ้า & เร่ง: พูดคำว่า 'และ' ให้ยาวขึ้นเท่ากับตัวเลข แล้วค่อยดีด",
+        "ถ้าข้ามสายแล้วสะดุด: เล่นสายละ 2 โน้ตก่อน (1-2 สาย 6 แล้ว 1-2 สาย 5)",
+        "ถ้า E Major กับ Minor ฟังไม่ออก: ดีดเฉพาะสาย 3 สลับระหว่างช่อง 1 กับสายเปล่าหลาย ๆ ครั้ง"
+      ],
+      dailySelfCheck: [
+        "Chromatic 3–4 นาที, Scale 3–4 นาที, Arpeggio 3–4 นาที",
+        "Rhythm + Application 6–8 นาที รวม 15–20 นาที",
+        "วาง Accent บน & หลัง 2 และ 4 ได้โดยที่ Pulse ใต้เท้าไม่แกว่ง"
+      ],
       troubleshooting: [
-        { problem: "เท้าขยับไปตาม off-beat", advice: "กลับไปตบมือเฉพาะเลข 1 2 3 4 แล้วค่อยเติมเสียงบน &" },
-        { problem: "ข้ามสายแล้ว alternate picking ขาด", advice: "ลด BPM และเล่น 1-2-3-4 แยกสายก่อนเชื่อม 6 → 5" },
-        { problem: "G# กับ G ยังไม่ต่าง", advice: "เล่น E–B เป็นกรอบเดิม แล้วเติม G# หรือ G ทีละตัวเพื่อฟัง 3rd" }
+        {
+          problem: "เท้าเคาะตามจังหวะยก (&)",
+          advice: "วางกีตาร์ลง ตบมือเฉพาะบน 2 & และ 4 & ขณะที่เท้าเคาะ 1 2 3 4 จนชิน"
+        },
+        {
+          problem: "ดีด Accent แล้วรีบวิ่งชน Beat ถัดไป",
+          advice: "อย่ากระชากทั้งแขน ใช้แค่สะบัดข้อมือเบา ๆ แล้วปล่อยให้เวลาไหลตามปกติ"
+        },
+        {
+          problem: "ข้ามสายแล้วนิ้วพันกัน",
+          advice: "ลดความเร็วลงมาที่ 50 BPM ฝึกยกนิ้วข้ามสายช้า ๆ"
+        }
       ],
-      miniExample: "นับ 1 & 2 & 3 & 4 &, accent บน & หลัง 2 และ 4 แล้วตอบด้วย E–G–A–B สั้น ๆ",
-      commonMistakes: ["ใช้ G Major แทน E Major/E Minor comparison", "เล่น off-beat จนหลุด pulse", "เรียกการข้ามสายว่า scale โดยไม่ฟังจังหวะ"],
-      selfCheck: ["เล่น 1-2-3-4 ข้ามสาย 6 → 5 ได้สม่ำเสมอ", "วาง scale fragment บน & ได้", "ฟัง G# vs G รอบ root E ได้"],
-      teacherNote: "ให้เท้าเป็นบ้าน ส่วน & เป็นจุดที่มือออกไปเที่ยวแล้วกลับมา อย่าให้ off-beat พา tempo ไปด้วย"
+      miniExample: "นับ 1 & 2 & 3 & 4 &, ดีด Em เบาบนตัวเลข และ Accent คมชัดบน 2 & และ 4 &",
+      commonMistakes: [
+        "ดีด Accent แล้วเร่งความเร็วตามแรงมือ",
+        "หยุดมือขวาค้างกลางอากาศตอนไม่ได้ดีด ทำให้จังหวะขาด",
+        "ใช้คอร์ด G Major แทนการเทียบ E Major กับ E Minor บน Root E เดิม"
+      ],
+      selfCheck: [
+        "ปากนับ 1 & 2 & 3 & 4 & ได้โดยเท้าเคาะเฉพาะตัวเลขตรงกับ Metronome",
+        "ดีด Accent บน & ได้โดยไม่รีบวิ่งชนจังหวะถัดไป",
+        "หูแยกออกชัดเจนระหว่างเสียง E Minor (หม่น) กับ E Major (สว่าง)"
+      ],
+      teacherNote: "เท้าคือบ้าน (Beat 1 2 3 4) ส่วน & คือการออกไปเที่ยว แล้วต้องกลับบ้านให้ตรง อย่าให้จังหวะยกพาความเร็วเตลิดไป"
     },
-    practice: ["Chromatic · 1-2-3-4 string crossing สาย 6 → 5", "Scale · E minor pentatonic partial 2–4 โน้ตบน off-beat", "Arpeggio · E Major vs E Minor: G# vs G", "Rhythm + Application · Syncopated rhythm + short scale/arpeggio fill"],
+    practice: [
+      "Chromatic · 1-2-3-4 string crossing สาย 6 → 5",
+      "Scale · E minor pentatonic partial 4 โน้ตบนจังหวะยก &",
+      "Arpeggio · E Major vs E Minor: G# (ช.1) vs G (สายเปล่า)",
+      "Rhythm + Application · Syncopated groove + Accent บน & หลัง 2 และ 4"
+    ],
     quiz: [
       { question: "ใน W2 เท้าควรยึดตรงไหน?", options: ["1 2 3 4", "เฉพาะ &", "e และ a ทุกตัว"], answer: 0 },
       { question: "จุดต่างของ E Major กับ E Minor คืออะไร?", options: ["G# กับ G", "E กับ B", "Root เปลี่ยนเป็น G"], answer: 0 },
       { question: "W2 ใช้ G Major เป็น comparison target หรือไม่?", options: ["ไม่ ใช้ E Major กับ E Minor", "ใช่ แทน E Minor", "ใช่ แทน E Major"], answer: 0 }
     ],
-    homework: ["ทำ Daily Core 15–20 นาที โดยวาง Scale และ Arpeggio บน &", "ฟังและพูด G# กับ G รอบ E ให้ได้ยินความต่างของ Major 3rd/Minor 3rd"],
+    homework: [
+      "ทำ Daily Core 15–20 นาที โดยวาง Scale และ Arpeggio บน &",
+      "ฟังและพูด G# กับ G รอบ E ให้ได้ยินความต่างของ Major 3rd/Minor 3rd"
+    ],
     earTraining: null,
     miniSong: null
   },
@@ -2519,44 +2627,142 @@ const month1V2Overrides = {
     rhythmSpine: "Dynamics",
     estimatedMinutesPerDay: "15–20 นาที",
     coreBlocks: [
-      { pillar: "Chromatic", duration: "3–4 นาที", title: "1-3-2-4 และ 1-4-2-3", focus: "Finger independence พร้อม relaxation", steps: ["เล่น 1-3-2-4 ช้า ๆ บนสายเดียว", "สลับเป็น 1-4-2-3 โดยไม่ยกนิ้วสูง", "รักษา tempo เดิมเมื่อเปลี่ยน dynamic"] },
-      { pillar: "Scale", duration: "3–4 นาที", title: "3-note sequencing", focus: "ใช้ E minor pentatonic partial ทำ phrase ไม่ไล่ขึ้น–ลงตรง ๆ อย่างเดียว", steps: ["เลือก 3 โน้ตจาก E–G–A–B", "เล่นเป็นกลุ่ม 3 โน้ตแล้วเว้นช่องว่าง", "เปลี่ยน light attack กับ strong attack โดย tempo คงที่"] },
-      { pillar: "Arpeggio", duration: "3–4 นาที", title: "C Major triad · C–E–G", focus: "Mute/Open sustain control และ chord tones 1–3–5", steps: ["เล่น C–E–G ช้า ๆ", "รอบหนึ่งให้เสียงเปิดค้างพอดี", "อีกรอบใช้ mute เบาใกล้ bridge แล้วเปรียบเทียบ pitch"] },
-      { pillar: "Rhythm + Application", duration: "6–8 นาที", title: "Dynamic groove builder", focus: "Accent contrast และ palm muting ที่ยังมี pitch", steps: ["เล่น pattern clean/open หนึ่งรอบ", "เล่น pattern palm-muted หนึ่งรอบ", "สลับเบา–ดังโดยด้านขอบมือฝั่งนิ้วก้อยของมือดีดอยู่ใกล้ bridge"] }
+      {
+        pillar: "Chromatic",
+        duration: "3–4 นาที",
+        title: "สลับนิ้วฝึกความอิสระ (1-3-2-4)",
+        focus: "Finger independence บนสาย 6 โดยผ่อนคลายกล้ามเนื้อ",
+        steps: [
+          "นิ้ว 1 (ช่อง 1) → นิ้ว 3 (ช่อง 3) → นิ้ว 2 (ช่อง 2) → นิ้ว 4 (ช่อง 4) บนสาย 6",
+          "เล่นวนซ้ำช้า ๆ 60 BPM เน้นนิ้วที่ไม่กดลอยอยู่เตี้ย ๆ เหนือบอร์ด",
+          "ผ่อนคลายข้อมือและหัวไหล่ ไม่เกร็งนิ้วก้อย"
+        ]
+      },
+      {
+        pillar: "Scale",
+        duration: "3–4 นาที",
+        title: "ทำนอง 3 โน้ตไล่น้ำหนักเสียง",
+        focus: "ไล่น้ำหนัก 3 ระดับ (เบา → กลาง → ดัง Accent) จาก E-G-A",
+        steps: [
+          "โน้ต 1: สาย 6 เปล่า (E) ดีดเบามาก (Soft)",
+          "โน้ต 2: สาย 6 ช่อง 3 (G) ดีดปานกลาง (Medium)",
+          "โน้ต 3: สาย 5 เปล่า (A) ดีดเน้นเสียง (Accent) ให้ตกตรงคลิกพอดี"
+        ]
+      },
+      {
+        pillar: "Arpeggio",
+        duration: "3–4 นาที",
+        title: "คอร์ด C Major (เสียงประสานอบอุ่น)",
+        focus: "จับ C Major กระจายสาย 5 → 4 → 3 (C-E-G) เปรียบเทียบเสียงเปิด vs Mute",
+        steps: [
+          "มือซ้ายจับ C: นิ้วชี้สาย 2 ช่อง 1, นิ้วกลางสาย 4 ช่อง 2, นิ้วนางสาย 5 ช่อง 3",
+          "มือขวาดีดกระจายสาย: สาย 5 (C) → สาย 4 (E) → สาย 3 (G)",
+          "ทดลองดีดแบบเสียงเปิดกังวาน สลับกับแตะสันมือ Mute เบา ๆ ชิด Bridge"
+        ]
+      },
+      {
+        pillar: "Rhythm + Application",
+        duration: "6–8 นาที",
+        title: "Dynamic groove builder",
+        focus: "ผสาน Palm Mute เข้ากับ Accent บนคอร์ด Em",
+        steps: [
+          "วางเนื้อขอบฝ่ามือด้านนิ้วก้อยชิด Bridge ดีด Em สั้นแน่นบน 1 2 3 4",
+          "ยกสันมือเปิดเสียง Accent เฉพาะตอนดีดบน 2 & และ 4 & แล้ววางกลับลงไป Mute",
+          "คุมความเร็วให้คงที่ 60 BPM ไม่เร่งเมื่อเล่นเสียงดัง"
+        ]
+      }
     ],
     learn: {
       targetBpm: "60 BPM",
-      diagram: { title: "Dynamic Contrast", caption: "pattern เดิม แต่ตั้งใจเปลี่ยนน้ำหนักเสียงและความยาวเสียง", cells: [
-        { label: "1", note: "เบา", kind: "rest" }, { label: "2", note: "กลาง", kind: "hit" }, { label: "3", note: "ดัง", kind: "accent" }, { label: "4", note: "ปล่อย", kind: "rest" }
-      ]},
+      diagram: {
+        title: "Dynamic Contrast",
+        caption: "pattern เดิม แต่ตั้งใจเปลี่ยนน้ำหนักเสียงและความยาวเสียง",
+        cells: [
+          { label: "1", note: "เบา", kind: "rest" },
+          { label: "2", note: "กลาง", kind: "hit" },
+          { label: "3", note: "ดัง", kind: "accent" },
+          { label: "4", note: "ปล่อย", kind: "rest" }
+        ]
+      },
       paragraphs: [
-        "W3 ไม่ได้เพิ่มความเร็ว แต่เพิ่มการควบคุม: โน้ตเดิมสามารถเบา ดัง เปิด หรือสั้นได้ตามเจตนา",
-        "Palm mute ใช้ด้านขอบมือฝั่งนิ้วก้อยของมือดีดวางใกล้ bridge ไม่ใช้นิ้วก้อยกดสาย",
-        "C Major arpeggio คือ C–E–G = 1–3–5; ให้หูแยกเสียงเปิดกับเสียง mute ที่ยังมี pitch"
+        "Dynamics (ไดนามิกส์) คือการคุมน้ำหนักเสียง 3 ระดับ: เบา (Soft) → ปกติ (Medium) → ดังเน้น (Accent) ทำให้เพลงมีมิติ ไม่แบนราบ",
+        "Palm Mute (ปาล์มมิวต์) ใช้เนื้อขอบฝ่ามือด้านนิ้วก้อยของมือดีดวางชิดแท่งหย่องสีขาว (Bridge) ทำให้เสียงสั้นแน่นแต่ยังได้ยินระดับเสียงคอร์ด (มี Pitch)",
+        "ห้ามใช้นิ้วก้อยกดสาย และห้ามวางมือลอยมากลางสายเพราะจะทำให้เสียงบอดสนิท"
       ],
-      listenFor: ["light attack กับ strong attack ต่างกันแต่ tempo เท่าเดิม", "palm-muted note ยังฟัง pitch ได้", "C–E–G เชื่อมเป็น C Major ไม่ใช่เสียงบอด"],
-      physicalFeel: ["ไหล่และข้อมือผ่อนคลาย", "ด้านขอบมือฝั่งนิ้วก้อยของมือดีดใกล้ bridge", "แรงกดและแรงดีดลดลง ไม่ใช้แรงแก้จังหวะ"],
-      guitarApplication: ["เล่น chromatic pattern เบาแล้วหนักขึ้นเมื่อเข้า target", "เล่น 3-note scale phrase แล้วเว้นช่องว่าง", "สลับ C Major arpeggio แบบ open กับ palm-muted"],
-      guidedSteps: ["ตั้ง Metronome 60 BPM และเล่น 1-3-2-4 เบา ๆ", "เล่น 1-4-2-3 โดยคุมความสูงนิ้ว", "ทำ 3-note sequence จาก E–G–A–B แล้วเว้นช่องว่าง", "เล่น C–E–G แบบ open sustain", "ทำซ้ำแบบ palm mute และเปรียบเทียบ dynamic groove"],
-      correctionSteps: ["ถ้าเล่นดังแล้วเร็วขึ้น ให้ลดแรงและกลับไป accent ทีละตัว", "ถ้า palm mute กลายเป็นเสียงบอด ให้ขยับขอบมือออกจาก bridge เล็กน้อย", "ถ้า pattern นิ้วเกร็ง ให้หยุด 1 pulse แล้วเริ่มด้วยแรงกดน้อยลง"],
-      dailySelfCheck: ["Chromatic 3–4 นาที, Scale 3–4 นาที, Arpeggio 3–4 นาที", "Rhythm + Application 6–8 นาที รวม 15–20 นาที", "เล่น clean/open และ palm-muted โดย dynamic ต่างแต่ tempo คงที่"],
+      listenFor: [
+        "เสียงเบาและเสียงดังต่างกันชัดเจน แต่ Metronome 60 BPM ยังตรงเป๊ะ",
+        "เสียง Palm Mute สั้น แน่น กระชับ แต่ยังได้ยินชื่อคอร์ด ไม่บอดตาย",
+        "C Major (C-E-G) ใสก้องทุกสาย"
+      ],
+      physicalFeel: [
+        "วางเนื้อขอบฝ่ามือด้านนิ้วก้อย (Hypothenar) ชิดแท่งหย่อง Bridge เบา ๆ เหมือนเอาหมอนพิงสาย",
+        "เวลาเล่นเบา คิดว่ากำลังดีดกล่อมเด็กนอน เวลา Accent คิดว่าสะกิดหยดน้ำ",
+        "ไหล่และแขนผ่อนคลาย ไม่เกร็งกล้ามเนื้อ"
+      ],
+      guitarApplication: [
+        "ห้อง 1-2: เล่น Palm Mute นุ่มนวลบนคอร์ด Em บน 1 2 3 4",
+        "ห้อง 3-4: ยกสันมือเปิดเสียง Accent เฉพาะบน 2 & และ 4 &",
+        "สลับกระจายสาย C Major (5-4-3) กับ Em"
+      ],
+      guidedSteps: [
+        "รอบแรก แตะสันมือชิด Bridge ดีดสาย 6 ฟังเสียง ตึก... ตึก... สั้นแน่น",
+        "รอบสอง ยกสันมือขึ้น ดีดสาย 6 ฟังเสียง ปิ๊ง... กังวานยาว",
+        "รอบสาม เล่น Chromatic สลับนิ้ว 1-3-2-4 บนสาย 6 ช้า ๆ 60 BPM",
+        "รอบสี่ เล่น 3 โน้ตสเกล ไล่น้ำหนัก เบา → กลาง → ดัง",
+        "รอบสุดท้าย จับ Em เล่น Palm Mute สลับกับเปิด Accent บน 2 & และ 4 &"
+      ],
+      correctionSteps: [
+        "ถ้า Palm Mute กลายเป็นเสียงบอด: เลื่อนสันมือถอยกลับมาชิดแท่งหย่อง Bridge ด้านขวามากขึ้น",
+        "ถ้าเล่นดังแล้วเร็วขึ้น: ลดแรงลง และคุมให้จังหวะตกตรงกับเสียงคลิกพอดี",
+        "ถ้านิ้วก้อยเกร็งตอนเล่น 1-3-2-4: พักมือ 1 นาที สะบัดข้อมือเบา ๆ แล้วกดด้วยแรงกดที่น้อยลง"
+      ],
+      dailySelfCheck: [
+        "Chromatic 3–4 นาที, Scale 3–4 นาที, Arpeggio 3–4 นาที",
+        "Rhythm + Application 6–8 นาที รวม 15–20 นาที",
+        "เล่นสลับ Palm Mute กับ Open Accent ได้โดยที่ Tempo ไม่แกว่ง"
+      ],
       troubleshooting: [
-        { problem: "Accent ทำให้ tempo เร็ว", advice: "ให้ accent ดังขึ้นด้วยน้ำหนัก ไม่ใช่ด้วยการขยับเร็วขึ้น" },
-        { problem: "Palm mute ไม่มี pitch", advice: "ใช้แค่ด้านขอบมือแตะสายใกล้ bridge เบาลงจนยังฟังชื่อโน้ตได้" },
-        { problem: "3-note sequence ฟังเหมือน scale ตรง ๆ", advice: "เว้นช่องว่างหลังกลุ่ม 3 โน้ตและให้ target หนึ่งตัวเด่นขึ้น" }
+        {
+          problem: "Palm Mute เสียงบอดสนิท ไม่มีระดับเสียง (Dead Note)",
+          advice: "วางมือลอยมากลางสายเกินไป ให้ถอยสันมือมาชิดแท่งหย่องกระดูกสีขาวของ Bridge แล้วแตะเบาลง"
+        },
+        {
+          problem: "Accent แล้วเผลอเร่งความเร็ว",
+          advice: "ให้คิดว่าเพิ่มน้ำหนักที่ปลายนิ้วชั่วขณะ ไม่ใช่การเร่งขยับแขนเร็วขึ้น"
+        },
+        {
+          problem: "นิ้วก้อยกางเกร็งตอนสลับนิ้ว",
+          advice: "ฝึกวางนิ้วลอยต่ำเหนือสาย แล้วกดลงทีละนิ้วช้า ๆ ที่ 50 BPM"
+        }
       ],
-      miniExample: "เล่น C–E–G แบบ open หนึ่งรอบ แล้วทำซ้ำแบบ palm-muted พร้อม accent ที่โน้ต G",
-      commonMistakes: ["สื่อว่าต้องใช้นิ้วก้อยทำ palm mute", "กด mute จนเสียงไม่มี pitch", "เพิ่มความดังด้วยการเร่ง tempo"],
-      selfCheck: ["เล่น 1-3-2-4 และ 1-4-2-3 ได้โดยไม่เกร็ง", "จัด 3-note phrase ได้", "C Major arpeggio open/mute ต่างกันแต่ยังมี pitch"],
+      miniExample: "เล่น Em แบบ Palm Mute บน 1 2 3 4 แล้วยกสันมือเปิด Accent ก้องกังวานที่ 2 & และ 4 &",
+      commonMistakes: [
+        "เอานิ้วก้อยไปกดสายแทนการใช้ขอบฝ่ามือ",
+        "กดสันมือแรงเกินไปจนสายจมและเสียงเพี้ยน",
+        "เล่นเสียงดังขึ้นแล้วเร่งความเร็วตามแรงมือ"
+      ],
+      selfCheck: [
+        "เสียง Palm Mute สั้นแน่น แต่ยังฟังออกว่าเป็นคอร์ด Em ไม่บอดสนิท",
+        "เล่นเสียงเบาและเสียงดังได้ชัดเจน โดยที่เข็ม Metronome ยังตรงเป๊ะ",
+        "สลับนิ้ว 1-3-2-4 ได้โดยข้อมือซ้ายไม่เกร็งค้าง"
+      ],
       teacherNote: "Dynamics คือการเลือกน้ำหนักเสียง ไม่ใช่การเล่นแรงขึ้นเรื่อย ๆ ให้ Pulse นิ่งก่อนแล้วค่อยเปลี่ยนสีเสียง"
     },
-    practice: ["Chromatic · 1-3-2-4 และ 1-4-2-3", "Scale · E minor pentatonic partial แบบ 3-note sequencing", "Arpeggio · C Major C–E–G พร้อม mute/open sustain control", "Rhythm + Application · Dynamic groove builder"],
+    practice: [
+      "Chromatic · 1-3-2-4 บนสาย 6 ช้า ๆ 60 BPM",
+      "Scale · 3 โน้ต E-G-A ไล่น้ำหนัก เบา → กลาง → ดัง (Accent)",
+      "Arpeggio · C Major C–E–G (สาย 5-4-3) พร้อมเปรียบเทียบเสียงเปิด vs Mute",
+      "Rhythm + Application · Dynamic groove builder สลับ Palm Mute กับ Open Accent บน Em"
+    ],
     quiz: [
       { question: "Palm mute ใช้ส่วนใดของมือ?", options: ["ด้านขอบมือฝั่งนิ้วก้อยของมือดีดใกล้ bridge", "นิ้วก้อยกดสาย", "ปลายปิ๊กกด bridge"], answer: 0 },
       { question: "C Major triad คืออะไร?", options: ["C–E–G = 1–3–5", "C–Eb–G = 1–♭3–5", "C–F–G = 1–4–5"], answer: 0 },
       { question: "เมื่อเล่นดังขึ้น สิ่งใดต้องคงที่?", options: ["Tempo/Pulse", "ความเกร็ง", "จำนวนโน้ตเท่านั้น"], answer: 0 }
     ],
-    homework: ["ทำ Daily Core 15–20 นาที โดยสลับ clean/open กับ palm-muted", "เช็กว่า dynamic contrast เกิดจากน้ำหนักและความยาวเสียง ไม่ใช่การเร่ง tempo"],
+    homework: [
+      "ทำ Daily Core 15–20 นาที โดยสลับ clean/open กับ palm-muted",
+      "เช็กว่า dynamic contrast เกิดจากน้ำหนักและความยาวเสียง ไม่ใช่การเร่ง tempo"
+    ],
     earTraining: null,
     miniSong: null
   },
@@ -2567,61 +2773,740 @@ const month1V2Overrides = {
     rhythmSpine: "Groove",
     estimatedMinutesPerDay: "15–20 นาที",
     coreBlocks: [
-      { pillar: "Chromatic", duration: "3–4 นาที", title: "4-note Chromatic Walk-up → Target Landing", focus: "F# → G → G# → A; A คือ target landing บน Beat 1", steps: ["เล่น F# → G → G# เป็น passing motion", "เล่น A เป็น target note", "ลง A บน Beat 1 ของห้องถัดไปตาม exercise"] },
-      { pillar: "Scale", duration: "3–4 นาที", title: "Phrasing → Root landing", focus: "ใช้ E minor pentatonic partial ทำ phrase และ resolve ไป Root บน Beat 1", steps: ["เลือก 2–4 โน้ตและเว้นช่องว่าง", "ให้ phrase มีจุดจบ ไม่ไล่ขึ้น–ลงอย่างเดียว", "เตรียมหูและมือให้ Root ลง Beat 1 ของ bar ถัดไป"] },
-      { pillar: "Arpeggio", duration: "3–4 นาที", title: "Progression arpeggiation · Em → C → G → D", focus: "ใช้ chord-tone concept 1–3–5 กับ progression ทั้ง 4 คอร์ด", steps: ["เล่น Em chord tones", "เปลี่ยนไป C แล้ว G", "จบ progression ที่ D ก่อนกลับ loop"] },
-      { pillar: "Rhythm + Application", duration: "6–8 นาที", title: "4-bar groove → 8-bar graduation", focus: "ทั้งสาม pillar กลายเป็น musical application บน 60–70 BPM", steps: ["Bar 1: rhythm groove, palm mute + accent", "Bar 2: arpeggio Em → C", "Bar 3: scale phrasing/pentatonic sequence", "Bar 4: F# → G → G# → A และ target root landing; เล่น 2 รอบรวม 8 bars"] }
+      {
+        pillar: "Chromatic",
+        duration: "3–4 นาที",
+        title: "4-note Chromatic Walk-up → Target Landing",
+        focus: "ไต่โน้ตบนสาย 6: F# (ช่อง 2) → G (ช่อง 3) → G# (ช่อง 4) → A (ช่อง 5 - Target Landing บน Beat 1)",
+        steps: [
+          "จังหวะ 3: นิ้ว 1 กดสาย 6 ช่อง 2 (F#)",
+          "จังหวะ 3 &: นิ้ว 2 กดสาย 6 ช่อง 3 (G) → จังหวะ 4: นิ้ว 3 กดสาย 6 ช่อง 4 (G#)",
+          "จังหวะ 1 ของห้องถัดไป: นิ้ว 4 (หรือ 1) กดสาย 6 ช่อง 5 (เสียง A - Target Landing!)"
+        ]
+      },
+      {
+        pillar: "Scale",
+        duration: "3–4 นาที",
+        title: "ทำนองกลับบ้าน (Phrase Resolution)",
+        focus: "เมโลดี้เพนทาทอนิกจบลงที่ Root E บน Beat 1",
+        steps: [
+          "เล่นเมโลดี้: สาย 5 ช่อง 2 (B) → สาย 5 เปล่า (A) → สาย 6 ช่อง 3 (G)",
+          "ลงจบที่สาย 6 เปล่า (E - Root) บนจังหวะ 1 ของห้องใหม่",
+          "ฟังความรู้สึกสงบ สมบูรณ์ และกลับถึงบ้าน"
+        ]
+      },
+      {
+        pillar: "Arpeggio",
+        duration: "3–4 นาที",
+        title: "การเชื่อมคอร์ด Em → C",
+        focus: "กระจายสายเปลี่ยนคอร์ด Em (สาย 6-5-4-3) → C Major (สาย 5-4-3)",
+        steps: [
+          "ดีดกระจายสาย Em (6-5-4-3) ใน 2 จังหวะแรก",
+          "ย้ายมือซ้ายมาจับ C Major ดีดกระจายสาย (5-4-3) ใน 2 จังหวะหลัง",
+          "ฝึกความคล่องตัวในการเปลี่ยนรูปคอร์ดโดยไม่หยุด Pulse"
+        ]
+      },
+      {
+        pillar: "Rhythm + Application",
+        duration: "6–8 นาที",
+        title: "4-bar groove → 8-bar graduation",
+        focus: "รวมทั้ง 4 เสาหลักเป็น 4-bar groove loop เล่น 2 รอบ รวม 8 bars ที่ 60–70 BPM",
+        steps: [
+          "Bar 1: Palm Muted Pulse บนคอร์ด Em (1 2 3 4)",
+          "Bar 2: Palm Muted Eighths (1 & 2 & 3 & 4 &) หรือกระจายสาย Em → C",
+          "Bar 3: Accent บน & หลัง 2 + Scale phrase",
+          "Bar 4: Accent บน & หลัง 2 และ 4 + Chromatic Walk-up (2-3-4) ส่งลงช่อง 5 (A) บน Beat 1 ของรอบถัดไป"
+        ]
+      }
     ],
     learn: {
       targetBpm: "60–70 BPM",
-      diagram: { title: "4-bar Groove Map", caption: "แต่ละห้องมีบทบาทต่างกัน แต่ Pulse เดียวกันพาไปจนจบ 8 bars", cells: [
-        { label: "Bar 1", note: "Rhythm", kind: "hit" }, { label: "Bar 2", note: "Arpeggio", kind: "accent" }, { label: "Bar 3", note: "Scale", kind: "hit" }, { label: "Bar 4", note: "Target", kind: "accent" }
-      ]},
+      diagram: {
+        title: "4-bar Groove Map",
+        caption: "แต่ละห้องมีบทบาทต่างกัน แต่ Pulse เดียวกันพาไปจนจบ 8 bars",
+        cells: [
+          { label: "Bar 1", note: "Rhythm", kind: "hit" },
+          { label: "Bar 2", note: "Arpeggio", kind: "accent" },
+          { label: "Bar 3", note: "Scale", kind: "hit" },
+          { label: "Bar 4", note: "Target", kind: "accent" }
+        ]
+      },
       paragraphs: [
-        "W4 คือการเปลี่ยนแบบฝึกให้เป็นเพลง: Rhythm เป็น spine และ Chromatic, Scale, Arpeggio ทำหน้าที่ต่างกันในแต่ละห้อง",
-        "Chromatic walk-up นี้มี 4 โน้ต F# → G → G# → A โดย A เป็น target landing ไม่ใช่ 3-note walk-up",
-        "เล่น 4 ห้องต่อกัน 2 รอบ รวม 8 bars ที่ 60–70 BPM โดยไม่หยุดและไม่ดัน tempo"
+        "Groove (กรูฟ) คือการรวม Pulse, Off-beat, Dynamics, Palm Mute และการเปลี่ยนคอร์ดให้เป็นดนตรีที่ไหลลื่นน่าฟัง",
+        "Chromatic Walk-up มี 4 โน้ต: F# (ช่อง 2) → G (ช่อง 3) → G# (ช่อง 4) → A (ช่อง 5) โดย A เป็น Target Landing บน Beat 1 ของห้องถัดไป",
+        "Graduation Gate: เล่นวน 4 ห้องต่อเนื่อง 2 รอบ (รวม 8 ห้อง) ที่ความเร็ว 60–70 BPM โดยไม่หยุดและไม่ดัน Tempo"
       ],
-      listenFor: ["Bar 1 เป็นพื้น groove", "Bar 2 chord tones ฟังเป็น Em → C", "Bar 4 A ลง Beat 1 ของห้องถัดไปแล้ว loop ต่อได้"],
-      physicalFeel: ["เท้ายังอยู่กับ pulse แม้เปลี่ยน material", "palm mute และ accent ทำหน้าที่เป็น groove", "มือซ้ายไม่รีบตอนเตรียม target landing"],
-      guitarApplication: ["Bar 1: palm mute + accent", "Bar 2: arpeggiate Em → C", "Bar 3: 3-note pentatonic phrasing", "Bar 4: 4-note chromatic walk-up แล้ว target landing"],
-      guidedSteps: ["เล่น Bar 1 อย่างเดียวจน rhythm groove นิ่ง", "เพิ่ม Bar 2 และเล่น Em → C arpeggio", "เพิ่ม Bar 3 ด้วย pentatonic phrase และเว้นช่องว่าง", "เล่น Bar 4 F# → G → G# → A ให้ A ลง Beat 1", "วน 4 bars สองรอบ รวม 8 bars ที่ 60–70 BPM"],
-      correctionSteps: ["ถ้า loop ขาด ให้ตัดเหลือ Bar 1–2 แล้วค่อยเพิ่มทีละห้อง", "ถ้า A มาก่อน Beat 1 ให้พูด passing notes แล้วรอ target ลงพร้อม click", "ถ้า progression ทำให้ groove ล้ม ให้ลด BPM ลงและยึด pulse ก่อน chord change"],
-      dailySelfCheck: ["Chromatic 3–4 นาที, Scale 3–4 นาที, Arpeggio 3–4 นาที", "Rhythm + Application 6–8 นาที รวม 15–20 นาที", "Graduation: 4 bars × 2 rounds = 8 bars ที่ 60–70 BPM โดยไม่หยุด"],
+      listenFor: [
+        "Bar 1 เป็นพื้นกรูฟที่นิ่งสนิท",
+        "Bar 2 ได้ยินเสียงเปลี่ยนคอร์ด Em → C ชัดเจน",
+        "Bar 4 โน้ต A ช่อง 5 แลนดิ้งลงตรง Beat 1 ของห้องถัดไปพอดีเป๊ะ แล้ววนรอบสองได้ไร้รอยต่อ"
+      ],
+      physicalFeel: [
+        "เท้ายังเคาะ 1 2 3 4 นิ่งสนิทตลอด 8 ห้อง",
+        "Palm Mute และ Accent สลับกันอย่างนุ่มนวล",
+        "มือซ้ายเตรียมวางนิ้วล่วงหน้าสำหรับ Chromatic Walk-up และ Target Landing"
+      ],
+      guitarApplication: [
+        "Bar 1: Palm Muted Pulse บน Em",
+        "Bar 2: กระจายสาย Em → C",
+        "Bar 3: ทำนองเพนทาทอนิกกลับสู่ Root E",
+        "Bar 4: Chromatic Walk-up ช่อง 2-3-4-5 ส่งเข้า Beat 1 รอบที่สอง"
+      ],
+      guidedSteps: [
+        "รอบแรก ซ้อม Bar 1 Palm Muted Pulse จนกรูฟนิ่ง",
+        "รอบสอง ซ้อม Bar 2 สลับกระจายสาย Em → C",
+        "รอบสาม ซ้อม Bar 4 ไต่ช่อง 2-3-4 ไปลงช่อง 5 ตรงจังหวะ 1 ให้แม่น",
+        "รอบสี่ รวม Bar 1 ถึง 4 ช้า ๆ ที่ 60 BPM",
+        "รอบสุดท้าย เล่น 4 ห้องวน 2 รอบ รวม 8 ห้องรวดเดียวเพื่อพิชิต Graduation Gate"
+      ],
+      correctionSteps: [
+        "ถ้ารอยต่อ Bar 4 วนกลับ Bar 1 สะดุด: ซ้อม Bar 4 เชื่อมเข้า Bar 1 ซ้ำ ๆ 5 รอบ โดยเตรียมวางสันมือ Mute ทันทีที่ลง Beat 1",
+        "ถ้าโน้ต A มาก่อน Beat 1: ท่องในใจ 'สอง... สาม... สี่...' แล้วลงช่อง 5 พร้อมคลิก 1",
+        "ถ้าเปลี่ยนคอร์ด Em → C ไม่ทัน: ซ้อมสลับรูปนิ้ว Em กับ C มือซ้ายเปล่า ๆ 10 รอบ"
+      ],
+      dailySelfCheck: [
+        "Chromatic 3–4 นาที, Scale 3–4 นาที, Arpeggio 3–4 นาที",
+        "Rhythm + Application 6–8 นาที รวม 15–20 นาที",
+        "Graduation: 4 bars × 2 rounds = 8 bars ที่ 60–70 BPM โดยไม่หยุด"
+      ],
       troubleshooting: [
-        { problem: "เล่นครบ 4 ห้องแต่กลับต้นรอบไม่ได้", advice: "นับ Bar 1 ใหม่ด้วยเท้าและให้ Beat 1 ชัดก่อนเริ่มรอบสอง" },
-        { problem: "A ไม่ลงเป็น target", advice: "แยก F#–G–G# เป็น passing motion แล้วซ้อม A ลง Beat 1 เดี่ยว ๆ" },
-        { problem: "เปลี่ยน Em → C → G → D แล้ว tempo แกว่ง", advice: "เล่น chord-tone ทีละตัวตาม pulse ก่อนกลับไป arpeggiate เต็ม progression" }
+        {
+          problem: "เล่นครบ 4 ห้องแล้วสะดุดตอนวนกลับรอบสอง",
+          advice: "Bar 4 พอไต่ช่อง 2-3-4 เสร็จ ให้แลนดิ้งลงช่อง 5 ตรงคลิก 1 แล้ววางสันมือ Mute ทันที"
+        },
+        {
+          problem: "โน้ต A ไม่ลงตรง Beat 1",
+          advice: "ซ้อมนับจังหวะ 3 (ช่อง 2), 3 & (ช่อง 3), 4 (ช่อง 4) แล้วลงคลิก 1 (ช่อง 5) ให้เข้าหูก่อน"
+        },
+        {
+          problem: "เปลี่ยนคอร์ด Em ไป C แล้วกรูฟชะงัก",
+          advice: "ลดความเร็วลงมาที่ 50 BPM ฝึกย้ายนิ้วล่วงหน้าครึ่งจังหวะ"
+        }
       ],
-      miniExample: "Bar 1 rhythm → Bar 2 Em–C arpeggio → Bar 3 pentatonic phrase → Bar 4 F#–G–G#–A ลง Beat 1 แล้วทำซ้ำ",
-      commonMistakes: ["เรียก F# → G → G# → A ว่า 3-note walk-up", "เล่น phrase โดยไม่ resolve ลง Beat 1", "นับ 2 รอบเป็น 4 bars แทน 8 bars"],
-      selfCheck: ["เชื่อม 4 ห้องต่อเนื่องได้", "A เป็น target landing บน Beat 1", "เล่น 2 รอบรวม 8 bars ที่ 60–70 BPM ได้มั่นคง"],
-      teacherNote: "ถ้า Groove สั่น ให้ลดชั้นที่กำลังเล่น แต่รักษา Pulse ต่อไป เป้าหมาย Graduation คือความต่อเนื่องที่ฟังเป็นเพลง"
+      miniExample: "Bar 1 Rhythm → Bar 2 Em-C Arpeggio → Bar 3 Pentatonic phrase → Bar 4 Walk-up ลง Beat 1 แล้ววนซ้ำรอบสอง",
+      commonMistakes: [
+        "เรียก F# → G → G# → A ว่า 3-note walk-up (ความจริงคือ 4 โน้ต)",
+        "เล่นจบห้อง 4 แล้วหยุดพัก ไม่วนต่อห้อง 1 ในรอบสอง",
+        "เร่งความเร็วตอนไต่ Chromatic Walk-up"
+      ],
+      selfCheck: [
+        "ไต่ Chromatic Walk-up ช่อง 2-3-4 ลงช่อง 5 ตรงจังหวะ 1 ได้อย่างมั่นใจ",
+        "สลับระหว่างเสียง Palm Mute กับ Open Accent ได้คล่องแคล่ว",
+        "ผ่าน Graduation Gate: เล่น Staged Mini-Song ครบ 8 ห้องต่อเนื่องได้สำเร็จ!"
+      ],
+      teacherNote: "ถ้า Groove สั่น ให้ลดความยากลงทีละชั้น แต่รักษา Pulse ไว้ เป้าหมาย Graduation คือความต่อเนื่องที่ฟังเป็นเพลง"
     },
-    practice: ["Chromatic · 4-note Chromatic Walk-up → Target Landing: F# → G → G# → A", "Scale · E minor pentatonic phrasing และ Root landing บน Beat 1", "Arpeggio · Em → C → G → D ด้วย 1–3–5 chord tones", "Rhythm + Application · 4-bar groove แล้วเล่น 2 รอบรวม 8 bars"],
+    practice: [
+      "Chromatic · 4-note Chromatic Walk-up → Target Landing: F# (ช.2) → G (ช.3) → G# (ช.4) → A (ช.5)",
+      "Scale · ทำนองเพนทาทอนิก Phrase Resolution ลง Root E บน Beat 1",
+      "Arpeggio · การเชื่อมคอร์ด Em → C ด้วย chord tones",
+      "Rhythm + Application · 4-bar groove เล่น 2 รอบรวม 8 bars ที่ 60–70 BPM"
+    ],
     quiz: [
       { question: "Chromatic walk-up W4 มีกี่โน้ต?", options: ["4 โน้ต: F#–G–G#–A", "3 โน้ต: F#–G–G#", "5 โน้ต: F–F#–G–G#–A"], answer: 0 },
       { question: "A ใน walk-up ทำหน้าที่อะไร?", options: ["Target landing บน Beat 1", "Passing note ตัวแรก", "Ghost note ที่ไม่ต้องฟัง"], answer: 0 },
       { question: "Graduation ของ W4 คืออะไร?", options: ["4 bars สองรอบ รวม 8 bars ที่ 60–70 BPM", "เล่นเร็วที่สุดหนึ่งครั้ง", "อัดวิดีโอหนึ่งครั้ง"], answer: 0 }
     ],
-    homework: ["เล่น 4-bar application สองรอบ รวม 8 bars ที่ 60–70 BPM โดยไม่หยุด", "เช็กว่า Bar 1–4 เชื่อมเป็น groove เดียวและ A ลง Beat 1 ของรอบถัดไป"],
+    homework: [
+      "เล่น 4-bar application สองรอบ รวม 8 bars ที่ 60–70 BPM โดยไม่หยุด",
+      "เช็กว่า Bar 1–4 เชื่อมเป็น groove เดียวและ A ลง Beat 1 ของรอบถัดไป"
+    ],
     earTraining: null,
     miniSong: {
-      title: "Month 1 V2 Groove: 4 bars × 2 rounds",
+      title: "Month 1 V3 Groove: 4 bars × 2 rounds = 8 bars",
       purpose: "เล่น 4 ห้องตามลำดับ แล้ววนต่อเนื่อง 2 รอบ รวม 8 bars เป็น Graduation ของ Month 1",
       bars: [
-        { bar: 1, chord: "Rhythm", direction: "Palm mute + accent เป็นพื้น groove" },
-        { bar: 2, chord: "Em → C", direction: "Arpeggiate chord tones ตาม pulse" },
-        { bar: 3, chord: "E minor pentatonic", direction: "เล่น 3-note phrase และเว้นช่องว่าง" },
-        { bar: 4, chord: "F# → G → G# → A", direction: "Chromatic passing motion แล้วให้ A เป็น target landing บน Beat 1 ของห้องถัดไป" }
+        { bar: 1, chord: "Em (Rhythm)", direction: "Palm mute + pulse 1 2 3 4 เป็นพื้น groove" },
+        { bar: 2, chord: "Em → C (Arpeggio)", direction: "กระจายสาย chord tones ตาม pulse" },
+        { bar: 3, chord: "E minor pentatonic (Scale)", direction: "เล่น 3-note phrase และ resolve กลับ Root E" },
+        { bar: 4, chord: "F# → G → G# → A (Walk-up)", direction: "Chromatic walk-up ช่อง 2-3-4 ส่ง A ช่อง 5 ลง Beat 1 ของรอบถัดไป" }
       ],
       feel: "Pulse ต้องต่อเนื่องจาก Bar 1 ถึง Bar 8; เล่นที่ 60–70 BPM และไม่หยุดระหว่างรอบ"
     }
   }
 };
 
+const month1V4R6RecoveryGuide = [
+  { problem: "เสียงบอดหรือแป๊ก", action: "หยุดมือขวา ตรวจปลายนิ้วให้ใกล้แท่งลวด ยกนิ้วที่แตะสายข้างเคียง แล้วกดเท่าที่เสียงใสก่อนดีดใหม่ช้า ๆ" },
+  { problem: "สายอื่นดังแทรก", action: "ลดความลึกของปิ๊ก ดีดเฉพาะสายที่ระบุ และยกนิ้วเดิมให้พ้นสายก่อนย้าย" },
+  { problem: "จังหวะหลุด", action: "วางมือขวาให้สายเงียบ เคาะเท้าและพูด 1 2 3 4 สองห้อง แล้วเริ่มใหม่จากจุดก่อนพลาด" },
+  { problem: "& เร็วเกินไป", action: "ทำ air-stroke โดยไม่ใส่เสียงก่อน พูด หนึ่ง และ สอง และ ให้คำว่า และ อยู่กึ่งกลางระหว่างคลิก" },
+  { problem: "ข้ามสายไม่ทัน", action: "ดีดสายเปล่า 6 → 5 โดยไม่กดนิ้วสองรอบ แล้วค่อยใส่ 1–2–3–4 กลับเข้าไป" },
+  { problem: "Palm Mute เป็นเสียงตาย", action: "ลดน้ำหนักด้านขอบมือฝั่งนิ้วก้อยและขยับใกล้ bridge ขึ้นเล็กน้อย เป้าหมายคือเสียงสั้นที่ยังฟัง pitch ได้" },
+  { problem: "การกวาด Em เลอะ", action: "เริ่มเหนือสาย 6 ใช้ปิ๊กตื้น แล้วลากลงช้าผ่าน 6 → 5 → 4 → 3 → 2 → 1 หนึ่งครั้ง" },
+  { problem: "Em → C ทำให้หยุด", action: "ฝึกวางมือซ้ายสลับรูปโดยไม่ดีด แล้วใช้แผนที่ 1 1& 2 2& | 3 3& 4 4& ที่ 50–60 BPM" }
+];
+
+const month1V4R6Overrides = {
+  1: {
+    title: "Week 1 · Foundation & Pulse: ทำให้มือรู้จักเสียงแรก",
+    summary: "Rhythm เป็นแกนหลัก: Chromatic, Scale และ Arpeggio ทุกอย่างลงบน Pulse เดียวกันที่ 60 BPM",
+    youtube: null,
+    rhythmSpine: "Pulse",
+    estimatedMinutesPerDay: "15–20 นาที",
+    coreBlocks: [
+      {
+        pillar: "Chromatic",
+        duration: "3–4 นาที",
+        title: "1–2–3–4 บนสายเดียว",
+        focus: "เดินนิ้วทีละช่องบนสาย 6 แล้วสาย 1 ด้วยเสียงใสและ pulse เดิม",
+        steps: [
+          "นิ้วชี้ 1 ถึงนิ้วก้อย 4 กดสาย 6 ช่อง 1–4 ทีละตัว แล้วดีดลงหนึ่งครั้งต่อคลิก",
+          "ปล่อยนิ้วเดิมหลังเสียงจบก่อนกดนิ้วถัดไป เพื่อไม่ให้เสียงทับกัน",
+          "ใช้รูปเดิมบนสาย 1 ช่อง 1–4 อีกสองรอบเมื่อมือเริ่มสบาย"
+        ]
+      },
+      {
+        pillar: "Scale",
+        duration: "3–4 นาที",
+        title: "E–G–A–B: E minor pentatonic partial",
+        focus: "พื้นที่เริ่มต้น 4 โน้ต ไม่ใช่ full shape: สาย 6 = 0(E), 3(G); สาย 5 = 0(A), 2(B)",
+        steps: [
+          "0 คือสายเปล่า: ดีดสาย 6 เปล่า = E แล้วนิ้วนางกดสาย 6 ช่อง 3 = G",
+          "ยกนิ้วนางให้พ้นสาย 5 ก่อนดีดสาย 5 เปล่า = A แล้วนิ้วกลางกดช่อง 2 = B",
+          "เล่น E–G–A–B ตรง 1 2 3 4 ที่ 60 BPM โดยไม่เติม F หรือโน้ตอื่น"
+        ]
+      },
+      {
+        pillar: "Arpeggio",
+        duration: "3–4 นาที",
+        title: "Em ทีละสาย: E–B–E–G",
+        focus: "คงรูป Em แล้วดีดสาย 6 → 5 → 4 → 3 เป็น 1 → 5 → 1 → ♭3",
+        steps: [
+          "มือซ้าย: นิ้วกลาง 2 สาย 5 ช่อง 2 และนิ้วนาง 3 สาย 4 ช่อง 2; สาย 6 และ 3 เป็นสายเปล่า",
+          "มือขวาดีดทีละสาย: 6 = E, 5 = B, 4 = E, 3 = G หนึ่งโน้ตต่อหนึ่งคลิก",
+          "ฟังเสียงใสครบสี่ตัว ไม่กวาดผ่านสายอื่นและไม่ให้สายข้างเคียงกวน"
+        ]
+      },
+      {
+        pillar: "Rhythm + Application",
+        duration: "6–8 นาที",
+        title: "Em Pulse Groove",
+        focus: "สร้าง full-chord action ขั้นต่ำก่อนนำ Em ไปเล่นใน 4 bars",
+        steps: [
+          "ก่อนใช้ full chord: คงรูป Em มือขวาเริ่มเหนือสาย 6 ใกล้ช่องเสียง และให้ปิ๊กโผล่ 2–3 มม.",
+          "กวาดลงช้า ๆ ครั้งเดียวจากสาย 6 ผ่าน 5, 4, 3, 2 ถึงสาย 1 แล้วพักฟัง",
+          "ถ้าโดนสายน้อย ให้เริ่มที่สาย 6 และเดินถึงสาย 1; ถ้าปิ๊กกว้างเกิน ให้หยุดที่สาย 1 ถอยกลับ และใช้ปิ๊กตื้นลง",
+          "เมื่อทำได้ เล่น Em บน 1 2 3 4 แล้วสลับกับ arpeggio 6 → 5 → 4 → 3"
+        ]
+      }
+    ],
+    learn: {
+      targetBpm: "60 BPM",
+      diagram: {
+        title: "Pulse: 1 2 3 4",
+        caption: "เท้าและ Metronome อยู่บนเลข 1 2 3 4; ทุก pillar ของวันนี้ลงบน pulse นี้",
+        cells: [
+          { label: "1", note: "ลง", kind: "hit" },
+          { label: "2", note: "ลง", kind: "hit" },
+          { label: "3", note: "ลง", kind: "hit" },
+          { label: "4", note: "ลง", kind: "hit" }
+        ]
+      },
+      paragraphs: [
+        "ลูปของวันนี้คือ DO → HEAR → FIX → REPEAT → UNDERSTAND → NAME: ทำก่อน ฟังเสียง แก้จุดพลาด ทำซ้ำ แล้วค่อยเรียกชื่อ Pulse, Chromatic, Scale และ Arpeggio",
+        "เปิด Metronome 60 BPM ฟังคลิก 4 ครั้ง เคาะเท้าและพูด 1 2 3 4 ก่อนให้กีตาร์เข้ามา เสียงเท้า เสียงสาย และคลิกควรทับกันเป็นจุดเดียว",
+        "E–G–A–B เป็น E minor pentatonic partial 4 โน้ตในพื้นที่เปิด ไม่ใช่รูปเต็มทั้งคอ ส่วน Em arpeggio คือการฟัง chord tones ทีละสาย"
+      ],
+      listenFor: [
+        "Pulse เท้าและ Metronome สม่ำเสมอ ไม่ถูกมือพาให้เร่ง",
+        "Chromatic และ E–G–A–B แยกเป็นเสียงเดี่ยว ไม่บอด ไม่แป๊ก และไม่มีสายข้างเคียงดัง",
+        "Em arpeggio ได้ยิน E–B–E–G ครบสี่เสียง และ full-chord downstroke รวมหลายสายเป็น Em ก้อนเดียว"
+      ],
+      physicalFeel: [
+        "นิ้วซ้ายตั้งเกือบฉาก ปลายนิ้วกดใกล้แท่งลวดด้านหัวกีตาร์โดยไม่กดทับแท่งลวด",
+        "นิ้วโป้งซ้ายแตะกลางด้านหลังคอ ไม่บีบคอ; ยกนิ้วเดิมให้พ้นสายก่อนย้าย",
+        "มือขวาเริ่มเหนือสาย 6 ข้อมือขยับสั้น ๆ และปิ๊กไม่จมลึก"
+      ],
+      guitarApplication: [
+        "เต็มคอร์ดครั้งแรก: คงรูป Em เริ่มมือขวาเหนือสาย 6 ลากลงครั้งเดียวผ่านสาย 6 → 5 → 4 → 3 → 2 → 1 แล้วพักฟัง",
+        "เสียงที่ควรได้ยินคือหลายสายรวมกันเป็น Em; ถ้าสายไม่ครบให้ช้าลง ถ้าโดนกว้างเกินให้หยุดที่สาย 1 และเริ่มใหม่ด้วยปิ๊กตื้น",
+        "4 bars: Bar 1 Em downstroke บน 1 2 3 4; Bar 2 Em arpeggio 6–5–4–3; Bar 3 E–G–A–B; Bar 4 Em downstroke บน Beat 1 แล้วปล่อยก้อง"
+      ],
+      guidedSteps: [
+        "รอบแรก วางกีตาร์ไว้ก่อน ฟังคลิก 4 ครั้ง เคาะเท้าและพูด 1 2 3 4",
+        "รอบสอง เล่น Chromatic 1–2–3–4 บนสาย 6 ที่ 60 BPM แล้วทำซ้ำบนสาย 1",
+        "รอบสาม เล่น E–G–A–B: สาย 6 0 → 3 แล้วสาย 5 0 → 2; ยกนิ้วเดิมก่อนย้ายสาย",
+        "รอบสี่ จับ Em และดีด arpeggio สาย 6 → 5 → 4 → 3 ทีละคลิก",
+        "รอบห้า สอนการกวาด Em หนึ่ง downstroke จากสาย 6 ถึงสาย 1 พักฟัง ทำซ้ำ 4 ครั้ง",
+        "รวม 4 bars ช้า ๆ โดยเท้าไม่หยุด ถ้า Bar 1 ยากให้กลับไปดีดสาย 6 เปล่าก่อน"
+      ],
+      correctionSteps: [
+        "เสียงบอด: เลื่อนปลายนิ้วเข้าใกล้แท่งลวดและลดแรงกดจนเสียงใส",
+        "เสียงทับกัน: ปล่อยนิ้วเดิมหลังเสียงจบก่อนกดนิ้วใหม่",
+        "กวาดโดนสายน้อย: เริ่มเหนือสาย 6 และเดินลงจนถึงสาย 1; กวาดกว้างเกิน: หยุดที่สาย 1 ถอยมือ และใช้ปิ๊กตื้น",
+        "จังหวะหลุด: วางมือขวาให้สายเงียบ กลับไปเคาะเท้า 1 2 3 4 สองห้อง แล้วเริ่มจากจุดก่อนพลาด"
+      ],
+      dailySelfCheck: [
+        "30 วินาที: เคาะเท้าและดีดสาย 6 ตรง 60 BPM โดยไม่เร่ง",
+        "E–G–A–B ตรง 1 2 3 4 และรู้ว่า 0 คือสายเปล่า",
+        "E–B–E–G จากสาย 6–5–4–3 ใสครบ แล้วกวาด Em หนึ่ง downstroke ได้จริง"
+      ],
+      troubleshooting: [
+        { problem: "เท้ารัวตามมือ", advice: "วางกีตาร์ลง ตบมือพร้อมเคาะเท้า 1 2 3 4 หนึ่งนาที แล้วค่อยหยิบกีตาร์" },
+        { problem: "สาย 5 บอดหลังย้ายจากสาย 6", advice: "ยกนิ้วนางให้พ้นสาย 5 ก่อนดีดสายเปล่า แล้วลดความเร็ว" },
+        { problem: "การกวาด Em เลอะ", advice: "ใช้ปิ๊กตื้น เริ่มสาย 6 ลากลงช้า ๆ ถึงสาย 1 หนึ่งครั้ง พักฟัง แล้วทำใหม่" }
+      ],
+      miniExample: "60 BPM: 1 2 3 4 → E–G–A–B → Em arpeggio 6–5–4–3 → Em downstroke หนึ่งครั้ง",
+      commonMistakes: [
+        "ใส่ F ลงใน E minor pentatonic partial; ให้ใช้เฉพาะ E–G–A–B",
+        "กดสายไกลแท่งลวดจนต้องบีบแรงและเสียงบอด",
+        "กวาดเต็มคอร์ดก่อนรู้จุดเริ่มและสายปลายทาง"
+      ],
+      teacherNote: "วันนี้ไม่ต้องเล่นเร็ว เป้าหมายคือให้มือรู้ว่ากำลังแตะสายไหน หูรู้ว่าควรได้ยินอะไร และเท้ารู้ว่า Pulse อยู่ตรงไหน"
+    },
+    practice: [
+      "Chromatic: 1–2–3–4 บนสาย 6 และสาย 1 ที่ 60 BPM",
+      "Scale: E–G–A–B แบบ E minor pentatonic partial; สาย 6 = 0/3, สาย 5 = 0/2",
+      "Arpeggio: Em, สาย 6 → 5 → 4 → 3 = E → B → E → G = 1 → 5 → 1 → ♭3",
+      "Full-chord bridge: Em หนึ่ง downstroke จากสาย 6 ถึงสาย 1 ก่อนใช้ใน application",
+      "Rhythm + Application: 4 bars บน Pulse 60 BPM"
+    ],
+    quiz: [
+      { question: "E minor pentatonic partial W1 ใช้สี่โน้ตใด?", options: ["E–G–A–B", "E–F–G–A", "E–G–B–D"], answer: 0 },
+      { question: "Em arpeggio E → B → E → G เป็นลำดับใด?", options: ["1 → 5 → 1 → ♭3", "1 → 3 → 5", "1 → 4 → 5"], answer: 0 },
+      { question: "full-chord downstroke เริ่มและจบที่สายใด?", options: ["สาย 6 ผ่านถึงสาย 1", "สาย 3 อย่างเดียว", "สาย 1 ไปสาย 6 แบบเร็ว"], answer: 0 }
+    ],
+    homework: [
+      "ทำ Daily Core 15–20 นาทีตามสัดส่วน Chromatic, Scale, Arpeggio, Rhythm + Application",
+      "ก่อนจบให้ฟังว่า E–B–E–G และ E–G–A–B ยังชัด โดยไม่เติม F หรือกวาดผิดช่วง"
+    ],
+    referenceTriggers: []
+  },
+  2: {
+    title: "Week 2 · Coordination & Off-beat: ให้เท้าอยู่บ้าน",
+    summary: "Rhythm เปลี่ยนจาก Pulse เป็น Off-beat: มือขวาเคลื่อนต่อเนื่องและวางเสียงบน & โดยเท้ายังอยู่บนเลข",
+    youtube: null,
+    rhythmSpine: "Off-beat",
+    estimatedMinutesPerDay: "15–20 นาที",
+    coreBlocks: [
+      {
+        pillar: "Chromatic",
+        duration: "3–4 นาที",
+        title: "String Crossing 6 → 5",
+        focus: "เดิน 1–2–3–4 บนสาย 6 แล้วข้ามสายโดยไม่หยุด pulse",
+        steps: [
+          "สาย 6 ช่อง 1–4 ก่อน แล้วสาย 5 ช่อง 1–4 ด้วยนิ้วเดิม",
+          "มือขวาเดินหนึ่งจังหวะต่อหนึ่งโน้ต ไม่หยุดรอสายใหม่",
+          "ถ้าข้ามไม่ทัน ให้ดีดสายเปล่า 6 → 5 สองรอบก่อนใส่นิ้ว"
+        ]
+      },
+      {
+        pillar: "Scale",
+        duration: "3–4 นาที",
+        title: "E–G–A–B บนจังหวะยก",
+        focus: "วางสี่โน้ตเดิมบน 1&, 2&, 3&, 4& โดยเท้ายังเคาะตัวเลข",
+        steps: [
+          "เริ่มด้วย air-stroke ทุกช่อง: พูด 1 และ 2 และ 3 และ 4 และ",
+          "ใช้สาย 6 เปล่าดีดเฉพาะ 1&, 2&, 3&, 4&",
+          "เมื่อเท้านิ่งจึงแทนด้วย E, G, A, B ตาม map"
+        ]
+      },
+      {
+        pillar: "Arpeggio",
+        duration: "3–4 นาที",
+        title: "ฟัง E Major กับ E Minor",
+        focus: "คง Root E เดิมและเปลี่ยนโน้ตเดียว: G = minor, G# = major",
+        steps: [
+          "ทั้งสองแบบใช้ E สาย 6 เปล่า, B สาย 5 ช่อง 2, E สาย 4 ช่อง 2",
+          "E Minor ปิดท้ายด้วย G สาย 3 เปล่า; E Major ปิดท้ายด้วย G# สาย 3 ช่อง 1",
+          "ฟังสีเสียงหม่นกับสว่างก่อนค่อยลองวางบนจังหวะยก"
+        ]
+      },
+      {
+        pillar: "Rhythm + Application",
+        duration: "6–8 นาที",
+        title: "Syncopated Em Groove",
+        focus: "มือขวาแกว่งต่อทั้งห้อง เสียงเน้นอยู่บน 2& และ 4&",
+        steps: [
+          "เท้าอยู่บน 1 2 3 4 ปากนับ 1 และ 2 และ 3 และ 4 และ",
+          "ช่องที่ไม่ให้เสียงเป็น air-stroke ไม่ใช่การหยุดมือ",
+          "เล่นสองห้องติดกันแล้วฟังว่า Off-beat ไม่ไหลไปชนคลิกถัดไป"
+        ]
+      }
+    ],
+    learn: {
+      targetBpm: "60 BPM",
+      diagram: {
+        title: "Off-beat: เท้าบนเลข มือวางเสียงบน &",
+        caption: "เลขเป็นบ้านของเท้า; & เป็นช่องกลางที่มือเคลื่อนผ่านและวางเสียงเมื่อถึงเวลา",
+        cells: [
+          { label: "1", note: "air", kind: "rest" },
+          { label: "1&", note: "E", kind: "hit" },
+          { label: "2", note: "air", kind: "rest" },
+          { label: "2&", note: "G", kind: "hit" },
+          { label: "3", note: "air", kind: "rest" },
+          { label: "3&", note: "A", kind: "hit" },
+          { label: "4", note: "air", kind: "rest" },
+          { label: "4&", note: "B", kind: "hit" }
+        ]
+      },
+      paragraphs: [
+        "ลูปวันนี้ยังเป็น DO → HEAR → FIX → REPEAT → UNDERSTAND → NAME แต่เพิ่มช่องกลาง: ทำ air-stroke ให้มือรู้ตำแหน่งก่อนให้สายดัง",
+        "เคาะเท้าเฉพาะ 1 2 3 4 และพูด 1 และ 2 และ 3 และ 4 และ เสียงที่วางบน & ต้องอยู่กึ่งกลางระหว่างคลิก ไม่มาก่อนและไม่ไหลไปชนคลิกถัดไป",
+        "Off-beat หรือ Syncopation คือการวางเสียงนอกจังหวะตกโดยให้ Pulse ยังนิ่ง และการฟัง Major/Minor วันนี้ใช้ Root E เดิมเพื่อให้หูจับ G# กับ G"
+      ],
+      listenFor: [
+        "เท้ายังตรงเลข แม้เสียงกีตาร์อยู่กึ่งกลางระหว่างคลิก",
+        "E–G–A–B ลงบน 1&, 2&, 3&, 4& ไม่ตกมาอยู่บนตัวเลข",
+        "E Major กับ E Minor มี E และ B เป็นบ้านเดิม; จุดต่างที่หูต้องได้ยินคือ G# กับ G"
+      ],
+      physicalFeel: [
+        "มือขวาแกว่งเหมือนลูกตุ้ม ลงบนเลขและกลับผ่านอากาศบน และ",
+        "นิ้วซ้ายยกพ้นสายเก่าก่อนข้าม 6 → 5; นิ้วโป้งเลื่อนตามคอเล็กน้อย",
+        "ปากนับช่วยให้มือรู้ช่องกลาง ไม่ต้องจำชื่อทิศทางเป็นคะแนน"
+      ],
+      guitarApplication: [
+        "Motor bridge: air-stroke ทุกครั้งที่มือผ่าน แล้วใช้สาย 6 เปล่าดีดเฉพาะ 1&, 2&, 3&, 4&",
+        "Scale map: 1 = air, 1& = E, 2 = air, 2& = G, 3 = air, 3& = A, 4 = air, 4& = B",
+        "ฟัง E Minor = E–B–E–G เทียบ E Major = E–B–E–G# โดย Root E เดิม",
+        "Application: ดีด Em เบาบนตัวเลข เน้นเสียงที่ 2& และ 4& และใช้ air-stroke ในช่องที่เงียบ"
+      ],
+      guidedSteps: [
+        "ตบมือเฉพาะ 2 และ และ 4 และ สี่ห้อง โดยเท้าอยู่บนเลข",
+        "เล่นสายเปล่า 6 → 5 เป็นกลุ่ม 1–2–3–4 แล้วค่อยใส่นิ้วเดิม",
+        "ทำ Scale map ด้วยสายเปล่าก่อน จากนั้นแทนเสียงด้วย E–G–A–B",
+        "สลับ E Minor และ E Major ช้า ๆ ฟังเฉพาะ G กับ G#",
+        "รวมเป็น Syncopated Em Groove สองห้อง มือขวาไม่หยุดในช่องเงียบ"
+      ],
+      correctionSteps: [
+        "ถ้า & เร็วเกิน ให้พูด และ ให้ยาวขึ้น โดยเท้ายังคงลงเฉพาะเลข",
+        "ถ้ามือหยุดในช่องเงียบ ให้ลดแรงเป็น air-stroke แต่อย่าหยุดการแกว่ง",
+        "ถ้าโน้ตมาก่อน &: กลับไปใช้สาย 6 เปล่าหนึ่งเสียงต่อหนึ่ง &",
+        "ถ้าเท้าตามมือ ให้วางกีตาร์ลง ตบมือและเคาะเท้าใหม่ก่อน"
+      ],
+      dailySelfCheck: [
+        "นับ 1 และ 2 และ 3 และ 4 และ ได้สองห้องโดยเท้าไม่ย้ายตาม และ",
+        "วาง E–G–A–B บน & ได้ครบสี่ตัวโดยไม่ตกบนเลข",
+        "สลับ E Minor → E Major สี่ครั้งและบอกได้ด้วยหูว่า G# สว่างกว่า G"
+      ],
+      troubleshooting: [
+        { problem: "มือหยุดในช่องเงียบ", advice: "กลับไป air-stroke โดยไม่ให้สายดัง แล้วพูด 1 และ 2 และ ให้มือเดินต่อ" },
+        { problem: "ข้ามสาย 6 → 5 ช้า", advice: "ดีดสายเปล่า 6 → 5 สองรอบโดยไม่กดนิ้ว แล้วค่อยใส่ 1–2–3–4" },
+        { problem: "สองสีของ Major/Minor ฟังเหมือนกัน", advice: "ค้าง E–B แล้วสลับเฉพาะสาย 3 ระหว่าง G สายเปล่ากับ G# ช่อง 1" }
+      ],
+      miniExample: "1  และ  2  และ  3  และ  4  และ / air E air G air A air B",
+      commonMistakes: [
+        "เท้าเคาะตามเสียง & แทนที่จะอยู่บนตัวเลข",
+        "หยุดมือในช่องที่ไม่ได้ให้เสียง ทำให้กลับเข้า beat ถัดไปไม่ทัน",
+        "เปลี่ยน Root ไปพร้อมกับ G/G# จนฟังไม่รู้ว่าจุดต่างอยู่ตรงไหน"
+      ],
+      teacherNote: "ให้เท้าเป็นบ้าน และให้มือออกไปเที่ยวบน & แล้วกลับบ้านตรงเวลา; ไม่ต้องรีบและไม่ต้องคิดคะแนน Down/Up",
+      referenceTriggers: []
+    },
+    practice: [
+      "Chromatic: String Crossing 6 → 5 ด้วย 1–2–3–4",
+      "Scale: E–G–A–B บน 1&, 2&, 3&, 4& ตาม timing map",
+      "Arpeggio/listening: E Minor = G เทียบ E Major = G# รอบ Root E เดิม",
+      "Rhythm + Application: Syncopated Em Groove เน้น 2& และ 4& สองห้อง"
+    ],
+    quiz: [
+      { question: "ใน W2 เท้าควรอยู่ตรงไหน?", options: ["บน 1 2 3 4", "บนทุก & เท่านั้น", "ตามเสียงกีตาร์ที่ดังที่สุด"], answer: 0 },
+      { question: "จุดต่างของ E Major กับ E Minor คืออะไร?", options: ["G# กับ G", "E กับ B", "Root เปลี่ยนเป็น G"], answer: 0 },
+      { question: "ถ้ามือหยุดในช่องเงียบควรทำอะไร?", options: ["เปลี่ยนเป็น air-stroke แต่แกว่งมือต่อ", "หยุดนับ", "เร่งมือให้ทัน"], answer: 0 }
+    ],
+    homework: [
+      "ทำ Daily Core 15–20 นาที โดยทุก block วางบน Off-beat ของสัปดาห์",
+      "ฟัง G# กับ G รอบ E เดิมให้บอกได้ด้วยหูโดยไม่เปลี่ยน Root"
+    ],
+    referenceTriggers: []
+  },
+  3: {
+    title: "Week 3 · Control, Dynamics & Palm Mute: คุมสีเสียง",
+    summary: "Rhythm เป็น Dynamics: คุมเสียงเปิด–สั้นและน้ำหนักเบา–เน้นโดย Pulse ไม่เดินหนี",
+    youtube: null,
+    rhythmSpine: "Dynamics",
+    estimatedMinutesPerDay: "15–20 นาที",
+    coreBlocks: [
+      {
+        pillar: "Chromatic",
+        duration: "3–4 นาที",
+        title: "1–3–2–4 Finger Independence",
+        focus: "สลับนิ้วบนสาย 6 โดยไม่บีบนิ้วก้อยและไม่บังคับ alternate-picking",
+        steps: [
+          "สาย 6 ช่อง 1 = นิ้ว 1, ช่อง 3 = นิ้ว 3, ช่อง 2 = นิ้ว 2, ช่อง 4 = นิ้ว 4",
+          "เริ่มจากคู่ 1 → 3 และ 2 → 4 แล้วรวมเป็น 1–3–2–4 หนึ่งโน้ตต่อคลิก",
+          "นิ้วที่ไม่กดลอยใกล้สาย ไม่ต้องกดค้างจนเกร็ง"
+        ]
+      },
+      {
+        pillar: "Scale",
+        duration: "3–4 นาที",
+        title: "E–G–A กับน้ำหนักเสียง",
+        focus: "เล่นเบา → กลาง → เน้น โดย tempo 60 BPM คงที่",
+        steps: [
+          "E = สาย 6 เปล่า, G = สาย 6 ช่อง 3, A = สาย 5 เปล่า",
+          "คลิก 1 E เบา, คลิก 2 G กลาง, คลิก 3 A เน้นเล็กน้อย, คลิก 4 พัก",
+          "เปลี่ยนน้ำหนักจากข้อมือ ไม่กระชากทั้งแขนและยกนิ้วนางก่อนย้ายสาย"
+        ]
+      },
+      {
+        pillar: "Arpeggio",
+        duration: "3–4 นาที",
+        title: "C Major: C–E–G",
+        focus: "ดีดสามเสียงบนสาย 5–4–3 ทีละสาย; Tip muting เป็นตัวช่วยเสริม",
+        steps: [
+          "นิ้วนาง 3 สาย 5 ช่อง 3 = C, นิ้วกลาง 2 สาย 4 ช่อง 2 = E, สาย 3 เปล่า = G",
+          "ดีดสาย 5, 4, 3 ทีละตัวที่ 60 BPM แล้วพักในคลิก 4",
+          "ถ้าต้องกันสาย 6 ให้ปลายนิ้วแตะสาย 6 เบา ๆ เป็น Tip muting; ไม่ใช่เงื่อนไขผ่านรอบแรก"
+        ]
+      },
+      {
+        pillar: "Rhythm + Application",
+        duration: "6–8 นาที",
+        title: "Dynamic Groove",
+        focus: "สลับเสียงเปิดกับ Palm Mute และเปิด accent โดย Pulse ยังนิ่ง",
+        steps: [
+          "ด้านขอบมือฝั่งนิ้วก้อยของมือดีดแตะใกล้ bridge/saddle เบา ๆ ไม่ใช้นิ้วก้อยกดสาย",
+          "รอบแรกเปิด, รอบสอง mute, รอบสามสลับ mute กับ accent ที่ 2 และ 4",
+          "เสียง mute ต้องสั้นแต่ยังฟัง pitch ได้; ถ้าตายให้ลดน้ำหนักหรือขยับใกล้ bridge"
+        ]
+      }
+    ],
+    learn: {
+      targetBpm: "60 BPM",
+      diagram: {
+        title: "Dynamics บน Pulse เดิม",
+        caption: "ความดังและความยาวของเสียงเปลี่ยนได้ แต่เท้ายังอยู่บน 1 2 3 4",
+        cells: [
+          { label: "1", note: "เบา", kind: "hit" },
+          { label: "2", note: "กลาง", kind: "hit" },
+          { label: "3", note: "เน้น", kind: "hit" },
+          { label: "4", note: "พัก", kind: "rest" }
+        ]
+      },
+      paragraphs: [
+        "ลูปวันนี้คือ DO → HEAR → FIX → REPEAT → UNDERSTAND → NAME: ทำเสียงเปิดและเสียงสั้น ฟังความต่าง แก้แรงมือ แล้วค่อยเรียกชื่อ Palm Mute และ Dynamics",
+        "Palm Mute ใช้ด้านขอบมือฝั่งนิ้วก้อยของมือดีดวางใกล้ bridge/saddle เบา ๆ ข้อมือยังขยับได้ ไม่ใช้นิ้วก้อยกดสาย",
+        "Dynamics เปลี่ยนน้ำหนักเบา–กลาง–เน้นโดยไม่เปลี่ยน tempo; C–E–G เป็น C Major ที่ดีดทีละสายบน 5–4–3"
+      ],
+      listenFor: [
+        "เสียงเปิดก้องยาว ส่วนเสียง mute สั้น แน่น และยังได้ยิน pitch",
+        "E–G–A มีสามน้ำหนัก แต่ tempo และ pulse ไม่เปลี่ยน",
+        "C–E–G ใสครบสามเสียง และไม่มีสาย 6 แทรก"
+      ],
+      physicalFeel: [
+        "ขอบมือฝั่งนิ้วก้อยของมือดีดแตะสายใกล้ bridge อย่างเบา ไม่วางน้ำหนักทั้งฝ่ามือ",
+        "นิ้วโป้งซ้ายแตะหลังคอ ไม่บีบ; นิ้วที่ไม่กดลอยใกล้สาย",
+        "ความดังมาจากข้อมือและ pick depth ไม่ใช่การกระชากแขน"
+      ],
+      guitarApplication: [
+        "เปรียบเทียบสาย 6 เปิดกับสาย 6 ที่แตะ Palm Mute: ถ้าเหลือเพียง ตึก ให้ลดแรงหรือขยับเข้าใกล้ bridge",
+        "1–3–2–4: สาย 6 ช่อง 1, 3, 2, 4 หนึ่งโน้ตต่อคลิก; ไม่บังคับ alternate-picking perfection",
+        "E–G–A: คลิก 1 เบา, 2 กลาง, 3 เน้น, 4 พัก; ถ้าดังแล้วเร็วให้ลดแรง",
+        "C Major: สาย 5 ช่อง 3 = C, สาย 4 ช่อง 2 = E, สาย 3 เปล่า = G; แตะสาย 6 แบบ Tip muting ได้ถ้าต้องกันเสียงกวน"
+      ],
+      guidedSteps: [
+        "ดีดสาย 6 เปิดหนึ่งครั้ง ฟังเสียงก้อง แล้วแตะขอบมือใกล้ bridge ดีดอีกครั้ง ฟังเสียงสั้น",
+        "เล่น 1–3 เป็นคู่ แล้ว 2–4 เป็นคู่ ก่อนรวม 1–3–2–4 ที่ 60 BPM",
+        "เล่น E–G–A ด้วยน้ำหนักเบา–กลาง–เน้น โดยพักบนคลิก 4",
+        "ดีด C–E–G ทีละสายที่ 60 BPM และตรวจว่านิ้วกลางไม่ล้มแตะสาย 3",
+        "รวม Dynamic Groove: เปิด 4 คลิก, mute 4 คลิก, แล้วสลับ accent ที่ 2 และ 4"
+      ],
+      correctionSteps: [
+        "เสียงตาย: ลดน้ำหนักขอบมือและขยับเข้าใกล้ bridge อีกเล็กน้อย",
+        "เสียงยังก้อง: ขยับขอบมือออกจาก bridge ไปทางคอเล็กน้อยหรือแตะเพิ่มนิดเดียว",
+        "นิ้วก้อยเกร็ง: สะบัดมือเบา ๆ กลับไปฝึกคู่ 2–4 ช้าลง และอย่ากดนิ้วที่ไม่ใช้",
+        "สาย 3 ของ C บอด: ตั้งนิ้วกลางบนสาย 4 ให้ชันขึ้นและดีดสาย 3 เปล่าให้ชัด"
+      ],
+      dailySelfCheck: [
+        "ทำเสียงเปิดและเสียง Palm Mute ต่างกันชัดที่ 60 BPM",
+        "เล่น 1–3–2–4 สี่รอบโดยเสียงใสและไม่เกร็งนิ้วก้อย",
+        "เล่น E–G–A สามน้ำหนักและ C–E–G ครบโดย tempo ไม่เปลี่ยน"
+      ],
+      troubleshooting: [
+        { problem: "Palm Mute ทึบจนไม่มี pitch", advice: "ลดน้ำหนักขอบมือและขยับเข้าใกล้ bridge จนเสียงสั้นแต่ยังฟังระดับเสียงได้" },
+        { problem: "Accent ทำให้ tempo เร็ว", advice: "ลดแรงดีด ให้ความดังมาจากข้อมือ แล้วกลับไปนับ 1 2 3 4" },
+        { problem: "C สาย 6 ดังแทรก", advice: "ดีดเฉพาะ 5–4–3 และใช้ Tip muting เบา ๆ เป็นตัวช่วย ไม่ต้องกดสายแรง" }
+      ],
+      miniExample: "เปิด 1 2 3 4 → mute 1 2 3 4 → E เบา, G กลาง, A เน้น, 4 พัก → C–E–G",
+      commonMistakes: [
+        "วางฝ่ามือหนักเกินไปจนเสียง mute ตาย",
+        "ใช้นิ้วก้อยกดสายแทนการวางขอบมือฝั่งนิ้วก้อยของมือดีด",
+        "เพิ่มแรงเพื่อทำ accent แล้ว tempo เร็วขึ้น"
+      ],
+      teacherNote: "สีเสียงเปลี่ยนได้โดยไม่ต้องทำให้ Pulse เปลี่ยน; ฟังว่ายังได้ยิน pitch อยู่เสมอ",
+      referenceTriggers: []
+    },
+    practice: [
+      "Chromatic: 1–3–2–4 บนสาย 6 ที่ 60 BPM",
+      "Scale: E–G–A ด้วยน้ำหนักเบา → กลาง → เน้น",
+      "Arpeggio: C Major C–E–G บนสาย 5–4–3; Tip muting เป็นตัวช่วยเสริม",
+      "Rhythm + Application: Dynamic Groove เปิด ↔ Palm Mute พร้อม accent 2 และ 4"
+    ],
+    quiz: [
+      { question: "Palm Mute ใช้ส่วนใดของมือดีด?", options: ["ด้านขอบมือฝั่งนิ้วก้อยใกล้ bridge", "นิ้วก้อยกดสาย", "ข้อมือกดคอ"], answer: 0 },
+      { question: "C Major arpeggio W3 ใช้สายใด?", options: ["5–4–3: C–E–G", "6–5–4: E–A–D", "1–2–3 เท่านั้น"], answer: 0 },
+      { question: "ถ้า accent ทำให้เร็วขึ้นควรทำอะไร?", options: ["ลดแรงและกลับไปนับ Pulse", "เพิ่มแรงให้ดังขึ้น", "หยุดเคาะเท้า"], answer: 0 }
+    ],
+    homework: [
+      "ทำ Daily Core 15–20 นาที โดยคุม Dynamics ของสัปดาห์นี้ไว้บน Pulse",
+      "เช็กว่าเสียง Palm Mute ยังมี pitch และ C–E–G ไม่มีสาย 6 กวน"
+    ],
+    referenceTriggers: []
+  },
+  4: {
+    title: "Week 4 · Groove Integration & Graduation",
+    summary: "Rhythm เป็น Groove: รวม Pulse, Off-beat และ Dynamics ให้เป็น 4 bars × 2 rounds = 8 bars",
+    youtube: null,
+    rhythmSpine: "Groove",
+    estimatedMinutesPerDay: "15–20 นาที",
+    coreBlocks: [
+      {
+        pillar: "Chromatic",
+        duration: "3–4 นาที",
+        title: "4-note Chromatic Walk-up → Target Landing",
+        focus: "F# → G → G# บน 3, 3&, 4; 4& เป็น air-stroke; A ลง Beat 1 ห้องใหม่",
+        steps: [
+          "F# = สาย 6 ช่อง 2 นิ้ว 1 ที่นับ 3",
+          "G = สาย 6 ช่อง 3 นิ้ว 2 ที่นับ 3&; G# = สาย 6 ช่อง 4 นิ้ว 3 ที่นับ 4",
+          "4& ฟันลม/พัก แล้ว A = สาย 6 ช่อง 5 นิ้ว 4 ลงพร้อมคลิก 1 ใหม่"
+        ]
+      },
+      {
+        pillar: "Scale",
+        duration: "3–4 นาที",
+        title: "Phrase Resolution: B → A → G → E",
+        focus: "B ที่ 3, A ที่ 3&, G ที่ 4, air ที่ 4&, E ลง Beat 1 ห้องใหม่",
+        steps: [
+          "B = สาย 5 ช่อง 2 นิ้วกลาง 2; A = สาย 5 เปล่า",
+          "G = สาย 6 ช่อง 3 นิ้วนาง 3; E = สาย 6 เปล่า",
+          "ปล่อยนิ้วกลางก่อน A และรอคลิก 1 ใหม่ก่อนปล่อยนิ้วนางให้ E เป็นสายเปล่า"
+        ]
+      },
+      {
+        pillar: "Arpeggio",
+        duration: "3–4 นาที",
+        title: "Em → C ด้วยแผนที่เดียว",
+        focus: "Em ที่ 1, 1&, 2, 2&; C ที่ 3, 3&, 4; 4& เป็น air/rest",
+        steps: [
+          "Em: สาย 6, 5, 4, 3 ตามลำดับ; C: สาย 5, 4, 3 ตามลำดับ",
+          "ฝึกเปลี่ยนรูป Em เป็น C ระหว่าง 2& กับ 3 ที่ 50–60 BPM ก่อน",
+          "ฟังสอง beats แรกเป็น Em และสอง beats หลังเปลี่ยนเป็น C ชัดเจน"
+        ]
+      },
+      {
+        pillar: "Rhythm + Application",
+        duration: "6–8 นาที",
+        title: "Groove Integration: 4 bars × 2 rounds",
+        focus: "ทำ motor bridge ก่อน แล้วรวม 4 bars ต่อเนื่องสองรอบที่ 60–70 BPM",
+        steps: [
+          "นับ 1 และ 2 และ 3 และ 4 และ ให้มือขวาลง–กลับผ่านอากาศสองครั้งต่อ beat",
+          "เริ่มที่ 50–60 BPM ด้วยสายเปล่าเฉพาะ &, กลับมาหนึ่งโน้ตต่อ beat แล้วค่อยใส่ map",
+          "จบ 4 bars แล้วต่อรอบที่สองโดย A ลง Beat 1 ของ Bar 5; รวมทั้งหมด 8 continuous bars"
+        ]
+      }
+    ],
+    learn: {
+      targetBpm: "60–70 BPM",
+      diagram: {
+        title: "W4 Timing Map",
+        caption: "4& เป็นช่องพักที่มือยังเดินต่อ; target landing ลง Beat 1 ของห้องใหม่",
+        cells: [
+          { label: "3", note: "F# / B", kind: "hit" },
+          { label: "3&", note: "G / A", kind: "hit" },
+          { label: "4", note: "G# / G", kind: "hit" },
+          { label: "4&", note: "air", kind: "rest" },
+          { label: "1", note: "A / E", kind: "hit" }
+        ]
+      },
+      paragraphs: [
+        "ลูปวันนี้คือ DO → HEAR → FIX → REPEAT → UNDERSTAND → NAME: รู้สึกการเดินของมือก่อน ฟัง target landing แล้วค่อยเรียกชื่อ Walk-up, Resolution และ Groove",
+        "ก่อนโน้ตเร็วขึ้น ให้ทำ motor bridge: เท้าอยู่บน 1 2 3 4 ปากนับ 1 และ 2 และ 3 และ 4 และ มือขวาลง–กลับผ่านอากาศโดยไม่หยุด",
+        "เมื่อมือไม่หยุดจึงใส่ F#–G–G#–A, B–A–G–E และ Em → C ตาม timing map; 4 bars × 2 rounds = 8 bars ที่ 60–70 BPM"
+      ],
+      listenFor: [
+        "F# ที่ 3, G ที่ 3&, G# ที่ 4, 4& เงียบ และ A ตกตรงคลิก 1 ของห้องใหม่",
+        "B–A–G คลายลง และ E กลับบ้านตรง Beat 1 ไม่มาก่อนเวลา",
+        "Bar 2 เปลี่ยนสีจาก Em เป็น C และ Pulse ต่อเนื่องตลอด 8 bars"
+      ],
+      physicalFeel: [
+        "มือขวาเดินลง–กลับสองครั้งต่อ beat แม้ 4& ไม่ให้สายดัง",
+        "นิ้วโป้งซ้ายเลื่อนตามคอเล็กน้อย ไม่บีบข้อมือตอนยืดนิ้ว 1–4",
+        "ปล่อยนิ้วกลางก่อน A, ย้ายนิ้วนางไป G ก่อน 4, แล้วปล่อยให้นิ้วออกเพื่อ E/A สายเปล่า"
+      ],
+      guitarApplication: [
+        "Motor bridge ที่ 50–60 BPM: 1 และ 2 และ 3 และ 4 และ; เลขลงผ่านอากาศ, และกลับผ่านอากาศ; จากนั้นใช้สาย 6 เปล่าดีดเฉพาะ &",
+        "Walk-up timing: 3 = F# สาย 6 ช่อง 2 นิ้ว 1; 3& = G ช่อง 3 นิ้ว 2; 4 = G# ช่อง 4 นิ้ว 3; 4& = air/rest; next 1 = A ช่อง 5 นิ้ว 4",
+        "Phrase timing: 3 = B สาย 5 ช่อง 2; 3& = A สาย 5 เปล่า; 4 = G สาย 6 ช่อง 3; 4& = air/rest; next 1 = E สาย 6 เปล่า",
+        "Em → C timing: 1 สาย 6 Em, 1& สาย 5 Em, 2 สาย 4 Em, 2& สาย 3 Em; 3 สาย 5 C, 3& สาย 4 C, 4 สาย 3 C, 4& air/rest"
+      ],
+      guidedSteps: [
+        "ทำ air-stroke สองห้องโดยไม่กดโน้ต: ลงบนเลข กลับบน และ และให้เท้าอยู่บนเลข",
+        "ที่ 50–60 BPM ดีดสาย 6 เปล่าเฉพาะ & แล้วกลับมาหนึ่งโน้ตต่อหนึ่ง beat",
+        "ซ้อม Walk-up เฉพาะ 3 → 3& → 4 → 1 ห้าครั้ง แล้วเพิ่ม 4& air อีกห้าครั้ง",
+        "ซ้อม B → A → G → E โดยรอคลิก 1 ใหม่ก่อน E สามครั้งติด",
+        "ซ้อม Em → C ตาม map หนึ่ง bar ที่ 60 BPM สามครั้งโดย Pulse ไม่หยุด",
+        "รวม Bar 1–4 ที่ 60 BPM แล้วทำซ้ำอีกหนึ่งรอบเป็น 8 bars ที่ 60–70 BPM"
+      ],
+      correctionSteps: [
+        "A หรือ E มาก่อน Beat 1: พูด 3–3และ–4–และ แล้วรอคลิก 1 ใหม่",
+        "มือขวาหยุดที่ 4&: ฝึก air-stroke สี่ช่องโดยไม่กดสายก่อนใส่โน้ต",
+        "เปลี่ยน Em → C ไม่ทัน: วางมือซ้ายสลับรูปโดยไม่ดีดห้าครั้ง แล้วกลับไป 50 BPM",
+        "tempo ดันขึ้น: ลดเหลือเท้าและ voice count ก่อน แล้วใส่โน้ตกลับทีละชั้น"
+      ],
+      dailySelfCheck: [
+        "Walk-up ลง A ที่ Beat 1 ใหม่ได้สามครั้งติด โดย 4& เป็น air/rest",
+        "Phrase E ลง Beat 1 ได้สามครั้งติดและเท้ายังเคาะผ่านช่องพัก",
+        "เล่น 4 bars แล้วต่อรอบสองรวม 8 continuous bars ที่ 60–70 BPM โดยไม่หยุด"
+      ],
+      troubleshooting: [
+        { problem: "A มาก่อนคลิก 1", advice: "พูด 3, 3และ, 4, และ แล้วให้ 4& เป็นช่องหายใจ ก่อนปล่อย A บนคลิกแรก" },
+        { problem: "E มาก่อนเวลา", advice: "เล่น B–A–G ช้าลง รอคลิก 1 ใหม่ และปล่อยนิ้วนางให้สาย 6 เปล่าดังตอนนั้น" },
+        { problem: "A ไม่ลงต้นรอบสอง", advice: "แยกซ้อม G# → air → A ห้าครั้ง แล้วค่อยกลับเข้า 4 bars" }
+      ],
+      miniExample: "3 F# | 3& G | 4 G# | 4& air | 1 A — จากนั้น 3 B | 3& A | 4 G | 4& air | 1 E",
+      commonMistakes: [
+        "เรียก Walk-up ว่า 3 โน้ตแล้วลืมว่า A คือ target landing ตัวที่ 4",
+        "เติมเสียงที่ 4& จน A มาก่อน Beat 1",
+        "เริ่มรอบใหม่โดยหยุดเท้าหรือหยุดมือหลัง Bar 4"
+      ],
+      teacherNote: "ความเร็วไม่ได้มาจากการรีบ แต่มาจากมือที่รู้ช่องพักและรู้ว่า target ต้องลงตรงคลิกไหน",
+      referenceTriggers: []
+    },
+    practice: [
+      "Chromatic: 4-note Walk-up F# → G → G# → A พร้อม 4& air/rest",
+      "Scale: Phrase B → A → G → E พร้อม E landing บน Beat 1",
+      "Arpeggio: Em → C ตาม map 1, 1&, 2, 2& | 3, 3&, 4, 4&",
+      "Rhythm + Application: 4 bars × 2 rounds = 8 continuous bars ที่ 60–70 BPM"
+    ],
+    quiz: [
+      { question: "ใน Walk-up W4 โน้ตใดลง Beat 1 ของห้องใหม่?", options: ["A", "G#", "F#"], answer: 0 },
+      { question: "ช่อง 4& ของ Walk-up ทำอะไร?", options: ["air-stroke / พัก ไม่มีโน้ต", "ดีด A ก่อนเวลา", "เพิ่ม F อีกตัว"], answer: 0 },
+      { question: "Graduation Gate คืออะไร?", options: ["4 bars × 2 rounds = 8 bars ที่ 60–70 BPM", "เล่นเร็วที่สุดหนึ่งครั้ง", "เล่นเฉพาะ Bar 1"], answer: 0 }
+    ],
+    homework: [
+      "ซ้อม motor bridge และ timing map ก่อนเพิ่มความเร็วทุกครั้ง",
+      "ผ่าน 4 bars ที่ 60 BPM แล้วค่อยต่อเป็น 8 continuous bars ที่ 60–70 BPM"
+    ],
+    referenceTriggers: []
+  }
+};
+
+const month1V4R6Graduation = {
+  title: "Month 1 Groove: 4 bars × 2 rounds = 8 bars",
+  purpose: "เล่น 4 ห้องตามแผนที่ของบทเรียน แล้ววนต่อเนื่อง 2 รอบ โดย Pulse ไม่หยุด",
+  bars: [
+    { bar: 1, chord: "Em · Rhythm / Palm Mute", direction: "Em palm mute เบา ๆ บน 1 2 3 4 ให้ Pulse ตั้งหลัก" },
+    { bar: 2, chord: "Em → C · Arpeggio", direction: "Em ที่ 1, 1&, 2, 2&; C ที่ 3, 3&, 4; 4& เป็น air/rest" },
+    { bar: 3, chord: "B → A → G · Phrase", direction: "B ที่ 3, A ที่ 3&, G ที่ 4, 4& เป็น air/rest; E ลง Beat 1 ของ Bar 4" },
+    { bar: 4, chord: "F# → G → G# → A · Walk-up", direction: "E ที่ Beat 1; F# ที่ 3, G ที่ 3&, G# ที่ 4, 4& air/rest; A ลง Beat 1 ของ Bar 5" }
+  ],
+  feel: "เล่น 4 bars แล้วต่อรอบที่สองรวม 8 continuous bars ที่ 60–70 BPM โดย A ลง Beat 1 ของรอบที่สอง"
+};
+
+Object.values(month1V4R6Overrides).forEach((override) => {
+  override.r6Content = true;
+  override.r6RecoveryGuide = month1V4R6RecoveryGuide;
+  override.visual = null;
+  override.rhythmGeometry = null;
+  override.earTraining = null;
+  override.miniSong = null;
+});
+month1V4R6Overrides[4].miniSong = month1V4R6Graduation;
+
 foundationWeeks.forEach((weekItem) => {
-  const override = month1V2Overrides[weekItem.number];
+  const override = month1V4R6Overrides[weekItem.number] || month1V2Overrides[weekItem.number];
   if (override) Object.assign(weekItem, override);
 });
 
@@ -4276,10 +5161,10 @@ function renderMonth1V2Core(weekItem) {
   if (!weekItem?.rhythmSpine || !Array.isArray(weekItem.coreBlocks) || weekItem.coreBlocks.length !== 4) return "";
 
   return `
-    <section class="lesson-block month1-v2-core" aria-label="Month 1 V2 Daily Core">
+    <section class="lesson-block month1-v2-core" aria-label="Month 1 Daily Core">
       <div class="lesson-block-heading">
         <div>
-          <p class="eyebrow">Month 1 V2 · Daily Core</p>
+          <p class="eyebrow">Month 1 · Daily Core</p>
           <h3>Rhythm spine: ${weekItem.rhythmSpine}</h3>
           <p>ทุก pillar เล่นร่วมกับจังหวะของสัปดาห์นี้ ไม่แยกเป็นแบบฝึกโดด ๆ</p>
         </div>
@@ -4331,7 +5216,9 @@ function renderLessonMedia(weekItem) {
 function renderLearnSection(weekItem) {
   const weekNumber = Number(weekItem?.number || weekItem?.week);
   const isWeek2 = weekNumber === 2;
-  const rhythmBlock = isWeek2 ? (weekItem?.rhythmGeometry || weeks[1]?.lessonBlocks?.find((b) => b.type === "rhythm-geometry") || null) : null;
+  const rhythmBlock = isWeek2 && !weekItem?.r6Content
+    ? (weekItem?.rhythmGeometry || weeks[1]?.lessonBlocks?.find((b) => b.type === "rhythm-geometry") || null)
+    : null;
   const completedDayCount = getFoundationWeekCompletedDayCount(weekNumber);
   const isWeekComplete = completedDayCount === 7;
   const completionLabel = `${isWeekComplete ? "✓ " : ""}${completedDayCount}/7 วัน`;
@@ -4492,11 +5379,32 @@ function renderLessonPracticeSupport(weekItem) {
     renderDailySelfCheck(weekItem),
     renderCommonMistakes(weekItem),
     renderTroubleshooting(weekItem),
+    renderMonth1V4R6RecoveryGuide(weekItem),
     renderEarTraining(weekItem.earTraining),
     renderMiniSong(weekItem.miniSong)
   ].filter(Boolean);
 
   return parts.join("");
+}
+
+function renderMonth1V4R6RecoveryGuide(weekItem) {
+  const items = Array.isArray(weekItem?.r6RecoveryGuide) ? weekItem.r6RecoveryGuide : [];
+  if (!items.length) return "";
+
+  return `
+    <section class="lesson-block month1-v4-r6-recovery" aria-label="Beginner Recovery Guide">
+      <p class="eyebrow">Recovery</p>
+      <h3>ติดตรงไหน ให้กลับไปแก้ตรงนั้น</h3>
+      <div class="troubleshooting-list">
+        ${items.map((item) => `
+          <article>
+            <h4>${item.problem}</h4>
+            <p><strong>ทำแบบนี้:</strong> ${item.action}</p>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `;
 }
 
 function renderDailySelfCheck(weekItem) {
@@ -6279,6 +7187,8 @@ function renderMonth2MissingCard(message) {
 }
 
 function renderRhythmVisual(visual, isNested = false) {
+  if (!visual || !Array.isArray(visual.steps)) return "";
+
   const blockClass = isNested ? "rhythm-demo-block rhythm-demo-inline" : "lesson-block rhythm-demo-block";
 
   return `
