@@ -7870,6 +7870,11 @@ body {
 }
 
 @media (max-width: 600px) {
+  /* Round 24: remove the redundant mobile card inset so lesson content can breathe. */
+  .lesson-panel {
+    padding-inline: 0;
+  }
+
   .lesson-block-heading {
     align-items: flex-start;
   }
