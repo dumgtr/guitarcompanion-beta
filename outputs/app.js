@@ -2940,6 +2940,7 @@ const month1V4R6RecoveryGuide = [
 const month1V4R6Overrides = {
   1: {
     title: "Week 1 · Foundation & Pulse: ทำให้มือรู้จักเสียงแรก",
+    todayGoal: "เคาะเท้าและดีดสาย 6 เปล่าให้ตรงกับคลิก 60 BPM เพื่อตั้งหลัก Pulse แรก และเล่น 4 เสาหลัก (Chromatic, Scale, Arpeggio, Em Groove) บนจังหวะเดียวกัน",
     summary: "Rhythm เป็นแกนหลัก: Chromatic, Scale และ Arpeggio ทุกอย่างลงบน Pulse เดียวกันที่ 60 BPM",
     youtube: null,
     rhythmSpine: "Pulse",
@@ -3075,6 +3076,7 @@ const month1V4R6Overrides = {
   },
   2: {
     title: "Week 2 · Coordination & Off-beat: ให้เท้าอยู่บ้าน",
+    todayGoal: "ทำให้มือขวาเคลื่อนที่ต่อเนื่องเหมือนลูกตุ้ม แล้ววางเสียงบนจังหวะยก '&' (หลัง 2 และ 4) โดยที่เท้ายังเคาะ 1 2 3 4 อยู่ที่เดิม",
     summary: "Rhythm เปลี่ยนจาก Pulse เป็น Off-beat: มือขวาเคลื่อนต่อเนื่องและวางเสียงบน & โดยเท้ายังอยู่บนเลข",
     youtube: null,
     rhythmSpine: "Off-beat",
@@ -3213,6 +3215,7 @@ const month1V4R6Overrides = {
   },
   3: {
     title: "Week 3 · Control, Dynamics & Palm Mute: คุมสีเสียง",
+    todayGoal: "ควบคุมน้ำหนักเสียง 3 ระดับ (เบา กลาง ดัง) และใช้เนื้อขอบฝ่ามือนิ้วก้อยแตะชิดหย่องทำเสียง Palm Mute โดยยังได้ยินระดับเสียงชัดเจน",
     summary: "Rhythm เป็น Dynamics: คุมเสียงเปิด–สั้นและน้ำหนักเบา–เน้นโดย Pulse ไม่เดินหนี",
     youtube: null,
     rhythmSpine: "Dynamics",
@@ -3347,6 +3350,7 @@ const month1V4R6Overrides = {
   },
   4: {
     title: "Week 4 · Groove Integration & Graduation",
+    todayGoal: "รวมทุกทักษะเข้าด้วยกัน: เล่น Bass Walk-up ไต่โน้ต F# → G → G# → A ส่งเข้า Beat 1, คลายเข้า Root E, และส่งคอร์ด Em → C บน 2& อย่างราบรื่น",
     summary: "Rhythm เป็น Groove: รวม Pulse, Off-beat และ Dynamics ให้เป็น 4 bars × 2 rounds = 8 bars",
     youtube: null,
     rhythmSpine: "Groove",
@@ -4802,10 +4806,9 @@ function renderFocusedLesson() {
       <p>${weekItem.summary}</p>
     </div>
     ${renderLessonFlowOverview()}
-    ${renderMonth1V2Core(weekItem)}
     ${renderLessonMedia(weekItem)}
     ${renderLearnSection(weekItem)}
-    ${renderLessonSection("3. เล่น: แบบฝึกหัด", weekItem.practice, "play-block")}
+    ${weekItem.coreBlocks ? renderMonth1V2Core(weekItem) : renderLessonSection("3. เล่น: แบบฝึกหัด", weekItem.practice, "play-block")}
     ${renderLessonPracticeSupport(weekItem)}
     <section class="lesson-block quiz-block">
       <h3>4. เช็ก: แบบทดสอบ</h3>
@@ -5161,11 +5164,11 @@ function renderMonth1V2Core(weekItem) {
   if (!weekItem?.rhythmSpine || !Array.isArray(weekItem.coreBlocks) || weekItem.coreBlocks.length !== 4) return "";
 
   return `
-    <section class="lesson-block month1-v2-core" aria-label="Month 1 Daily Core">
+    <section class="lesson-block play-block month1-v2-core" aria-label="3. เล่น: แบบฝึกหัด (Daily Core 15–20 นาที)">
       <div class="lesson-block-heading">
         <div>
-          <p class="eyebrow">Month 1 · Daily Core</p>
-          <h3>Rhythm spine: ${weekItem.rhythmSpine}</h3>
+          <p class="eyebrow">3. เล่น: แบบฝึกหัด</p>
+          <h3>Daily Core: 4 เสาหลัก (Rhythm spine: ${weekItem.rhythmSpine})</h3>
           <p>ทุก pillar เล่นร่วมกับจังหวะของสัปดาห์นี้ ไม่แยกเป็นแบบฝึกโดด ๆ</p>
         </div>
         <span class="week-progress-badge">${weekItem.estimatedMinutesPerDay || "15–20 นาที"}</span>
@@ -5192,24 +5195,33 @@ function renderMonth1V2Core(weekItem) {
 }
 
 function renderLessonMedia(weekItem) {
-  const youtube = weekItem.youtube;
+  const goal = weekItem.todayGoal || weekItem.summary || "";
   const listenFor = weekItem.learn?.listenFor || weekItem.hear || [];
-  if (!youtube?.title) return "";
+  const targetBpm = weekItem.learn?.targetBpm || "60 BPM";
+  const youtube = weekItem.youtube;
 
   return `
-    <section class="lesson-block lesson-media-block listen-step-block">
+    <section class="lesson-block lesson-media-block listen-step-block" aria-label="1. วันนี้เราจะทำอะไร">
       <div class="lesson-media-copy">
-        <p class="eyebrow">1. ฟัง</p>
-        <h3>${youtube.title}</h3>
-        <p>ใช้ Metronome ในแถบควบคุมด้านบนเป็นจุดอ้างอิง แล้วฟังเสียง click ให้สม่ำเสมอก่อนเริ่มเล่นครับ</p>
+        <p class="eyebrow">1. วันนี้เราจะทำอะไร</p>
+        <h3>${weekItem.title}</h3>
+        <p class="lesson-today-goal"><strong>เป้าหมายวันนี้:</strong> ${goal}</p>
+        <p>เปิด Metronome ในแถบควบคุมด้านบน ตั้งที่ <strong>${targetBpm}</strong> แล้วเคาะเท้าให้ตรงกับ click ก่อนลงมือเล่นครับ</p>
       </div>
-      <div class="listen-prompt">
-        <strong>โจทย์ฟัง</strong>
-        <p>เปิด Metronome ในแถบด้านบน ปรับตาม Target BPM ของบทเรียน แล้วเคาะเท้าให้ตรงกับ click ก่อนลงมือเล่น</p>
-        <ul>
-          ${listenFor.map((line) => `<li>${line}</li>`).join("")}
-        </ul>
-      </div>
+      ${listenFor.length ? `
+        <div class="listen-prompt">
+          <strong>โจทย์ฟังก่อนเล่น</strong>
+          <p>เคาะเท้าให้ตรงกับ click 4 ครั้ง แล้วฟังเสียงอ้างอิงก่อนเริ่มดีด:</p>
+          <ul>
+            ${listenFor.map((line) => `<li>${line}</li>`).join("")}
+          </ul>
+        </div>
+      ` : ""}
+      ${youtube?.title ? `
+        <div class="lesson-media-embed">
+          <h4>${youtube.title}</h4>
+        </div>
+      ` : ""}
     </section>
   `;
 }

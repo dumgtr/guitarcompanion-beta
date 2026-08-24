@@ -4,8 +4,8 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
-const app = fs.readFileSync(path.join(ROOT, 'outputs', 'app.js'), 'utf8');
-const r6 = fs.readFileSync(path.join(ROOT, 'docs', 'MONTH1_V4_FINAL_LESSON_DRAFT_R6.md'), 'utf8');
+const app = fs.readFileSync(path.join(ROOT, 'outputs', 'app.js'), 'utf8').replace(/\r\n/g, '\n');
+const r6 = fs.readFileSync(path.join(ROOT, 'docs', 'MONTH1_V4_FINAL_LESSON_DRAFT_R6.md'), 'utf8').replace(/\r\n/g, '\n');
 
 let passed = 0;
 let failed = 0;
