@@ -20,10 +20,11 @@ const args = process.argv.slice(2);
 const isStopCommand = args.includes("--stop");
 const isIdentityCommand = args.includes("--identity");
 const numericArg = args.find(a => !a.startsWith("--") && !isNaN(Number(a)));
-const port = numericArg ? Number(numericArg) : DEFAULT_PORT;
+const port = numericArg !== undefined ? Number(numericArg) : DEFAULT_PORT;
 const host = DEFAULT_HOST;
+let boundPort = port;
 
-const pidFilePath = path.join(os.tmpdir(), `guitarcompanion-preview-${port}.json`);
+const getPidFilePath = (p) => path.join(os.tmpdir(), `guitarcompanion-preview-${p}.json`);
 
 // PID & Identity Commands
 if (isStopCommand) {
@@ -146,6 +147,9 @@ server.on("error", (error) => {
 });
 
 server.listen(port, host, () => {
+  const addr = server.address();
+  boundPort = typeof addr === "object" && addr && addr.port ? addr.port : port;
+
   // Write PID Ownership Record
   writePidRecord();
 
@@ -218,7 +222,7 @@ function setStandardHeaders(response, contentType) {
   response.setHeader("Content-Type", contentType);
   response.setHeader("X-GC-Git-Branch", sanitizeHeaderValue(gitTelemetry.branch));
   response.setHeader("X-GC-Git-Commit", sanitizeHeaderValue(gitTelemetry.gitSha));
-  response.setHeader("X-GC-Server-Port", String(port));
+  response.setHeader("X-GC-Server-Port", String(boundPort));
   response.setHeader("X-GC-App-SHA256", appSha256);
   response.setHeader("X-GC-Identity-Verified", String(gitTelemetry.identityVerified));
 }
@@ -237,7 +241,7 @@ function sendIdentityJson(response) {
     appSha256,
     serverPid: process.pid,
     host,
-    port,
+    port: boundPort,
     startedAt: startedAtIso,
     uptimeSeconds,
     cachePolicy: "no-store"
@@ -272,23 +276,24 @@ function writePidRecord() {
       gitSha: gitTelemetry.gitSha,
       appSha256,
       host,
-      port,
+      port: boundPort,
       startedAt: startedAtIso,
       serverModulePath: __filename
     };
-    writeFileSync(pidFilePath, JSON.stringify(record, null, 2), "utf-8");
+    writeFileSync(getPidFilePath(boundPort), JSON.stringify(record, null, 2), "utf-8");
   } catch (err) {
-    console.warn(`[PidRecordWarning] Could not write PID file ${pidFilePath}: ${err.message}`);
+    console.warn(`[PidRecordWarning] Could not write PID file ${getPidFilePath(boundPort)}: ${err.message}`);
   }
 }
 
 function removePidRecordIfOwned() {
   try {
-    if (existsSync(pidFilePath)) {
-      const raw = readFileSync(pidFilePath, "utf-8");
+    const pidPath = getPidFilePath(boundPort);
+    if (existsSync(pidPath)) {
+      const raw = readFileSync(pidPath, "utf-8");
       const record = JSON.parse(raw);
       if (record && record.pid === process.pid) {
-        unlinkSync(pidFilePath);
+        unlinkSync(pidPath);
       }
     }
   } catch {
@@ -297,7 +302,7 @@ function removePidRecordIfOwned() {
 }
 
 function stopOwnedServer(targetPort, repoRoot) {
-  const targetPidPath = path.join(os.tmpdir(), `guitarcompanion-preview-${targetPort}.json`);
+  const targetPidPath = getPidFilePath(targetPort);
   if (!existsSync(targetPidPath)) {
     console.log(`[StopServer] No server PID record found for port ${targetPort}.`);
     return;
@@ -339,8 +344,8 @@ function printStartupBanner() {
   console.log(`\n==================================================`);
   console.log(`🎸 Guitar Companion Deterministic Preview Server V1`);
   console.log(`==================================================`);
-  console.log(`URL:             http://${host}:${port}/`);
-  console.log(`Identity URL:    http://${host}:${port}/__gc_preview_identity`);
+  console.log(`URL:             http://${host}:${boundPort}/`);
+  console.log(`Identity URL:    http://${host}:${boundPort}/__gc_preview_identity`);
   console.log(`Branch:          ${gitTelemetry.branch}`);
   console.log(`Git SHA:         ${gitTelemetry.gitSha}`);
   console.log(`Repository root: ${repositoryRoot}`);
@@ -348,7 +353,7 @@ function printStartupBanner() {
   console.log(`App SHA-256:     ${appSha256}`);
   console.log(`PID:             ${process.pid}`);
   console.log(`Host:            ${host}`);
-  console.log(`Port:            ${port}`);
+  console.log(`Port:            ${boundPort}`);
   console.log(`Cache:           no-store, max-age=0`);
   console.log(`Identity:        ${gitTelemetry.identityVerified ? "VERIFIED (QA-READY)" : "UNVERIFIED"}`);
   console.log(`==================================================\n`);

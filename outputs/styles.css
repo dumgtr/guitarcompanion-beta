@@ -7842,6 +7842,68 @@ body {
   border-color: var(--fsl-accent-hover);
 }
 
+/* Round 22: keep Month 1 lesson content inside the mobile card. */
+.lesson-panel > *,
+.lesson-block,
+.lesson-media-block,
+.lesson-media-copy,
+.listen-prompt,
+.month1-v2-core,
+.lesson-block-heading,
+.lesson-block-heading > div,
+.lesson-media-embed,
+.lesson-today-goal,
+.lesson-block h3,
+.lesson-block h4,
+.lesson-block p,
+.lesson-block ul,
+.lesson-block ol,
+.lesson-block li,
+.lesson-diagram,
+.lesson-diagram > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.lesson-block-heading > div {
+  flex: 1 1 auto;
+}
+
+@media (max-width: 600px) {
+  .lesson-block-heading {
+    align-items: flex-start;
+  }
+
+  .lesson-block h3,
+  .lesson-block h4,
+  .lesson-block p,
+  .lesson-block li,
+  .lesson-media-embed,
+  .lesson-media-embed h4,
+  .lesson-diagram-head h4,
+  .lesson-diagram-head p {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .lesson-diagram {
+    width: 100%;
+    overflow-x: visible;
+  }
+
+  .lesson-diagram-grid {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(var(--diagram-count), minmax(0, 1fr));
+  }
+
+  .diagram-cell {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}
+
 .gc-fsl-variant-b .main-workspace-layout {
   display: flex;
   flex-direction: column;

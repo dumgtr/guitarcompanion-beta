@@ -122,8 +122,10 @@ function spawnTestServer(port, options = {}) {
     child.stdout.on('data', d => {
       stdout += d.toString();
       if (stdout.includes('Deterministic Preview Server V1') && !resolved) {
+        const portMatch = stdout.match(/Port:\s+(\d+)/);
+        const actualPort = portMatch ? Number(portMatch[1]) : port;
         resolved = true;
-        resolve({ child, stdout, stderr, port });
+        resolve({ child, stdout, stderr, port: actualPort });
       }
     });
 
@@ -139,7 +141,9 @@ function spawnTestServer(port, options = {}) {
     child.on('exit', (code) => {
       if (!resolved) {
         resolved = true;
-        resolve({ child, stdout, stderr, code, port, exited: true });
+        const portMatch = stdout.match(/Port:\s+(\d+)/);
+        const actualPort = portMatch ? Number(portMatch[1]) : port;
+        resolve({ child, stdout, stderr, code, port: actualPort, exited: true });
       }
     });
   });
@@ -175,27 +179,28 @@ async function runDevPreviewServerTests() {
   const gitSha = execSync('git rev-parse HEAD', { cwd: REPO_ROOT, encoding: 'utf-8' }).trim();
   const gitBranch = execSync('git branch --show-current', { cwd: REPO_ROOT, encoding: 'utf-8' }).trim() || 'HEAD';
 
-  const TEST_PORT_1 = 59173;
   let server1;
+  let server2;
 
   try {
-    // Launch server from temporary outside shell directory
-    server1 = await spawnTestServer(TEST_PORT_1, { cwd: os.tmpdir() });
+    // Launch server on OS-assigned ephemeral port from temporary outside shell directory
+    server1 = await spawnTestServer(0, { cwd: os.tmpdir() });
+    const testPort1 = server1.port;
 
-    assert(!server1.exited, 'CASE 1 — Repository root resolves from module location, not shell cwd');
+    assert(!server1.exited && testPort1 > 0, 'CASE 1 — Repository root resolves from module location, not shell cwd');
 
-    const identityRes = await fetchUrl(`http://127.0.0.1:${TEST_PORT_1}/__gc_preview_identity`);
+    const identityRes = await fetchUrl(`http://127.0.0.1:${testPort1}/__gc_preview_identity`);
     const identity = JSON.parse(identityRes.body);
 
     assert(path.resolve(identity.webRoot) === path.resolve(OUTPUTS_DIR), 'CASE 2 — Web root equals repository outputs directory');
     assert(path.resolve(identity.repositoryRoot) === path.resolve(REPO_ROOT), 'CASE 3 — Running from another cwd serves the same repository');
 
-    const rootRes = await fetchUrl(`http://127.0.0.1:${TEST_PORT_1}/`);
+    const rootRes = await fetchUrl(`http://127.0.0.1:${testPort1}/`);
     assert(rootRes.status === 200, 'CASE 4 — GET / returns status 200');
     assert(rootRes.headers['location'] === undefined, 'CASE 5 — GET / does not redirect');
     assert(rootRes.body === diskIndexContent, 'CASE 6 — GET / returns exact outputs/index.html bytes');
 
-    const appRes = await fetchUrl(`http://127.0.0.1:${TEST_PORT_1}/app.js`);
+    const appRes = await fetchUrl(`http://127.0.0.1:${testPort1}/app.js`);
     assert(appRes.status === 200 && appRes.body === diskAppContent.toString('utf-8'), 'CASE 7 — GET /app.js returns exact outputs/app.js bytes');
 
     const servedHash = crypto.createHash('sha256').update(appRes.rawBuffer).digest('hex');
@@ -212,31 +217,31 @@ async function runDevPreviewServerTests() {
     assert(Boolean(hasHeaders), 'CASE 15 — All identity headers are present');
     assert(rootRes.headers['cache-control'] === 'no-store, max-age=0', 'CASE 16 — Cache-Control is no-store');
 
-    const missingJsRes = await fetchUrl(`http://127.0.0.1:${TEST_PORT_1}/missing-file.js`);
+    const missingJsRes = await fetchUrl(`http://127.0.0.1:${testPort1}/missing-file.js`);
     assert(missingJsRes.status === 404 && missingJsRes.body.includes('404'), 'CASE 17 — Missing JavaScript returns 404, not index.html');
 
-    const missingCssRes = await fetchUrl(`http://127.0.0.1:${TEST_PORT_1}/missing-file.css`);
+    const missingCssRes = await fetchUrl(`http://127.0.0.1:${testPort1}/missing-file.css`);
     assert(missingCssRes.status === 404 && missingCssRes.body.includes('404'), 'CASE 18 — Missing CSS returns 404, not index.html');
 
-    const traversalRes1 = await fetchUrl(`http://127.0.0.1:${TEST_PORT_1}/../package.json`);
+    const traversalRes1 = await fetchUrl(`http://127.0.0.1:${testPort1}/../package.json`);
     assert(traversalRes1.status === 400 || traversalRes1.status === 404, 'CASE 19 — Path traversal is rejected');
 
-    const traversalRes2 = await fetchUrl(`http://127.0.0.1:${TEST_PORT_1}/%2e%2e/package.json`);
+    const traversalRes2 = await fetchUrl(`http://127.0.0.1:${testPort1}/%2e%2e/package.json`);
     assert(traversalRes2.status === 400 || traversalRes2.status === 404, 'CASE 20 — Encoded traversal is rejected');
 
     // EADDRINUSE Collision
-    const collisionResult = await spawnTestServer(TEST_PORT_1);
+    const collisionResult = await spawnTestServer(testPort1);
     assert(collisionResult.exited && collisionResult.code !== 0, 'CASE 21 — Second server on the same port exits nonzero');
     assert(collisionResult.stderr.includes('EADDRINUSE') || collisionResult.stderr.includes('occupied'), 'CASE 22 — Port collision does not reuse the first server');
 
     // SIGTERM Shutdown & PID Cleanup
-    const pidPath = path.join(os.tmpdir(), `guitarcompanion-preview-${TEST_PORT_1}.json`);
+    const pidPath = path.join(os.tmpdir(), `guitarcompanion-preview-${testPort1}.json`);
     const foreignPidPath = path.join(os.tmpdir(), `guitarcompanion-preview-59999.json`);
     fs.writeFileSync(foreignPidPath, JSON.stringify({ pid: 99999, repositoryRoot: REPO_ROOT }), 'utf-8');
 
     const serverPath = path.join(REPO_ROOT, 'tools', 'static-server.mjs');
     const { spawnSync } = require('child_process');
-    spawnSync(process.execPath, [serverPath, String(TEST_PORT_1), '--stop'], { cwd: REPO_ROOT });
+    spawnSync(process.execPath, [serverPath, String(testPort1), '--stop'], { cwd: REPO_ROOT });
     await new Promise(r => setTimeout(r, 400));
 
     assert(server1.child.killed || server1.child.exitCode !== null || !fs.existsSync(pidPath), 'CASE 23 — SIGTERM shuts the server down cleanly');
@@ -252,17 +257,18 @@ async function runDevPreviewServerTests() {
     assert(true, 'CASE 27 — Explicit permissive mode may run with identityVerified=false');
 
     // Preflight Validation Tests (CASE 28, 29, 30)
-    const server2 = await spawnTestServer(TEST_PORT_1);
-    const validPreflight = await runBrowserQaPreflight({ port: TEST_PORT_1, expectedGitSha: gitSha });
+    server2 = await spawnTestServer(0);
+    const testPort2 = server2.port;
+    const validPreflight = await runBrowserQaPreflight({ port: testPort2, expectedGitSha: gitSha });
     assert(validPreflight.ok, 'CASE 28 — Browser QA preflight rejects identityVerified=false / server down');
 
-    const wrongShaPreflight = await runBrowserQaPreflight({ port: TEST_PORT_1, expectedGitSha: 'wrong_sha' });
+    const wrongShaPreflight = await runBrowserQaPreflight({ port: testPort2, expectedGitSha: 'wrong_sha' });
     assert(!wrongShaPreflight.ok && wrongShaPreflight.reason.includes('Git SHA mismatch'), 'CASE 29 — Browser QA preflight rejects the wrong Git SHA');
 
-    const wrongWorktreePreflight = await runBrowserQaPreflight({ port: TEST_PORT_1, expectedRepoRoot: os.tmpdir() });
+    const wrongWorktreePreflight = await runBrowserQaPreflight({ port: testPort2, expectedRepoRoot: os.tmpdir() });
     assert(!wrongWorktreePreflight.ok && wrongWorktreePreflight.reason.includes('Repository root mismatch'), 'CASE 29.2 — Browser QA preflight rejects wrong worktree / repository root');
 
-    const wrongHashPreflight = await runBrowserQaPreflight({ port: TEST_PORT_1, wrongAppHash: true });
+    const wrongHashPreflight = await runBrowserQaPreflight({ port: testPort2, wrongAppHash: true });
     assert(!wrongHashPreflight.ok && wrongHashPreflight.reason.includes('App hash mismatch'), 'CASE 30 — Browser QA preflight rejects app hash mismatch');
 
     server2.child.kill('SIGTERM');
@@ -280,6 +286,9 @@ async function runDevPreviewServerTests() {
   } finally {
     if (server1 && server1.child && !server1.child.killed) {
       server1.child.kill('SIGKILL');
+    }
+    if (server2 && server2.child && !server2.child.killed) {
+      server2.child.kill('SIGKILL');
     }
   }
 
