@@ -461,7 +461,8 @@ main {
 
 .hero::before {
   position: absolute;
-  inset: auto -80px 58px 42%;
+  inset: auto 16px 58px 42%;
+  max-width: 100%;
   z-index: -1;
   height: 220px;
   border: 1px solid color-mix(in srgb, var(--accent), var(--line) 45%);
@@ -7842,9 +7843,11 @@ body {
   border-color: var(--fsl-accent-hover);
 }
 
-/* Round 22: keep Month 1 lesson content inside the mobile card. */
+/* Round 26: keep Month 1 lesson content, flow chips, and cards fluid inside mobile viewports. */
 .lesson-panel > *,
 .lesson-block,
+.lesson-flow,
+.lesson-flow-card,
 .lesson-media-block,
 .lesson-media-copy,
 .listen-prompt,
@@ -7860,19 +7863,50 @@ body {
 .lesson-block ol,
 .lesson-block li,
 .lesson-diagram,
-.lesson-diagram > * {
+.lesson-diagram > *,
+.lesson-diagram-grid {
   min-width: 0;
   max-width: 100%;
+  box-sizing: border-box;
 }
 
 .lesson-block-heading > div {
   flex: 1 1 auto;
 }
 
+/* Harmonize Section 1, 2, 3, 4 Step Headings */
+.lesson-media-copy .eyebrow,
+.month1-v2-core .lesson-block-heading .eyebrow {
+  display: inline-block;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--ink);
+  text-transform: none;
+  margin-bottom: 6px;
+}
+
+.lesson-media-copy h3,
+.month1-v2-core .lesson-block-heading h3 {
+  font-size: 1rem;
+  font-weight: 650;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.learn-block .lesson-block-heading h3,
+.quiz-block h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
 @media (max-width: 600px) {
-  /* Round 24: remove the redundant mobile card inset so lesson content can breathe. */
   .lesson-panel {
     padding-inline: 0;
+  }
+
+  .lesson-flow {
+    grid-template-columns: 1fr;
   }
 
   .lesson-block-heading {
