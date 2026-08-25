@@ -2839,7 +2839,7 @@ const month1V2Overrides = {
       listenFor: [
         "Bar 1 เป็นพื้นกรูฟที่นิ่งสนิท",
         "Bar 2 ได้ยินเสียงเปลี่ยนคอร์ด Em → C ชัดเจน",
-        "Bar 4 โน้ต A ช่อง 5 แลนดิ้งลงตรง Beat 1 ของห้องถัดไปพอดีเป๊ะ แล้ววนรอบสองได้ไร้รอยต่อ"
+        "Bar 4 โน้ต A ช่อง 5 ลงเป็น Target Landing ตรง Beat 1 ของห้องถัดไปพอดีเป๊ะ แล้ววนรอบสองได้ไร้รอยต่อ"
       ],
       physicalFeel: [
         "เท้ายังเคาะ 1 2 3 4 นิ่งสนิทตลอด 8 ห้อง",
@@ -2872,7 +2872,7 @@ const month1V2Overrides = {
       troubleshooting: [
         {
           problem: "เล่นครบ 4 ห้องแล้วสะดุดตอนวนกลับรอบสอง",
-          advice: "Bar 4 พอไต่ช่อง 2-3-4 เสร็จ ให้แลนดิ้งลงช่อง 5 ตรงคลิก 1 แล้ววางสันมือ Mute ทันที"
+          advice: "Bar 4 พอไต่ช่อง 2-3-4 เสร็จ ให้ลง Target Landing ที่ช่อง 5 ตรงคลิก 1 แล้ววางสันมือ Mute ทันที"
         },
         {
           problem: "โน้ต A ไม่ลงตรง Beat 1",
@@ -2939,7 +2939,7 @@ const month1V4R6RecoveryGuide = [
 
 const month1V4R6Overrides = {
   1: {
-    title: "Week 1 · Foundation & Pulse: ทำให้มือรู้จักเสียงแรก",
+    title: "Week 1 · Foundation & Pulse: ดีดโน้ตแรกให้ตรง Pulse และชัดเจน",
     todayGoal: "เคาะเท้าและดีดสาย 6 เปล่าให้ตรงกับคลิก 60 BPM เพื่อตั้งหลัก Pulse แรก และเล่น 4 เสาหลัก (Chromatic, Scale, Arpeggio, Em Groove) บนจังหวะเดียวกัน",
     summary: "Rhythm เป็นแกนหลัก: Chromatic, Scale และ Arpeggio ทุกอย่างลงบน Pulse เดียวกันที่ 60 BPM",
     youtube: null,
@@ -3075,7 +3075,7 @@ const month1V4R6Overrides = {
     referenceTriggers: []
   },
   2: {
-    title: "Week 2 · Coordination & Off-beat: ให้เท้าอยู่บ้าน",
+    title: "Week 2 · Coordination & Off-beat: เคาะเท้าตาม Pulse ให้สม่ำเสมอ",
     todayGoal: "ทำให้มือขวาเคลื่อนที่ต่อเนื่องเหมือนลูกตุ้ม แล้ววางเสียงบนจังหวะยก '&' (หลัง 2 และ 4) โดยที่เท้ายังเคาะ 1 2 3 4 อยู่ที่เดิม",
     summary: "Rhythm เปลี่ยนจาก Pulse เป็น Off-beat: มือขวาเคลื่อนต่อเนื่องและวางเสียงบน & โดยเท้ายังอยู่บนเลข",
     youtube: null,
@@ -3146,7 +3146,7 @@ const month1V4R6Overrides = {
       paragraphs: [
         "ลูปวันนี้ยังเป็น DO → HEAR → FIX → REPEAT → UNDERSTAND → NAME แต่เพิ่มช่องกลาง: ทำ air-stroke ให้มือรู้ตำแหน่งก่อนให้สายดัง",
         "เคาะเท้าเฉพาะ 1 2 3 4 และพูด 1 และ 2 และ 3 และ 4 และ เสียงที่วางบน & ต้องอยู่กึ่งกลางระหว่างคลิก ไม่มาก่อนและไม่ไหลไปชนคลิกถัดไป",
-        "Off-beat หรือ Syncopation คือการวางเสียงนอกจังหวะตกโดยให้ Pulse ยังนิ่ง และการฟัง Major/Minor วันนี้ใช้ Root E เดิมเพื่อให้หูจับ G# กับ G"
+        "Off-beat (จังหวะยก '&') หรือ Syncopation คือการวางเสียงระหว่างคลิกโดยให้ Pulse เท้ายังนิ่ง และการฟัง Major/Minor วันนี้ใช้ Root E เดิมเพื่อให้หูจับ G# กับ G"
       ],
       listenFor: [
         "เท้ายังตรงเลข แม้เสียงกีตาร์อยู่กึ่งกลางระหว่างคลิก",
@@ -3193,7 +3193,7 @@ const month1V4R6Overrides = {
         "หยุดมือในช่องที่ไม่ได้ให้เสียง ทำให้กลับเข้า beat ถัดไปไม่ทัน",
         "เปลี่ยน Root ไปพร้อมกับ G/G# จนฟังไม่รู้ว่าจุดต่างอยู่ตรงไหน"
       ],
-      teacherNote: "ให้เท้าเป็นบ้าน และให้มือออกไปเที่ยวบน & แล้วกลับบ้านตรงเวลา; ไม่ต้องรีบและไม่ต้องคิดคะแนน Down/Up",
+      teacherNote: "เคาะเท้าคุม Pulse 1 2 3 4 ให้สม่ำเสมอ แล้วให้มือขวาดีดลงจังหวะยก & ให้ตรงเวลา; ไม่ต้องรีบและไม่ต้องกังวลเรื่องทิศทางปิ๊ก",
       referenceTriggers: []
     },
     practice: [
@@ -3214,8 +3214,8 @@ const month1V4R6Overrides = {
     referenceTriggers: []
   },
   3: {
-    title: "Week 3 · Control, Dynamics & Palm Mute: คุมสีเสียง",
-    todayGoal: "ควบคุมน้ำหนักเสียง 3 ระดับ (เบา กลาง ดัง) และใช้เนื้อขอบฝ่ามือนิ้วก้อยแตะชิดหย่องทำเสียง Palm Mute โดยยังได้ยินระดับเสียงชัดเจน",
+    title: "Week 3 · Control, Dynamics & Palm Mute: ควบคุม Dynamics และน้ำหนักมือขวา",
+    todayGoal: "ควบคุม Dynamics 3 ระดับ (เบา กลาง ดัง) และใช้สันมือฝั่งนิ้วก้อยแตะชิดหย่องทำเสียง Palm Mute โดยยังได้ยินระดับเสียงชัดเจน",
     summary: "Rhythm เป็น Dynamics: คุมเสียงเปิด–สั้นและน้ำหนักเบา–เน้นโดย Pulse ไม่เดินหนี",
     youtube: null,
     rhythmSpine: "Dynamics",
@@ -3350,7 +3350,7 @@ const month1V4R6Overrides = {
   },
   4: {
     title: "Week 4 · Groove Integration & Graduation",
-    todayGoal: "รวมทุกทักษะเข้าด้วยกัน: เล่น Bass Walk-up ไต่โน้ต F# → G → G# → A ส่งเข้า Beat 1, คลายเข้า Root E, และส่งคอร์ด Em → C บน 2& อย่างราบรื่น",
+    todayGoal: "รวมทุกทักษะเข้าด้วยกัน: เล่น Chromatic Walk-up ไต่โน้ต F# → G → G# → A ส่งเข้า Beat 1, คลายเข้า Root E, และส่งคอร์ด Em → C บน 2& อย่างราบรื่น",
     summary: "Rhythm เป็น Groove: รวม Pulse, Off-beat และ Dynamics ให้เป็น 4 bars × 2 rounds = 8 bars",
     youtube: null,
     rhythmSpine: "Groove",
@@ -3491,7 +3491,7 @@ const month1V4R6Graduation = {
   title: "Month 1 Groove: 4 bars × 2 rounds = 8 bars",
   purpose: "เล่น 4 ห้องตามแผนที่ของบทเรียน แล้ววนต่อเนื่อง 2 รอบ โดย Pulse ไม่หยุด",
   bars: [
-    { bar: 1, chord: "Em · Rhythm / Palm Mute", direction: "Em palm mute เบา ๆ บน 1 2 3 4 ให้ Pulse ตั้งหลัก" },
+    { bar: 1, chord: "Em · Rhythm / Palm Mute", direction: "Em Palm Mute เบา ๆ บน 1 2 3 4 ให้ Pulse ตั้งหลัก" },
     { bar: 2, chord: "Em → C · Arpeggio", direction: "Em ที่ 1, 1&, 2, 2&; C ที่ 3, 3&, 4; 4& เป็น air/rest" },
     { bar: 3, chord: "B → A → G · Phrase", direction: "B ที่ 3, A ที่ 3&, G ที่ 4, 4& เป็น air/rest; E ลง Beat 1 ของ Bar 4" },
     { bar: 4, chord: "F# → G → G# → A · Walk-up", direction: "E ที่ Beat 1; F# ที่ 3, G ที่ 3&, G# ที่ 4, 4& air/rest; A ลง Beat 1 ของ Bar 5" }
