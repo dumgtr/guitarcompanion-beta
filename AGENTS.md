@@ -68,37 +68,27 @@ After changes, summarize:
 - what changed
 - what was intentionally not changed
 
-## Agent Role & Workflow Guidelines
+## Multi-Agent Team Roster & Roles
 
-- The Product Owner chooses AGY IDE, AGY CLI, or Codex as Orchestrator for each task.
-- Codex is the sole file-writing Implementer.
-- Claude and Gemini are read-only reviewers. Invoke them only through the fixed `claude-readonly` or `gemini-plan-review` profile in Provider Process Runner V1 with a separate Human Dispatch Authorization.
-- Do not invoke provider CLIs ad hoc, use mock reviewers as acceptance evidence, accept `GC_*_AGENT_CMD` command templates, or require a Host Broker that is not present and verifiable in this repository.
-- Provider Runner request data cannot override executables, arguments, tools, protocols, or permissions.
-- Scope Router V2 is advisory and Shadow Mode only. It never dispatches a provider and never enables execution or auto-repair.
-- System CLI output and repository state are the validation source of truth. A provider report is advisory and never self-approves a change.
-- Commit, push, merge, and production activation remain Product Owner gates.
-- When interpreting user instructions in natural language for running Qwen reviews, the Coordinator/Orchestrator must translate cost intents to the appropriate `--cost-priority` CLI flag:
-  - "ถูกที่สุด" / "ประหยัดสุด" -> Map to `--cost-priority cheapest`
-  - "ราคาถูก" / "economy" -> Map to `--cost-priority economy`
-  - "เอาเร็ว" -> Map to `--cost-priority fast`
-  - Explicit model name mentioned -> Map to `--model <model-name>`
+| Agent / Model | Interface & Provider | Endpoint / Protocol | Primary Role & Responsibility |
+|---|---|---|---|
+| **AGY CLI (`agy`)** | Antigravity CLI Orchestration | Native IDE / Subagent Runner | Master Orchestrator, multi-viewport verification probe, release gating & test automation |
+| **Codex CLI (`codex exec`)** | OpenAI Codex CLI Engine | CLI Engine (`codex exec`) | Core implementation, precision refactoring, and code synthesis |
+| **GitHub Copilot CLI (`gh copilot`)** | GitHub Copilot CLI | CLI Engine (`gh copilot`) | Code inspection, diff verification, commit & PR review |
+| **Hermes (`stealth/ox-alpha`)** | OpenRouter API | `https://openrouter.ai/api/v1/chat/completions` | Frontend CSS layout forensics, visual geometry & element overflow diagnostic specialist |
+| **DeepSeek (`deepseek-v4-flash` / `deepseek-chat`)** | DeepSeek Direct API | `https://api.deepseek.com/chat/completions` (`DEEPSEEK_API_KEY`) | Music pedagogy fidelity, fretboard mechanics, and guitar technique auditor |
+| **Qwen (`qwen-max` / `qwen3.7-plus` / `qwen3.7-flash`)** | Alibaba Cloud DashScope Direct API | `https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions` (`DASHSCOPE_API_KEY`) | Fast architectural review, invariant validation, and natural Thai tone checking |
 
-คุณคือ Lead Developer และ Orchestrator คุณต้องทำงานร่วมกับทีมภายนอกผ่าน CLI ดังนี้:
+## Multi-Agent Governance Rules
 
-**เครื่องมือที่มีให้ (CLI Tools):**
-- Risk Reviewer (Claude): รันด้วยคำสั่ง `python agent_tools/mock_claude_risk.py [file_path] "Find security risks"`
-- Audio/Web Reviewer (Gemini): รันด้วยคำสั่ง `python agent_tools/mock_gemini_reviewer.py [file_path] "Review audio web specs"`
-- Integrator & Fallback (Codex): รันด้วยคำสั่ง `codex exec [file_path]`
-**ลำดับการทำงาน (Workflow):**
-1. รับ Requirement จาก Product Owner (ผู้ใช้งาน) และเขียนโครงสร้างโค้ดเริ่มต้น
-2. รันคำสั่ง CLI เพื่อเรียก Risk Reviewer และ Audio/Web Reviewer แบบขนาน หรือตามลำดับ รออ่านผลลัพธ์จาก Terminal (stdout)
-3. นำคำแนะนำที่ได้มาปรับปรุงโค้ด
-4. **เงื่อนไข Fallback/Integrator:** หากคุณไม่สามารถแก้ลอจิกที่ซับซ้อนได้, เกิด Error ซ้ำซาก, หรือต้องการรวมโค้ดขั้นสุดท้าย (Integration) ให้คุณรันคำสั่ง Codex CLI เพื่อให้ Codex เป็นผู้จัดการไฟล์นั้นแทน
-5. เมื่อทุกอย่างเสร็จสมบูรณ์ ให้รายงานผลสรุปต่อ Product Owner
-- เมื่อตีความคำสั่งภาษาธรรมชาติของผู้ใช้สำหรับการรัน Qwen reviews ใน Coordinator/Orchestrator:
-  - "ถูกที่สุด" / "ประหยัดสุด" -> แปลงเป็น `--cost-priority cheapest`
-  - "ราคาถูก" / "economy" -> แปลงเป็น `--cost-priority economy`
-  - "เอาเร็ว" -> แปลงเป็น `--cost-priority fast`
-  - มีการระบุชื่อโมเดลตรงๆ -> แปลงเป็น `--model <model-name>`
+1. **Dual Workstreams:** Divide audit tasks into independent Workstream A (Musical Vocabulary & Pedagogy) and Workstream B (Independent UX/UI & Accessibility).
+2. **Clear Agent Roles:** Every agent operates strictly within its designated role and responsibility.
+3. **Designated Channels:** Agents must be dispatched via their official live channels (Direct APIs, CLI engines, or native subagents).
+4. **Read-Only Audit Phase:** No source code modifications are permitted during the audit phase.
+5. **No Autonomous Releases:** Agents are strictly prohibited from performing autonomous Git commits, pushes, or deployments.
+6. **Synthesis Before Implementation:** All findings must be consolidated into structured synthesis reports before any code edit is proposed.
+7. **Preserve Locked Files & Invariants:** Hard constraints (e.g., `outputs/app.js` SHA-256 hash, `outputs/audio-engine.js`, `outputs/index.html`, Month 2–32) must be preserved unless explicitly authorized.
+8. **Evidence-Based Surgical Edits:** Implement only approved, high-value findings with targeted changes.
+9. **Mandatory Multi-Gate Verification:** Every change must pass all 10 regression test suites (100% assertions green) and Chromium multi-viewport measurements (0px horizontal overflow, heading typography invariants).
+10. **Product Owner Release Gate:** All commits, pushes, and production deployments require explicit Product Owner approval.
 
